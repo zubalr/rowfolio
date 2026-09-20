@@ -1,0 +1,436 @@
+/**
+ * Evidence surface styles — scoped to the dark drawer.
+ *
+ * Everything hangs off `[data-rf-surface="ink"]`, which re-maps the shared
+ * text/divider tokens to the ink palette, so the evidence chrome inherits the
+ * one dark surface in the product while the rest of the app stays on paper.
+ * Logical properties throughout so the sheet mirrors correctly in RTL.
+ */
+
+[data-rf-surface="ink"] .rf-evidence {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-5);
+  font-size: var(--rf-type-0, 15px);
+}
+
+[data-rf-surface="ink"] .rf-evidence__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-2);
+}
+
+[data-rf-surface="ink"] .rf-evidence__finding {
+  margin: 0;
+  font-size: 1.05em;
+  font-weight: 600;
+}
+
+[data-rf-surface="ink"] .rf-evidence__scope {
+  margin: 0;
+  color: var(--rf-ink-muted);
+  font-size: 0.9em;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rf-space-2);
+  align-items: baseline;
+}
+
+[data-rf-surface="ink"] .rf-evidence__sheet {
+  font-family: var(--rf-font-mono);
+  font-size: 0.85em;
+  /* Long sheet names wrap rather than overflow the 320px sheet. */
+  overflow-wrap: anywhere;
+}
+
+/* ---- caveats -------------------------------------------------------- */
+
+[data-rf-surface="ink"] .rf-evidence__caveats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-1);
+  padding-block-start: var(--rf-space-2);
+  border-block-start: 1px solid var(--rf-ink-rule);
+}
+
+[data-rf-surface="ink"] .rf-evidence__caveat {
+  display: inline-flex;
+  gap: var(--rf-space-2);
+  align-items: baseline;
+  font-size: 0.88em;
+  color: var(--rf-ink-muted);
+}
+
+[data-rf-surface="ink"] .rf-evidence__caveat--warning {
+  color: var(--rf-ink-scenario);
+}
+
+[data-rf-surface="ink"] .rf-evidence__caveat .rf-icon {
+  align-self: center;
+  flex-shrink: 0;
+}
+
+/* ---- calculation trace ---------------------------------------------- */
+
+[data-rf-surface="ink"] .rf-evidence__section {
+  margin-block-start: var(--rf-space-3);
+}
+
+[data-rf-surface="ink"] .rf-evidence__proof {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-2);
+  padding-block-end: var(--rf-space-4);
+}
+
+[data-rf-surface="ink"] .rf-evidence__proof + .rf-evidence__proof {
+  border-block-start: 1px solid var(--rf-ink-rule);
+  padding-block-start: var(--rf-space-4);
+}
+
+[data-rf-surface="ink"] .rf-evidence__proof-title {
+  margin: 0;
+  font-size: 0.95em;
+  font-weight: 600;
+}
+
+[data-rf-surface="ink"] .rf-evidence__trace {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-1);
+}
+
+[data-rf-surface="ink"] .rf-evidence__trace-node {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-1);
+}
+
+[data-rf-surface="ink"] .rf-evidence__trace-branch {
+  list-style: none;
+  margin: 0;
+  padding-inline-start: var(--rf-space-5);
+  border-inline-start: 1px solid var(--rf-ink-rule);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-1);
+  padding-block: var(--rf-space-1);
+}
+
+[data-rf-surface="ink"] .rf-evidence__trace-line {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--rf-space-2);
+  flex-wrap: wrap;
+}
+
+[data-rf-surface="ink"] .rf-evidence__op {
+  font-family: var(--rf-font-mono);
+  color: var(--rf-ink-data);
+  font-weight: 600;
+  min-width: 1.2em;
+}
+
+[data-rf-surface="ink"] .rf-evidence__operand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--rf-space-2);
+  flex-wrap: wrap;
+}
+
+[data-rf-surface="ink"] .rf-evidence__operand--missing {
+  color: var(--rf-ink-attention);
+}
+
+[data-rf-surface="ink"] .rf-evidence__operand-note {
+  color: var(--rf-ink-muted);
+  font-size: 0.85em;
+}
+
+[data-rf-surface="ink"] .rf-evidence__id {
+  font-family: var(--rf-font-mono);
+  font-size: 0.85em;
+  color: var(--rf-ink-muted);
+  overflow-wrap: anywhere;
+}
+
+[data-rf-surface="ink"] .rf-evidence__num {
+  font-family: var(--rf-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+[data-rf-surface="ink"] .rf-evidence__unit {
+  color: var(--rf-ink-muted);
+  font-size: 0.85em;
+}
+
+[data-rf-surface="ink"] .rf-evidence__spans {
+  display: inline-flex;
+  gap: var(--rf-space-2);
+  flex-wrap: wrap;
+}
+
+[data-rf-surface="ink"] .rf-evidence__result {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rf-space-3);
+  flex-wrap: wrap;
+  border-block-start: 1px solid var(--rf-ink-rule);
+  padding-block-start: var(--rf-space-2);
+  margin-block-start: var(--rf-space-1);
+}
+
+[data-rf-surface="ink"] .rf-evidence__equals {
+  font-family: var(--rf-font-mono);
+  color: var(--rf-ink-muted);
+}
+
+[data-rf-surface="ink"] .rf-evidence__exact {
+  font-family: var(--rf-font-mono);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+[data-rf-surface="ink"] .rf-evidence__headline-value {
+  font-size: 1.15em;
+  font-weight: 650;
+}
+
+[data-rf-surface="ink"] .rf-evidence__verified {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rf-space-1);
+  color: var(--rf-ink-positive);
+  font-size: 0.85em;
+}
+
+[data-rf-surface="ink"] .rf-evidence__undefined {
+  color: var(--rf-ink-scenario);
+  font-weight: 600;
+}
+
+[data-rf-surface="ink"] .rf-evidence__method {
+  margin: 0;
+  color: var(--rf-ink-muted);
+  font-size: 0.82em;
+}
+
+/* ---- contributing inputs -------------------------------------------- */
+
+[data-rf-surface="ink"] .rf-evidence__inputs {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+[data-rf-surface="ink"] .rf-evidence__input {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--rf-space-3);
+  padding-block: var(--rf-space-2);
+  border-block-end: 1px solid var(--rf-ink-rule);
+}
+
+[data-rf-surface="ink"] .rf-evidence__input:last-child {
+  border-block-end: none;
+}
+
+[data-rf-surface="ink"] .rf-evidence__input dt {
+  margin: 0;
+  color: var(--rf-ink-muted);
+}
+
+[data-rf-surface="ink"] .rf-evidence__input dd {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--rf-space-2);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  text-align: end;
+}
+
+[data-rf-surface="ink"] .rf-evidence__eligibility {
+  color: var(--rf-ink-muted);
+  font-size: 0.82em;
+  font-family: var(--rf-font-mono);
+}
+
+/* ---- source rows ----------------------------------------------------- */
+
+[data-rf-surface="ink"] .rf-evidence__selection-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rf-space-3);
+  flex-wrap: wrap;
+  margin-block-end: var(--rf-space-2);
+}
+
+[data-rf-surface="ink"] .rf-evidence__rows-scroll {
+  max-height: 340px;
+  overflow: auto;
+  border: 1px solid var(--rf-ink-rule);
+  border-radius: var(--rf-radius-control);
+}
+
+[data-rf-surface="ink"] .rf-evidence__rows-scroll:focus-visible {
+  outline: 2px solid var(--rf-focus);
+  outline-offset: 2px;
+}
+
+[data-rf-surface="ink"] .rf-evidence__table {
+  /* rf-table supplies borders/typography; evidence tightens density. */
+  font-size: 0.85em;
+}
+
+[data-rf-surface="ink"] .rf-evidence__table thead th {
+  position: sticky;
+  inset-block-start: 0;
+  background: var(--rf-ink-surface);
+  z-index: 1;
+}
+
+[data-rf-surface="ink"] .rf-evidence__col-row {
+  font-family: var(--rf-font-mono);
+  white-space: nowrap;
+  color: var(--rf-ink-muted);
+}
+
+[data-rf-surface="ink"] .rf-evidence__col-num {
+  text-align: end;
+}
+
+[data-rf-surface="ink"] .rf-evidence__cell {
+  display: inline-flex;
+  gap: var(--rf-space-2);
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+[data-rf-surface="ink"] .rf-evidence__cell-original {
+  color: var(--rf-ink-attention);
+  text-decoration-thickness: 1px;
+}
+
+[data-rf-surface="ink"] .rf-evidence__flag {
+  color: var(--rf-ink-scenario);
+  font-size: 0.7em;
+  margin-inline-start: var(--rf-space-1);
+}
+
+[data-rf-surface="ink"] .rf-evidence__empty {
+  color: var(--rf-ink-muted);
+}
+
+[data-rf-surface="ink"] .rf-evidence__pager {
+  display: flex;
+  align-items: center;
+  gap: var(--rf-space-3);
+  flex-wrap: wrap;
+  padding-block-start: var(--rf-space-2);
+}
+
+[data-rf-surface="ink"] .rf-evidence__pager-status {
+  color: var(--rf-ink-muted);
+  font-size: 0.85em;
+}
+
+[data-rf-surface="ink"] .rf-evidence__pager-status--excluded {
+  display: inline-flex;
+  gap: var(--rf-space-2);
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+/* ---- transformations ------------------------------------------------- */
+
+[data-rf-surface="ink"] .rf-evidence__transforms {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+[data-rf-surface="ink"] .rf-evidence__transform {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rf-space-3);
+  flex-wrap: wrap;
+  padding-block: var(--rf-space-2);
+  border-block-end: 1px solid var(--rf-ink-rule);
+}
+
+[data-rf-surface="ink"] .rf-evidence__transform:last-child {
+  border-block-end: none;
+}
+
+[data-rf-surface="ink"] .rf-evidence__change {
+  display: inline-flex;
+  gap: var(--rf-space-2);
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+[data-rf-surface="ink"] .rf-evidence__transform-status {
+  color: var(--rf-ink-muted);
+  font-size: 0.85em;
+}
+
+/* ---- fingerprint ------------------------------------------------------ */
+
+[data-rf-surface="ink"] .rf-evidence__fingerprint {
+  border-block-start: 1px solid var(--rf-ink-rule);
+  padding-block-start: var(--rf-space-3);
+}
+
+[data-rf-surface="ink"] .rf-evidence__fingerprint-title {
+  margin: 0 0 var(--rf-space-2);
+  font-size: 0.9em;
+  font-weight: 600;
+  color: var(--rf-ink-muted);
+}
+
+[data-rf-surface="ink"] .rf-evidence__fingerprint-grid {
+  margin: 0;
+  display: grid;
+  gap: var(--rf-space-2);
+}
+
+[data-rf-surface="ink"] .rf-evidence__fingerprint-grid > div {
+  display: flex;
+  gap: var(--rf-space-3);
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+[data-rf-surface="ink"] .rf-evidence__fingerprint-grid dt {
+  color: var(--rf-ink-muted);
+  font-size: 0.85em;
+  flex-shrink: 0;
+}
+
+[data-rf-surface="ink"] .rf-evidence__fingerprint-grid dd {
+  margin: 0;
+  text-align: end;
+  min-width: 0;
+}
+
+[data-rf-surface="ink"] .rf-evidence__filename {
+  overflow-wrap: anywhere;
+}
+
+[data-rf-surface="ink"] .rf-evidence__hash {
+  font-family: var(--rf-font-mono);
+  font-size: 0.78em;
+  overflow-wrap: anywhere;
+}
+
+[data-rf-surface="ink"] .rf-evidence__hash-note {
+  margin: var(--rf-space-2) 0 0;
+  color: var(--rf-ink-muted);
+  font-size: 0.8em;
+}
