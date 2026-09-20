@@ -112,7 +112,9 @@ function ResultLine({
         {evaluated.value}
       </Bidi>
       {formatted !== null ? (
-        <span className="rf-evidence__headline-value">{formatted}</span>
+        <Bidi dir="ltr" className="rf-evidence__headline-value">
+          {formatted}
+        </Bidi>
       ) : null}
       {verified ? (
         <span className="rf-evidence__verified">
@@ -175,7 +177,7 @@ function InputsList({
                 <span className="rf-evidence__undefined">{i18n.t("common.undefined")}</span>
               )}
               <span className="rf-evidence__eligibility">
-                {i18n.formatInteger(m.eligibleRows)}
+                <Bidi dir="ltr">{i18n.formatInteger(m.eligibleRows)}</Bidi>
                 {" / "}
                 {i18n.plural("count.records", m.totalRows)}
               </span>
