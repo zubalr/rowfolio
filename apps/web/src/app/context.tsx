@@ -11,7 +11,11 @@ export interface AppServices {
   readonly controller: SessionController;
   /** Resolves with the lazily-imported session controller. */
   readonly controllerReady: Promise<SessionController>;
-  i18n: I18n;
+  /** The i18n service — resolved once `i18nReady` settles; the getter throws
+   *  before that, so consumers must sit behind the app gate (see App.tsx). */
+  readonly i18n: I18n;
+  /** Resolves with the lazily-imported i18n service. */
+  readonly i18nReady: Promise<I18n>;
   blobStore: BlobUrlStore;
 }
 
