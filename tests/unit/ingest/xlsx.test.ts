@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import type { RawCell, RawTable } from '../../../packages/contracts/src/index.ts';
 import { checkRawTable } from '../../../packages/contracts/src/index.ts';
 import { inspectSource, parseSource } from '../../../packages/ingest/src/index.ts';
+import { buildXlsx } from '../../../fixtures/ingest/xlsxkit.mjs';
 import { expectIngestError, fixtureBytes, toArrayBuffer } from './helpers.ts';
 
 const DEFAULT_OPTS = { allowHiddenSheet: false };
@@ -108,6 +109,28 @@ describe('xlsx: sheet selection', () => {
     expect(insp.hiddenSheets.map((s) => s.sheetId)).toEqual(['S1', 'S2']);
     expect(insp.previewRows.length).toBeGreaterThan(0);
     expect(insp.warnings).toContain('ingest.warn.hidden-sheets-excluded');
+  });
+
+  it('inspectSource on an all-hidden workbook returns the sheet list with no default', async () => {
+    const bytes = buildXlsx({
+      sheets: [
+        { name: 'Payload', hidden: true, rows: [['k', 'v'], ['a', 1]] },
+        { name: 'Secrets', veryHidden: true, rows: [['x'], [9]] },
+      ],
+    });
+    const insp = await inspectSource(toArrayBuffer(new Uint8Array(bytes)), 'all-hidden.xlsx');
+    expect(insp.sheets.map((s) => s.visibility)).toEqual(['hidden', 'very-hidden']);
+    expect(insp.defaultSheetId).toBeNull();
+    expect(insp.hiddenSheets.map((s) => s.sheetId)).toEqual(['S0', 'S1']);
+    expect(insp.previewRows).toEqual([]);
+    expect(insp.warnings).toContain('ingest.warn.hidden-sheets-excluded');
+    // The explicit opt-in path still parses the hidden sheet.
+    const t = await parseSource(toArrayBuffer(new Uint8Array(bytes)), 'all-hidden.xlsx', {
+      allowHiddenSheet: true,
+      selectedSheetId: 'S0',
+    }, NOOP);
+    expect(t.sourceRef.sheetName).toBe('Payload');
+    expect(t.cells.length).toBeGreaterThan(0);
   });
 });
 

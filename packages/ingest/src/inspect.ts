@@ -8,7 +8,7 @@
 import type { RawCell } from '@rowfolio/contracts';
 import { sha256Hex } from '@rowfolio/contracts';
 import { detectFormat, decodeUtf8Fatal } from './detect.ts';
-import { IngestError } from './errors.ts';
+import { IngestError, isIngestError } from './errors.ts';
 import { resolveLimits, type IngestLimits } from './limits.ts';
 import { checkAbort } from './abort.ts';
 import { preflightZip } from './zip-preflight.ts';
@@ -117,10 +117,17 @@ export async function inspectSource(
     progress('preflight', f * 0.5),
   );
   const meta = readWorkbookMeta(entries, limits);
-  const sheet = selectSheet(meta.sheets, opts, limits);
+  // An all-hidden workbook has no default sheet; inspection still returns the
+  // sheet list so the UI can offer the explicit opt-in, with an empty preview.
+  let sheet: SheetInfo | null = null;
+  try {
+    sheet = selectSheet(meta.sheets, opts, limits);
+  } catch (e) {
+    if (!isIngestError(e) || e.detail !== 'xlsx.no-visible-sheets') throw e;
+  }
   progress('preflight', 0.75);
 
-  const ws = readSheet(sanitizedZip, sheet.name);
+  const ws = sheet === null ? {} : readSheet(sanitizedZip, sheet.name);
   const data = ws['!data'] as readonly (readonly unknown[] | undefined)[] | undefined;
 
   // First content row → preview band start; cap at previewRows rows.
@@ -180,7 +187,7 @@ export async function inspectSource(
     sourceHash,
     compressedBytes: input.byteLength,
     sheets: meta.sheets,
-    defaultSheetId: sheet.sheetId,
+    defaultSheetId: sheet?.sheetId ?? null,
     hiddenSheets: meta.sheets.filter((s) => s.visibility !== 'visible'),
     dateSystem: meta.dateSystem,
     previewRows: preview,
