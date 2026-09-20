@@ -1,0 +1,30 @@
+/* Minimal page chrome for the evidence harness — the drawer owns the visual story. */
+.harness {
+  font-family: var(--rf-font-body, system-ui);
+  margin: 0;
+}
+
+.harness__hint {
+  color: #53636a;
+  font-size: 12px;
+  margin: 8px 16px;
+}
+
+.harness__page {
+  padding: 24px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  background: var(--rf-paper, #f7f4ec);
+  min-height: 100vh;
+}
+
+.harness__finding {
+  font-weight: 600;
+}
+
+.harness__trigger,
+.harness__page button {
+  min-height: 44px;
+  padding: 0 16px;
+}

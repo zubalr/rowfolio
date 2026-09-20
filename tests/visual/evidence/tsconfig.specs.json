@@ -1,0 +1,31 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "jsx": "react-jsx",
+    "paths": {
+      "@rowfolio/contracts": ["../../../packages/contracts/src/index.ts"],
+      "@rowfolio/contracts/interfaces": ["../../../packages/contracts/src/interfaces.ts"],
+      "@rowfolio/i18n": ["../../../packages/i18n/src/index.ts"],
+      "@rowfolio/ui": ["../../../packages/ui/src/index.ts"],
+      "@rowfolio/ui/fonts": ["../../../packages/ui/src/fonts.ts"]
+    }
+  },
+  "include": [
+    "playwright.config.ts",
+    "specs/**/*.ts",
+    "support/**/*.ts",
+    "harness/**/*.ts",
+    "harness/**/*.tsx",
+    "*.test.ts",
+    "*.test.tsx",
+    "../../../apps/web/src/evidence/**/*.ts",
+    "../../../apps/web/src/evidence/**/*.tsx",
+    "../../../packages/contracts/src/**/*.ts",
+    "../../../packages/i18n/src/**/*.ts",
+    "../../../packages/ui/src/**/*.ts",
+    "../../../packages/ui/src/**/*.tsx",
+    "../../contract/fixtures/*.json"
+  ]
+}
