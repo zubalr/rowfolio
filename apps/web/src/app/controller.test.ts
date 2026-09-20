@@ -153,6 +153,53 @@ describe('SessionController', () => {
     await controller.dispose();
   });
 
+  it('adoptUploadOutcome: normalize failure surfaces an error instead of stalling', async () => {
+    const failing = fixtureAdapters();
+    failing.loadNormalize = async () => ({
+      profileTable: () => ({ proposedColumns: [], issues: [] }),
+      normalizeTable: () => {
+        throw new Error('normalize-boom');
+      },
+    });
+    const { controller, spawned } = makeController({ adapters: failing });
+    const outcome = {
+      table: { id: 'raw-1', sourceRef: { id: 'src-1', sourceHash: 'h1' }, cells: [], dateSystem: 'not-applicable', warnings: [] },
+      inspection: { format: 'csv' as const, sourceName: 'up.csv', compressedBytes: 10 },
+      parseOptions: {},
+      approvalPlan: { issueIds: [], columns: [], useUnverifiedFormulaCaches: [] },
+      sourceHash: 'h1',
+    };
+    await controller.adoptUploadOutcome(outcome as never);
+    const s = controller.getState();
+    expect(s.phase).toBe('idle');
+    expect(s.error?.code).toBeDefined();
+    // The analysis worker must NOT have been terminated by adoption —
+    // the same client owns the retained raw table the normalize op resolves.
+    expect(spawned[0]?.terminated).not.toBe(true);
+    await controller.dispose();
+  });
+
+  it('adoptUploadOutcome: happy path reaches ready on the same worker client', async () => {
+    const { controller, requests, spawned } = makeController();
+    // Realistic flow: the upload UI parses through the worker, which retains
+    // the raw table under its id for the normalize op to resolve.
+    const bytes = new TextEncoder().encode('a,b\n1,2\n3,4\n').buffer as ArrayBuffer;
+    const table = await controller.parseViaWorker(bytes, 'up.csv', {});
+    const outcome = {
+      table,
+      inspection: { format: 'csv' as const, sourceName: 'up.csv', compressedBytes: bytes.byteLength },
+      parseOptions: {},
+      approvalPlan: { issueIds: [], columns: [], useUnverifiedFormulaCaches: [] },
+      sourceHash: table.sourceRef.sourceHash,
+    };
+    await controller.adoptUploadOutcome(outcome as never);
+    expect(controller.getState().phase).toBe('ready');
+    const ops = requests[0]!.map((r) => r.operation);
+    expect(ops).toEqual(['ingest', 'normalize', 'analyze']);
+    expect(spawned[0]?.terminated).not.toBe(true);
+    await controller.dispose();
+  });
+
   it('commits an immutable scenario result and rejects overlapping submits', async () => {
     const { controller, requests } = makeController();
     await controller.useSample();

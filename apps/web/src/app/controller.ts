@@ -248,7 +248,9 @@ export class SessionController {
     };
     sourceHash: Hash;
   }): Promise<void> {
-    this.cancelWork('new source');
+    // No cancelWork here: the upload flow's parse ran through this client's
+    // worker, which retains the raw table normalize resolves by id —
+    // cancelling terminates that worker and discards the retained table.
     this.deps.blobStore?.releaseAll();
     this.dispatch({
       type: 'source.begin',
@@ -261,6 +263,7 @@ export class SessionController {
       },
     });
     const rid = this.ids.request();
+    let activeRid = rid;
     this.dispatch({ type: 'request.start', requestId: rid });
     try {
       // Hash binding still verified — the worker-derived sourceRef hash must
@@ -284,6 +287,7 @@ export class SessionController {
         issues: [],
       });
       const nr = this.ids.request();
+      activeRid = nr;
       this.dispatch({ type: 'request.start', requestId: nr });
       await this.normalizeAndAnalyze(
         nr,
@@ -295,7 +299,7 @@ export class SessionController {
         this.analysis ?? undefined,
       );
     } catch (error) {
-      this.fail(rid, error);
+      this.fail(activeRid, error);
     }
   }
 
@@ -515,53 +519,62 @@ export class SessionController {
     const revision = this.state.revision;
     const sessionId = this.state.sessionId;
 
-    const table = (await client.request(
-      {
-        protocolVersion: 1,
-        requestId: rid,
-        sessionId,
-        revision,
-        operation: 'normalize',
-        payload: {
-          rawTableId: rawTable.id,
-          approvedIssueIds: [...approvedIssueIds],
-          columnConfirmations: [...columns],
-        },
-      },
-      [],
-      this.progressFor(rid),
-    )).result as NormalizedTable;
-
-    let snapshot: AnalysisSnapshot;
-    if (prepared && prepared.tableId === table.id && prepared.normalizationRevision === table.normalizationRevision) {
-      // Validated fast path: the shipped snapshot already binds these bytes.
-      snapshot = prepared;
-      this.diagnostic('prepared snapshot bound to normalized table revision');
-    } else {
-      const ar = this.ids.request();
-      this.dispatch({ type: 'request.start', requestId: ar });
-      const scopeBase = kind === 'sample' ? SAMPLE_SCOPE_BASE : UPLOAD_SCOPE_BASE;
-      snapshot = (await client.request(
+    // `active` tracks the request id the reducer considers current: normalize
+    // runs on `rid`, then `request.start` for the analyze sub-request moves the
+    // current id to `ar` — failures must be reported on the id that is live.
+    let active = rid;
+    try {
+      const table = (await client.request(
         {
           protocolVersion: 1,
-          requestId: ar,
+          requestId: rid,
           sessionId,
           revision,
-          operation: 'analyze',
-          payload: { table, scope: { ...scopeBase, tableId: table.id } },
+          operation: 'normalize',
+          payload: {
+            rawTableId: rawTable.id,
+            approvedIssueIds: [...approvedIssueIds],
+            columnConfirmations: [...columns],
+          },
         },
         [],
-        this.progressFor(ar),
-      )).result as AnalysisSnapshot;
-      rid = ar;
+        this.progressFor(rid),
+      )).result as NormalizedTable;
+
+      let snapshot: AnalysisSnapshot;
+      if (prepared && prepared.tableId === table.id && prepared.normalizationRevision === table.normalizationRevision) {
+        // Validated fast path: the shipped snapshot already binds these bytes.
+        snapshot = prepared;
+        this.diagnostic('prepared snapshot bound to normalized table revision');
+      } else {
+        const ar = this.ids.request();
+        active = ar;
+        this.dispatch({ type: 'request.start', requestId: ar });
+        const scopeBase = kind === 'sample' ? SAMPLE_SCOPE_BASE : UPLOAD_SCOPE_BASE;
+        snapshot = (await client.request(
+          {
+            protocolVersion: 1,
+            requestId: ar,
+            sessionId,
+            revision,
+            operation: 'analyze',
+            payload: { table, scope: { ...scopeBase, tableId: table.id } },
+          },
+          [],
+          this.progressFor(ar),
+        )).result as AnalysisSnapshot;
+      }
+      rid = active;
+      this.dispatch({
+        type: 'analyze.done',
+        requestId: rid,
+        sourceHash: table.sourceRef.sourceHash,
+        table,
+        snapshot,
+      });
+    } catch (error) {
+      this.fail(active, error);
     }
-    this.dispatch({
-      type: 'analyze.done',
-      requestId: rid,
-      sourceHash: table.sourceRef.sourceHash,
-      table,
-      snapshot,
-    });
   }
 
   /* ---- findings & evidence ---- */
