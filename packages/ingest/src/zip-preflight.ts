@@ -381,7 +381,7 @@ export async function preflightZip(
   const cd = scanCentralDirectory(bytes, limits);
   const { entries, order } = await inflateBounded(bytes, cd, limits, signal, progress);
 
-  const stored: Record<string, [Uint8Array, { level: 0 }]> = {};
+  const stored: Record<string, [Uint8Array, { level: 0 }]> = Object.create(null);
   for (const name of order) {
     const data = entries.get(name);
     if (data) stored[name] = [data, { level: 0 }];

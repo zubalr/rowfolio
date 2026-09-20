@@ -226,7 +226,9 @@ export class SessionController {
         operation: 'ingest',
         payload: { sourceName, format, byteLength: bytes.byteLength, binarySlot: 'source' },
       },
-      [{ slot: 'source', buffer: bytes }] as BinarySlot[],
+      // Transfer a copy: postMessage detaches the transferable, and callers
+      // retain file.bytes for retry — it must stay attached.
+      [{ slot: 'source', buffer: bytes.slice(0) }] as BinarySlot[],
       (p) => progress?.(p.stage, p.fraction),
     );
     return res.result as RawTable;
@@ -297,6 +299,7 @@ export class SessionController {
         'upload',
         null,
         this.analysis ?? undefined,
+        outcome.approvalPlan.useUnverifiedFormulaCaches,
       );
     } catch (error) {
       this.fail(activeRid, error);
@@ -511,6 +514,7 @@ export class SessionController {
     kind: 'sample' | 'upload',
     prepared: AnalysisSnapshot | null = null,
     clientOverride?: WorkerClient,
+    useUnverifiedFormulaCaches: readonly string[] = [],
   ): Promise<void> {
     // The normalize op needs the raw table retained by the ingest worker —
     // reuse the same client; never recreate (worker state is per-instance).
@@ -535,6 +539,7 @@ export class SessionController {
             rawTableId: rawTable.id,
             approvedIssueIds: [...approvedIssueIds],
             columnConfirmations: [...columns],
+            useUnverifiedFormulaCaches: [...useUnverifiedFormulaCaches],
           },
         },
         [],

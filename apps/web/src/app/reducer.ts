@@ -258,19 +258,22 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
           failure: null,
           scenarioId: state.scenario?.id ?? null,
           locale: action.model.locale,
+          epoch: state.revision,
         },
       };
 
     case 'export.progress':
-      if (!state.export.building) return state;
+      if (!state.export.building || state.export.epoch !== state.revision) return state;
       return { ...state, export: { ...state.export, stage: action.stage } };
 
     case 'export.done': {
+      if (state.export.epoch !== state.revision) return state;
       const artifacts = { ...state.export.artifacts, [action.format]: action.entry };
       return { ...state, export: { ...state.export, artifacts } };
     }
 
     case 'export.failed':
+      if (state.export.epoch !== state.revision) return state;
       return {
         ...state,
         export: {
@@ -280,6 +283,7 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       };
 
     case 'export.finished':
+      if (state.export.epoch !== state.revision) return state;
       return { ...state, phase: 'ready', export: { ...state.export, building: false, stage: null } };
 
     case 'session.replay':

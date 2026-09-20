@@ -78,6 +78,8 @@ export interface ExportState {
   /** Identity of the committed inputs the artifacts bind to. */
   scenarioId: string | null;
   locale: Locale | null;
+  /** Session revision the build began on; commits are dropped once it no longer matches. */
+  epoch: number;
 }
 
 export interface SessionError {
@@ -138,6 +140,7 @@ export function initialSession(sessionId: string): SessionState {
       failure: null,
       scenarioId: null,
       locale: null,
+      epoch: -1,
     },
   };
 }

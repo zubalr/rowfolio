@@ -199,7 +199,7 @@ export class WorkerSupervisor {
     progress: ProgressFn,
   ): Promise<NormalizedTable> {
     progress('normalize', null);
-    const { rawTableId, approvedIssueIds, columnConfirmations } = request.payload;
+    const { rawTableId, approvedIssueIds, columnConfirmations, useUnverifiedFormulaCaches } = request.payload;
     const raw = this.rawTables.get(rawTableId);
     if (!raw) {
       throw new SupervisorError('INTERNAL', 'error.INTERNAL', false, `unknown rawTableId ${rawTableId}`);
@@ -208,7 +208,7 @@ export class WorkerSupervisor {
     return mod.normalizeTable(raw, {
       issueIds: approvedIssueIds,
       columns: columnConfirmations as readonly Column[],
-      useUnverifiedFormulaCaches: [],
+      useUnverifiedFormulaCaches: useUnverifiedFormulaCaches ?? [],
     } as never) as NormalizedTable;
   }
 
