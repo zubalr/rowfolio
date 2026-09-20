@@ -18,9 +18,11 @@ import { GUIDE_STEPS } from "./controller.ts";
 export interface GuideBarProps {
   readonly controller: DemoController;
   readonly i18n: I18n;
+  /** "Skip — open the workspace": exit the tour into the real product. */
+  readonly onOpenWorkspace?: () => void;
 }
 
-export function GuideBar({ controller, i18n }: GuideBarProps) {
+export function GuideBar({ controller, i18n, onOpenWorkspace }: GuideBarProps) {
   const [state, setState] = useState<GuideState>(controller.getState());
 
   useEffect(() => controller.subscribe(setState), [controller]);
@@ -90,9 +92,18 @@ export function GuideBar({ controller, i18n }: GuideBarProps) {
         >
           {nextStep ? i18n.tSafe(nextStep.captionKey) : i18n.tSafe("action.close")}
         </Button>
-        <Button variant="secondary" onClick={() => controller.exit()}>
-          {i18n.tSafe("action.stop")}
+        <Button variant="secondary" onClick={() => void controller.replay()}>
+          {i18n.tSafe("action.replay")}
         </Button>
+        {onOpenWorkspace !== undefined ? (
+          <Button variant="secondary" onClick={onOpenWorkspace}>
+            {i18n.tSafe("action.skipGuide")}
+          </Button>
+        ) : (
+          <Button variant="secondary" onClick={() => controller.exit()}>
+            {i18n.tSafe("action.stop")}
+          </Button>
+        )}
       </div>
     </div>
   );

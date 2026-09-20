@@ -1,27 +1,25 @@
 /**
- * LandingApp — the bilingual product-entry page (A12).
- *
- * Rendered by both static entries (`/` English, `/ar/` Arabic); document
- * lang/dir are already correct per entry, and the i18n provider is pinned
- * to them. Composition: masthead → hero with a legible miniature finding →
- * the interactive prepared-sample preview → how-it-works → footer.
+ * LandingApp — the bilingual product-entry page (A12), composed as an
+ * editorial operations studio: compact nav and a single headline over a
+ * large working specimen of the product mechanism (source rows → regional
+ * comparison → evidence → scenario → briefing), then the four-beat staged
+ * demonstration, then the privacy close. Warm ivory reading surfaces, deep
+ * ink evidence stage, cobalt data, amber assumption layer.
  *
  * The whole demo payload — preview stage, fixture-derived truth and the
  * DemoController wiring — sits behind the `PreviewLoader` lazy chunk so
  * first paint only ships the shell; CTA clicks are forwarded as a one-shot
  * `pendingAction` the loader honors even if it mounts after the click.
- * The Motion overlay is a further nested lazy boundary inside the loader.
  *
  * No parser/export/chart library is reachable from this graph, and nothing
  * touches `window` at module scope, so the entry stays prerender-safe.
  */
 import { Suspense, lazy, useRef, useState } from "react";
-import { Bidi, Button, Icon, SkipLink } from "@rowfolio/ui";
+import { Button, Icon, SkipLink } from "@rowfolio/ui";
 import type { I18n } from "@rowfolio/i18n";
-import { MINI_TRUTH } from "./miniTruth.ts";
 import type { PendingDemoAction } from "./PreviewLoader.tsx";
 import { persistLocaleChoice } from "./i18n.ts";
-import { siblingLocaleHref, workspaceHref } from "./routes.ts";
+import { scrollToId, siblingLocaleHref, workspaceHref } from "./routes.ts";
 import { setWorkspaceIntent } from "./pendingUpload.ts";
 import "./landing.css";
 
@@ -33,17 +31,32 @@ export interface LandingAppProps {
   readonly i18n: I18n;
 }
 
+const STEPS = [
+  { key: "spot", action: "reveal" },
+  { key: "inspect", action: "evidence" },
+  { key: "assume", action: "scenario" },
+  { key: "brief", action: "briefing" },
+] as const;
+
 export function LandingApp({ i18n }: LandingAppProps) {
   const [pendingDemo, setPendingDemo] = useState<PendingDemoAction | null>(null);
   const uploadInput = useRef<HTMLInputElement>(null);
 
+  const requestDemo = (action: PendingDemoAction) => {
+    setPendingDemo(action);
+    scrollToId("demo");
+  };
   const exploreSample = () => {
     setWorkspaceIntent({ kind: "sample" });
-    setPendingDemo("explore");
+    requestDemo("explore");
   };
   const startGuide = () => {
     setWorkspaceIntent({ kind: "guide" });
-    setPendingDemo("guide");
+    requestDemo("guide");
+  };
+  const openWorkspace = () => {
+    setWorkspaceIntent({ kind: "sample" });
+    window.location.hash = workspaceHref();
   };
   const pickUpload = () => uploadInput.current?.click();
   const onFileChosen = (file: File | undefined) => {
@@ -68,9 +81,9 @@ export function LandingApp({ i18n }: LandingAppProps) {
           {i18n.t("brand.name")}
         </a>
         <nav className="rf-nav" aria-label="Rowfolio">
-          <a href="#how">{i18n.t("nav.how")}</a>
-          <button type="button" className="rf-nav__link" onClick={exploreSample}>
-            {i18n.t("nav.demo")}
+          <a href="#demo">{i18n.t("nav.demo")}</a>
+          <button type="button" className="rf-nav__link" onClick={openWorkspace}>
+            {i18n.t("action.openWorkspace")}
           </button>
           <a href="https://github.com/zubalr/rowfolio" rel="noopener noreferrer">
             {i18n.t("nav.github")}
@@ -88,64 +101,40 @@ export function LandingApp({ i18n }: LandingAppProps) {
 
       <main id="main">
         <section className="rf-hero" aria-labelledby="rf-hero-title">
-          <div className="rf-hero__copy">
-            <span className="rf-hero__eyebrow">{i18n.t("common.local")}</span>
-            <h1 id="rf-hero-title" className="rf-hero__title">
-              {i18n.t("hero.title")}
-            </h1>
-            <p className="rf-hero__body">{i18n.t("hero.body")}</p>
-            <div className="rf-hero__actions">
-              <Button variant="primary" iconEnd="arrow-end" onClick={exploreSample} data-testid="cta-demo">
-                {i18n.t("action.tryDemo")}
-              </Button>
-              <Button variant="secondary" icon="upload" onClick={pickUpload} data-testid="cta-upload">
-                {i18n.t("action.upload")}
-              </Button>
-              <Button variant="secondary" onClick={startGuide} data-testid="cta-guide">
-                {i18n.t("action.startGuide")}
-              </Button>
-            </div>
-            <p className="rf-hero__proof">{i18n.t("privacy.short")}</p>
-            <input
-              ref={uploadInput}
-              type="file"
-              accept={UPLOAD_ACCEPT}
-              hidden
-              data-testid="upload-input"
-              onChange={(event) => onFileChosen(event.currentTarget.files?.[0])}
-            />
+          <span className="rf-hero__eyebrow">{i18n.t("common.local")}</span>
+          <h1 id="rf-hero-title" className="rf-hero__title">
+            {i18n.t("hero.title")}
+          </h1>
+          <p className="rf-hero__body">{i18n.t("hero.body")}</p>
+          <div className="rf-hero__actions">
+            <Button variant="primary" iconEnd="arrow-end" onClick={exploreSample} data-testid="cta-demo">
+              {i18n.t("action.tryDemo")}
+            </Button>
+            <Button variant="secondary" icon="upload" onClick={pickUpload} data-testid="cta-upload">
+              {i18n.t("action.upload")}
+            </Button>
+            <Button variant="secondary" onClick={startGuide} data-testid="cta-guide">
+              {i18n.t("action.startGuide")}
+            </Button>
           </div>
-
-          {/* Legible miniature finding — the 0–4 s storyboard beat. */}
-          <div className="rf-mini" data-rf-surface="ink" data-testid="hero-mini">
-            <span className="rf-mini__eyebrow">{i18n.t("common.prepared")}</span>
-            <p className="rf-mini__figure">
-              <Bidi dir="ltr" className="rf-numeric">
-                {i18n.formatInteger(MINI_TRUTH.revenue)}
-              </Bidi>
-              <span className="rf-mini__unit">
-                {" "}
-                USD · {i18n.t("region.North")} · {i18n.t("period.june2026")}
-              </span>
-            </p>
-            <p className="rf-mini__delta">
-              <Bidi dir="ltr" className="rf-numeric">
-                −{i18n.formatPercent(MINI_TRUTH.targetGapRatio, {
-                  minFractionDigits: 0,
-                  maxFractionDigits: 1,
-                })}
-              </Bidi>{" "}
-              {i18n.t("metric.targetGap")}
-            </p>
-          </div>
+          <p className="rf-hero__proof">{i18n.t("privacy.short")}</p>
+          <input
+            ref={uploadInput}
+            type="file"
+            accept={UPLOAD_ACCEPT}
+            hidden
+            data-testid="upload-input"
+            onChange={(event) => onFileChosen(event.currentTarget.files?.[0])}
+          />
         </section>
 
+        {/* The large working specimen — real mechanism, real values. */}
         <Suspense
           fallback={
-            <section className="rf-preview" id="demo" aria-labelledby="rf-preview-title">
-              <header className="rf-preview__head">
+            <section className="rf-stage" id="demo" aria-labelledby="rf-preview-title">
+              <header className="rf-stage__head">
                 <div>
-                  <h2 id="rf-preview-title" className="rf-preview__title">
+                  <h2 id="rf-preview-title" className="rf-stage__title">
                     {i18n.t("workspace.findings")}
                   </h2>
                 </div>
@@ -160,27 +149,42 @@ export function LandingApp({ i18n }: LandingAppProps) {
           />
         </Suspense>
 
-        <section className="rf-how" id="how" aria-label={i18n.t("nav.how")}>
-          <div className="rf-how__step">
-            <span className="rf-how__num" aria-hidden="true">
-              01
-            </span>
-            <h3>{i18n.t("upload.title")}</h3>
-            <p>{i18n.t("upload.types")}</p>
-          </div>
-          <div className="rf-how__step">
-            <span className="rf-how__num" aria-hidden="true">
-              02
-            </span>
-            <h3>{i18n.t("workspace.findings")}</h3>
-            <p>{i18n.t("evidence.title")}</p>
-          </div>
-          <div className="rf-how__step">
-            <span className="rf-how__num" aria-hidden="true">
-              03
-            </span>
-            <h3>{i18n.t("export.title")}</h3>
-            <p>{i18n.t("export.preview")}</p>
+        {/* Staged demonstration — each beat is one sentence and one action. */}
+        <section className="rf-steps" aria-labelledby="rf-steps-title">
+          <h2 id="rf-steps-title" className="rf-steps__title">
+            {i18n.t("demo.band.title")}
+          </h2>
+          <ol className="rf-steps__list">
+            {STEPS.map((step, i) => (
+              <li className="rf-steps__step" key={step.key}>
+                <span className="rf-steps__num" aria-hidden="true">
+                  {`0${i + 1}`}
+                </span>
+                <h3 className="rf-steps__name">{i18n.t(`demo.step.${step.key}.title`)}</h3>
+                <p className="rf-steps__body">{i18n.t(`demo.step.${step.key}.body`)}</p>
+                <Button
+                  variant="secondary"
+                  iconEnd="arrow-end"
+                  onClick={() => requestDemo(step.action)}
+                >
+                  {i18n.t(`demo.step.${step.key}.action`)}
+                </Button>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* Closing — privacy note and the return to product. */}
+        <section className="rf-close" aria-labelledby="rf-close-title">
+          <h2 id="rf-close-title">{i18n.t("landing.close.title")}</h2>
+          <p className="rf-close__body">{i18n.t("landing.close.body")}</p>
+          <div className="rf-close__actions">
+            <Button variant="primary" iconEnd="arrow-end" onClick={exploreSample}>
+              {i18n.t("action.tryDemo")}
+            </Button>
+            <Button variant="secondary" onClick={pickUpload}>
+              {i18n.t("action.upload")}
+            </Button>
           </div>
         </section>
       </main>
