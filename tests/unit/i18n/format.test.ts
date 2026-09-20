@@ -87,7 +87,7 @@ describe("formatInteger / formatPercent / formatCurrency", () => {
     expect(en.formatPercent("1.5")).toBe("150%");
     expect(en.formatPercent("0.9")).toBe("90%");
     expect(en.formatPercent("-0.5")).toBe("-50%");
-    expect(en.formatPercent("12.3")).toBe("1230%");
+    expect(en.formatPercent("12.3")).toBe("1,230%");
   });
 
   it("currency formats with the confirmed code regardless of locale", () => {
