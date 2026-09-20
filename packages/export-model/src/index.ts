@@ -1,2 +1,23 @@
-// Public entry surface for @rowfolio/export-model. Implementations land under their owning task.
-export {};
+/**
+ * Public entry surface for `@rowfolio/export-model`.
+ *
+ * Only the contract-assigned `buildExportModel` signature crosses the
+ * package boundary. Copy tables, parity checks and id helpers are
+ * exported for testability; writers consume the model read-only.
+ */
+import type { BuildExportModel } from '@rowfolio/contracts/interfaces';
+import { buildExportModel as buildExportModelImpl } from './model.ts';
+
+export type { BuildExportModel };
+export {
+  baselineMarginOf,
+  buildExportModel,
+  isSampleModel,
+  localizeDigits,
+  numericParity,
+  periodLabel,
+} from './model.ts';
+export { ExportModelError } from './model.ts';
+export { TEMPLATE_VERSION } from './model.ts';
+
+export const buildExportModelApi: BuildExportModel = buildExportModelImpl;
