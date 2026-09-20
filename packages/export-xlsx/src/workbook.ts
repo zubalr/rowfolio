@@ -116,6 +116,15 @@ function columnLetter(index1: number): string {
   return out;
 }
 
+/**
+ * Escape a criterion for embedding in a `"..."` Excel string literal:
+ * embedded quotes double (`"` → `""`) so hostile text stays one literal
+ * and can never break out into formula syntax.
+ */
+export function escapeFormulaStringLiteral(text: string): string {
+  return text.replace(/"/g, '""');
+}
+
 interface KpiPlacement {
   readonly row: number;
   readonly valueAddress: string;
@@ -247,7 +256,8 @@ export const buildWorkbook = async (
     const col = `${cleanLetters.get(field)}`;
     const regionCol = `${cleanLetters.get('region')}`;
     const dateCol = `${cleanLetters.get('date')}`;
-    return `SUMIFS('${cleanName}'!${col}2:${col}${lastCleanRow},'${cleanName}'!${regionCol}2:${regionCol}${lastCleanRow},"${region}",'${cleanName}'!${dateCol}2:${dateCol}${lastCleanRow},">="&DATE(${start[0]},${start[1]},${start[2]}),'${cleanName}'!${dateCol}2:${dateCol}${lastCleanRow},"<"&DATE(${end[0]},${end[1]},${end[2]}))`;
+    const criterion = escapeFormulaStringLiteral(region);
+    return `SUMIFS('${cleanName}'!${col}2:${col}${lastCleanRow},'${cleanName}'!${regionCol}2:${regionCol}${lastCleanRow},"${criterion}",'${cleanName}'!${dateCol}2:${dateCol}${lastCleanRow},">="&DATE(${start[0]},${start[1]},${start[2]}),'${cleanName}'!${dateCol}2:${dateCol}${lastCleanRow},"<"&DATE(${end[0]},${end[1]},${end[2]}))`;
   };
   const ymd = (iso: string): [number, number, number] => [
     Number(iso.slice(0, 4)),

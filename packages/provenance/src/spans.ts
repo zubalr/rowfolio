@@ -22,8 +22,69 @@ export function canonicalizeSpans(rows: readonly number[]): RowSpan[] {
   return spans;
 }
 
-/** Expand canonical spans back into physical rows in order. */
-export function expandSpans(spans: readonly RowSpan[]): number[] {
+/**
+ * Legitimate source-row envelope: no selection can address more physical
+ * rows than the ingestion cap admits (policy `limits.rowsIncludingHeader`).
+ * Expansion beyond this is always hostile or corrupt — never a real table.
+ */
+export const MAX_EXPANDED_ROWS = 50000;
+
+export class SpanError extends Error {
+  readonly code: 'span-invalid' | 'span-overflow';
+  constructor(code: SpanError['code'], message: string) {
+    super(message);
+    this.name = 'SpanError';
+    this.code = code;
+  }
+}
+
+/** Validate one span's bounds without allocating anything. */
+function checkSpanBounds(span: RowSpan, index: number): void {
+  const { start, end } = span;
+  if (typeof start !== 'number' || typeof end !== 'number'
+    || !Number.isFinite(start) || !Number.isFinite(end)) {
+    throw new SpanError('span-invalid', `span ${index} bounds must be finite numbers`);
+  }
+  if (!Number.isInteger(start) || !Number.isInteger(end)) {
+    throw new SpanError('span-invalid', `span ${index} bounds must be integers`);
+  }
+  if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) {
+    throw new SpanError('span-invalid', `span ${index} bounds exceed safe integers`);
+  }
+  if (start < 1) {
+    throw new SpanError('span-invalid', `span ${index} starts before row 1`);
+  }
+  if (end > MAX_EXPANDED_ROWS) {
+    throw new SpanError('span-invalid', `span ${index} ends past the ${MAX_EXPANDED_ROWS}-row source envelope`);
+  }
+  if (start > end) {
+    throw new SpanError('span-invalid', `span ${index} is inverted (${start} > ${end})`);
+  }
+}
+
+/**
+ * Expand canonical spans back into physical rows in order.
+ *
+ * Total cardinality is checked mathematically BEFORE any allocation or
+ * iteration, so a hostile `[{start:1,end:2^31-1}]` fails typed instead of
+ * exhausting the heap. Malformed, reversed, non-finite, and unsafe-integer
+ * spans are refused the same way.
+ */
+export function expandSpans(spans: readonly RowSpan[], maxRows: number = MAX_EXPANDED_ROWS): number[] {
+  if (!Number.isSafeInteger(maxRows) || maxRows < 0) {
+    throw new SpanError('span-invalid', 'maxRows must be a non-negative safe integer');
+  }
+  let total = 0;
+  spans.forEach((span, i) => {
+    checkSpanBounds(span, i);
+    total += span.end - span.start + 1;
+    if (total > maxRows) {
+      throw new SpanError(
+        'span-overflow',
+        `spans expand to more than ${maxRows} rows (refused before allocation)`,
+      );
+    }
+  });
   const rows: number[] = [];
   for (const span of spans) {
     for (let n = span.start; n <= span.end; n += 1) rows.push(n);

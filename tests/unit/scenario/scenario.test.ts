@@ -10,6 +10,7 @@ import { describe, expect, it } from 'vitest';
 import {
   checkScenarioResult,
   compareDecimal,
+  isDecimal,
   OPERATING_COST_SCENARIO_V1,
   type AnalysisSnapshot,
   type Metric,
@@ -178,5 +179,23 @@ describe('money helpers', () => {
     expect(fractionScale('4500000.00')).toBe(2);
     expect(fractionScale('17')).toBe(0);
     expect(scenarioId('analysis-abc', '0.08')).toBe('scenario-analysis-abc-cost008');
+  });
+
+  it('never emits negative zero: sign, near-zero and boundary cases', () => {
+    expect(quantizeMoney('-0.004', 2)).toBe('0.00');
+    expect(isDecimal(quantizeMoney('-0.004', 2))).toBe(true);
+    expect(quantizeMoney('-0.000', 2)).toBe('0.00');
+    expect(quantizeMoney('0.004', 2)).toBe('0.00');
+    expect(quantizeMoney('-0.005', 2)).toBe('-0.01');
+    expect(quantizeMoney('-0.006', 2)).toBe('-0.01');
+    expect(quantizeMoney('-0.01', 2)).toBe('-0.01');
+    expect(quantizeMoney('-0.4', 0)).toBe('0');
+    expect(quantizeMoney('-0.5', 0)).toBe('-1');
+    expect(quantizeMoney('-0.004', 3)).toBe('-0.004');
+    expect(quantizeMoney('-123.456', 2)).toBe('-123.46');
+    // Every rounded zero is canonical; every real negative keeps its sign.
+    for (const raw of ['-0.004', '-0.0001', '0.004', '-0.0', '0']) {
+      expect(isDecimal(quantizeMoney(raw, 2))).toBe(true);
+    }
   });
 });

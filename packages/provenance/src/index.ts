@@ -19,3 +19,5 @@ export {
   validateSpans,
 } from './spans.ts';
 export type { SpanProblems } from './spans.ts';
+export { SpanError } from './spans.ts';
+export { MAX_EXPANDED_ROWS } from './spans.ts';

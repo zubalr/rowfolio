@@ -18,6 +18,7 @@ import { buildExportModel } from '../../../packages/export-model/src/index.ts';
 import {
   assertSafeSheetName,
   buildWorkbook,
+  escapeFormulaStringLiteral,
   ExportXlsxError,
   MAX_EXPORT_DATA_ROWS,
   validateModelLimits,
@@ -75,6 +76,16 @@ function unzip(bytes: Uint8Array): Map<string, Uint8Array> {
 
 const textOf = (entries: Map<string, Uint8Array>, name: string): string =>
   Buffer.from(entries.get(name) as Uint8Array).toString('utf8');
+
+/** Decode the XML entities ExcelJS emits inside formula text. */
+function decodeXmlEntities(text: string): string {
+  return text
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
+}
 
 async function buildEn(): Promise<{ bytes: Uint8Array; model: ExportModel }> {
   const model = buildExportModel(snapshot, table, scenario, 'en', 'latn', CREATED);
@@ -219,5 +230,36 @@ describe('workbook structure', () => {
     };
     expect(() => validateModelLimits(big)).toThrow(ExportXlsxError);
     await expect(buildWorkbook(big, () => undefined)).rejects.toThrow(ExportXlsxError);
+  });
+
+  it('escapes quotes in SUMIFS region criteria so hostile text stays one literal', async () => {
+    expect(escapeFormulaStringLiteral('North')).toBe('North');
+    expect(escapeFormulaStringLiteral('say "hi"')).toBe('say ""hi""');
+    const hostile = 'x","1")+999*0+("';
+    const model = buildExportModel(snapshot, table, scenario, 'en', 'latn', CREATED);
+    const attacked: ExportModel = {
+      ...model,
+      metrics: model.metrics.map((m) =>
+        m.id === 'north-june-revenue'
+          ? { ...m, scope: { ...m.scope, regions: [hostile] } }
+          : m,
+      ),
+    };
+    const artifact = await buildWorkbook(attacked, () => undefined);
+    const entries = unzip(new Uint8Array(artifact.bytes));
+    const xml = [...entries.keys()]
+      .filter((n) => n.startsWith('xl/worksheets/') && n.endsWith('.xml'))
+      .map((n) => textOf(entries, n))
+      .join('\n');
+    const formulas = xml.match(/<f>[^<]*SUMIFS[^<]*<\/f>/g) ?? [];
+    expect(formulas.length).toBeGreaterThan(0);
+    // ExcelJS entity-encodes formula text; decode before asserting so the
+    // check targets Excel semantics, not serialization artifacts.
+    const decoded = formulas.map(decodeXmlEntities);
+    const escaped = `"${hostile.replaceAll('"', '""')}"`;
+    // The attacked metric's formula carries the escaped single literal…
+    expect(decoded.some((f) => f.includes(escaped))).toBe(true);
+    // …and no formula carries the raw hostile text as a broken-out literal.
+    expect(decoded.every((f) => !f.includes(`"${hostile}"`))).toBe(true);
   });
 });

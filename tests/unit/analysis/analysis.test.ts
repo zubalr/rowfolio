@@ -24,11 +24,14 @@ import {
   domainMax,
   evaluateOutliers,
   evaluateTrends,
+  findDateColumn,
+  findRegionColumn,
   hasSampleColumns,
   iqrFlag,
   previousMonthPeriod,
   quantileType7,
   relativeChange,
+  scopeRows,
   summarizeMonthly,
   toSpans,
   trailingMonths,
@@ -216,6 +219,40 @@ describe('mechanics', () => {
       { start: 4, end: 4 },
       { start: 9, end: 9 },
     ]);
+  });
+
+  it('treats a region filter without a region column as unsatisfiable', () => {
+    const dateColumn = findDateColumn(table);
+    if (dateColumn === null) throw new Error('golden table lacks a date column');
+    // Regions requested but no region column: zero rows, never the whole
+    // table masquerading as a regional scope.
+    const scoped = scopeRows(
+      table, dateColumn, { start: '2026-01-01', end: '2026-12-31' }, null, ['Atlantis'],
+    );
+    expect(scoped.rows).toHaveLength(0);
+    expect(scoped.sourceRows).toHaveLength(0);
+    // Empty region list means no regional constraint: rows flow normally.
+    const unscoped = scopeRows(
+      table, dateColumn, { start: '2026-06-01', end: '2026-06-30' }, null, [],
+    );
+    expect(unscoped.rows.length).toBeGreaterThan(0);
+  });
+
+  it('filters matching regions and empties missing ones', () => {
+    const dateColumn = findDateColumn(table);
+    const regionColumn = findRegionColumn(table);
+    if (dateColumn === null || regionColumn === null) throw new Error('golden table lacks axis columns');
+    const north = scopeRows(
+      table, dateColumn, { start: '2026-06-01', end: '2026-06-30' },
+      regionColumn, ['North'],
+    );
+    expect(north.rows).toHaveLength(100);
+    expect(north.rows.every((r) => r.values['region'] === 'North')).toBe(true);
+    const missing = scopeRows(
+      table, dateColumn, { start: '2026-06-01', end: '2026-06-30' },
+      regionColumn, ['Atlantis'],
+    );
+    expect(missing.rows).toHaveLength(0);
   });
 
   it('ranks by class, coverage, magnitude and stable id, capped at three', () => {
