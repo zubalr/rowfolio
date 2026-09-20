@@ -14,11 +14,15 @@ import type {
   NormalizedTable,
   ScenarioResult,
 } from '../../../packages/contracts/src/index.ts';
+import { DESIGN_TOKENS } from '../../../packages/contracts/src/index.ts';
 import { buildExportModel } from '../../../packages/export-model/src/index.ts';
 import {
   buildPresentation,
   ExportPptxError,
 } from '../../../packages/export-pptx/src/index.ts';
+
+/** OOXML colors are bare uppercase hex — derive expectations from the tokens. */
+const argb = (hex: string): string => hex.replace('#', '').toUpperCase();
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const FIXTURES = join(HERE, '..', '..', '..', 'tests', 'contract', 'fixtures');
@@ -335,9 +339,9 @@ describe('deck structure', () => {
     // Value labels render (default placement for clustered cols is outEnd),
     // in ink — not the library's default black.
     expect(chart).toContain('<c:showVal val="1"/>');
-    expect(chart).toContain('srgbClr val="172B35"'); // data labels in ink
-    expect(chart).toContain('srgbClr val="D7DCD8"'); // valAxis gridline in rule color
-    expect(chart).toContain('srgbClr val="2855D9"'); // observed series = data cobalt
+    expect(chart).toContain(`srgbClr val="${argb(DESIGN_TOKENS.color.ink)}"`); // data labels in ink
+    expect(chart).toContain(`srgbClr val="${argb(DESIGN_TOKENS.color.rule)}"`); // valAxis gridline in rule color
+    expect(chart).toContain(`srgbClr val="${argb(DESIGN_TOKENS.color.data)}"`); // observed series = data cobalt
     // Axis bounds still honor the model contract (min/max from domain).
     expect(chart).toContain('valAx');
     expect(chart).toMatch(/<c:min val="0"\/>/);
