@@ -28,45 +28,42 @@ test.describe("Full User Journeys", () => {
     const heading = await page.textContent("h1");
     expect(heading).toBeTruthy();
 
-    // 2. Check for demo CTA button
-    const demoCta = page.locator('[data-testid="cta-demo"], [data-testid="open-demo-cta"], button:has-text("Demo"), button:has-text("Try")');
-    const hasDemoCta = (await demoCta.count()) > 0;
-
-    if (!hasDemoCta) {
-      test.skip(
-        true,
-        "PENDING: Workspace interactive controls are not yet mounted in application shell on frozen base",
-      );
-      return;
-    }
-
+    // 2. Click demo CTA button
+    const demoCta = page.locator('[data-testid="cta-demo"], [data-testid="open-demo-cta"]');
+    await expect(demoCta.first()).toBeVisible();
     await demoCta.first().click();
 
-    // 3. Finding and Evidence Drawer
-    const showWhyBtn = page.locator('button:has-text("Show me why"), button[aria-controls="rf-preview-evidence"], [data-testid="view-evidence-btn"]');
-    if ((await showWhyBtn.count()) > 0) {
-      await showWhyBtn.first().click();
-      const evidence = page.locator('[data-testid="preview-evidence"], [role="dialog"]');
-      await expect(evidence.first()).toBeVisible();
-    }
+    // 3. Inspect Finding and open Evidence Drawer
+    const finding = page.locator('[data-testid="preview-finding"], [data-testid="finding-north"]');
+    await expect(finding.first()).toBeVisible();
 
-    // 4. Scenario calculation range
-    const scenarioRange = page.locator('[data-testid="scenario-range"], [data-testid="scenario-cost-input"]');
-    if ((await scenarioRange.count()) > 0) {
-      await scenarioRange.first().fill("8");
-    }
+    const showWhyBtn = page.locator('button[aria-controls="rf-preview-evidence"], button:has-text("Show me why"), [data-testid="view-evidence-btn"]');
+    await expect(showWhyBtn.first()).toBeVisible();
+    await showWhyBtn.first().click();
 
-    // 5. Briefing / export prepare
-    const prepareBtn = page.locator('[data-testid="preview-briefing"] button, [data-testid="export-prepare-btn"]');
-    if ((await prepareBtn.count()) > 0) {
-      await prepareBtn.first().click();
-    }
+    const evidence = page.locator('[data-testid="preview-evidence"], #rf-preview-evidence');
+    await expect(evidence.first()).toBeVisible();
+    await expect(evidence.locator("text=Operations!").first()).toBeVisible();
 
-    // 6. Reset / clear session
-    const resetBtn = page.locator('[data-testid="clear-session-btn"]');
-    if ((await resetBtn.count()) > 0) {
-      await resetBtn.click();
-    }
+    // 4. Apply scenario calculation (+8% cost factor)
+    const scenarioRange = page.locator('[data-testid="scenario-range"], #rf-cost-range, [data-testid="scenario-cost-input"]');
+    await expect(scenarioRange.first()).toBeVisible();
+    await scenarioRange.first().fill("8");
+    await expect(page.locator(".rf-scenario__value, [data-testid='scenario-value']").first()).toBeVisible();
+
+    // 5. Prepare native exports / briefing
+    const prepareBtn = page.locator('[data-testid="preview-briefing"] button, button:has-text("Prepare briefing"), [data-testid="export-prepare-btn"]');
+    await expect(prepareBtn.first()).toBeVisible();
+    await prepareBtn.first().click();
+    await expect(page.locator('.rf-briefing__file[data-ready="true"], [data-testid="export-ready"]').first()).toBeVisible();
+
+    // 6. Reset / clear demo session
+    const resetBtn = page.locator('button:has-text("Replay demo"), button:has-text("Replay"), [data-testid="clear-session-btn"]');
+    await expect(resetBtn.first()).toBeVisible();
+    await resetBtn.first().click();
+
+    // Verify session reset: evidence is closed
+    await expect(evidence.first()).not.toBeVisible();
   });
 
   test("Journey 2: Bilingual Toggle (English <-> Arabic)", async ({ page }) => {
