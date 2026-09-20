@@ -74,7 +74,11 @@ const BANNED = [
   /^openai$/, /^@anthropic-ai\//, /^@google(-ai)?\//, /^@google\/generative-ai$/,
   /^firebase/, /^@firebase\//, /^@supabase\//, /^aws-sdk$/, /^@aws-sdk\//,
   /^@sentry\//, /^posthog/, /^@posthog\//, /^@segment\//, /^mixpanel/, /^@amplitude\//,
-  /^applicationinsights$/, /^@vercel\//, /^netlify/, /^wrangler$/,
+  /^applicationinsights$/,
+  // @vercel/analytics is the single sanctioned telemetry dep (pageviews only,
+  // production-gated, beforeSend-reduced to allowlisted route tokens).
+  /^@vercel\/(?!analytics$)/,
+  /^netlify/, /^wrangler$/,
 ];
 
 let failures = 0;
