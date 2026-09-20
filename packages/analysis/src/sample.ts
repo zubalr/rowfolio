@@ -70,6 +70,29 @@ export function hasSampleColumns(table: NormalizedTable): boolean {
 
 const RATIO_UNIT: Unit = { kind: 'ratio', label: 'fraction', currency: null };
 
+/** ISO 4217 currency declared by the bound sample manifest. */
+const SAMPLE_CURRENCY: Unit = { kind: 'currency', label: 'USD', currency: 'USD' };
+const SAMPLE_CURRENCY_COLUMNS = new Set([
+  'revenue',
+  'target_revenue',
+  'operating_cost',
+  'maintenance_cost',
+]);
+
+/**
+ * The hash-bound sample manifest declares `currency: "USD"` for its money
+ * measures; ingested columns arrive with the generic unknown unit, so the
+ * pack binds the declared currency before any measure reads `column.unit`.
+ */
+function bindSampleCurrency(table: NormalizedTable): NormalizedTable {
+  return {
+    ...table,
+    columns: table.columns.map((column) =>
+      SAMPLE_CURRENCY_COLUMNS.has(column.id) ? { ...column, unit: SAMPLE_CURRENCY } : column,
+    ),
+  };
+}
+
 const ACTION_ORDER: Record<string, number> = {
   'map-category': 0,
   'use-cache': 1,
@@ -327,7 +350,8 @@ export interface SamplePack {
   readonly evaluatedOutliers: readonly string[];
 }
 
-export function buildSamplePack(table: NormalizedTable, scope: Scope): SamplePack {
+export function buildSamplePack(unboundTable: NormalizedTable, scope: Scope): SamplePack {
+  const table = bindSampleCurrency(unboundTable);
   const ctx = packContext(table, scope);
   const revenueCol = columnOf(table, 'revenue');
   const targetCol = columnOf(table, 'target_revenue');
