@@ -81,6 +81,13 @@ describe("formatInteger / formatPercent / formatCurrency", () => {
     expect(arPct).toContain("؜");
     // 0.5 percent: -0.005*100 = -0.5 → -0.5%
     expect(en.formatPercent("-0.005")).toBe("-0.5%");
+    // Single-fraction-digit inputs keep full magnitude (regression: "0.5"
+    // previously rendered as "5%").
+    expect(en.formatPercent("0.5")).toBe("50%");
+    expect(en.formatPercent("1.5")).toBe("150%");
+    expect(en.formatPercent("0.9")).toBe("90%");
+    expect(en.formatPercent("-0.5")).toBe("-50%");
+    expect(en.formatPercent("12.3")).toBe("1230%");
   });
 
   it("currency formats with the confirmed code regardless of locale", () => {

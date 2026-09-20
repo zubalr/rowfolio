@@ -1,5 +1,5 @@
 import type { Decimal, Metric, Unit } from '@rowfolio/contracts';
-import type { I18n } from '@rowfolio/i18n';
+import { toDecimal, type I18n, type NumberFormatOptions } from '@rowfolio/i18n';
 
 /** Format a canonical decimal for display by unit kind. Presentation only. */
 export function formatDecimal(i18n: I18n, value: Decimal, unit: Unit): string {
@@ -31,8 +31,14 @@ export function formatInteger(i18n: I18n, value: number | Decimal): string {
   return i18n.formatInteger(value);
 }
 
-export function formatPercentAbs(i18n: I18n, value: Decimal): string {
-  return i18n.formatPercent(stripSign(value));
+export function formatPercentAbs(
+  i18n: I18n,
+  value: Decimal,
+  options?: NumberFormatOptions,
+): string {
+  // Validate canonical decimal form before stripping the sign — malformed
+  // input must throw, never silently format ('--1' ≠ '1').
+  return i18n.formatPercent(stripSign(toDecimal(value)), options);
 }
 
 function stripSign(value: Decimal): Decimal {

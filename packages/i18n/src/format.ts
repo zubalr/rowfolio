@@ -148,12 +148,10 @@ function applyFractionBounds(parts: DecimalParts, min: number, max: number): Dec
 
 /** Multiplies by 100 exactly by moving the decimal point — percent display shifts digits, never values. */
 function shiftForPercent(parts: DecimalParts): DecimalParts {
-  const digits = parts.integer + parts.fraction;
-  // Decimal point moves two places right; pad so the split point exists.
-  const point = parts.integer.length + 2;
-  const padded = digits.padStart(point, "0");
-  const integer = padded.slice(0, point).replace(/^0+(?=\d)/, "");
-  const fraction = padded.slice(point);
+  // Decimal point moves two places right: the first two fraction digits
+  // (right-padded) join the integer part; the rest stay fractional.
+  const integer = (parts.integer + parts.fraction.slice(0, 2).padEnd(2, "0")).replace(/^0+(?=\d)/, "");
+  const fraction = parts.fraction.slice(2);
   return { negative: parts.negative, integer, fraction };
 }
 
