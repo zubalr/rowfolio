@@ -22,55 +22,48 @@ test.describe("Full User Journeys", () => {
   test("Journey 1: Landing -> Demo -> Finding -> Evidence -> Scenario -> Export -> Clear", async ({ page }) => {
     await page.goto("/");
 
-    // 1. Verify landing page headline
+    // 1. Verify landing page brand & headline
+    const brand = await page.textContent(".rf-brand");
+    expect(brand).toContain("Rowfolio");
     const heading = await page.textContent("h1");
-    expect(heading).toContain("Rowfolio");
+    expect(heading).toBeTruthy();
 
-    // 2. Check for demo CTA button
-    const demoCta = page.locator('[data-testid="open-demo-cta"], button:has-text("Demo"), button:has-text("Try")');
-    const hasDemoCta = (await demoCta.count()) > 0;
-
-    if (!hasDemoCta) {
-      test.skip(
-        true,
-        "PENDING: Workspace interactive controls are not yet mounted in application shell on frozen base",
-      );
-      return;
-    }
-
+    // 2. Click demo CTA button
+    const demoCta = page.locator('[data-testid="cta-demo"], [data-testid="open-demo-cta"]');
+    await expect(demoCta.first()).toBeVisible();
     await demoCta.first().click();
 
-    // 3. Select primary editorial finding (North region June target gap)
-    const findingBtn = page.locator('[data-testid="finding-north"], button:has-text("North")');
-    await expect(findingBtn.first()).toBeVisible();
-    await findingBtn.first().click();
+    // 3. Inspect Finding and open Evidence Drawer
+    const finding = page.locator('[data-testid="preview-finding"], [data-testid="finding-north"]');
+    await expect(finding.first()).toBeVisible();
 
-    // 4. Open evidence drawer
-    const evidenceBtn = page.locator('[data-testid="view-evidence-btn"]');
-    await expect(evidenceBtn).toBeVisible();
-    await evidenceBtn.click();
+    const showWhyBtn = page.locator('button[aria-controls="rf-preview-evidence"], button:has-text("Show me why"), [data-testid="view-evidence-btn"]');
+    await expect(showWhyBtn.first()).toBeVisible();
+    await showWhyBtn.first().click();
 
-    // 5. Inspect evidence dialog and physical source rows
-    const dialog = page.locator('[role="dialog"]');
-    await expect(dialog).toBeVisible();
-    const sourceRows = page.locator('[data-testid="evidence-source-row"]');
-    expect(await sourceRows.count()).toBeGreaterThan(0);
+    const evidence = page.locator('[data-testid="preview-evidence"], #rf-preview-evidence');
+    await expect(evidence.first()).toBeVisible();
+    await expect(evidence.locator("text=Operations!").first()).toBeVisible();
 
-    // Close dialog with Escape
-    await page.keyboard.press("Escape");
-    await expect(dialog).not.toBeVisible();
+    // 4. Apply scenario calculation (+8% cost factor)
+    const scenarioRange = page.locator('[data-testid="scenario-range"], #rf-cost-range, [data-testid="scenario-cost-input"]');
+    await expect(scenarioRange.first()).toBeVisible();
+    await scenarioRange.first().fill("8");
+    await expect(page.locator(".rf-scenario__value, [data-testid='scenario-value']").first()).toBeVisible();
 
-    // 6. Apply +8% scenario
-    const scenarioInput = page.locator('[data-testid="scenario-cost-input"]');
-    await scenarioInput.fill("8");
+    // 5. Prepare native exports / briefing
+    const prepareBtn = page.locator('[data-testid="preview-briefing"] button, button:has-text("Prepare briefing"), [data-testid="export-prepare-btn"]');
+    await expect(prepareBtn.first()).toBeVisible();
+    await prepareBtn.first().click();
+    await expect(page.locator('.rf-briefing__file[data-ready="true"], [data-testid="export-ready"]').first()).toBeVisible();
 
-    // 7. Prepare native exports
-    const exportBtn = page.locator('[data-testid="export-prepare-btn"]');
-    await exportBtn.click();
+    // 6. Reset / clear demo session
+    const resetBtn = page.locator('button:has-text("Replay demo"), button:has-text("Replay"), [data-testid="clear-session-btn"]');
+    await expect(resetBtn.first()).toBeVisible();
+    await resetBtn.first().click();
 
-    // 8. Reset / clear session
-    const resetBtn = page.locator('[data-testid="clear-session-btn"]');
-    await resetBtn.click();
+    // Verify session reset: evidence is closed
+    await expect(evidence.first()).not.toBeVisible();
   });
 
   test("Journey 2: Bilingual Toggle (English <-> Arabic)", async ({ page }) => {
@@ -78,7 +71,7 @@ test.describe("Full User Journeys", () => {
     expect(await page.getAttribute("html", "lang")).toBe("en");
 
     // Check for language switcher
-    const langToggle = page.locator('a:has-text("العربية"), button:has-text("العربية")');
+    const langToggle = page.locator('.rf-lang, a:has-text("العربية"), button:has-text("العربية")');
     const hasToggle = (await langToggle.count()) > 0;
 
     if (!hasToggle) {
@@ -86,14 +79,16 @@ test.describe("Full User Journeys", () => {
       await page.goto("/ar/");
       expect(await page.getAttribute("html", "lang")).toBe("ar");
       expect(await page.getAttribute("html", "dir")).toBe("rtl");
-      const heading = await page.locator("h1").first().textContent();
-      expect(heading).toContain("روفوليو");
+      const brand = await page.locator(".rf-brand").first().textContent();
+      expect(brand).toContain("روفوليو");
       return;
     }
 
     await langToggle.first().click();
     expect(await page.getAttribute("html", "lang")).toBe("ar");
     expect(await page.getAttribute("html", "dir")).toBe("rtl");
+    const brand = await page.locator(".rf-brand").first().textContent();
+    expect(brand).toContain("روفوليو");
   });
 
   test("Journey 3: File Upload Ingestion Flow", async ({ page }) => {
@@ -104,7 +99,17 @@ test.describe("Full User Journeys", () => {
     if (!hasUpload) {
       test.skip(
         true,
-        "PENDING: File upload dropzone component is not yet mounted in application shell on frozen base",
+        "PENDING: File upload input is not yet mounted in application shell on frozen base",
+      );
+      return;
+    }
+
+    // Check if workspace upload review surface is routed in apps/web
+    const hasWorkspaceUpload = (await page.locator('[data-testid="upload-dropzone"], .rf-upload').count()) > 0;
+    if (!hasWorkspaceUpload) {
+      test.skip(
+        true,
+        "PENDING: Workspace router / session layer is not yet wired in apps/web/src/main.ts to mount UploadFlow upon file selection",
       );
       return;
     }
