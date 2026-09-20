@@ -2,7 +2,6 @@ import { Suspense, useEffect, useMemo, useRef, useState, type ChangeEvent } from
 import { Button, Dialog, Status } from '@rowfolio/ui';
 import type { MessageKey } from '@rowfolio/i18n';
 import { inspectSource } from '@rowfolio/ingest';
-import { profileTable } from '@rowfolio/normalize';
 import { evaluateProof, readEvidencePage } from '@rowfolio/provenance';
 import type { NormalizedTable } from '@rowfolio/contracts';
 import { takeWorkspaceIntent } from '../landing/pendingUpload.ts';
@@ -60,15 +59,16 @@ export function WorkspaceScreen({ navigateLanding }: { navigateLanding: () => vo
     // Mount-once: consumes the one-shot landing intent.
   }, []);
 
-  // UploadFlow ports: inspect + profile run in-process (bounded); parse is
-  // delegated to the analysis worker so the raw table it retains is the same
-  // one normalize resolves by id.
+  // UploadFlow ports: inspect runs in-process (bounded preview); parse and
+  // profile are delegated to the analysis worker — the raw table it retains
+  // is the same one profile and normalize resolve by id, and profiling stays
+  // off the main thread.
   const uploadPorts: UploadPorts = useMemo(
     () => ({
       inspect: (bytes, name, options, progress) => inspectSource(bytes, name, options, progress),
       parse: (bytes, name, options, progress, extras) =>
         controller.parseViaWorker(bytes, name, options, progress, extras),
-      profile: (raw) => profileTable(raw),
+      profile: (raw) => controller.profileViaWorker(raw),
     }),
     [controller],
   );

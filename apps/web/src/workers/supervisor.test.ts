@@ -64,6 +64,29 @@ describe('WorkerSupervisor', () => {
     expect((norm as { code: string }).code).toBe('INTERNAL');
   });
 
+  it('profiles the retained raw table via the profile op', async () => {
+    const { send, posted } = harness();
+    const bytes = csvBytes('Period,Region,Revenue\n2026-03,North,1000\n2026-04,North,1200\n2026-04,North,1200\n');
+    await send(
+      baseRequest('ingest', { sourceName: 'ops.csv', format: 'csv', byteLength: bytes.byteLength, binarySlot: 'source' }),
+      [{ slot: 'source', buffer: bytes }],
+    );
+    const rawId = (posted.at(-1)!.message as { result: { id: string } }).result.id;
+
+    await send(baseRequest('profile', { rawTableId: rawId }, 'rp'));
+    const prof = posted.at(-1)!.message;
+    expect(prof.kind).toBe('success');
+    const result = (prof as { result: { proposedColumns: { id: string }[]; issues: { id: string }[] } }).result;
+    expect(result.proposedColumns.length).toBe(3);
+    expect(result.issues.some((i) => i.id.startsWith('quality-duplicate'))).toBe(true);
+
+    // Unknown table fails honestly, not with a fabricated profile.
+    await send(baseRequest('profile', { rawTableId: 'nope' }, 'rp2'));
+    const bad = posted.at(-1)!.message;
+    expect(bad.kind).toBe('error');
+    expect((bad as { code: string }).code).toBe('INTERNAL');
+  });
+
   it('answers dispose with {disposed:true}', async () => {
     const { posted, send } = harness();
     await send(baseRequest('dispose', {}));

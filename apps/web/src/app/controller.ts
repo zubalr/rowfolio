@@ -5,6 +5,7 @@ import type {
   ExportModel,
   Locale,
   NormalizedTable,
+  ProfileResult,
   QualityIssue,
   RawTable,
   ScenarioResult,
@@ -232,6 +233,28 @@ export class SessionController {
       (p) => progress?.(p.stage, p.fraction),
     );
     return res.result as RawTable;
+  }
+
+  /**
+   * Profile the raw table retained by the analysis worker — keeps the O(cells)
+   * profile off the main thread and against the same retained instance that
+   * normalize will resolve by id.
+   */
+  async profileViaWorker(rawTable: RawTable): Promise<ProfileResult> {
+    const client = this.analysis;
+    if (!client) throw new WorkerRequestError('INTERNAL', 'error.INTERNAL', false, 'analysis worker unavailable');
+    const res = await client.request(
+      {
+        protocolVersion: 1,
+        requestId: this.ids.request(),
+        sessionId: this.state.sessionId,
+        revision: this.state.revision,
+        operation: 'profile',
+        payload: { rawTableId: rawTable.id },
+      },
+      [],
+    );
+    return res.result as ProfileResult;
   }
 
   /**
