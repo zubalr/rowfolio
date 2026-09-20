@@ -32,11 +32,13 @@ export function computePercentile(sorted: number[], p: number): number {
   return sorted[Math.max(0, Math.min(idx, sorted.length - 1))] ?? 0;
 }
 
-export function runBenchmark(fn: () => void, rowCount: number, iterations = 20): BenchmarkStats {
+export function runBenchmark(fn: () => void, rowCount: number, iterations = 20, warmups = 3): BenchmarkStats {
   const durations: number[] = [];
 
-  // Warmup run
-  fn();
+  // JIT Warmup runs
+  for (let w = 0; w < warmups; w++) {
+    fn();
+  }
 
   for (let i = 0; i < iterations; i++) {
     const start = performance.now();
