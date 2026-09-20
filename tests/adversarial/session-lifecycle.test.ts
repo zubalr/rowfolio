@@ -112,7 +112,11 @@ async function uploadCsvToReady(controller: SessionController, bytes = CLEAN_CSV
 /* ------------------------------------------------------------------ */
 
 describe('A22-F01: upload review commit path', () => {
-  it.fails('a committed UploadFlow outcome reaches phase ready', async () => {
+  it('a committed UploadFlow outcome reaches phase ready', async () => {
+    // Was A22-F01: adoptUploadOutcome() called cancelWork() which terminated
+    // the worker retaining the raw table → every committed upload failed
+    // with INTERNAL. Fixed upstream by d8beb01 — this test is now the
+    // regression lock for it.
     const { controller } = makeController();
     // UploadFlow's parse port — the worker retains the RawTable by id.
     const bytes = toArrayBuffer(CLEAN_CSV);

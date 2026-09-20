@@ -4,9 +4,9 @@
 **Scope:** supported workflows attacked end-to-end — ingest (zip/xlsx/csv), normalize, analysis, scenario, provenance, export (xlsx/pptx), worker protocol, session lifecycle, egress surface.
 
 **Environment:** node v24.19.0 · pnpm 12.5.1 · vitest 5.0.0 · Ubuntu (linux x64)
-**Reproduce:** `pnpm vitest run tests/adversarial` → **7 files, 63 tests: 53 pass, 10 expected-fail** (each expected-fail is a demonstrated defect; `it.fails` asserts the correct contract and flips red on fix).
+**Reproduce:** `pnpm vitest run tests/adversarial` → **7 files, 63 tests: 54 pass, 9 expected-fail** (each expected-fail is a demonstrated defect; `it.fails` asserts the correct contract and flips red on fix).
 
-**Verdict:** 2 P0-class resource-exhaustion defects, 4 P1 correctness/integrity defects, 3 P2/latent defects. All defenses that currently hold are locked by regression tests. No data ever left the process; no untyped hang observed inside policy bounds; all malformed binaries terminated in typed errors.
+**Verdict:** 2 P0-class resource-exhaustion defects, 4 P1 correctness/integrity defects (F01 already fixed upstream at `d8beb01` — kept as a regression lock), 3 P2/latent defects. All defenses that currently hold are locked by regression tests. No data ever left the process; no untyped hang observed inside policy bounds; all malformed binaries terminated in typed errors.
 
 ---
 
@@ -14,14 +14,14 @@
 
 Severity rubric applied verbatim: **P0** = data leaves browser / executable-injected content / unrecoverable tab exhaustion / false evidence. **P1** = wrong supported calculation, source mapping, corrupted native file, unreadable Arabic, stale-snapshot export, or demo failure. **P2** = recoverable UI defect that does not falsify output.
 
-### A22-F01 — P1 · Upload commit path always fails (demo failure)
-`apps/web/src/app/controller.ts:251` — `adoptUploadOutcome()` calls `cancelWork('new source')`, which runs `analysis.cancel()` → `recreateWorker()`: the worker that retained the parsed `RawTable` (UploadFlow's parse port = `parseViaWorker` on `this.analysis`) is destroyed. The subsequent `normalize` request lands on a fresh supervisor with an empty `rawTables` map → `unknown rawTableId` → INTERNAL.
+### A22-F01 — P1 · Upload commit path always fails (demo failure) — **FIXED upstream at `d8beb01`**
+`apps/web/src/app/controller.ts` — `adoptUploadOutcome()` called `cancelWork('new source')`, which ran `analysis.cancel()` → `recreateWorker()`: the worker that retained the parsed `RawTable` (UploadFlow's parse port = `parseViaWorker` on `this.analysis`) was destroyed, and the `normalize` request landed on a fresh supervisor with an empty `rawTables` map → `unknown rawTableId` → INTERNAL. Integration commit `d8beb01` removed the `cancelWork` call (plus live-request-id failure routing); the suite's assertion now passes and is kept as the regression lock.
 - **Expected:** committed UploadFlow outcome reaches `phase='ready'`.
-- **Actual:** every upload through the committed UploadFlow path fails with INTERNAL.
+- **Actual (pre-d8beb01):** every upload through the committed UploadFlow path failed with INTERNAL.
 - **Fixture:** any clean CSV; synthesized `date,region,amount` 2-row file.
 - **Steps:** `parseViaWorker(bytes,…)` → `adoptUploadOutcome({table, inspection, parseOptions, approvalPlan, sourceHash})` → observe state.
-- **Regression test:** `tests/adversarial/session-lifecycle.test.ts` → `it.fails('a committed UploadFlow outcome reaches phase ready')`.
-- **Suggested owner fix:** do not `cancel()` the client that holds the retained table (skip `cancelWork` for the adopt path, or re-parse on a fresh worker and drop the retention contract).
+- **Regression test:** `tests/adversarial/session-lifecycle.test.ts` → `it('a committed UploadFlow outcome reaches phase ready')` (promoted from `it.fails` after the upstream fix).
+- **Owner fix landed:** `d8beb01` — `cancelWork` removed from `adoptUploadOutcome`; covered additionally by `apps/web/src/app/controller.test.ts` and real-browser Journey 3 e2e.
 
 ### A22-F02 — P1 · User-approved formula-cache opt-in is silently dropped at the wire
 `packages/contracts` `WorkerRequest.normalize` payload has no `useUnverifiedFormulaCaches` field (schema: `approvedIssueIds` + `columnConfirmations` only), and `apps/web/src/workers/supervisor.ts` `handleNormalize` hardcodes `useUnverifiedFormulaCaches: []`. UploadFlow collects the opt-in (`approvalPlan.useUnverifiedFormulaCaches`) — it is discarded silently; approved formula cells land `null` and are excluded from metrics.
