@@ -1,6 +1,9 @@
 import { m } from 'motion/react';
+import { useEffect, useRef } from 'react';
 import { useI18n } from '../app/context.tsx';
 import type { MessageKey } from '@rowfolio/i18n';
+import type { Finding } from '@rowfolio/contracts';
+import { findingTestId } from './findingCopy.ts';
 
 /**
  * The evidence badge on the hero stage — the visual half of the "badge →
@@ -18,6 +21,26 @@ export function EvidenceChip({
   onOpen: () => void;
 }) {
   const i18n = useI18n();
+  const wasHidden = useRef(false);
+
+  // The drawer's focus-restore targets this chip, which is hidden while open —
+  // focus() on it is a no-op and focus drops to <body>. Recover by handing
+  // focus to this finding's list trigger once the chip is visible again. The
+  // activeElement guard keeps us from stealing focus the dialog restored fine.
+  useEffect(() => {
+    if (wasHidden.current && !hidden) {
+      const active = document.activeElement;
+      if (active === null || active === document.body) {
+        document
+          .querySelector<HTMLElement>(
+            `[data-testid="${findingTestId({ id: findingId } as Finding)}"] [data-testid="view-evidence-btn"]`,
+          )
+          ?.focus();
+      }
+    }
+    wasHidden.current = hidden;
+  }, [hidden, findingId]);
+
   return (
     <m.button
       type="button"
