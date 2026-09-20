@@ -7,8 +7,12 @@
  * 3. File upload journey: Drag/drop or file input for CSV/XLSX.
  * 4. Reduced-motion user journey.
  */
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { test, expect } from "@playwright/test";
 import { ensureStaticServer, stopStaticServer } from "./helpers.ts";
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 test.beforeAll(async () => {
   await ensureStaticServer(4173);
@@ -85,43 +89,37 @@ test.describe("Full User Journeys", () => {
     }
 
     await langToggle.first().click();
-    expect(await page.getAttribute("html", "lang")).toBe("ar");
-    expect(await page.getAttribute("html", "dir")).toBe("rtl");
+    await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
     const brand = await page.locator(".rf-brand").first().textContent();
     expect(brand).toContain("روفوليو");
   });
 
   test("Journey 3: File Upload Ingestion Flow", async ({ page }) => {
     await page.goto("/");
-    const uploadInput = page.locator('input[type="file"]');
-    const hasUpload = (await uploadInput.count()) > 0;
+    const uploadInput = page.locator('input[type="file"]').first();
+    await expect(uploadInput).toBeAttached({ timeout: 10_000 });
 
-    if (!hasUpload) {
-      test.skip(
-        true,
-        "PENDING: File upload input is not yet mounted in application shell on frozen base",
-      );
-      return;
-    }
+    const sampleCsvPath = path.resolve(repoRoot, "fixtures/sample/sample_operations.csv");
+    await uploadInput.setInputFiles(sampleCsvPath);
 
-    // Check if workspace upload review surface is routed in apps/web
-    const hasWorkspaceUpload = (await page.locator('[data-testid="upload-dropzone"], .rf-upload').count()) > 0;
-    if (!hasWorkspaceUpload) {
-      test.skip(
-        true,
-        "PENDING: Workspace router / session layer is not yet wired in apps/web/src/main.ts to mount UploadFlow upon file selection",
-      );
-      return;
-    }
+    // Transitions to workspace
+    await expect(page).toHaveURL(/#\/workspace/, { timeout: 15_000 });
 
-    // Set file input
-    await uploadInput.setInputFiles({
-      name: "test_input.csv",
-      mimeType: "text/csv",
-      buffer: Buffer.from("Period,Region,Revenue\n2026-03,North,1000\n"),
-    });
+    // ReviewPanel mounts with proposed quality issues review
+    const applyBtn = page.locator('button:has-text("Apply approved changes")');
+    await expect(applyBtn).toBeVisible({ timeout: 15_000 });
+    await applyBtn.click();
 
-    await expect(page.locator("text=test_input.csv")).toBeVisible();
+    // Verification of ready workspace
+    await expect(page.locator("text=The briefing starts here")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("text=2400 retained")).toBeVisible();
+
+    // Clear session resets back to landing page
+    const clearBtn = page.locator('[data-testid="clear-session-btn"]');
+    await expect(clearBtn).toBeVisible();
+    await clearBtn.click();
+    await expect(page.locator("h1")).toBeVisible();
   });
 
   test("Journey 4: Reduced Motion Preference Compliance", async ({ page }) => {
@@ -131,5 +129,106 @@ test.describe("Full User Journeys", () => {
     // Verify page loads without error under reduced motion
     const heading = await page.textContent("h1");
     expect(heading).toBeTruthy();
+  });
+
+  test("Journey 5: Export XLSX/PPTX preparation, Blob URL lifecycle, and session revocation", async ({ page }) => {
+    await page.goto("/");
+
+    // Instrument URL.createObjectURL and URL.revokeObjectURL
+    await page.evaluate(() => {
+      const g = window as unknown as {
+        __createdUrls: string[];
+        __revokedUrls: string[];
+      };
+      g.__createdUrls = [];
+      g.__revokedUrls = [];
+      const origCreate = URL.createObjectURL.bind(URL);
+      const origRevoke = URL.revokeObjectURL.bind(URL);
+      URL.createObjectURL = (blob: Blob | MediaSource) => {
+        const url = origCreate(blob);
+        g.__createdUrls.push(url);
+        return url;
+      };
+      URL.revokeObjectURL = (url: string) => {
+        g.__revokedUrls.push(url);
+        origRevoke(url);
+      };
+    });
+
+    const uploadInput = page.locator('input[type="file"]').first();
+    await expect(uploadInput).toBeAttached({ timeout: 10_000 });
+
+    const sampleCsvPath = path.resolve(repoRoot, "fixtures/sample/sample_operations.csv");
+    await uploadInput.setInputFiles(sampleCsvPath);
+
+    // Transitions to workspace
+    await expect(page).toHaveURL(/#\/workspace/, { timeout: 15_000 });
+
+    const applyBtn = page.locator('button:has-text("Apply approved changes")');
+    await expect(applyBtn).toBeVisible({ timeout: 15_000 });
+    await applyBtn.click();
+
+    await expect(page.locator("text=The briefing starts here")).toBeVisible({ timeout: 15_000 });
+
+    // Open export and prepare briefing
+    const prepareBtn = page.locator('[data-testid="export-prepare-btn"]');
+    await expect(prepareBtn).toBeVisible();
+    await prepareBtn.click();
+
+    // Verify export downloads appear
+    const downloadLinks = page.locator(".rf-export-links a.rf-download");
+    await expect(downloadLinks.first()).toBeVisible({ timeout: 25_000 });
+
+    const hrefs = await downloadLinks.evaluateAll((links) =>
+      links.map((el) => (el as HTMLAnchorElement).href)
+    );
+    expect(hrefs.length).toBeGreaterThanOrEqual(1);
+    for (const href of hrefs) {
+      expect(href.startsWith("blob:")).toBe(true);
+    }
+
+    // Inspect actual downloaded file via Playwright download manager
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      downloadLinks.first().click(),
+    ]);
+    const downloadStream = await download.createReadStream();
+    if (downloadStream) {
+      const chunks: Buffer[] = [];
+      for await (const chunk of downloadStream) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      }
+      const downloadedBuffer = Buffer.concat(chunks);
+      expect(downloadedBuffer.length).toBeGreaterThan(100);
+      expect(Array.from(downloadedBuffer.subarray(0, 4))).toEqual([0x50, 0x4b, 0x03, 0x04]); // PK\x03\x04 zip header
+    }
+
+    // Close export dialog
+    const closeBtn = page.locator("dialog[open] .rf-dialog__close");
+    await expect(closeBtn).toBeVisible();
+    await closeBtn.click();
+    await expect(page.locator("dialog[open]")).toHaveCount(0);
+
+    // Clear session
+    const clearBtn = page.locator('[data-testid="clear-session-btn"]');
+    await expect(clearBtn).toBeVisible();
+    await clearBtn.click();
+
+    // Verify session clear navigated back to landing
+    await expect(page.locator("h1")).toBeVisible();
+
+    // Verify all created Blob URLs were revoked
+    const { created, revoked } = await page.evaluate(() => {
+      const g = window as unknown as {
+        __createdUrls: string[];
+        __revokedUrls: string[];
+      };
+      return { created: g.__createdUrls, revoked: g.__revokedUrls };
+    });
+
+    expect(created.length).toBeGreaterThan(0);
+    for (const url of created) {
+      expect(revoked).toContain(url);
+    }
   });
 });
