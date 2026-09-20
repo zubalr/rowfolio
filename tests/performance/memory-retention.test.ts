@@ -40,10 +40,14 @@ describe("memory retention and contract lifecycle invariants", () => {
     expect(postHash).toBe(initialHash);
   });
 
+  // Active browser equivalent is implemented and verified in:
+  // `tests/e2e/memory-retention.spec.ts` ("Live browser heap, worker, and DOM retention across repeated upload/export/clear cycles")
+  // via Chromium CDP (HeapProfiler.collectGarbage, Performance.getMetrics, DOM tree invariance).
+  // Retained as a placeholder pending review from the app owner before removal.
   it.skip(
     "PENDING: Real browser heap snapshot inspection across upload/clear cycles requires full web runtime and frontend integration",
     () => {
-      // Integration gate: requires browser DevTools heap snapshot protocol against running web app.
+      // Mapped to: tests/e2e/memory-retention.spec.ts
     },
   );
 });

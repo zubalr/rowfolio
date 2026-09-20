@@ -198,10 +198,15 @@ describe("worker watchdog and preflight bounds", () => {
     expect(result.violation).toContain("exceeds character limit (32000)");
   });
 
+  // Active browser equivalent is implemented and verified in:
+  // `tests/e2e/worker-lifecycle.spec.ts` ("Web Worker Lifecycle & Boundary Guarantees")
+  // proving real Chromium Web Worker spawn, bounded retention, termination on source replacement,
+  // hard disposal on clearSession(), and recovery after policy limit rejections.
+  // Retained as a placeholder pending review from the app owner before removal.
   it.skip(
     "PENDING: Active worker process watchdog termination requires ingestion worker thread implementation",
     () => {
-      // Integration check: will run once worker thread runtime is integrated.
+      // Mapped to: tests/e2e/worker-lifecycle.spec.ts
     },
   );
 });
