@@ -2224,6 +2224,11 @@
             },
             "recoverable": {
               "type": "boolean"
+            },
+            "detail": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Content-free machine qualifier for disambiguation (e.g. csv.ambiguous-delimiter); never carries user data."
             }
           },
           "required": [

@@ -61,6 +61,8 @@ interface ErrorPayload {
   code: string;
   messageKey: string;
   recoverable: boolean;
+  /** Content-free qualifier (e.g. `csv.ambiguous-delimiter`); never user data. */
+  detail?: string;
 }
 
 /**
@@ -280,12 +282,14 @@ export class SupervisorError extends Error {
   readonly code: string;
   readonly messageKey: string;
   readonly recoverable: boolean;
+  readonly detail: string | undefined;
   constructor(code: string, messageKey: string, recoverable: boolean, detail?: string) {
     super(detail ?? code);
     this.name = 'SupervisorError';
     this.code = code;
     this.messageKey = messageKey;
     this.recoverable = recoverable;
+    this.detail = detail;
   }
 }
 
@@ -304,7 +308,10 @@ const WORKER_CODES = new Set([
 
 function mapError(error: unknown): ErrorPayload {
   if (error instanceof SupervisorError) {
-    return { code: error.code, messageKey: error.messageKey, recoverable: error.recoverable };
+    return {
+      code: error.code, messageKey: error.messageKey, recoverable: error.recoverable,
+      ...(error.detail !== undefined ? { detail: error.detail } : {}),
+    };
   }
   if (error instanceof AdapterUnavailableError) {
     return { code: 'UNSUPPORTED', messageKey: 'error.UNSUPPORTED', recoverable: true };
@@ -317,10 +324,12 @@ function mapError(error: unknown): ErrorPayload {
   if (typeof code === 'string' && WORKER_CODES.has(code)) {
     const recoverable = (error as { recoverable?: unknown })?.recoverable !== false;
     const messageKey = (error as { messageKey?: unknown })?.messageKey;
+    const detail = (error as { detail?: unknown })?.detail;
     return {
       code,
       messageKey: typeof messageKey === 'string' ? messageKey : `error.${code}`,
       recoverable,
+      ...(typeof detail === 'string' ? { detail } : {}),
     };
   }
   return { code: 'INTERNAL', messageKey: 'error.INTERNAL', recoverable: false };

@@ -27,6 +27,8 @@ export class WorkerRequestError extends Error {
   readonly code: WorkerErrorCode;
   readonly messageKey: string;
   readonly recoverable: boolean;
+  /** Content-free qualifier from the worker (e.g. `csv.ambiguous-delimiter`). */
+  readonly detail: string | undefined;
 
   constructor(code: WorkerErrorCode, messageKey: string, recoverable: boolean, detail?: string) {
     super(detail ?? `${code} (${messageKey})`);
@@ -34,15 +36,16 @@ export class WorkerRequestError extends Error {
     this.code = code;
     this.messageKey = messageKey;
     this.recoverable = recoverable;
+    this.detail = detail;
   }
 
-  static fromMessage(message: { code: string; messageKey: string; recoverable: boolean }): WorkerRequestError {
+  static fromMessage(message: { code: string; messageKey: string; recoverable: boolean; detail?: string }): WorkerRequestError {
     const codes: WorkerErrorCode[] = [
       'INVALID_FILE', 'LIMIT_EXCEEDED', 'AMBIGUOUS_INPUT', 'UNSUPPORTED',
       'CANCELLED', 'TIMEOUT', 'EXPORT_FAILED', 'SCHEMA_MISMATCH', 'INTERNAL',
     ];
     const code = (codes as string[]).includes(message.code) ? (message.code as WorkerErrorCode) : 'INTERNAL';
-    return new WorkerRequestError(code, message.messageKey || `error.${code}`, message.recoverable !== false);
+    return new WorkerRequestError(code, message.messageKey || `error.${code}`, message.recoverable !== false, message.detail);
   }
 }
 

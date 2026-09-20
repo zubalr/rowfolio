@@ -140,6 +140,28 @@ describe('WorkerClient', () => {
     });
   });
 
+  it('carries the wire detail qualifier through to WorkerRequestError', async () => {
+    let worker: WorkerLike | null = null;
+    const client = new WorkerClient(() => (worker = {
+      postMessage: () => {},
+      terminate: () => {},
+      onmessage: null,
+      onerror: null,
+    }));
+    const promise = client.request(REQ('r1'));
+    await Promise.resolve();
+    const err = encodeResponse({
+      protocolVersion: 1, requestId: 'r1', sessionId: 's1', revision: 0,
+      kind: 'error', code: 'AMBIGUOUS_INPUT', messageKey: 'error.AMBIGUOUS_INPUT',
+      recoverable: true, detail: 'csv.ambiguous-delimiter',
+    });
+    respond(worker!, err.envelope);
+    await expect(promise).rejects.toMatchObject({
+      code: 'AMBIGUOUS_INPUT',
+      detail: 'csv.ambiguous-delimiter',
+    });
+  });
+
   it('dispose() resolves without a worker ever spawned', async () => {
     const client = new WorkerClient(inProcessFactory());
     await expect(client.dispose()).resolves.toBeUndefined();

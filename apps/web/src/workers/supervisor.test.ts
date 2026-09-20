@@ -87,6 +87,18 @@ describe('WorkerSupervisor', () => {
     expect((bad as { code: string }).code).toBe('INTERNAL');
   });
 
+  it('carries the ambiguous-delimiter detail onto the wire', async () => {
+    const { send, posted } = harness();
+    const bytes = csvBytes('id;date,region\nR-1;2026-06-01,North\nR-2;2026-06-02,South\n');
+    await send(
+      baseRequest('ingest', { sourceName: 'ambig.csv', format: 'csv', byteLength: bytes.byteLength, binarySlot: 'source' }),
+      [{ slot: 'source', buffer: bytes }],
+    );
+    const msg = posted.at(-1)!.message;
+    expect(msg.kind).toBe('error');
+    expect(msg).toMatchObject({ code: 'AMBIGUOUS_INPUT', detail: 'csv.ambiguous-delimiter' });
+  });
+
   it('answers dispose with {disposed:true}', async () => {
     const { posted, send } = harness();
     await send(baseRequest('dispose', {}));
