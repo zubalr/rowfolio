@@ -28,8 +28,10 @@ export PATH="$HOME/.nvm/versions/node/v24.19.0/bin:$PATH"   # node not on PATH
 pnpm vitest run tests/adversarial
 ```
 
-Expected: 7 files, 63 tests — 54 pass, **9 expected-fail (the open defects)**.
-(F01 was fixed upstream at `d8beb01`; its test is promoted to a regression lock.)
+Expected: 7 files, 63 tests — 57 pass, **6 expected-fail (the open defects)**.
+Fixed upstream and promoted to regression locks: F01 (`d8beb01`), F02/F03/F04
+(`a6d6af1`). Still open (it.fails): F05, F06, F07, F08 (partial fix — now an
+untyped TypeError), F10, F11.
 
 ## Files
 

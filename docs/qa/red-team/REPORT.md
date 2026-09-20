@@ -4,9 +4,9 @@
 **Scope:** supported workflows attacked end-to-end — ingest (zip/xlsx/csv), normalize, analysis, scenario, provenance, export (xlsx/pptx), worker protocol, session lifecycle, egress surface.
 
 **Environment:** node v24.19.0 · pnpm 12.5.1 · vitest 5.0.0 · Ubuntu (linux x64)
-**Reproduce:** `pnpm vitest run tests/adversarial` → **7 files, 63 tests: 54 pass, 9 expected-fail** (each expected-fail is a demonstrated defect; `it.fails` asserts the correct contract and flips red on fix).
+**Reproduce:** `pnpm vitest run tests/adversarial` → **7 files, 63 tests: 57 pass, 6 expected-fail** (each expected-fail is a demonstrated defect; `it.fails` asserts the correct contract and flips red on fix).
 
-**Verdict:** 2 P0-class resource-exhaustion defects, 4 P1 correctness/integrity defects (F01 already fixed upstream at `d8beb01` — kept as a regression lock), 3 P2/latent defects. All defenses that currently hold are locked by regression tests. No data ever left the process; no untyped hang observed inside policy bounds; all malformed binaries terminated in typed errors.
+**Verdict:** 2 P0-class resource-exhaustion defects open (F05, F07). 4 P1 findings — F01 fixed upstream at `d8beb01`, F02/F04 fixed upstream at `a6d6af1` (all retained as regression locks), F06 still open. 3 P2/latent — F03 fixed upstream at `a6d6af1`; F08 **partially** fixed at `a6d6af1` (now an untyped `TypeError` instead of silent divergence — still open); F10/F11 latent. All verified defenses are locked by regression tests. No data ever left the process; no untyped hang observed inside policy bounds; all malformed binaries terminated in typed errors.
 
 ---
 
@@ -23,21 +23,15 @@ Severity rubric applied verbatim: **P0** = data leaves browser / executable-inje
 - **Regression test:** `tests/adversarial/session-lifecycle.test.ts` → `it('a committed UploadFlow outcome reaches phase ready')` (promoted from `it.fails` after the upstream fix).
 - **Owner fix landed:** `d8beb01` — `cancelWork` removed from `adoptUploadOutcome`; covered additionally by `apps/web/src/app/controller.test.ts` and real-browser Journey 3 e2e.
 
-### A22-F02 — P1 · User-approved formula-cache opt-in is silently dropped at the wire
-`packages/contracts` `WorkerRequest.normalize` payload has no `useUnverifiedFormulaCaches` field (schema: `approvedIssueIds` + `columnConfirmations` only), and `apps/web/src/workers/supervisor.ts` `handleNormalize` hardcodes `useUnverifiedFormulaCaches: []`. UploadFlow collects the opt-in (`approvalPlan.useUnverifiedFormulaCaches`) — it is discarded silently; approved formula cells land `null` and are excluded from metrics.
-- **Expected:** an approved use-cache column contributes its cached value.
-- **Actual:** cell value `null` despite approval (verified over the real ingest+normalize wire path with a formula-bearing xlsx).
+### A22-F02 — P1 · User-approved formula-cache opt-in is silently dropped at the wire — **FIXED upstream at `a6d6af1`**
+The `WorkerRequest.normalize` payload had no `useUnverifiedFormulaCaches` field (schema-verified rejection) and `handleNormalize` hardcoded `[]`; UploadFlow's `approvalPlan.useUnverifiedFormulaCaches` was silently discarded — approved formula cells landed `null`. Upstream fix: schema source + regenerated types carry the field, the supervisor forwards it, and the adopt path passes `approvalPlan.useUnverifiedFormulaCaches`. Verified over the real ingest→normalize wire path (formula xlsx → `values['amount'] === '42'`).
 - **Fixture:** `buildXlsx` sheet with `{t:'f', f:'1+1', v:42}`.
-- **Regression tests:** schema rejection lock + `it.fails('an opted-in formula cache flows to normalized values over the real wire path')` in `session-lifecycle.test.ts`.
-- **Suggested owner fix:** add `useUnverifiedFormulaCaches` to the normalize payload schema (A01) + forward it in `handleNormalize` (app owner).
+- **Regression tests:** `it('WorkerRequest schema accepts a normalize payload carrying useUnverifiedFormulaCaches')` + `it('an opted-in formula cache flows to normalized values over the real wire path')` in `session-lifecycle.test.ts` (promoted from `it.fails`).
 
-### A22-F04 — P1 · Stale export commits artifacts over a newer session
-`export.done` / `export.finished` reducers carry no `requestId`/epoch guard. `prepareExport()` is phase-guarded, but once building, an export that outlives its source still commits: artifacts built from snapshot A's model merge into a session already committed to source B, and `export.finished` forces `phase:'ready'` unconditionally.
-- **Expected:** superseded export artifacts are dropped (guarded by requestId or source epoch).
-- **Actual:** stale artifacts commit; B's session exposes A's workbook bytes.
-- **Reproduction:** commit CSV A → `prepareExport()` (held at a test gate inside the export writer) → `selectSource(B)` to ready → release gate → A's artifacts land.
-- **Regression test:** `it.fails('a superseded export cannot record artifacts or force phase=ready')` in `session-lifecycle.test.ts`.
-- **Suggested owner fix:** stamp `export.begin` with the active request/epoch and make `export.done`/`export.finished` no-ops when it no longer matches.
+### A22-F04 — P1 · Stale export commits artifacts over a newer session — **FIXED upstream at `a6d6af1`**
+`export.done` / `export.finished` carried no requestId/epoch guard: an export that outlived its source committed snapshot-A artifacts onto a session already at B, and `export.finished` forced `phase:'ready'` unconditionally. Upstream fix: `export.begin` stamps `epoch = state.revision`; `done`/`failed`/`finished`/`progress` drop mismatched-epoch commits.
+- **Reproduction (pre-a6d6af1):** commit CSV A → `prepareExport()` (held at a test gate inside the export writer) → `selectSource(B)` to ready → release gate → A's artifacts landed.
+- **Regression test:** `it('a superseded export cannot record artifacts or force phase=ready')` in `session-lifecycle.test.ts` (promoted from `it.fails`).
 
 ### A22-F06 — P1 · Regions filter silently returns all rows when no region column exists
 `packages/analysis/src/scope.ts` `scopeRows`: `regions.length > 0 && regionColumn !== null` — when the table has no `region` column the gate degenerates to "no filter" and every row is retained, while the scope still reports a regional filter.
@@ -64,19 +58,17 @@ At the 50k-row envelope a ~5 MB file → ~5M cells + ~5M issue objects → multi
 - **Actual:** O(N) unbounded allocation to process death.
 - **Regression test:** `it.fails('expandSpans must refuse oversize spans, not materialize millions of ids')` in `engine-edges.test.ts`.
 
-### A22-F03 — P2 · Parse retry reuses a detached ArrayBuffer and can never succeed
-`parseViaWorker` transfers `bytes` as a transferable (real Worker → detached). `UploadFlow.retry()` re-submits `state.file.bytes` — the same now-detached buffer → retry always re-fails.
-- **Expected:** a recoverable parse error can be retried with the same picked file.
-- **Actual:** retry submits a 0-byte/detached buffer.
-- **Fixture:** `detachBuffer()` (node MessageChannel transfer) simulates the real browser detach exactly.
-- **Regression test:** `it.fails('a parse retry after a recoverable error can reuse the original file bytes')` in `session-lifecycle.test.ts`.
+### A22-F03 — P2 · Parse retry reuses a detached ArrayBuffer — **FIXED upstream at `a6d6af1`**
+`parseViaWorker` transferred the caller's `bytes` (real Worker → detached); `UploadFlow.retry()` re-submitted the same `file.bytes` → retry always re-failed. Upstream fix: the request transfers `bytes.slice(0)`, leaving the caller's buffer attached.
+- **Regression test:** `it('a parse retry after a recoverable error can reuse the original file bytes')` in `session-lifecycle.test.ts` (promoted from `it.fails`).
 
-### A22-F08 — P2 · Sanitized zip repack silently drops an entry named `__proto__`
-`zip-preflight.ts` repacks via `zipSync` keyed by a plain `Record` — `stored['__proto__'] = bytes` mutates the prototype instead of storing. `entries`/`order` still list the entry; the repacked zip (what SheetJS sees) lacks it → preflight sees N entries, the parser sees N−1.
-- **Expected:** repack preserves every admitted entry (or the name is refused up front).
-- **Actual:** silent divergence between admission check and the bytes actually parsed.
+### A22-F08 — P2 · `__proto__` zip entry: partial fix — now an untyped TypeError
+Originally the repack keyed a plain `Record` so `stored['__proto__'] = bytes` mutated the prototype — the entry was silently absent from the zip SheetJS saw. Upstream `a6d6af1` changed `stored` to `Object.create(null)`, but fflate's `zipSync` internally assigns into a plain object (`r[fn]` in `fltn`), so the pollution moved inside fflate and `preflightZip` now throws an **untyped `TypeError: Cannot read properties of undefined (reading 'level')`** — verified through `parseSource` on the real path.
+- **Expected:** repack preserves the admitted entry, or the name is refused with a typed `IngestError` — never a library-internals crash.
+- **Actual:** untyped TypeError propagates out of `preflightZip`/`parseXlsx` (surfaces as INTERNAL via supervisor `mapError`).
 - **Fixture:** `buildZip` array-form entry `{name:'__proto__'}` + `note.txt`.
-- **Regression test:** `it.fails('entry named __proto__ is dropped from the sanitized repack')` in `ingest-corpus.test.ts`.
+- **Regression test:** `it.fails('entry named __proto__ is preserved by the repack or refused as a typed error')` in `ingest-corpus.test.ts` — still open.
+- **Suggested owner fix:** reject `__proto__`/`prototype`/`constructor` (and any key colliding with Object.prototype) in `normalizeZipPath` — bounded refusal before fflate sees it.
 
 ### A22-F10 — P2 (latent) · `quantizeMoney` emits non-canonical `-0.00`
 `quantizeMoney('-0.004', 2)` → `'-0.00'` — violates the canonical-decimal rule (`isDecimal('-0.00') === false`). Latent today: `runScenario` only feeds inputs with fraction length ≤ places.

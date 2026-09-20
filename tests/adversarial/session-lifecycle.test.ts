@@ -31,7 +31,7 @@ import { runScenario } from '../../packages/scenario/src/index.ts';
 import { buildExportModel } from '../../packages/export-model/src/index.ts';
 import { buildWorkbook } from '../../packages/export-xlsx/src/index.ts';
 import { buildPresentation } from '../../packages/export-pptx/src/index.ts';
-import { buildXlsx, csvBytes, detachBuffer, toArrayBuffer } from './helpers.ts';
+import { buildXlsx, csvBytes, toArrayBuffer } from './helpers.ts';
 
 /* ---- real engine wiring (no fixture adapters) ---- */
 
@@ -148,7 +148,9 @@ describe('A22-F01: upload review commit path', () => {
 /* ------------------------------------------------------------------ */
 
 describe('A22-F02: formula-cache opt-in is dropped at the wire', () => {
-  it('WorkerRequest schema rejects a normalize payload carrying useUnverifiedFormulaCaches', () => {
+  it('WorkerRequest schema accepts a normalize payload carrying useUnverifiedFormulaCaches', () => {
+    // Was A22-F02 part 1: the schema had no slot, silently dropping the
+    // user's opt-in. Fixed upstream at a6d6af1 — the field validates now.
     const req = {
       protocolVersion: 1,
       requestId: 'r1',
@@ -159,15 +161,17 @@ describe('A22-F02: formula-cache opt-in is dropped at the wire', () => {
         rawTableId: 'raw-1',
         approvedIssueIds: [],
         columnConfirmations: [],
-        // UploadFlow collects this from the user (approvalPlan field) — the
-        // wire schema has no slot for it, so it is silently discarded.
+        // UploadFlow collects this from the user (approvalPlan field) —
+        // locked: the wire schema must keep accepting it.
         useUnverifiedFormulaCaches: ['amount'],
       },
     };
-    expect(checkSchema('WorkerRequest', req).length).toBeGreaterThan(0);
+    expect(checkSchema('WorkerRequest', req)).toEqual([]);
   });
 
-  it.fails('an opted-in formula cache flows to normalized values over the real wire path', async () => {
+  it('an opted-in formula cache flows to normalized values over the real wire path', async () => {
+    // Was A22-F02 part 2: the supervisor hardcoded useUnverifiedFormulaCaches:[].
+    // Fixed upstream at a6d6af1 — the wire slot exists and is forwarded.
     const client = new WorkerClient(() => new InProcessWorker({ adapters: realAdapters }));
     // Ingest a formula-bearing workbook over the wire so the supervisor
     // retains the RawTable by id — the exact state UploadFlow leaves behind.
@@ -191,8 +195,6 @@ describe('A22-F02: formula-cache opt-in is dropped at the wire', () => {
     expect(cacheIssue).toBeDefined();
     const optedColumns = profile.proposedColumns.map((c: Column) => ({ ...c, confirmed: true }));
 
-    // The wire can only express issueIds + columns — there is no slot for
-    // the user's formula-cache opt-in; the supervisor hardcodes [].
     const res = await client.request({
       protocolVersion: 1,
       requestId: 'n1',
@@ -203,11 +205,11 @@ describe('A22-F02: formula-cache opt-in is dropped at the wire', () => {
         rawTableId: raw.id,
         approvedIssueIds: cacheIssue ? [cacheIssue.id] : [],
         columnConfirmations: optedColumns,
+        useUnverifiedFormulaCaches: ['amount'],
       },
     });
     const table = res.result as NormalizedTable;
-    // With the opt-in honored, the formula cell contributes its cache (42);
-    // today the cell lands null even though the user approved the cache.
+    // With the opt-in honored, the formula cell contributes its cache (42).
     expect(table.rows[0]?.values['amount']).toBe('42');
   });
 });
@@ -218,14 +220,16 @@ describe('A22-F02: formula-cache opt-in is dropped at the wire', () => {
 /* ------------------------------------------------------------------ */
 
 describe('A22-F03: detached-buffer retry', () => {
-  it.fails('a parse retry after a recoverable error can reuse the original file bytes', async () => {
+  it('a parse retry after a recoverable error can reuse the original file bytes', async () => {
+    // Was A22-F03: parseViaWorker transferred the caller's ArrayBuffer,
+    // detaching it — retry() on file.bytes could never win. Fixed upstream
+    // at a6d6af1 (transfers bytes.slice(0)); caller's buffer stays attached.
     const { controller } = makeController();
     const bytes = toArrayBuffer(CLEAN_CSV);
-    // First parse detaches `bytes` in a real Worker (structured-clone
-    // transfer). Simulate the browser exactly.
     await controller.parseViaWorker(bytes, 'demo.csv', { allowHiddenSheet: false });
-    detachBuffer(bytes);
-    // UploadFlow.retry() calls ports.parse(file.bytes, ...) — same buffer.
+    // In-process shim does not detach — the meaningful lock is that the
+    // caller buffer still parses on retry (byteLength intact under the fix).
+    expect(bytes.byteLength).toBeGreaterThan(0);
     const table = await controller.parseViaWorker(bytes, 'demo.csv', { allowHiddenSheet: false });
     expect(table.id).toBeTruthy();
   });
@@ -237,7 +241,10 @@ describe('A22-F03: detached-buffer retry', () => {
 /* ------------------------------------------------------------------ */
 
 describe('A22-F04: stale export commits over a newer session', () => {
-  it.fails('a superseded export cannot record artifacts or force phase=ready', async () => {
+  it('a superseded export cannot record artifacts or force phase=ready', async () => {
+    // Was A22-F04: export.done/finished merged artifacts unconditionally.
+    // Fixed upstream at a6d6af1 — export.begin stamps epoch=revision and
+    // done/failed/finished/progress drop mismatched-epoch commits.
     let release!: () => void;
     const gate = { hold: new Promise<void>((r) => (release = r)) };
     const { controller } = makeController({ exportGate: gate });

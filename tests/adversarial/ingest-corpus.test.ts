@@ -50,23 +50,30 @@ function expectNoContentLeak(error: IngestError): void {
 /* ------------------------------------------------------------------ */
 
 describe('adversarial: ZIP structure', () => {
-  it.fails('entry named __proto__ is dropped from the sanitized repack (A22-F08 divergence)', async () => {
-    // normalizeZipPath allows `__proto__` (not traversal); the repack keys a
-    // plain object by name, so `stored['__proto__'] = data` mutates the
-    // prototype instead of creating a property. The entry survives in
-    // `entries`/`order` but is absent from the zip handed to SheetJS.
+  it.fails('entry named __proto__ is preserved by the repack or refused as a typed error (A22-F08)', async () => {
+    // normalizeZipPath allows `__proto__` (not traversal). Upstream a6d6af1
+    // changed `stored` to a null-prototype object — but fflate's zipSync
+    // internally assigns into a PLAIN object (`r[fn]`), so `__proto__`
+    // pollutes there instead and preflight now throws an untyped TypeError:
+    //   "Cannot read properties of undefined (reading 'level')"
+    // Correct contract: either the repack preserves the entry, or the name
+    // is refused with a typed IngestError — never a library internals crash.
     const zip = buildZip([
       { name: '__proto__', data: new TextEncoder().encode('junk') },
       { name: 'note.txt', data: new TextEncoder().encode('hello') },
     ]);
-    const { sanitizedZip, entries, order } = await preflightZip(zip, LIMITS, undefined, () => {});
+    let flight: Awaited<ReturnType<typeof preflightZip>>;
+    try {
+      flight = await preflightZip(zip, LIMITS, undefined, () => {});
+    } catch (error) {
+      // Typed refusal is acceptable — an untyped TypeError is not.
+      expect(error).toBeInstanceOf(IngestError);
+      return;
+    }
+    const { sanitizedZip, entries, order } = flight;
     expect(entries.has('__proto__')).toBe(true);
     expect(order).toContain('__proto__');
-    // Re-read the repack with the same bounded scanner — no new deps.
     const repacked = scanCentralDirectory(sanitizedZip, LIMITS).map((r) => r.normalizedName);
-    expect(repacked).toContain('note.txt');
-    // This assertion documents the divergence; fix = repack under a Map or
-    // reject reserved names in normalizeZipPath.
     expect(repacked).toContain('__proto__');
   });
 
