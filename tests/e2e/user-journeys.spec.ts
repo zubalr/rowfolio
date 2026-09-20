@@ -1,19 +1,14 @@
 /**
- * End-to-End User Journeys (A19)
+ * End-to-End User Journeys
  *
- * Full user journeys from contracts and 18_TEST_STRATEGY.md:
+ * Full user journeys from contracts:
  * 1. Demo journey: Landing -> Demo -> Finding Selection -> Evidence Drawer -> Source Rows -> Scenario -> Export -> Reset.
  * 2. Bilingual toggle journey: English <-> Arabic full flow with RTL directionality check.
  * 3. File upload journey: Drag/drop or file input for CSV/XLSX.
  * 4. Reduced-motion user journey.
- *
- * Note on execution against frozen base:
- * In accordance with ROWFOLIO_WORK_SPLIT.md:
- * "Validate what can run on frozen base; mark actual app/Office/browser checks pending when those
- * implementations are absent. Devin runs the final integrated checks; pending is never passed."
  */
 import { test, expect } from "@playwright/test";
-import { ensureStaticServer, stopStaticServer } from "./helpers.js";
+import { ensureStaticServer, stopStaticServer } from "./helpers.ts";
 
 test.beforeAll(async () => {
   await ensureStaticServer(4173);
@@ -23,7 +18,7 @@ test.afterAll(() => {
   stopStaticServer();
 });
 
-test.describe("Full User Journeys (A19)", () => {
+test.describe("Full User Journeys", () => {
   test("Journey 1: Landing -> Demo -> Finding -> Evidence -> Scenario -> Export -> Clear", async ({ page }) => {
     await page.goto("/");
 
@@ -36,9 +31,9 @@ test.describe("Full User Journeys (A19)", () => {
     const hasDemoCta = (await demoCta.count()) > 0;
 
     if (!hasDemoCta) {
-      test.fixme(
+      test.skip(
         true,
-        "Pending integration gate: A03/A05/A11 workspace components are not yet mounted into apps/web/src/main.ts on frozen base",
+        "PENDING: Workspace interactive controls are not yet mounted in application shell on frozen base",
       );
       return;
     }
@@ -107,9 +102,9 @@ test.describe("Full User Journeys (A19)", () => {
     const hasUpload = (await uploadInput.count()) > 0;
 
     if (!hasUpload) {
-      test.fixme(
+      test.skip(
         true,
-        "Pending integration gate: A11 upload dropzone component is not yet mounted in apps/web on frozen base",
+        "PENDING: File upload dropzone component is not yet mounted in application shell on frozen base",
       );
       return;
     }

@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { ensureStaticServer, stopStaticServer, VIEWPORTS, runAxeAudit } from "./helpers.js";
+import { ensureStaticServer, stopStaticServer, VIEWPORTS, runAxeAudit } from "./helpers.ts";
 
 test.beforeAll(async () => {
   await ensureStaticServer(4173);
@@ -9,7 +9,7 @@ test.afterAll(() => {
   stopStaticServer();
 });
 
-test.describe("Landing & Responsive Viewports (A19)", () => {
+test.describe("Landing & Responsive Viewports", () => {
   test("renders English landing page with correct lang and dir attributes", async ({ page }) => {
     const consoleErrors: string[] = [];
     page.on("console", (msg) => {

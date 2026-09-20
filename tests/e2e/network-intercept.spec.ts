@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { ensureStaticServer, stopStaticServer } from "./helpers.js";
+import { ensureStaticServer, stopStaticServer } from "./helpers.ts";
 
 test.beforeAll(async () => {
   await ensureStaticServer(4173);
@@ -9,7 +9,7 @@ test.afterAll(() => {
   stopStaticServer();
 });
 
-test.describe("Strict Network Interception & Canary Isolation (A20)", () => {
+test.describe("Strict Network Interception & Canary Isolation", () => {
   test("allows only GET/HEAD requests to same-origin static assets", async ({ page }) => {
     const nonStaticRequests: Array<{ url: string; method: string }> = [];
 
