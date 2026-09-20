@@ -1,15 +1,18 @@
 {
   "color": {
-    "ink": "#172B35",
+    "ink": "#14252E",
     "paper": "#F7F4EC",
     "surface": "#FFFEFA",
     "muted": "#53636A",
     "rule": "#D7DCD8",
-    "data": "#2855D9",
-    "attention": "#C84B31",
+    "data": "#2B50E8",
+    "attention": "#E04E1A",
     "negative": "#A33224",
-    "positive": "#116B63",
-    "scenario": "#946000"
+    "positive": "#0E8F7E",
+    "scenario": "#B96F00",
+    "dataTint30": "#C6D1FF",
+    "positiveText": "#116B63",
+    "scenarioText": "#946000"
   },
   "spacing": [
     4,

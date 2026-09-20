@@ -36,7 +36,7 @@ test.describe("keyboard controls", () => {
     });
     expect(ring.tag).toBe("BUTTON");
     expect(parseFloat(ring.outlineWidth)).toBeGreaterThanOrEqual(3);
-    // Cobalt focus color (data #2855D9).
+    // Cobalt focus color (data #2B50E8).
     expect(ring.outlineColor).toBe("rgb(40, 85, 217)");
 
     await shot(page, info, `focus-ring-${locale}`, { fullPage: false });

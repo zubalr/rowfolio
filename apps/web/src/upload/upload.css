@@ -195,7 +195,7 @@ html[lang="ar"] .rf-upload__note {
 }
 
 .rf-upload__warning .rf-icon {
-  color: var(--rf-scenario);
+  color: var(--rf-scenario-text);
   flex-shrink: 0;
   transform: translateY(2px);
 }
@@ -296,7 +296,7 @@ html[lang="ar"] .rf-upload__issue-detail {
 }
 
 .rf-upload__capability .rf-icon {
-  color: var(--rf-scenario);
+  color: var(--rf-scenario-text);
   flex-shrink: 0;
   transform: translateY(2px);
 }

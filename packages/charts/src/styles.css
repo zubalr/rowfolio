@@ -6,16 +6,20 @@
  */
 
 .rf-chart {
-  --rf-c-ink: #172b35;
+  --rf-c-ink: #14252e;
   --rf-c-paper: #f7f4ec;
   --rf-c-surface: #fffefa;
   --rf-c-muted: #53636a;
   --rf-c-rule: #d7dcd8;
-  --rf-c-data: #2855d9;
-  --rf-c-attention: #c84b31;
+  --rf-c-data: #2b50e8;
+  --rf-c-data-tint-30: #c6d1ff;
+  --rf-c-attention: #e04e1a;
   --rf-c-negative: #a33224;
-  --rf-c-positive: #116b63;
-  --rf-c-scenario: #946000;
+  --rf-c-positive: #0e8f7e;
+  /* text-grade variants keep small labels AA on paper */
+  --rf-c-positive-text: #116b63;
+  --rf-c-scenario: #b96f00;
+  --rf-c-scenario-text: #946000;
   /* mark motion: geometry transitions land on settled values (never animated
      numbers); entrance grows marks from their true baseline once. */
   --rf-chart-ms: 240ms;
@@ -29,15 +33,18 @@
    Every mark paint is a var() so the whole plot remaps here. */
 [data-rf-surface="ink"] .rf-chart {
   --rf-c-ink: #fffefa;
-  --rf-c-paper: #172b35;
-  --rf-c-surface: #1f3947;
+  --rf-c-paper: #14252e;
+  --rf-c-surface: #1e3846;
   --rf-c-muted: #aec2cb;
   --rf-c-rule: #3a4a53;
-  --rf-c-data: #9db4f5;
-  --rf-c-attention: #e8907c;
-  --rf-c-negative: #e8907c;
-  --rf-c-positive: #7fc4bb;
-  --rf-c-scenario: #e0b878;
+  --rf-c-data: #a8bcff;
+  --rf-c-data-tint-30: #a8bcff;
+  --rf-c-attention: #f0926c;
+  --rf-c-negative: #f0926c;
+  --rf-c-positive: #74c6b8;
+  --rf-c-positive-text: #74c6b8;
+  --rf-c-scenario: #f0b45c;
+  --rf-c-scenario-text: #f0b45c;
 }
 
 .rf-chart__caption {
@@ -160,7 +167,7 @@ html[lang="ar"] .rf-chart-hlabel {
 }
 
 .rf-chart-delta--pos {
-  fill: var(--rf-c-positive);
+  fill: var(--rf-c-positive-text);
 }
 
 .rf-chart-delta--big {
@@ -169,7 +176,7 @@ html[lang="ar"] .rf-chart-hlabel {
 
 .rf-chart-hypo {
   font-size: 11px;
-  fill: var(--rf-c-scenario);
+  fill: var(--rf-c-scenario-text);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -510,7 +517,7 @@ html[dir="rtl"] .rf-chart-tip,
 .rf-chart-note {
   margin: 6px 0 0;
   font-size: 12px;
-  color: var(--rf-c-scenario);
+  color: var(--rf-c-scenario-text);
 }
 
 .rf-visually-hidden {

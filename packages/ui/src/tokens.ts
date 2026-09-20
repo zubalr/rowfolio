@@ -14,7 +14,7 @@
 
 export const color = {
   /** Brand ink — primary text and solid primary controls. */
-  ink: "#172B35",
+  ink: "#14252E",
   /** Warm paper — page background. */
   paper: "#F7F4EC",
   /** Surface — raised content regions (tables, preview panels). */
@@ -24,15 +24,21 @@ export const color = {
   /** Subtle rule — divider-led hierarchy. */
   rule: "#D7DCD8",
   /** Primary data cobalt — actuals, focus, links. */
-  data: "#2855D9",
-  /** Vermilion — active editorial finding / attention. NOT for normal text on paper (4.24:1, large-only). */
-  attention: "#C84B31",
+  data: "#2B50E8",
+  /** Cobalt at 30% on surface — non-selected marks of the observed hue. */
+  dataTint30: "#C6D1FF",
+  /** Vermilion — active finding / gap / attention accents. Graphical/large text only — not AA for body text. */
+  attention: "#E04E1A",
   /** Negative text on light surfaces (darker than attention for AA). */
   negative: "#A33224",
-  /** Positive teal. */
-  positive: "#116B63",
-  /** Scenario amber — hypothetical series/annotations. */
-  scenario: "#946000",
+  /** Positive teal — graphical/marks. */
+  positive: "#0E8F7E",
+  /** Positive teal, AA text grade on paper (4.9:1) — small text in the positive hue. */
+  positiveText: "#116B63",
+  /** Scenario amber — hypothetical series/annotations. Graphical only — not AA for body text. */
+  scenario: "#B96F00",
+  /** Scenario amber, AA text grade on paper (4.7:1) — hypothesis labels, notes. */
+  scenarioText: "#946000",
 } as const;
 
 /**
@@ -40,18 +46,18 @@ export const color = {
  * single theme; the evidence drawer is a dark *treatment* of it, so these are
  * lightened tints of existing tokens (matching the interaction reference),
  * never new hues. Ratios vs `color.ink` are asserted in contrast.test.ts:
- *   dataOnInk #9DB4F5 on ink ≈ 6.3:1, mutedOnInk #AEC2CB on ink ≈ 8.4:1,
- *   ruleOnInk rgba-equivalent #3A4A53 on ink ≈ 1.9:1 (non-text rule only).
+ *   dataOnInk #A8BCFF on ink ≈ 8.5:1, mutedOnInk #AEC2CB on ink ≈ 8.5:1,
+ *   ruleOnInk rgba-equivalent #3A4A53 on ink ≈ 1.7:1 (non-text rule only).
  */
 export const colorOnInk = {
   text: "#FFFEFA",
   muted: "#AEC2CB",
-  data: "#9DB4F5",
-  attention: "#E8907C",
-  positive: "#7FC4BB",
-  scenario: "#E0B878",
+  data: "#A8BCFF",
+  attention: "#F0926C",
+  positive: "#74C6B8",
+  scenario: "#F0B45C",
   rule: "#3A4A53",
-  surface: "#1F3947",
+  surface: "#1E3846",
 } as const;
 
 export type ColorToken = keyof typeof color;
