@@ -12,14 +12,14 @@ export interface LandingProps {
  * automatically by the A12 landing module when `src/landing/` lands.
  */
 export function Landing({ onNavigateWorkspace }: LandingProps) {
-  const { controller } = useServices();
+  const { controllerReady } = useServices();
   const i18n = useI18n();
   const t = (key: MessageKey, params?: Record<string, string>) => i18n.tSafe(key, params);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   const runSample = () => {
     onNavigateWorkspace();
-    void controller.useSample();
+    void controllerReady.then((controller) => controller.useSample());
   };
 
   const onFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -29,7 +29,7 @@ export function Landing({ onNavigateWorkspace }: LandingProps) {
     const bytes = await file.arrayBuffer();
     const format = /\.xlsx$/i.test(file.name) ? 'xlsx' : 'csv';
     onNavigateWorkspace();
-    void controller.selectSource(bytes, file.name, format);
+    void controllerReady.then((controller) => controller.selectSource(bytes, file.name, format));
   };
 
   return (
