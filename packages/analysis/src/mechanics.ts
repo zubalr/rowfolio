@@ -122,11 +122,12 @@ export function absDecimal(value: string): string {
 }
 
 /**
- * Chart domain ceiling: the smallest two-significant-figure bound
- * strictly above `max × 1.1`, so axes always clear the data with visible
- * headroom. Strictness matters: a bound merely equal to the stretched
- * maximum collapses headroom on exact hits, and mis-scaled rendering
- * (e.g. 0.23 for data 1,1,2) flattens every bar to the same top.
+ * Chart domain ceiling: the smallest two-significant-figure bound at or
+ * above `max × 1.1`, so axes clear the data with the contracted headroom.
+ * An exact hit already provides the 10% margin; strict-above would add
+ * headroom the contract does not ask for and rebaseline established
+ * bounds (1,000,000 → 1,100,000). What must never happen is mis-scaled
+ * rendering (e.g. 0.23 for data 1,1,2), which flattens every bar.
  */
 export function domainMax(values: readonly string[]): string {
   let max = '0';
@@ -154,7 +155,7 @@ export function domainMax(values: readonly string[]): string {
     return `0.${'0'.repeat(right - d.length)}${d}`;
   };
   let candidate = render(t, order);
-  if (compareDecimal(candidate, stretched) <= 0) {
+  if (compareDecimal(candidate, stretched) < 0) {
     t += 1;
     if (t === 100) {
       t = 10;

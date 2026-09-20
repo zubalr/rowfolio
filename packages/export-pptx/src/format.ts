@@ -37,7 +37,9 @@ export function formatCompact(value: string): string {
     return `${sign}${shiftDecimal(digitsOf(value), -6)}m`;
   }
   if (magnitude > 3) {
-    // Thousands trim to a readable precision: `881k`, `10.8k`.
+    // Thousands trim (never round up) to a readable precision: `881k`,
+    // `10.8k`. Truncation is intentional for display only; the model
+    // value behind the label is untouched.
     const shifted = shiftDecimal(digitsOf(value), -3);
     const [whole, frac = ''] = shifted.split('.');
     const trimmed = frac.replace(/0+$/, '');

@@ -245,7 +245,7 @@ function scenarioChart(
 }
 
 /**
- * Smallest two-significant-figure bound strictly above `max × 1.1`.
+ * Smallest two-significant-figure bound at or above `max × 1.1`.
  * Local mirror of the analysis bound rule (packages cannot share
  * implementations across boundaries); see `domainMax` for rationale.
  */
@@ -273,7 +273,7 @@ function domainCeil(values: readonly string[]): string {
     return `0.${'0'.repeat(right - d.length)}${d}`;
   };
   let candidate = render(t, order);
-  if (compareDecimal(candidate, scaled) <= 0) {
+  if (compareDecimal(candidate, scaled) < 0) {
     t += 1;
     if (t === 100) {
       t = 10;

@@ -185,7 +185,8 @@ describe('deck structure', () => {
     }
   });
 
-  it('fails visibly invalid models instead of clipping', async () => {    const model = buildExportModel(snapshot, table, scenario, 'en', 'latn', CREATED);
+  it('fails visibly invalid models instead of clipping', async () => {
+    const model = buildExportModel(snapshot, table, scenario, 'en', 'latn', CREATED);
     // Nine metrics on one finding slide exceeds the body fit budget.
     const extra = Array.from({ length: 9 }, (_, i) => ({
       ...(model.metrics[0] as ExportModel['metrics'][number]),
