@@ -1,4 +1,4 @@
-import { createElement, Fragment, type ReactElement } from "react";
+import { createElement, Fragment } from "react";
 import { createRoot } from "react-dom/client";
 // `./fonts` is a declared subpath export of @rowfolio/ui (see
 // packages/ui/package.json exports); the deep-path lint pattern cannot see
@@ -17,14 +17,15 @@ import "./app/app.css";
 // scripts/audit-static.ts and the bundle-budget audit.
 const host = document.getElementById("root");
 if (host) {
-  const children: ReactElement[] = [
-    createElement(App, { services: createAppServices() }),
-  ];
-  if (import.meta.env.PROD && import.meta.env.VITE_VERCEL_ENV === "production") {
-    const { Analytics } = await import("@vercel/analytics/react");
-    children.push(
-      createElement(Analytics, { mode: "production", beforeSend: analyticsBeforeSend }),
-    );
-  }
-  createRoot(host).render(createElement(Fragment, null, ...children));
+  createRoot(host).render(
+    createElement(Fragment, null, createElement(App, { services: createAppServices() })),
+  );
+}
+
+// Analytics is best-effort and never blocks or breaks the app: the SDK
+// wrapper chunk loads after render, and a failed load is swallowed.
+if (import.meta.env.PROD && import.meta.env.VITE_VERCEL_ENV === "production") {
+  void import("@vercel/analytics")
+    .then((mod) => mod.inject({ mode: "production", beforeSend: analyticsBeforeSend }))
+    .catch(() => {});
 }
