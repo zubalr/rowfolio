@@ -62,7 +62,12 @@ export interface ScopedRows {
   readonly sourceRows: number[];
 }
 
-/** Rows with a date in `[start, end]` (and region in `regions` when non-empty). */
+/** Rows with a date in `[start, end]` (and region in `regions` when non-empty).
+ *
+ * A requested region filter on a table without a region column is
+ * unsatisfiable: it returns no rows rather than silently passing the
+ * whole table through as the "regional" scope.
+ */
 export function scopeRows(
   table: NormalizedTable,
   dateColumn: Column,
@@ -70,6 +75,7 @@ export function scopeRows(
   regionColumn: Column | null,
   regions: readonly string[],
 ): ScopedRows {
+  if (regions.length > 0 && regionColumn === null) return { rows: [], sourceRows: [] };
   const rows = table.rows.filter((row) => {
     const date = row.values[dateColumn.id];
     if (typeof date !== 'string' || date < period.start || date > period.end) return false;

@@ -21,10 +21,12 @@ import {
   evaluateProof,
   evidenceRow,
   expandSpans,
+  MAX_EXPANDED_ROWS,
   ProofError,
   readEvidencePage,
   requireSelection,
   spanRowCount,
+  SpanError,
   validateSpans,
 } from '../../../packages/provenance/src/index.ts';
 
@@ -56,6 +58,28 @@ describe('span compression', () => {
     expect(validateSpans([{ start: 1, end: 2 }, { start: 3, end: 4 }], 4).valid).toBe(false);
     expect(validateSpans([{ start: 1, end: 4 }], 5).valid).toBe(false);
     expect(validateSpans([{ start: 1, end: 4 }], 4).valid).toBe(true);
+  });
+
+  it('refuses abusive expansion before allocating anything', () => {
+    // The reported OOM shape: bounds are checked mathematically, so the
+    // refusal needs only a tiny input, never a heap-sized reproduction.
+    expect(() => expandSpans([{ start: 1, end: 2147483647 }])).toThrowError(SpanError);
+    expect(() => expandSpans([{ start: 1, end: MAX_EXPANDED_ROWS + 1 }])).toThrowError(SpanError);
+    expect(expandSpans([{ start: 1, end: MAX_EXPANDED_ROWS }])).toHaveLength(MAX_EXPANDED_ROWS);
+  });
+
+  it('rejects malformed, reversed, non-finite and unsafe-integer spans', () => {
+    expect(() => expandSpans([{ start: 5, end: 3 }])).toThrowError(SpanError);
+    expect(() => expandSpans([{ start: 0, end: 4 }])).toThrowError(SpanError);
+    expect(() => expandSpans([{ start: 1.5, end: 4 }])).toThrowError(SpanError);
+    expect(() => expandSpans([{ start: NaN, end: 4 }])).toThrowError(SpanError);
+    expect(() => expandSpans([{ start: 1, end: Infinity }])).toThrowError(SpanError);
+    expect(() => expandSpans([{ start: 1, end: Number.MAX_SAFE_INTEGER }])).toThrowError(SpanError);
+    expect(() => expandSpans([{ start: 1, end: 4 }], 3)).toThrowError(SpanError);
+    expect(() => expandSpans([{ start: 1, end: 4 }], -1)).toThrowError(SpanError);
+    // Valid callers are unaffected, including custom tighter bounds.
+    expect(expandSpans([{ start: 2, end: 4 }])).toEqual([2, 3, 4]);
+    expect(expandSpans([{ start: 2, end: 4 }], 3)).toEqual([2, 3, 4]);
   });
 });
 

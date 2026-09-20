@@ -56,29 +56,39 @@ const RANGE_MAX = '0.30';
 const RATIO_UNIT: Unit = { kind: 'ratio', label: 'fraction', currency: null };
 const PP_UNIT: Unit = { kind: 'percentage-point', label: 'pp', currency: null };
 
-/** Half-up quantization to exactly `places` fraction digits (money display). */
+/** Half-up quantization to exactly `places` fraction digits (money display).
+ *
+ * A zero magnitude never carries a sign: `-0.004` at scale 2 is `'0.00'`,
+ * never `'-0.00'` (which violates canonical-decimal form). Real negative
+ * values keep their sign (`-0.006` → `'-0.01'`).
+ */
 export function quantizeMoney(value: Decimal, places: number): Decimal {
   const negative = value.startsWith('-');
   const body = negative ? value.slice(1) : value;
   const dot = body.indexOf('.');
   const int = dot === -1 ? body : body.slice(0, dot);
   const frac = dot === -1 ? '' : body.slice(dot + 1);
+  const unsigned = (digits: string): Decimal => {
+    const bare = digits.replace('.', '');
+    if (bare === '' || BigInt(bare) === 0n) {
+      return places === 0 ? '0' : `0.${'0'.repeat(places)}`;
+    }
+    return negative ? `-${digits}` : digits;
+  };
   if (places === 0) {
     const roundUp = (frac[0] ?? '0') >= '5';
-    return `${negative && (int !== '0' || roundUp) ? '-' : ''}${roundUp ? (BigInt(int) + 1n).toString() : int}`;
+    return unsigned(roundUp ? (BigInt(int) + 1n).toString() : int);
   }
   if (frac.length <= places) {
-    return `${negative ? '-' : ''}${int}.${frac.padEnd(places, '0')}`;
+    return unsigned(`${int}.${frac.padEnd(places, '0')}`);
   }
   const keep = frac.slice(0, places);
   const dropped = frac.slice(places);
-  const roundUp = (dropped[0] as string) >= '5';
-  if (!roundUp) return `${negative ? '-' : ''}${int}.${keep}`;
+  if ((dropped[0] as string) < '5') {
+    return unsigned(`${int}.${keep}`);
+  }
   const bumped = (BigInt(int + keep) + 1n).toString().padStart(int.length + places, '0');
-  const out = places === 0
-    ? bumped
-    : `${bumped.slice(0, bumped.length - places)}.${bumped.slice(bumped.length - places)}`;
-  return `${negative ? '-' : ''}${out}`;
+  return unsigned(`${bumped.slice(0, bumped.length - places)}.${bumped.slice(bumped.length - places)}`);
 }
 
 /** Fraction digits carried by a decimal literal (money display scale). */

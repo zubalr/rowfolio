@@ -9,6 +9,7 @@
 export {
   assertSafeSheetName,
   buildWorkbook,
+  escapeFormulaStringLiteral,
   ExportXlsxError,
   validateModelLimits,
 } from './workbook.ts';
