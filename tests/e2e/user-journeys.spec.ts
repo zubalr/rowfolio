@@ -55,11 +55,17 @@ test.describe("Full User Journeys", () => {
     await scenarioRange.first().fill("8");
     await expect(page.locator(".rf-scenario__value, [data-testid='scenario-value']").first()).toBeVisible();
 
-    // 5. Prepare native exports / briefing
+    // 5. Prepare the briefing specimen: the six slide outlines and the
+    // workbook summary flip to data-ready (the demo path previews
+    // readiness here; real downloads happen in the workspace flow and
+    // are covered by Journey 5).
     const prepareBtn = page.locator('[data-testid="preview-briefing"] button, button:has-text("Prepare briefing"), [data-testid="export-prepare-btn"]');
     await expect(prepareBtn.first()).toBeVisible();
     await prepareBtn.first().click();
-    await expect(page.locator('.rf-briefing__file[data-ready="true"], [data-testid="export-ready"]').first()).toBeVisible();
+    const readySlides = page.locator('.rf-briefing__slide[data-ready="true"]');
+    await expect(readySlides.first()).toBeVisible({ timeout: 30_000 });
+    expect(await readySlides.count()).toBe(6);
+    await expect(page.locator('.rf-briefing__workbook[data-ready="true"]')).toBeVisible({ timeout: 30_000 });
 
     // 6. Reset / clear demo session
     const resetBtn = page.locator('button:has-text("Replay demo"), button:has-text("Replay"), [data-testid="clear-session-btn"]');
@@ -229,6 +235,70 @@ test.describe("Full User Journeys", () => {
     expect(created.length).toBeGreaterThan(0);
     for (const url of created) {
       expect(revoked).toContain(url);
+    }
+  });
+
+  test("Journey 6: Ambiguous-delimiter CSV recovers via the workspace delimiter picker", async ({
+    page,
+  }) => {
+    const pageErrors: Error[] = [];
+    page.on("pageerror", (error) => {
+      pageErrors.push(error);
+    });
+
+    // Deterministic ambiguous-delimiter fixture (os tmpdir, never
+    // committed): comma and semicolon both parse every record at uniform
+    // width, so inspection reports AMBIGUOUS_INPUT/csv.ambiguous-delimiter.
+    // The workspace UploadFlow path must offer the delimiter picker (the
+    // landing adoptFile path has no recovery action — reported to Cloud).
+    const { tmpdir } = await import("node:os");
+    const { writeFileSync, unlinkSync } = await import("node:fs");
+    // Unique per run: parallel repeats must not share one tmp path.
+    const ambiguousPath = path.join(
+      tmpdir(),
+      `rowfolio-ambiguous-delim-${process.pid}-${Date.now()}-${Math.floor(Math.random() * 1e6)}.csv`,
+    );
+    writeFileSync(
+      ambiguousPath,
+      ["id;date,region", "R-1;2026-06-01,North", "R-2;2026-06-02,South"].join("\n"),
+    );
+
+    try {
+      // Enter the workspace idle surface directly so the file reaches the
+      // UploadFlow dropzone (not the landing adoptFile path).
+      await page.goto("/#/workspace");
+      const dropInput = page.locator('[data-testid="upload-flow"] input[type="file"]');
+      await expect(dropInput).toBeAttached({ timeout: 10_000 });
+      await dropInput.setInputFiles(ambiguousPath);
+
+      // The delimiter picker offers comma, tab, and semicolon plus cancel.
+      const picker = page.locator('[data-testid="delimiter-picker"]');
+      await expect(picker).toBeVisible({ timeout: 20_000 });
+      await expect(page.locator('[data-testid="delimiter-,"]')).toBeVisible();
+      await expect(page.locator('[data-testid="delimiter-;"]')).toBeVisible();
+
+      // Choosing semicolon parses the file and advances into the normal
+      // review flow (here: header-row/column confirmation for the
+      // two-column split — proof the flow left the dead-end behind).
+      await page.locator('[data-testid="delimiter-;"]').click();
+      const applyBtn = page.locator('button:has-text("Apply approved changes")');
+      await expect(applyBtn).toBeVisible({ timeout: 30_000 });
+      await applyBtn.click();
+      await expect(page.locator("text=Confirm the table and header row").first()).toBeVisible({ timeout: 15_000 });
+
+      // Clean teardown with no retained workers.
+      const clearBtn = page.locator('[data-testid="clear-session-btn"]');
+      await expect(clearBtn).toBeVisible();
+      await clearBtn.click();
+      await expect(page.locator("h1")).toBeVisible({ timeout: 10_000 });
+      await expect
+        .poll(() => page.workers().length, { timeout: 10_000 })
+        .toBe(0);
+
+      // No uncaught exceptions anywhere in the recover path.
+      expect(pageErrors).toEqual([]);
+    } finally {
+      unlinkSync(ambiguousPath);
     }
   });
 });
