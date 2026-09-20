@@ -2,7 +2,7 @@ import type { AnalysisSnapshot, Metric } from '@rowfolio/contracts';
 import { Metric as MetricView, MetricStrip } from '@rowfolio/ui';
 import { useI18n } from '../app/context.tsx';
 import type { MessageKey } from '@rowfolio/i18n';
-import { formatMetricValue } from './format.ts';
+import { formatMetricValue, metricUnitLabel } from './format.ts';
 import { duplicateLabelKeys } from './stageModel.ts';
 
 const MAX_KPIS = 4;
@@ -68,10 +68,11 @@ function headlineMetrics(snapshot: AnalysisSnapshot): Metric[] {
 /**
  * Units worth printing beside the value: currency codes ("USD"), counts
  * ("records"), minutes. Ratios already carry % in the formatted value and
- * `unknown` carries no information at all — both badges are noise.
+ * placeholder labels ("unit"/"fraction") carry nothing — both suppressed.
  */
 function displayUnit(metric: Metric): Metric['unit'] | undefined {
-  return metric.unit.kind === 'ratio' || metric.unit.kind === 'unknown' ? undefined : metric.unit;
+  const label = metricUnitLabel(metric.unit);
+  return label === null ? undefined : { ...metric.unit, label };
 }
 
 /** "May" / "May–Jun 2026" — the metric's own scope period, localized. */

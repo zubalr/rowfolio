@@ -1,23 +1,29 @@
 import type { Decimal, Metric, Unit } from '@rowfolio/contracts';
 import type { I18n } from '@rowfolio/i18n';
 
-/** Format a canonical decimal for display by unit kind. Presentation only. */
+/**
+ * Format a canonical decimal for display by unit kind. Presentation only.
+ * Summary surfaces declare display precision — canonical Decimals can carry
+ * arbitrarily long fractions (the i18n formatters preserve them exactly), so
+ * every branch bounds fraction digits to the workspace conventions.
+ */
 export function formatDecimal(i18n: I18n, value: Decimal, unit: Unit): string {
   switch (unit.kind) {
     case 'currency':
-      return unit.currency ? i18n.formatCurrency(value, unit.currency) : i18n.formatNumber(value);
+      return unit.currency
+        ? i18n.formatCurrency(value, unit.currency, { maxFractionDigits: 2 })
+        : i18n.formatNumber(value, { maxFractionDigits: 2 });
     case 'ratio':
-      return i18n.formatPercent(value);
+      return i18n.formatPercent(value, { maxFractionDigits: 1 });
     case 'percentage-point':
-      // Deltas are frequently fractional (e.g. -3.75 pp) — integer formatting
-      // would throw; canonical decimals render exactly via formatNumber.
-      return i18n.formatNumber(value);
+      // Deltas are frequently fractional (e.g. -3.75 pp) — cap at 2dp.
+      return i18n.formatNumber(value, { maxFractionDigits: 2 });
     case 'count':
     case 'minutes':
     case 'score':
       return i18n.formatInteger(value);
     default:
-      return i18n.formatNumber(value);
+      return i18n.formatNumber(value, { maxFractionDigits: 2 });
   }
 }
 
@@ -33,6 +39,26 @@ export function formatInteger(i18n: I18n, value: number | Decimal): string {
 
 export function formatPercentAbs(i18n: I18n, value: Decimal): string {
   return i18n.formatPercent(stripSign(value), { maxFractionDigits: 1 });
+}
+
+/**
+ * The unit's display badge, or null when the badge carries no information.
+ * Engines may emit placeholder labels ("unit", "fraction") — suppress those;
+ * a currency badge falls back to its ISO code. Ratios already carry the %
+ * sign inside the formatted value, so their badge is redundant noise.
+ */
+export function metricUnitLabel(unit: Unit): string | null {
+  switch (unit.kind) {
+    case 'currency':
+      return unit.label === 'unit' || unit.label === '' ? unit.currency : unit.label;
+    case 'ratio':
+    case 'unknown':
+      return null;
+    default: {
+      const label = unit.label.trim();
+      return label === '' || label === 'unit' || label === 'fraction' ? null : label;
+    }
+  }
 }
 
 function stripSign(value: Decimal): Decimal {

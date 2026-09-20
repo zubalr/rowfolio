@@ -184,3 +184,11 @@ html[lang='ar'] .rf-stage-scope {
 .rf-stage-panel .rf-chart-plot {
   overflow-x: clip;
 }
+
+/* Canonical decimals can carry arbitrarily long fractions — an unbreakable
+   numeric token must wrap before it can widen the layout. */
+.rf-workspace .rf-finding-body,
+.rf-workspace .rf-metric__value,
+.rf-workspace .rf-evidence__num {
+  overflow-wrap: anywhere;
+}

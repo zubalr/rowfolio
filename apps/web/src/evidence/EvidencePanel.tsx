@@ -41,6 +41,7 @@ import {
 } from "./model.ts";
 import { SourceRowsTable } from "./SourceRowsTable.tsx";
 import { EvidenceBadge } from "./EvidenceBadge.tsx";
+import { metricUnitLabel } from "../workspace/format.ts";
 import {
   EVIDENCE_PAGE_SIZE,
   type EvidenceBundle,
@@ -164,9 +165,9 @@ function InputsList({
                   <Bidi dir="ltr" className="rf-evidence__num">
                     {formatted}
                   </Bidi>
-                  {m.unit.label ? (
+                  {metricUnitLabel(m.unit) !== null ? (
                     <Bidi dir="ltr" className="rf-evidence__unit">
-                      {m.unit.label}
+                      {metricUnitLabel(m.unit)}
                     </Bidi>
                   ) : null}
                 </>
