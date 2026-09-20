@@ -1,0 +1,68 @@
+{
+  "caseId": "csv-quoted-criteria",
+  "category": "csv_formula_like_strings",
+  "description": "Filter-criteria-looking text (comparison operators, a function call, quoted literals) and a doubled-quote literal.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 6,
+      "headerColumns": 3,
+      "perRecordFieldCounts": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ]
+    },
+    "parsedRows": [
+      [
+        "rule_id",
+        "criteria",
+        "threshold"
+      ],
+      [
+        "R-1",
+        ">=100",
+        "100"
+      ],
+      [
+        "R-2",
+        "<5",
+        "5"
+      ],
+      [
+        "R-3",
+        "<>void",
+        "0"
+      ],
+      [
+        "R-4",
+        "=today()",
+        "1"
+      ],
+      [
+        "R-5",
+        "\"literal\"",
+        "7"
+      ],
+      [
+        "R-6",
+        "a,b",
+        "8"
+      ]
+    ],
+    "requiredBehavior": [
+      "criteria cells are inert text: never compiled into filters, never evaluated as expressions",
+      "the doubled-quote cell parses to a literal \"literal\" value; quote handling follows the CSV grammar exactly",
+      "the comma inside R-6 stays within one field; record count remains 6"
+    ]
+  },
+  "notes": [],
+  "artifact": "csv-quoted-criteria.csv",
+  "sha256": "1eb0de8e5ffdcaf195b6651d71cd726bbc22ea1e379ec6c5b240a25584d66d96",
+  "bytes": 110,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

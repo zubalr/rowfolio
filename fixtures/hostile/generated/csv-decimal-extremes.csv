@@ -1,0 +1,7 @@
+id,metric,amount
+X-1,tiny,0.000000123456789
+X-2,tiny,0.000000000000000001
+X-3,large,123456789012345678.90
+X-4,negzero,-0.00
+X-5,negzero,-0
+X-6,plain,-12.50

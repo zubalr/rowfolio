@@ -1,0 +1,61 @@
+{
+  "caseId": "csv-arabic-mixed-script",
+  "category": "csv_unicode_rtl",
+  "description": "Single cells mixing Arabic and Latin scripts, Arabic-Indic digits, Arabic punctuation and an em dash.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 4,
+      "headerColumns": 3,
+      "perRecordFieldCounts": [
+        3,
+        3,
+        3,
+        3
+      ]
+    },
+    "parsedRows": [
+      [
+        "entry_id",
+        "note_mixed",
+        "amount_usd"
+      ],
+      [
+        "A-1",
+        "اشترِ خطة Pro السنوية، ثم فعّل الحساب",
+        "120.00"
+      ],
+      [
+        "A-2",
+        "الطلب #1234 تم استلامه؟ نعم؛ تم الشحن",
+        "45.50"
+      ],
+      [
+        "A-3",
+        "نسخة ٢٠٢٦ متوفرة الآن — Version 2026",
+        "75.25"
+      ],
+      [
+        "A-4",
+        "العنوان: شارع الملك فهد، الرياض",
+        "30.00"
+      ]
+    ],
+    "exactSums": {
+      "amount_usd": "270.75"
+    },
+    "requiredBehavior": [
+      "cells preserved as authored: no bidi reordering, no script stripping, no punctuation translation at parse time",
+      "NFC comparison keys apply without merging Arabic letters or altering Arabic-Indic digits",
+      "display needs directional isolation (dir=auto/bdi); Latin tokens and digits stay LTR islands inside RTL text"
+    ]
+  },
+  "notes": [
+    "Complements csv-unicode-rtl-category-names by mixing scripts inside one cell rather than per column."
+  ],
+  "artifact": "csv-arabic-mixed-script.csv",
+  "sha256": "7c49ce8f769fb5206859f8bc780718e4db48977874bae1a21306409d7219565e",
+  "bytes": 317,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

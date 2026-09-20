@@ -1,0 +1,7 @@
+rule_id,criteria,threshold
+R-1,>=100,100
+R-2,<5,5
+R-3,<>void,0
+R-4,=today(),1
+R-5,"""literal""",7
+R-6,"a,b",8

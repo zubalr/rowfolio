@@ -62,7 +62,13 @@ The corpus scripts need only the Python 3 standard library. See
 | `tooling/dataset/` | Sample generator, independent Decimal verifier, artifact binder |
 | `tooling/test/corpus/` | Hostile-corpus generator/validator and i18n catalog checkers |
 | `tooling/capture/` | Screenshot capture tooling for release-candidate media (private outputs) |
-| `docs/public/` | Product documentation: formats and limits, privacy, synthetic data, status |
+| `docs/public/` | Product documentation: usage guide, formats and limits, privacy, synthetic data, status |
+
+## Using Rowfolio
+
+See [docs/public/using-rowfolio.md](docs/public/using-rowfolio.md) for
+running the app locally and a practical walkthrough of evidence, scenarios,
+formula handling and the data lifecycle.
 
 ## Supported input formats
 

@@ -885,6 +885,203 @@ def case_xlsx_formula_like_strings() -> tuple[dict, bytes]:
     return manifest, _xlsx_bytes([("Notes", _sheet_xml(rows))])
 
 
+def case_csv_decimal_extremes() -> tuple[dict, bytes]:
+    from decimal import Decimal, localcontext
+
+    rows = [
+        ["id", "metric", "amount"],
+        ["X-1", "tiny", "0.000000123456789"],
+        ["X-2", "tiny", "0.000000000000000001"],
+        ["X-3", "large", "123456789012345678.90"],
+        ["X-4", "negzero", "-0.00"],
+        ["X-5", "negzero", "-0"],
+        ["X-6", "plain", "-12.50"],
+    ]
+    # Exact column total computed at authoring time with unrounded decimal
+    # arithmetic; the independent validator recomputes it from the bytes.
+    with localcontext() as ctx:
+        ctx.prec = 60
+        total = sum((Decimal(r[2]) for r in rows[1:]), Decimal("0"))
+    total_str = format(total, "f")
+    manifest = {
+        "caseId": "csv-decimal-extremes",
+        "category": "csv_invalid_values",
+        "description": "Very small and very large decimals, negative zero written two ways, and a plain negative value.",
+        "mediaType": "text/csv",
+        "expected": {
+            "tableShape": {"records": 6, "headerColumns": 3, "perRecordFieldCounts": [3] * 6},
+            "parsedRows": rows,
+            "exactSums": {"amount": total_str},
+            "requiredBehavior": [
+                "every value stays an exact decimal string; no float conversion at any pipeline stage",
+                "'-0.00' and '-0' are numerically zero (sign is display-only); they never crash parsing or sums",
+                "0.000000000000000001 sits at the policy exponent floor and must not underflow to zero",
+                "the column total is stated exactly in exactSums and must reconcile under exact decimal arithmetic",
+            ],
+        },
+        "notes": [
+            "Magnitudes chosen inside the contract policy bounds (<= 30 significant digits per input value, exponent <= 18).",
+        ],
+    }
+    return manifest, _csv_bytes(rows)
+
+
+def case_csv_fractional_pp() -> tuple[dict, bytes]:
+    rows = [
+        ["week", "visitors", "conversions", "conversion_rate"],
+        ["2026-W01", "1000", "123", "0.1230"],
+        ["2026-W02", "1250", "141", "0.1128"],
+        ["2026-W03", "900", "99", "0.1100"],
+        ["2026-W04", "1470", "205", "0.1395"],
+    ]
+    manifest = {
+        "caseId": "csv-fractional-pp",
+        "category": "csv_numeric_date_ambiguity",
+        "description": "Weekly conversion rates stored as 4-decimal fractions, giving fractional percentage-point deltas between weeks.",
+        "mediaType": "text/csv",
+        "expected": {
+            "tableShape": {"records": 4, "headerColumns": 4, "perRecordFieldCounts": [4] * 4},
+            "parsedRows": rows,
+            "exactSums": {"visitors": "4620", "conversions": "568"},
+            "requiredBehavior": [
+                "conversion_rate is a ratio: never summed, never averaged row-over-row",
+                "week-over-week deltas are fractional percentage points (e.g. W01->W02 is -1.02 pp) and derive from the stored fractions",
+                "any overall rate is a weighted ratio of summed conversions over summed visitors, not a mean of rates",
+            ],
+        },
+        "notes": [
+            "Rates are conversions/visitors quantized to 4 decimals at authoring time; the raw counts are the additive truth.",
+        ],
+    }
+    return manifest, _csv_bytes(rows)
+
+
+def case_csv_quoted_criteria() -> tuple[dict, bytes]:
+    rows = [
+        ["rule_id", "criteria", "threshold"],
+        ["R-1", ">=100", "100"],
+        ["R-2", "<5", "5"],
+        ["R-3", "<>void", "0"],
+        ["R-4", "=today()", "1"],
+        ["R-5", '"literal"', "7"],
+        ["R-6", "a,b", "8"],
+    ]
+    manifest = {
+        "caseId": "csv-quoted-criteria",
+        "category": "csv_formula_like_strings",
+        "description": "Filter-criteria-looking text (comparison operators, a function call, quoted literals) and a doubled-quote literal.",
+        "mediaType": "text/csv",
+        "expected": {
+            "tableShape": {"records": 6, "headerColumns": 3, "perRecordFieldCounts": [3] * 6},
+            "parsedRows": rows,
+            "requiredBehavior": [
+                "criteria cells are inert text: never compiled into filters, never evaluated as expressions",
+                'the doubled-quote cell parses to a literal "literal" value; quote handling follows the CSV grammar exactly',
+                "the comma inside R-6 stays within one field; record count remains 6",
+            ],
+        },
+        "notes": [],
+    }
+    return manifest, _csv_bytes(rows)
+
+
+def case_csv_regionless_table() -> tuple[dict, bytes]:
+    rows = [
+        ["entry_id", "occurred_on", "amount_usd"],
+        ["E-1", "2026-01-05", "120.00"],
+        ["E-2", "2026-01-06", "85.50"],
+        ["E-3", "2026-01-07", "64.25"],
+        ["E-4", "2026-01-08", "150.00"],
+        ["E-5", "2026-01-09", "97.10"],
+        ["E-6", "2026-01-12", "210.15"],
+        ["E-7", "2026-01-13", "43.00"],
+    ]
+    manifest = {
+        "caseId": "csv-regionless-table",
+        "category": "csv_missing_values",
+        "description": "A valid table with no dimension columns at all (no region, category, or group axis).",
+        "mediaType": "text/csv",
+        "expected": {
+            "tableShape": {"records": 7, "headerColumns": 3, "perRecordFieldCounts": [3] * 7},
+            "exactSums": {"amount_usd": "770.00"},
+            "requiredBehavior": [
+                "analysis is whole-table only: counts, missingness and range of the single additive measure",
+                "no per-region or per-category split exists; none may be inferred from column names or values",
+                "single-month coverage is not a declared complete period, so no period-over-period claims",
+            ],
+        },
+        "notes": ["Complements the regionless-scope engine coverage with a parser-facing fixture."],
+    }
+    return manifest, _csv_bytes(rows)
+
+
+def case_csv_incomplete_periods() -> tuple[dict, bytes]:
+    rows = [
+        ["month", "branch_id", "amount_usd", "target_usd"],
+        ["2025-01", "B-01", "100.00", "120.00"],
+        ["2025-01", "B-02", "90.00", "0.00"],
+        ["2025-01", "B-03", "80.00", "110.00"],
+        ["2025-02", "B-01", "105.00", "120.00"],
+        ["2025-02", "B-02", "95.00", "0.00"],
+        ["2025-02", "B-03", "85.00", "110.00"],
+        ["2025-04", "B-01", "110.00", "120.00"],
+        ["2025-04", "B-02", "70.00", "130.00"],
+    ]
+    manifest = {
+        "caseId": "csv-incomplete-periods",
+        "category": "csv_missing_values",
+        "description": "Monthly panel with an entirely missing month (2025-03) and a partial latest month, plus zero targets.",
+        "mediaType": "text/csv",
+        "expected": {
+            "tableShape": {"records": 8, "headerColumns": 4, "perRecordFieldCounts": [4] * 8},
+            "exactSums": {"amount_usd": "735.00", "target_usd": "710.00"},
+            "exactSumsByGroup": {
+                "column": "amount_usd",
+                "groupBy": "month",
+                "values": {"2025-01": "270.00", "2025-02": "285.00", "2025-04": "180.00"},
+            },
+            "requiredBehavior": [
+                "2025-03 is absent: absence is not zero and never fills a trend series",
+                "2025-04 is partial (2 of 3 branches): it is not compared as a full period against complete months",
+                "target_usd = 0 rows make target variance not_computable for those rows (target > 0 required); zero is not treated as missing",
+                "month sums reconcile exactly per exactSumsByGroup",
+            ],
+        },
+        "notes": ["Branch identifiers and amounts are invented."],
+    }
+    return manifest, _csv_bytes(rows)
+
+
+def case_csv_arabic_mixed_script() -> tuple[dict, bytes]:
+    rows = [
+        ["entry_id", "note_mixed", "amount_usd"],
+        ["A-1", "اشترِ خطة Pro السنوية، ثم فعّل الحساب", "120.00"],
+        ["A-2", "الطلب #1234 تم استلامه؟ نعم؛ تم الشحن", "45.50"],
+        ["A-3", "نسخة ٢٠٢٦ متوفرة الآن — Version 2026", "75.25"],
+        ["A-4", "العنوان: شارع الملك فهد، الرياض", "30.00"],
+    ]
+    manifest = {
+        "caseId": "csv-arabic-mixed-script",
+        "category": "csv_unicode_rtl",
+        "description": "Single cells mixing Arabic and Latin scripts, Arabic-Indic digits, Arabic punctuation and an em dash.",
+        "mediaType": "text/csv",
+        "expected": {
+            "tableShape": {"records": 4, "headerColumns": 3, "perRecordFieldCounts": [3] * 4},
+            "parsedRows": rows,
+            "exactSums": {"amount_usd": "270.75"},
+            "requiredBehavior": [
+                "cells preserved as authored: no bidi reordering, no script stripping, no punctuation translation at parse time",
+                "NFC comparison keys apply without merging Arabic letters or altering Arabic-Indic digits",
+                "display needs directional isolation (dir=auto/bdi); Latin tokens and digits stay LTR islands inside RTL text",
+            ],
+        },
+        "notes": [
+            "Complements csv-unicode-rtl-category-names by mixing scripts inside one cell rather than per column.",
+        ],
+    }
+    return manifest, _csv_bytes(rows)
+
+
 # ---------------------------------------------------------------------------
 # Corpus assembly
 # ---------------------------------------------------------------------------
@@ -908,6 +1105,12 @@ CSV_CASES = [
     case_csv_unicode_rtl_category_names,
     case_csv_header_only,
     case_csv_empty_file,
+    case_csv_decimal_extremes,
+    case_csv_fractional_pp,
+    case_csv_quoted_criteria,
+    case_csv_regionless_table,
+    case_csv_incomplete_periods,
+    case_csv_arabic_mixed_script,
 ]
 
 XLSX_CASES = [

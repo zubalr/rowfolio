@@ -1,0 +1,74 @@
+{
+  "caseId": "csv-decimal-extremes",
+  "category": "csv_invalid_values",
+  "description": "Very small and very large decimals, negative zero written two ways, and a plain negative value.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 6,
+      "headerColumns": 3,
+      "perRecordFieldCounts": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ]
+    },
+    "parsedRows": [
+      [
+        "id",
+        "metric",
+        "amount"
+      ],
+      [
+        "X-1",
+        "tiny",
+        "0.000000123456789"
+      ],
+      [
+        "X-2",
+        "tiny",
+        "0.000000000000000001"
+      ],
+      [
+        "X-3",
+        "large",
+        "123456789012345678.90"
+      ],
+      [
+        "X-4",
+        "negzero",
+        "-0.00"
+      ],
+      [
+        "X-5",
+        "negzero",
+        "-0"
+      ],
+      [
+        "X-6",
+        "plain",
+        "-12.50"
+      ]
+    ],
+    "exactSums": {
+      "amount": "123456789012345666.400000123456789001"
+    },
+    "requiredBehavior": [
+      "every value stays an exact decimal string; no float conversion at any pipeline stage",
+      "'-0.00' and '-0' are numerically zero (sign is display-only); they never crash parsing or sums",
+      "0.000000000000000001 sits at the policy exponent floor and must not underflow to zero",
+      "the column total is stated exactly in exactSums and must reconcile under exact decimal arithmetic"
+    ]
+  },
+  "notes": [
+    "Magnitudes chosen inside the contract policy bounds (<= 30 significant digits per input value, exponent <= 18)."
+  ],
+  "artifact": "csv-decimal-extremes.csv",
+  "sha256": "cafd342fea8e95a5528b833a074d9be1a8a1e9c3eb6f02e1745ba940e0d9401f",
+  "bytes": 156,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

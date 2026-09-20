@@ -268,13 +268,14 @@ export async function runJourney(browser: Browser, options: JourneyOptions): Pro
     results.push(
       await step(page, options, '04-loaded', timeout, async () => {
         await page.getByTestId('review-submit').click({ timeout });
-        await waitTestId(page, 'view-evidence-btn', timeout);
+        // each finding renders its own evidence button; wait for the first
+        await page.getByTestId('view-evidence-btn').first().waitFor({ state: 'visible', timeout });
         await page.waitForTimeout(1200);
       }),
     );
     results.push(
       await step(page, options, '05-evidence', timeout, async () => {
-        await page.getByTestId('view-evidence-btn').click({ timeout });
+        await page.getByTestId('view-evidence-btn').first().click({ timeout });
         await waitTestId(page, 'evidence-panel', timeout);
         await page.waitForTimeout(500);
       }),
