@@ -83,12 +83,29 @@ html[lang="ar"] .rf-nav__link {
   margin-inline-start: var(--rf-space-2);
 }
 
-/* ---------- Hero: headline over the working specimen ---------- */
+/* ---------- Ruled-ledger backdrop ----------
+ * The faint 1px cell grid on a 32px rhythm — foreground ink at ~4%, so it
+ * reads as ledger texture on paper and hairline grid on the ink stage.
+ */
+.rf-ledger {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--rf-text) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--rf-text) 4%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* ---------- Hero: the ink stage — one headline, one primary action ---------- */
 .rf-hero {
-  padding-block: var(--rf-space-7) var(--rf-space-6);
+  padding-block: var(--rf-space-8) var(--rf-space-7);
+}
+.rf-hero__inner {
   padding-inline: var(--rf-gutter);
   max-width: calc(var(--rf-max-width) + 2 * var(--rf-gutter));
   margin-inline: auto;
+}
+/* The specimen beneath needs the paper rhythm back after the ink band. */
+.rf-hero + .rf-stage {
+  padding-block-start: var(--rf-space-7);
 }
 .rf-hero__eyebrow {
   font-size: 13px;
@@ -498,7 +515,11 @@ html[lang="ar"] .rf-scenario__value {
 html[lang="ar"] .rf-scenario__label {
   font-size: 14px;
 }
+/* The assumption slider is amber — assumptions wear scenario hue, never
+   the cobalt reserved for observed data. */
 .rf-scenario__range {
+  --rf-range-accent: var(--rf-scenario);
+  --rf-range-track: color-mix(in srgb, var(--rf-scenario) 30%, var(--rf-divider));
   inline-size: 100%;
   margin-block-start: var(--rf-space-2);
   accent-color: var(--rf-scenario);
@@ -707,7 +728,9 @@ html[lang="ar"] .rf-guide__caption {
   opacity: 0.6;
 }
 
-/* ---------- Staged demonstration — four beats ---------- */
+/* ---------- Staged demonstration — the guided rail ----------
+ * Four ledger cells; each step is a cell in the rail, separated by rules.
+ */
 .rf-steps {
   border-block-start: 1px solid var(--rf-divider);
   padding-block: var(--rf-space-7);
@@ -832,29 +855,35 @@ html[lang="ar"] .rf-footer {
   align-self: center;
 }
 
-/* ---------- Guide highlight ring ---------- */
+/* ---------- Guide highlight — the traveling cell chrome ----------
+ * The guided rail's focus is THE selection chrome: 2px cobalt inset rule +
+ * 8% cobalt wash, identical to every other selected element.
+ */
 .rf-demo-ring {
   position: fixed;
   inset-inline-start: 0;
   inset-block-start: 0;
   pointer-events: none;
-  border: 2px solid var(--rf-attention);
+  box-shadow: inset 0 0 0 2px var(--rf-data);
+  background: color-mix(in srgb, var(--rf-data) 8%, transparent);
   border-radius: var(--rf-radius-control);
   z-index: 60;
   transform-origin: 0 0;
 }
 
-/* Demo target emphasis (instant fallback for reduced motion too) */
+/* Demo target emphasis (instant fallback for reduced motion too) — same
+   cell chrome, statically applied while the rail visits a target. */
 [data-demo-active] {
-  outline: 2px solid var(--rf-attention);
-  outline-offset: 4px;
+  outline: 2px solid var(--rf-data);
+  outline-offset: -2px;
+  background: color-mix(in srgb, var(--rf-data) 8%, transparent);
   border-radius: var(--rf-radius-control);
 }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1199px) {
   .rf-masthead,
-  .rf-hero,
+  .rf-hero__inner,
   .rf-stage,
   .rf-steps,
   .rf-close,
@@ -874,7 +903,7 @@ html[lang="ar"] .rf-footer {
     min-height: 64px;
     padding-inline: var(--rf-space-4);
   }
-  .rf-hero,
+  .rf-hero__inner,
   .rf-stage,
   .rf-steps,
   .rf-close,

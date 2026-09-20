@@ -8,6 +8,11 @@
   flex-direction: column;
   gap: var(--rf-space-5);
   max-inline-size: 56rem;
+  /* Content stages carry the ruled ledger — faint 32px cell grid. */
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--rf-ink) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--rf-ink) 4%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
 .rf-upload__title {
@@ -175,6 +180,32 @@ html[lang="ar"] .rf-upload__note {
   overflow: clip;
 }
 
+/* Baseline axis: the header ledger rule is the heavier ink line. */
+.rf-upload__preview .rf-table thead tr {
+  border-block-end: 2px solid var(--rf-ink);
+}
+
+/* The pending header-row choice reads as a selected cell row — cobalt
+   chrome over the row, darker baseline under it. */
+.rf-upload__preview-header > td,
+.rf-upload__preview tr[data-header] > td {
+  background: color-mix(in srgb, var(--rf-accent) 8%, transparent);
+  box-shadow: inset 0 -2px 0 var(--rf-accent), inset 0 2px 0 var(--rf-accent);
+}
+
+/* --- delta brackets ----------------------------------------------------------
+ * A proposed change is bracketed like a spreadsheet cell: the 'after' value
+   (the cell following the → arrow) gets an amber assumption frame.
+ */
+.rf-upload__issue-detail span[aria-hidden="true"] + .rf-upload__cell,
+.rf-upload__issue-detail span[aria-hidden="true"] + .rf-mono {
+  border: 1px solid color-mix(in srgb, var(--rf-scenario) 55%, transparent);
+  background: color-mix(in srgb, var(--rf-scenario) 7%, transparent);
+  border-radius: var(--rf-radius-control);
+  padding-inline: var(--rf-space-2);
+  color: var(--rf-scenario-text);
+}
+
 /* --- warnings / disclosures ------------------------------------------------ */
 
 .rf-upload__warnings {
@@ -208,7 +239,11 @@ html[lang="ar"] .rf-upload__note {
   unicode-bidi: isolate;
 }
 
-/* --- issues & decisions ---------------------------------------------------- */
+/* --- issues & decisions ----------------------------------------------------
+ * Proposed changes live in the amber assumption area — a dashed amber rail
+   and a faint wash mark every row still awaiting a decision; nothing amber
+   is committed.
+ */
 
 .rf-upload__issue,
 .rf-upload__cache,
@@ -218,7 +253,10 @@ html[lang="ar"] .rf-upload__note {
   align-items: flex-start;
   gap: var(--rf-space-3);
   padding-block: var(--rf-space-3);
+  padding-inline-start: var(--rf-space-3);
   border-block-start: 1px solid var(--rf-divider);
+  border-inline-start: 3px solid color-mix(in srgb, var(--rf-scenario) 60%, transparent);
+  background: color-mix(in srgb, var(--rf-scenario) 4%, transparent);
 }
 
 .rf-upload__issue-body {
@@ -259,6 +297,13 @@ html[lang="ar"] .rf-upload__issue-detail {
 .rf-upload__colconfirm {
   flex-direction: column;
   align-items: stretch;
+  padding-block-end: var(--rf-space-3);
+}
+
+.rf-upload__colconfirm .rf-upload__badge {
+  color: var(--rf-scenario-text);
+  border-color: color-mix(in srgb, var(--rf-scenario) 55%, transparent);
+  background: color-mix(in srgb, var(--rf-scenario) 8%, transparent);
 }
 
 .rf-upload__colconfirm-head {

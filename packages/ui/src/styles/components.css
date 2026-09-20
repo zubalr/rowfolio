@@ -12,6 +12,18 @@
   transform: scaleX(-1);
 }
 
+/* ---------- The cell-selection chrome ----------
+ * ONE identical treatment on every selected element across the app — a
+ * 2px cobalt inset rule over an 8% cobalt wash, the "cell selected" read.
+ * Hue token is --rf-accent (=== --rf-data cobalt on paper, remapped to the
+ * light cobalt on the ink surface) so the chrome stays correct on both.
+ */
+.rf-cell-selected,
+[data-rf-selected] {
+  box-shadow: inset 0 0 0 2px var(--rf-accent);
+  background: color-mix(in srgb, var(--rf-accent) 8%, transparent);
+}
+
 /* ---------- Button ---------- */
 .rf-btn {
   display: inline-flex;
@@ -30,32 +42,35 @@
   transition:
     background-color var(--rf-hover-ms) var(--rf-ease),
     border-color var(--rf-hover-ms) var(--rf-ease),
+    box-shadow var(--rf-hover-ms) var(--rf-ease),
     color var(--rf-hover-ms) var(--rf-ease);
 }
 html[lang="ar"] .rf-btn {
   font-size: 16px;
 }
 
-/* Primary: solid ink. */
+/* Primary: the verdict tier — solid ink with a cobalt underprint rule. */
 .rf-btn--primary {
   background: var(--rf-ink);
   color: var(--rf-surface);
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--rf-data) 55%, transparent);
 }
 .rf-btn--primary:hover:not(:disabled) {
   background: #23404E;
+  box-shadow: inset 0 -3px 0 var(--rf-data);
 }
 .rf-btn--primary:active:not(:disabled) {
   background: #0F1E26;
 }
 
-/* Secondary: transparent with quiet rule; underline + arrow on hover. */
+/* Secondary: the ruled tier — hairline ledger rule on a raised cell. */
 .rf-btn--secondary {
-  background: transparent;
+  background: var(--rf-bg-raised);
   border-color: var(--rf-divider);
   color: var(--rf-text);
 }
 .rf-btn--secondary:hover:not(:disabled) {
-  background: var(--rf-bg-raised);
+  border-color: var(--rf-accent);
 }
 .rf-btn--secondary .rf-btn__label {
   text-decoration: underline;
@@ -65,6 +80,23 @@ html[lang="ar"] .rf-btn {
 }
 .rf-btn--secondary:hover:not(:disabled) .rf-btn__label {
   text-decoration-color: currentColor;
+}
+
+/* Ghost: the quiet tier — no cell frame at all, text that wakes on hover. */
+.rf-btn--ghost {
+  background: transparent;
+  color: var(--rf-text-muted);
+}
+.rf-btn--ghost:hover:not(:disabled) {
+  color: var(--rf-text);
+  background: color-mix(in srgb, var(--rf-ink) 5%, transparent);
+}
+[data-rf-surface="ink"] .rf-btn--ghost {
+  color: var(--rf-ink-muted);
+}
+[data-rf-surface="ink"] .rf-btn--ghost:hover:not(:disabled) {
+  color: var(--rf-ink-text);
+  background: color-mix(in srgb, var(--rf-ink-text) 8%, transparent);
 }
 
 /* Attention: vermilion is reserved for genuine exceptions. The
@@ -361,8 +393,25 @@ html[lang="ar"] .rf-dialog__description {
 .rf-status__icon {
   margin-block-start: 2px;
 }
+/* Error = a vermilion edge accent, never a red flood. */
+.rf-status--error {
+  border-inline-start: 3px solid var(--rf-attention);
+  padding-inline-start: var(--rf-space-3);
+}
 .rf-status--error .rf-status__icon {
-  color: var(--rf-danger-text);
+  color: var(--rf-attention);
+}
+[data-rf-surface="ink"] .rf-status--error {
+  border-inline-start-color: var(--rf-ink-attention);
+}
+/* Empty = a quiet unfilled ledger cell. */
+.rf-status--empty {
+  border: 1px dashed var(--rf-divider);
+  border-radius: var(--rf-radius-panel);
+  padding: var(--rf-space-5);
+}
+[data-rf-surface="ink"] .rf-status--empty {
+  border-color: var(--rf-ink-rule);
 }
 .rf-status--success .rf-status__icon {
   color: var(--rf-positive);
@@ -409,12 +458,15 @@ html[lang="ar"] .rf-status__body {
   gap: var(--rf-space-2);
   align-items: baseline;
   padding-block: 2px;
+  padding-inline: var(--rf-space-2);
+  margin-inline: calc(-1 * var(--rf-space-2));
+  border-radius: var(--rf-radius-control);
 }
 .rf-status__stage::before {
   content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 1px;
   border: 1px solid var(--rf-divider);
   align-self: center;
   flex: none;
@@ -426,6 +478,14 @@ html[lang="ar"] .rf-status__body {
 .rf-status__stage[data-state="current"] {
   color: var(--rf-text);
 }
+[data-rf-surface="ink"] .rf-status__stage[data-state="current"] {
+  color: var(--rf-ink-text);
+}
+/* The in-flight stage reads as the selected cell in the ledger. */
+.rf-status__stage[data-state="current"] {
+  box-shadow: inset 0 0 0 1.5px var(--rf-accent);
+  background: color-mix(in srgb, var(--rf-accent) 8%, transparent);
+}
 .rf-status__stage[data-state="current"]::before {
   background: var(--rf-accent);
   border-color: var(--rf-accent);
@@ -434,7 +494,7 @@ html[lang="ar"] .rf-status__body {
   margin-block-start: var(--rf-space-3);
 }
 
-/* Spinner — restrained rotation; reduced-motion renders it static. */
+/* Spinner — a cobalt quarter-arc on the ink rule; reduced-motion static. */
 .rf-spinner {
   animation: rf-spin 1.2s linear infinite;
 }
@@ -449,12 +509,164 @@ html[lang="ar"] .rf-status__body {
   }
 }
 
+/* Skeleton — the honest shimmer of a cell still being written. One sweep
+   across a ruled gradient; reduced-motion freezes it mid-state. */
+.rf-skeleton {
+  display: block;
+  block-size: 1em;
+  border-radius: var(--rf-radius-control);
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--rf-ink) 5%, transparent) 25%,
+      color-mix(in srgb, var(--rf-ink) 11%, transparent) 50%,
+      color-mix(in srgb, var(--rf-ink) 5%, transparent) 75%
+    );
+  background-size: 240px 100%;
+  background-repeat: no-repeat;
+  animation: rf-skeleton-sweep 1.4s var(--rf-ease) infinite;
+}
+@keyframes rf-skeleton-sweep {
+  from {
+    background-position: -240px 0;
+  }
+  to {
+    background-position: calc(100% + 240px) 0;
+  }
+}
+[data-rf-surface="ink"] .rf-skeleton {
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--rf-ink-text) 6%, transparent) 25%,
+    color-mix(in srgb, var(--rf-ink-text) 12%, transparent) 50%,
+    color-mix(in srgb, var(--rf-ink-text) 6%, transparent) 75%
+  );
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-skeleton {
+    animation: none;
+  }
+}
+
+/* ---------- Tabs ----------
+ * Tabs are cells in the ledger's index strip; the selected tab carries the
+ * same cell-selection chrome as every other selected element.
+ */
+.rf-tabs {
+  display: flex;
+  gap: var(--rf-space-1);
+  border-block-end: 1px solid var(--rf-divider);
+}
+.rf-tab {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: var(--rf-radius-control) var(--rf-radius-control) 0 0;
+  padding: var(--rf-space-2) var(--rf-space-3);
+  color: var(--rf-text-muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color var(--rf-hover-ms) var(--rf-ease),
+    box-shadow var(--rf-hover-ms) var(--rf-ease),
+    color var(--rf-hover-ms) var(--rf-ease);
+}
+.rf-tab:hover {
+  color: var(--rf-text);
+}
+.rf-tab[aria-selected="true"],
+.rf-tab.is-selected {
+  color: var(--rf-text);
+  box-shadow: inset 0 0 0 2px var(--rf-accent);
+  background: color-mix(in srgb, var(--rf-accent) 8%, transparent);
+}
+
+/* ---------- Tooltip ----------
+ * Ink surface, one hairline rule — the ledger margin note.
+ */
+.rf-tooltip {
+  position: absolute;
+  z-index: 70;
+  background: var(--rf-ink);
+  color: var(--rf-ink-text);
+  border: 1px solid var(--rf-ink-rule);
+  border-radius: var(--rf-radius-control);
+  padding: var(--rf-space-1) var(--rf-space-2);
+  font-size: 12px;
+  line-height: 1.4;
+  max-inline-size: 32ch;
+  pointer-events: none;
+}
+
+/* ---------- Range input ----------
+ * Ruled track + cobalt thumb. Semantic surfaces override --rf-range-accent
+ * (the assumption slider keeps its amber).
+ */
+input[type="range"] {
+  --rf-range-accent: var(--rf-data);
+  --rf-range-track: color-mix(in srgb, var(--rf-range-accent) 30%, var(--rf-divider));
+  appearance: none;
+  -webkit-appearance: none;
+  block-size: 20px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  block-size: 4px;
+  border-radius: 2px;
+  background: var(--rf-range-track);
+}
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  inline-size: 18px;
+  block-size: 18px;
+  border-radius: 50%;
+  background: var(--rf-range-accent);
+  border: 2px solid var(--rf-bg);
+  margin-block-start: -7px;
+  transition: transform var(--rf-hover-ms) var(--rf-ease);
+}
+input[type="range"]::-moz-range-track {
+  block-size: 4px;
+  border-radius: 2px;
+  background: var(--rf-range-track);
+}
+input[type="range"]::-moz-range-thumb {
+  inline-size: 14px;
+  block-size: 14px;
+  border-radius: 50%;
+  background: var(--rf-range-accent);
+  border: 2px solid var(--rf-bg);
+  transition: transform var(--rf-hover-ms) var(--rf-ease);
+}
+input[type="range"]:hover::-webkit-slider-thumb,
+input[type="range"]:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+input[type="range"]:hover::-moz-range-thumb,
+input[type="range"]:focus-visible::-moz-range-thumb {
+  transform: scale(1.15);
+}
+
 /* ---------- Data table ---------- */
 .rf-table-wrap {
   border: 1px solid var(--rf-divider);
   border-radius: var(--rf-radius-panel);
   background: var(--rf-bg-raised);
   overflow: hidden;
+}
+/* The baseline axis — the header ledger rule is a heavier ink line. */
+.rf-table thead tr {
+  border-block-end: 1px solid var(--rf-ink);
+}
+/* A selected table row carries the same cell chrome as everything else. */
+.rf-table tbody tr.is-selected,
+.rf-table tbody tr[data-rf-selected] {
+  box-shadow: inset 0 0 0 2px var(--rf-accent);
+  background: color-mix(in srgb, var(--rf-accent) 8%, transparent);
 }
 .rf-table-scroll {
   overflow: auto;
@@ -568,6 +780,12 @@ html[lang="ar"] .rf-metric__label {
   font-weight: 500;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
+}
+/* Ledger numerals: mono tabular figures, always. */
+.rf-metric__value .rf-numeric {
+  font-family: var(--rf-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 html[lang="ar"] .rf-metric__value {
   letter-spacing: normal;

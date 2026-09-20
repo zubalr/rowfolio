@@ -230,7 +230,7 @@ export function PreviewStage({
 
   return (
     <section
-      className="rf-stage"
+      className="rf-stage rf-ledger"
       id="demo"
       aria-labelledby="rf-preview-title"
       data-testid="preview-stage"

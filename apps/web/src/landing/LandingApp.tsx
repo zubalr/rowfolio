@@ -101,45 +101,49 @@ export function LandingApp({ i18n }: LandingAppProps) {
       </header>
 
       <main id="main">
-        <section className="rf-hero" aria-labelledby="rf-hero-title">
-          <span className="rf-hero__eyebrow">{i18n.t("common.local")}</span>
-          <h1 id="rf-hero-title" className="rf-hero__title">
-            {landingCopy(i18n.locale, "hero.title")}
-          </h1>
-          <p className="rf-hero__body">{landingCopy(i18n.locale, "hero.body")}</p>
-          <div className="rf-hero__actions">
-            <Button variant="primary" iconEnd="arrow-end" onClick={exploreSample} data-testid="cta-demo">
-              {i18n.t("action.tryDemo")}
-            </Button>
-            <Button variant="secondary" icon="upload" onClick={pickUpload} data-testid="cta-upload">
-              {i18n.t("action.upload")}
-            </Button>
-            <Button variant="secondary" onClick={startGuide} data-testid="cta-guide">
-              {i18n.t("action.startGuide")}
-            </Button>
+        <section className="rf-hero rf-ledger" aria-labelledby="rf-hero-title" data-rf-surface="ink">
+          <div className="rf-hero__inner">
+            <span className="rf-hero__eyebrow">{i18n.t("common.local")}</span>
+            <h1 id="rf-hero-title" className="rf-hero__title">
+              {landingCopy(i18n.locale, "hero.title")}
+            </h1>
+            <p className="rf-hero__body">{landingCopy(i18n.locale, "hero.body")}</p>
+            <div className="rf-hero__actions">
+              <Button variant="primary" iconEnd="arrow-end" onClick={exploreSample} data-testid="cta-demo">
+                {i18n.t("action.tryDemo")}
+              </Button>
+              <Button variant="ghost" icon="upload" onClick={pickUpload} data-testid="cta-upload">
+                {i18n.t("action.upload")}
+              </Button>
+              <Button variant="ghost" onClick={startGuide} data-testid="cta-guide">
+                {i18n.t("action.startGuide")}
+              </Button>
+            </div>
+            <p className="rf-hero__proof">{i18n.t("privacy.short")}</p>
+            <input
+              ref={uploadInput}
+              type="file"
+              accept={UPLOAD_ACCEPT}
+              hidden
+              data-testid="upload-input"
+              onChange={(event) => onFileChosen(event.currentTarget.files?.[0])}
+            />
           </div>
-          <p className="rf-hero__proof">{i18n.t("privacy.short")}</p>
-          <input
-            ref={uploadInput}
-            type="file"
-            accept={UPLOAD_ACCEPT}
-            hidden
-            data-testid="upload-input"
-            onChange={(event) => onFileChosen(event.currentTarget.files?.[0])}
-          />
         </section>
 
         {/* The large working specimen — real mechanism, real values. */}
         <Suspense
           fallback={
-            <section className="rf-stage" id="demo" aria-labelledby="rf-preview-title">
+            <section className="rf-stage rf-ledger" id="demo" aria-labelledby="rf-preview-title">
               <header className="rf-stage__head">
                 <div>
                   <h2 id="rf-preview-title" className="rf-stage__title">
                     {i18n.t("workspace.findings")}
                   </h2>
+                  <span className="rf-skeleton" aria-hidden="true" style={{ inlineSize: "12em", marginBlockStart: "0.5em" }} />
                 </div>
               </header>
+              <span className="rf-skeleton" aria-hidden="true" style={{ blockSize: "15em", inlineSize: "min(38em, 100%)" }} />
             </section>
           }
         >

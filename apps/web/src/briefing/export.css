@@ -1,0 +1,73 @@
+/**
+ * Export dialog — the briefing model preview as a slide wall: each slide
+ * kind gets its own recognizable mini composition (glyph + geometry, never
+ * six identical gray boxes). Token colors only; slides are model previews,
+ * not pixel renders.
+ */
+
+.rf-export-outline {
+  list-style: none;
+  margin: var(--rf-space-3) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: var(--rf-space-3);
+}
+
+/* One slide cell: ruled card + authored glyph stage + kind + title. */
+.rf-export-slide {
+  border: 1px solid var(--rf-divider);
+  border-radius: var(--rf-radius-control);
+  background: var(--rf-bg-raised);
+  padding: var(--rf-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-2);
+  min-width: 0;
+}
+
+.rf-export-slide__art {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 3 / 2;
+  border: 1px solid var(--rf-divider);
+  border-radius: 4px;
+  /* The mini-stage itself is a ledger cell — faint ruled grid. */
+  background-color: var(--rf-paper);
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--rf-ink) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--rf-ink) 5%, transparent) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.rf-export-slide__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rf-slide-kind {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rf-text-muted);
+}
+html[lang="ar"] .rf-slide-kind {
+  letter-spacing: normal;
+  font-size: 0.8rem;
+}
+
+.rf-export-slide__title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--rf-text);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 479px) {
+  .rf-export-outline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

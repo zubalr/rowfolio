@@ -53,7 +53,7 @@ export default function GuideHighlight({ stepId }: { stepId: string }) {
         height: rect.height,
         opacity: 1,
       }}
-      transition={{ duration: 0.32, ease: [0.2, 0.7, 0.2, 1] }}
+      transition={{ type: "spring", stiffness: 500, damping: 35 }}
     />
   );
 }
