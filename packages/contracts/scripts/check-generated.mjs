@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 /** CI/test helper: fail if src/types.ts differs from a fresh schema regeneration. */
-import console from 'node:console';
 import process from 'node:process';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';

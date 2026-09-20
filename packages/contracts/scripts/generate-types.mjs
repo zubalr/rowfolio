@@ -41,11 +41,14 @@ function ts(s) {
   if (t === 'array') return `Array<${ts(s.items)}>`;
   if (t === 'object') {
     const props = s.properties;
-    if ((props === undefined || Object.keys(props).length === 0) && typeof s.additionalProperties === 'object') {
-      return `Record<string, ${ts(s.additionalProperties)}>`;
+    if (props === undefined || Object.keys(props).length === 0) {
+      if (typeof s.additionalProperties === 'object') {
+        return `Record<string, ${ts(s.additionalProperties)}>`;
+      }
+      return s.additionalProperties === false ? 'Record<string, never>' : 'Record<string, unknown>';
     }
     const required = new Set(s.required ?? []);
-    const body = Object.entries(props ?? {})
+    const body = Object.entries(props)
       .map(([k, v]) => `${JSON.stringify(k)}${required.has(k) ? '' : '?'}: ${ts(v)};`)
       .join(' ');
     return `{ ${body} }`;

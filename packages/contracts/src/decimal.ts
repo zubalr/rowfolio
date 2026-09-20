@@ -224,7 +224,7 @@ export function divideDecimal(a: string, b: string, precision: number = PRECISIO
   }
 
   // value = BigInt(rawDigits) * 10^E
-  let digitsStr = intDigits + frac.map(String).join('');
+  const digitsStr = intDigits + frac.map(String).join('');
   let exponent = -frac.length;
   let digits = BigInt(digitsStr);
   let ds = digits.toString();

@@ -20,15 +20,12 @@ import type {
   NormalizedRow,
   NormalizedTable,
   Provenance,
-  QualityIssue,
   RawTable,
   RowSelection,
   SampleManifest,
   ScenarioDefinition,
   ScenarioResult,
   Scope,
-  SheetModel,
-  SlideModel,
   SourceRef,
   Unit,
   WorkerRequest,
@@ -405,8 +402,8 @@ function checkMetricBundle(
   expected: { normalizationRevision?: string | undefined; sourceHash?: string | undefined },
   merged?: MetricBundle,
 ): void {
-  const metricIds = uniqueIds(bundle.metrics, 'metric', pointer(base, 'metrics'), issues);
-  const proofIds = uniqueIds(bundle.proofs, 'provenance', pointer(base, 'provenance'), issues);
+  uniqueIds(bundle.metrics, 'metric', pointer(base, 'metrics'), issues);
+  uniqueIds(bundle.proofs, 'provenance', pointer(base, 'provenance'), issues);
   // Id-resolution pools: the bundle's own ids plus, for scenario bundles, the
   // baseline bundle's ids (scenario expressions reference baseline metrics and
   // selections by id — the oracle resolves against the merged namespace).
@@ -493,7 +490,7 @@ function checkMetricBundle(
   }
 
   // --- findings ---
-  const findingIds = uniqueIds(bundle.findings, 'finding', pointer(base, 'findings'), issues);
+  uniqueIds(bundle.findings, 'finding', pointer(base, 'findings'), issues);
   const chartIds = uniqueIds(bundle.charts, 'chart', pointer(base, 'charts'), issues);
   const issueIdsForRefs = new Set(issueMap?.keys() ?? []);
   for (const [i, f] of bundle.findings.entries()) {
@@ -742,6 +739,7 @@ function checkSheetName(name: string, path: string, issues: ContractIssue[]): vo
   if (!SAFE_SHEET_NAME.test(name)) issues.push(issue('semantic', 'sheet.name.chars', path, 'sheet name contains forbidden characters []:*?/\\'));
   if (/^[=+\-@]/.test(name) || /^'/.test(name)) issues.push(issue('semantic', 'sheet.name.formula', path, 'sheet name starts with a formula-significant character'));
 
+  // eslint-disable-next-line no-control-regex -- rejecting control characters is the point of this check
   if (/[\u0000-\u001F\u007F]/.test(name)) issues.push(issue('semantic', 'sheet.name.control', path, 'sheet name contains control characters'));
 }
 
@@ -759,7 +757,6 @@ export function checkExportModel(value: unknown, ctx: SemanticContext = {}): Con
   if (model.slides.length !== 6) issues.push(issue('semantic', 'slides.count', '/slides', `expected exactly six slides, got ${model.slides.length}`));
 
   const metricSet = new Set([...model.metrics.map((m) => m.id), ...(model.scenario?.metrics ?? []).map((m) => m.id)]);
-  const proofSet = new Set([...model.provenance.map((p) => p.id), ...(model.scenario?.provenance ?? []).map((p) => p.id)]);
   const findingSet = new Set(model.findings.map((f) => f.id));
   const chartSet = new Set(model.charts.map((c) => c.id));
   for (const [i, s] of model.slides.entries()) {
@@ -811,7 +808,7 @@ export function checkExportModel(value: unknown, ctx: SemanticContext = {}): Con
 // Remaining contract types — structural + intra-document semantics
 // ---------------------------------------------------------------------------
 
-export function checkFinding(value: unknown, _ctx: SemanticContext = {}): ContractIssue[] {
+export function checkFinding(value: unknown): ContractIssue[] {
   const issues = checkSchema('Finding', value);
   if (issues.length > 0 || !isPlainObject(value)) return issues;
   const f = value as unknown as Finding;
@@ -823,7 +820,7 @@ export function checkFinding(value: unknown, _ctx: SemanticContext = {}): Contra
   return issues;
 }
 
-export function checkProvenance(value: unknown, _ctx: SemanticContext = {}): ContractIssue[] {
+export function checkProvenance(value: unknown): ContractIssue[] {
   const issues = checkSchema('Provenance', value);
   if (issues.length > 0 || !isPlainObject(value)) return issues;
   const p = value as unknown as Provenance;
@@ -848,7 +845,7 @@ export function checkProvenance(value: unknown, _ctx: SemanticContext = {}): Con
   return issues;
 }
 
-export function checkScenarioDefinition(value: unknown, _ctx: SemanticContext = {}): ContractIssue[] {
+export function checkScenarioDefinition(value: unknown): ContractIssue[] {
   const issues = checkSchema('ScenarioDefinition', value);
   if (issues.length > 0 || !isPlainObject(value)) return issues;
   const d = value as unknown as ScenarioDefinition;
@@ -862,15 +859,15 @@ export function checkScenarioDefinition(value: unknown, _ctx: SemanticContext = 
   return issues;
 }
 
-export function checkWorkerRequest(value: unknown, _ctx: SemanticContext = {}): ContractIssue[] {
+export function checkWorkerRequest(value: unknown): ContractIssue[] {
   return checkSchema('WorkerRequest', value);
 }
 
-export function checkWorkerResponse(value: unknown, _ctx: SemanticContext = {}): ContractIssue[] {
+export function checkWorkerResponse(value: unknown): ContractIssue[] {
   return checkSchema('WorkerResponse', value);
 }
 
-export function checkRawTable(value: unknown, _ctx: SemanticContext = {}): ContractIssue[] {
+export function checkRawTable(value: unknown): ContractIssue[] {
   const issues = checkSchema('RawTable', value);
   if (issues.length > 0 || !isPlainObject(value)) return issues;
   const t = value as unknown as RawTable;
@@ -884,7 +881,7 @@ export function checkRawTable(value: unknown, _ctx: SemanticContext = {}): Contr
   return issues;
 }
 
-export function checkSampleManifest(value: unknown, _ctx: SemanticContext = {}): ContractIssue[] {
+export function checkSampleManifest(value: unknown): ContractIssue[] {
   const issues = checkSchema('SampleManifest', value);
   if (issues.length > 0 || !isPlainObject(value)) return issues;
   const m = value as unknown as SampleManifest;
@@ -901,7 +898,7 @@ export function checkSampleManifest(value: unknown, _ctx: SemanticContext = {}):
   return issues;
 }
 
-export function checkNormalizedRow(value: unknown, _ctx: SemanticContext = {}): ContractIssue[] {
+export function checkNormalizedRow(value: unknown): ContractIssue[] {
   return checkSchema('NormalizedRow', value);
 }
 
