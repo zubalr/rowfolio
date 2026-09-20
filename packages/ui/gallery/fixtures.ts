@@ -2,7 +2,7 @@
  * Gallery fixtures — display strings and rows for the story matrix.
  *
  * Localized copy is quoted verbatim from contracts/locales/{en,ar}.json v1.0.0
- * (the product catalog belongs to @rowfolio/i18n, owned by A04). Numeric
+ * (the product catalog belongs to @rowfolio/i18n, in packages/i18n). Numeric
  * display strings are the formatted truths of the fixed sample
  * (fixtures/analysis-snapshot.example.json): 881,000 vs 1,000,000 → −11.9%,
  * downtime 1,194→1,565 (+31.1%), quality 29 issues (24 resolved/5 unresolved),

@@ -1,7 +1,7 @@
 /**
  * Contrast verification (WCAG 2.x sRGB).
  *
- * Reproduces every pair in the handoff's validation/contrast.json and asserts
+ * Reproduces every pair in the published contrast-validation pairs and asserts
  * the on-ink tints stay within their declared usage. A regression here means a
  * token or component color pairing changed — fix the pairing, not the test.
  */
@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
 import { contrastRatio, relativeLuminance } from "./contrast.ts";
 import { color, colorOnInk } from "./tokens.ts";
 
-// Expected ratios from validation/contrast.json (planning verification,
+// Expected ratios from the contract design-token palette (verified
 // WCAG relative luminance on sRGB). Tolerance ±0.02 covers float rounding.
 const CONTRACT_PAIRS = [
   { fg: color.ink, bg: color.paper, ratio: 13.329, normalAA: true },

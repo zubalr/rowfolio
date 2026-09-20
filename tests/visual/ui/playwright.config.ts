@@ -1,7 +1,7 @@
 import { defineConfig } from "@playwright/test";
 
 /**
- * Visual/a11y harness for @rowfolio/ui (task A03, owned path tests/visual/ui).
+ * Visual/a11y harness for @rowfolio/ui (owned path tests/visual/ui).
  *
  * The webServer builds the gallery (`vite build`) then serves the exact static
  * artifact via `vite preview` — tests never exercise the dev server. Browser:

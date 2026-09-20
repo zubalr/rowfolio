@@ -2,7 +2,7 @@
  * WCAG 2.x sRGB relative-luminance contrast math.
  *
  * Pure, dependency-free and shared by the unit suite (`contrast.test.ts`,
- * which reproduces every pair in the handoff's validation/contrast.json) so a
+ * which reproduces every published role pair) so a
  * future token edit that breaks a checked pair fails the build rather than
  * shipping an unreadable combination.
  */
@@ -50,7 +50,7 @@ export interface ContrastPair {
 }
 
 /**
- * Checked role pairs (source: validation/contrast.json, contract v1.0.0) plus
+ * Checked role pairs (contract v1.0.0 design-token palette) plus
  * the dark evidence surface tints. `attention`/`paper` at 4.24:1 is registered
  * as `large-text` only — normal-size vermilion text on paper is forbidden by
  * the design spec; components must use `negative` for text-grade red.
