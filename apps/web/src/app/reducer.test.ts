@@ -144,6 +144,42 @@ describe('sessionReducer', () => {
     expect(s.revision).toBe(0);
   });
 
+  it('keeps the pending stage marker monotonic and inside the rendered stage list', () => {
+    let s = initialSession('s1');
+    s = sessionReducer(s, {
+      type: 'source.begin', kind: 'upload',
+      source: { name: 'u.csv', format: 'csv', byteLength: 3, hash: null },
+    });
+    expect(s.pending?.stage).toBe('preflight');
+    s = sessionReducer(s, { type: 'request.start', requestId: 'r' });
+    s = sessionReducer(s, { type: 'worker.progress', requestId: 'r', stage: 'parse', fraction: 0.4 });
+    expect(s.pending?.stage).toBe('parse');
+    s = sessionReducer(s, { type: 'ingest.done', requestId: 'r', rawTable: { id: 'raw' } as never });
+    // Profiling is the quality-preview step — the marker must not claim
+    // 'analyze' while the profile op has not even reported yet.
+    expect(s.pending?.stage).toBe('normalize');
+    // Worker emits its finer-grained 'profile' stage — folded, not rendered raw.
+    s = sessionReducer(s, { type: 'worker.progress', requestId: 'r', stage: 'profile', fraction: null });
+    expect(s.pending?.stage).toBe('normalize');
+    // A late 'parse' fraction or an unknown stage must never rewind/blank it.
+    s = sessionReducer(s, { type: 'worker.progress', requestId: 'r', stage: 'parse', fraction: 0.9 });
+    expect(s.pending?.stage).toBe('normalize');
+    s = sessionReducer(s, { type: 'worker.progress', requestId: 'r', stage: 'not-a-real-stage', fraction: null });
+    expect(s.pending?.stage).toBe('normalize');
+    s = sessionReducer(s, { type: 'profile.done', requestId: 'r', columns: [], issues: [] });
+    expect(s.phase).toBe('analyzing');
+    // profile.done must leave a real stage — null would render as 'preflight'.
+    expect(s.pending?.stage).toBe('normalize');
+    s = sessionReducer(s, { type: 'request.start', requestId: 'r2' });
+    s = sessionReducer(s, { type: 'worker.progress', requestId: 'r2', stage: 'analyze', fraction: null });
+    expect(s.pending?.stage).toBe('analyze');
+    s = sessionReducer(s, {
+      type: 'analyze.done', requestId: 'r2',
+      sourceHash: SNAPSHOT.sourceHash, table: TABLE, snapshot: SNAPSHOT,
+    });
+    expect(s.phase).toBe('ready');
+  });
+
   it('replay resets to the committed baseline without losing the dataset', () => {
     let s = ready();
     s = sessionReducer(s, { type: 'scenario.submit', requestId: 'sc1', costChange: '0.08' });

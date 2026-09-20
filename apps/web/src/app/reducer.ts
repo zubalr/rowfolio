@@ -55,6 +55,24 @@ function isCurrent(state: SessionState, requestId: string): boolean {
   return state.requestId === requestId;
 }
 
+/**
+ * The workspace Status renders exactly these stage ids, in order. Worker
+ * progress is finer-grained — `profile` folds into the `normalize` step (it
+ * computes the quality preview that step shows). The marker is monotonic:
+ * unknown or regressive updates keep the current stage rather than blanking
+ * or rewinding it.
+ */
+const PENDING_STAGE_ORDER: readonly string[] = ['preflight', 'parse', 'normalize', 'analyze'];
+const PENDING_STAGE_FOLD: Record<string, string> = { profile: 'normalize' };
+
+function advancePendingStage(current: string | null, emitted: string): string | null {
+  const folded = PENDING_STAGE_FOLD[emitted] ?? emitted;
+  const nextIdx = PENDING_STAGE_ORDER.indexOf(folded);
+  if (nextIdx < 0) return current; // unknown stage — keep the marker where it is
+  const curIdx = current === null ? -1 : PENDING_STAGE_ORDER.indexOf(current);
+  return nextIdx < curIdx ? current : folded;
+}
+
 export function sessionReducer(state: SessionState, action: SessionAction): SessionState {
   switch (action.type) {
     case 'source.begin': {
@@ -117,7 +135,11 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       if (state.pending) {
         return {
           ...state,
-          pending: { ...state.pending, stage: action.stage, fraction: action.fraction },
+          pending: {
+            ...state.pending,
+            stage: advancePendingStage(state.pending.stage, action.stage),
+            fraction: action.fraction,
+          },
         };
       }
       if (state.export.building) {
@@ -128,10 +150,12 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
 
     case 'ingest.done': {
       if (!isCurrent(state, action.requestId) || !state.pending) return state;
+      // Profiling belongs to the quality-preview step — 'analyze' here would
+      // claim a stage that has not started.
       return {
         ...state,
         phase: 'profiling',
-        pending: { ...state.pending, rawTable: action.rawTable, stage: 'analyze', fraction: null },
+        pending: { ...state.pending, rawTable: action.rawTable, stage: 'normalize', fraction: null },
       };
     }
 
@@ -141,7 +165,9 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
         ...state.pending,
         proposedColumns: action.columns,
         issues: action.issues,
-        stage: null,
+        // Next real step is the normalize request — a null stage would fall
+        // back to 'preflight' in the UI and visually rewind the pipeline.
+        stage: 'normalize',
         fraction: null,
       };
       // Sample sources ship manifest-approved fixes — never needsReview.

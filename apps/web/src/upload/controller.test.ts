@@ -328,4 +328,82 @@ describe("upload controller", () => {
     const settled = await waitFor(controller, (s) => s.stage !== "parsing");
     expect(settled.stage).toBe("idle");
   });
+
+  it("every typed failure code reaches the error surface with a detail token", async () => {
+    for (const code of [
+      "INVALID_FILE",
+      "LIMIT_EXCEEDED",
+      "AMBIGUOUS_INPUT",
+      "UNSUPPORTED",
+      "TIMEOUT",
+      "SCHEMA_MISMATCH",
+      "INTERNAL",
+    ] as const) {
+      const controller = createUploadController(
+        {
+          ...ingestPorts(),
+          inspect: () =>
+            Promise.reject({
+              code,
+              messageKey: `error.${code}`,
+              recoverable: code !== "SCHEMA_MISMATCH" && code !== "INTERNAL",
+              detail: `probe.${code.toLowerCase()}`,
+            }),
+          profile: testProfile,
+        },
+        {},
+      );
+      controller.acceptFile(csvBytes(CSV), "t.csv");
+      const s = await waitFor(controller, (x) => x.stage === "error");
+      expect(s.stage).toBe("error");
+      if (s.stage !== "error") continue;
+      expect(s.failure.code).toBe(code);
+      expect(typeof s.failure.detail).toBe("string");
+      expect(s.failure.detail.length).toBeGreaterThan(0);
+      expect(s.retryStep).toBe("inspect");
+      // Non-recoverable failures must not offer a retry affordance.
+      if (code === "SCHEMA_MISMATCH" || code === "INTERNAL") {
+        expect(s.failure.recoverable).toBe(false);
+      }
+      controller.cancel();
+    }
+  });
+
+  it("a parse-stage failure carries retryStep=parse and keeps the prior outcome", async () => {
+    let outcome: UploadOutcome | null = null;
+    const controller = createUploadController(makePorts(), {
+      onComplete: (o) => {
+        outcome = o;
+      },
+    });
+    await driveToReview(controller);
+    controller.submit();
+    const prior = outcome!;
+
+    const failing = createUploadController(
+      {
+        ...ingestPorts(),
+        parse: () =>
+          Promise.reject({
+            code: "TIMEOUT",
+            messageKey: "error.TIMEOUT",
+            recoverable: true,
+            detail: "watchdog",
+          }),
+        profile: testProfile,
+      },
+      {},
+    );
+    failing.acceptFile(csvBytes(CSV), "t.csv");
+    await waitFor(failing, (s) => s.stage === "configure");
+    failing.proceed();
+    const errored = await waitFor(failing, (s) => s.stage === "error");
+    expect(errored.stage).toBe("error");
+    if (errored.stage !== "error") return;
+    expect(errored.failure.code).toBe("TIMEOUT");
+    expect(errored.retryStep).toBe("parse");
+    // A retry of a bounded step re-runs parse with the preserved inspection.
+    expect(errored.inspection).not.toBeUndefined();
+    expect(prior.sourceHash.length).toBe(64);
+  });
 });

@@ -516,3 +516,148 @@ describe('upload reliability (W-UPLOAD)', () => {
     await controller.dispose();
   });
 });
+
+describe('upload resilience — cancel coverage + progress honesty', () => {
+  const CSV_BYTES = new TextEncoder().encode('a,b\n1,2\n').buffer as ArrayBuffer;
+
+  it('marks real stages monotonically — parse → quality step → analyze, never a rewind', async () => {
+    const { controller } = makeController();
+    const stages: string[] = [];
+    controller.subscribe((s) => {
+      if (s.pending?.stage) stages.push(s.pending.stage);
+    });
+    await controller.selectSource(CSV_BYTES, 'a.csv', 'csv');
+    expect(controller.getState().phase).toBe('ready');
+    const order = ['preflight', 'parse', 'normalize', 'analyze'];
+    let last = -1;
+    for (const stage of stages) {
+      const idx = order.indexOf(stage);
+      expect(idx, `unexpected stage ${stage}`).toBeGreaterThanOrEqual(0);
+      expect(idx, `stage regressed to ${stage}`).toBeGreaterThanOrEqual(last);
+      last = idx;
+    }
+    // The analyze request carries no worker progress — the controller must
+    // mark it itself or the UI would sit on 'normalize' while analysis runs.
+    expect(stages).toContain('analyze');
+    await controller.dispose();
+  });
+
+  it('upload parse abort tears down the in-flight worker request', async () => {
+    const gate = new Promise<never>(() => {});
+    const hanging: SupervisorHooks['adapters'] = {
+      ...fixtureAdapters(),
+      loadIngest: async () => ({ handleIngestRequest: () => gate }) as never,
+    };
+    const { controller, spawned } = makeController({ adapters: hanging });
+    const ac = new AbortController();
+    const pending = controller.parseViaWorker(CSV_BYTES, 'x.csv', {}, undefined, { signal: ac.signal });
+    await waitFor(() => spawned.length === 1);
+    ac.abort();
+    await expect(pending).rejects.toMatchObject({ code: 'CANCELLED' });
+    expect(spawned[0]?.terminated).toBe(true);
+    await controller.dispose();
+  });
+
+  it('the upload abort bridge still covers the profile leg of the same job', async () => {
+    const gate = new Promise<never>(() => {});
+    const adapters: SupervisorHooks['adapters'] = {
+      ...fixtureAdapters(),
+      loadNormalize: async () => ({
+        profileTable: () => gate,
+        normalizeTable: () => TABLE as never,
+      }),
+    };
+    const { controller, spawned, requests } = makeController({ adapters });
+    const ac = new AbortController();
+    const table = await controller.parseViaWorker(CSV_BYTES, 'x.csv', {}, undefined, { signal: ac.signal });
+    const profiled = controller.profileViaWorker(table);
+    await waitFor(() => requests.flat().some((r) => r.operation === 'profile'));
+    ac.abort();
+    await expect(profiled).rejects.toMatchObject({ code: 'CANCELLED' });
+    expect(spawned.at(-1)?.terminated).toBe(true);
+    await controller.dispose();
+  });
+
+  it('adoptUploadOutcome unbinds the upload signal — a later abort cannot kill normalize', async () => {
+    const { controller, spawned } = makeController();
+    const ac = new AbortController();
+    const table = await controller.parseViaWorker(CSV_BYTES, 'x.csv', {}, undefined, { signal: ac.signal });
+    const adopt = controller.adoptUploadOutcome({
+      table,
+      inspection: { format: 'csv', sourceName: 'x.csv', compressedBytes: CSV_BYTES.byteLength },
+      parseOptions: {},
+      approvalPlan: { issueIds: [], columns: [], useUnverifiedFormulaCaches: [] },
+      sourceHash: table.sourceRef.sourceHash,
+    });
+    await waitFor(() => controller.getState().phase === 'ready');
+    await adopt;
+    ac.abort();
+    // The upload job ended at submit — its stale signal must not terminate
+    // the worker now carrying the committed session.
+    expect(spawned.at(-1)?.terminated).toBe(false);
+    await controller.dispose();
+  });
+
+  it('cancelWork during normalize exits pending and terminates the worker', async () => {
+    const gate = new Promise<never>(() => {});
+    const adapters: SupervisorHooks['adapters'] = {
+      ...fixtureAdapters(),
+      loadNormalize: async () => ({
+        profileTable: () => ({ proposedColumns: [], issues: [] }),
+        normalizeTable: () => gate,
+      }),
+    };
+    const { controller, spawned, requests } = makeController({ adapters });
+    const done = controller.selectSource(CSV_BYTES, 'a.csv', 'csv');
+    await waitFor(() => requests.flat().some((r) => r.operation === 'normalize'));
+    controller.cancelWork('user');
+    await done;
+    const s = controller.getState();
+    expect(s.phase).toBe('idle');
+    expect(s.pending).toBeNull();
+    expect(s.requestId).toBeNull();
+    expect(s.error).toBeNull();
+    expect(spawned.at(-1)?.terminated).toBe(true);
+    await controller.dispose();
+  });
+
+  it('cancelWork during the bounded inspect step exits pending — the late resolve drops', async () => {
+    let release!: (v: unknown) => void;
+    const gate = new Promise((r) => { release = r; });
+    const { controller } = makeController({ mainAdapters: { inspectSource: () => gate } });
+    const done = controller.selectSource(CSV_BYTES, 'a.csv', 'csv');
+    await waitFor(() => controller.getState().phase === 'reading');
+    controller.cancelWork('user');
+    release({
+      format: 'csv', sourceName: 'a.csv', sourceHash: 'h'.repeat(64),
+      sheets: [], defaultSheetId: null, hiddenSheets: [], compressedBytes: 1,
+    });
+    await done;
+    const s = controller.getState();
+    expect(s.phase).toBe('idle');
+    expect(s.error).toBeNull();
+    expect(s.pending).toBeNull();
+    await controller.dispose();
+  });
+
+  it('cancelExport during an in-flight export op ends the build cleanly', async () => {
+    const gate = new Promise<never>(() => {});
+    const adapters: SupervisorHooks['adapters'] = {
+      ...fixtureAdapters(),
+      loadExportWriters: async () => (async () => gate) as never,
+    };
+    const { controller, spawned, requests } = makeController({ adapters });
+    await controller.useSample();
+    controller.openExport();
+    const pending = controller.prepareExport();
+    await waitFor(() => requests.flat().some((r) => r.operation === 'export'));
+    controller.cancelExport();
+    await pending;
+    const s = controller.getState();
+    expect(s.phase).toBe('ready');
+    expect(s.export.building).toBe(false);
+    expect(s.export.failure?.code).toBe('CANCELLED');
+    expect(spawned.at(-1)?.terminated).toBe(true);
+    await controller.dispose();
+  });
+});

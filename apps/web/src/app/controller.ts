@@ -139,6 +139,14 @@ export class SessionController {
   private analysis: WorkerClient | null = null;
   private analysisOptions: IngestParseOptions | null = null;
   private exportClient: WorkerClient | null = null;
+  /**
+   * Upload-job abort bridge: the upload controller's AbortSignal lives one
+   * layer up, but its parse/profile ops run on THIS worker client — an abort
+   * must terminate the in-flight worker request, not just drop the result.
+   * Bound by parseViaWorker (the signal spans the whole parse→profile job)
+   * and released when the outcome is adopted.
+   */
+  private uploadAbort: { signal: AbortSignal; detach(): void } | null = null;
   private readonly ids: IdGen;
   private readonly deps: ControllerDeps;
 
@@ -190,24 +198,50 @@ export class SessionController {
     return this.analysis;
   }
 
+  private bindUploadAbort(signal: AbortSignal | undefined, client: WorkerClient): void {
+    this.uploadAbort?.detach();
+    this.uploadAbort = null;
+    if (!signal) return;
+    const onAbort = () => client.cancel('upload aborted');
+    if (signal.aborted) {
+      // Abort raced the bind — a listener on a dead signal never fires.
+      onAbort();
+      return;
+    }
+    signal.addEventListener('abort', onAbort, { once: true });
+    this.uploadAbort = { signal, detach: () => signal.removeEventListener('abort', onAbort) };
+  }
+
+  private unbindUploadAbort(): void {
+    this.uploadAbort?.detach();
+    this.uploadAbort = null;
+  }
+
   /**
    * UploadFlow parse port — runs ingest inside the analysis worker so the
    * worker retains the RawTable for the subsequent normalize request.
    * ParseOptions travel on the worker `name` channel (v1 wire gap — the
    * ingest op has no options field; flagged for contracts v1.1).
+   * `extras.signal` is the upload job's abort: it tears down the worker
+   * request — and the profile request of the same job — rather than leaving
+   * a parse running against an abandoned upload.
    */
   async parseViaWorker(
     bytes: ArrayBuffer,
     sourceName: string,
     options: IngestParseOptions,
     progress?: ((stage: string, fraction: number | null) => void) | undefined,
-    extras?: { delimiter?: ',' | '\t' | ';' } | undefined,
+    extras?: { delimiter?: ',' | '\t' | ';'; signal?: AbortSignal } | undefined,
   ): Promise<RawTable> {
     const parseOptions: IngestParseOptions = {
       ...options,
       ...(extras?.delimiter !== undefined ? { delimiter: extras.delimiter } : {}),
     };
     const client = this.ensureAnalysis(parseOptions);
+    this.bindUploadAbort(extras?.signal, client);
+    if (extras?.signal?.aborted) {
+      throw new WorkerRequestError('CANCELLED', 'error.CANCELLED', true, 'upload aborted');
+    }
     const rid = this.ids.request();
     // Binary sniffing only — the worker re-detects authoritatively.
     const head = new Uint8Array(bytes.slice(0, 4));
@@ -275,6 +309,7 @@ export class SessionController {
     // No cancelWork here: the upload flow's parse ran through this client's
     // worker, which retains the raw table normalize resolves by id —
     // cancelling terminates that worker and discards the retained table.
+    this.unbindUploadAbort(); // job committed — a later upload abort must not kill normalize
     this.deps.blobStore?.releaseAll();
     this.dispatch({
       type: 'source.begin',
@@ -600,6 +635,9 @@ export class SessionController {
         const ar = this.ids.request();
         active = ar;
         this.dispatch({ type: 'request.start', requestId: ar });
+        // The analyze op emits no stage progress — mark it honestly as soon
+        // as the request is live so the UI doesn't sit on 'normalize'.
+        this.dispatch({ type: 'worker.progress', requestId: ar, stage: 'analyze', fraction: null });
         // The bound sample keeps its declared June-2026 scope even when it
         // arrives via the upload path — the supervisor pins the same
         // samplePolicyId from the hash, and sample-pack analysis requires a
