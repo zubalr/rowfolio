@@ -7,7 +7,7 @@
  * Rules:
  * - Normal text WCAG AA: >= 4.5:1
  * - Large text (>=18pt or >=14pt bold) / graphical objects: >= 3.0:1
- * - Attention (#C84B31) on Paper (#F7F4EC) ratio is 4.24:1 (prohibited for normal text,
+ * - Attention (#E04E1A) on Paper (#F7F4EC) ratio is 3.62:1 (prohibited for normal text,
  *   only permitted for large display numerals or nontext markers).
  */
 import { describe, expect, it } from "vitest";
@@ -69,7 +69,9 @@ describe("WCAG 2.2 AA token contrast ratios", () => {
     attention: hexToRgb(colors.attention),
     negative: hexToRgb(colors.negative),
     positive: hexToRgb(colors.positive),
+    positiveText: hexToRgb(colors.positiveText),
     scenario: hexToRgb(colors.scenario),
+    scenarioText: hexToRgb(colors.scenarioText),
   };
 
   it("ink on paper exceeds 4.5:1 (high contrast body text)", () => {
@@ -92,14 +94,14 @@ describe("WCAG 2.2 AA token contrast ratios", () => {
     expect(ratio).toBeGreaterThanOrEqual(6.0);
   });
 
-  it("positive teal on paper exceeds 4.5:1 for normal text AA", () => {
-    const ratio = contrastRatio(colorRgb.positive, colorRgb.paper);
-    expect(ratio).toBeGreaterThanOrEqual(5.5);
+  it("positive teal is graphical-only; its text variant is AA", () => {
+    expect(contrastRatio(colorRgb.positive, colorRgb.paper)).toBeGreaterThanOrEqual(3.0);
+    expect(contrastRatio(colorRgb.positiveText, colorRgb.paper)).toBeGreaterThanOrEqual(4.5);
   });
 
-  it("scenario amber on paper exceeds 4.5:1 for normal text AA", () => {
-    const ratio = contrastRatio(colorRgb.scenario, colorRgb.paper);
-    expect(ratio).toBeGreaterThanOrEqual(4.8);
+  it("scenario amber is graphical-only; its text variant is AA", () => {
+    expect(contrastRatio(colorRgb.scenario, colorRgb.paper)).toBeGreaterThanOrEqual(3.0);
+    expect(contrastRatio(colorRgb.scenarioText, colorRgb.paper)).toBeGreaterThanOrEqual(4.5);
   });
 
   it("surface on ink exceeds 4.5:1 for dark evidence register", () => {
@@ -114,8 +116,7 @@ describe("WCAG 2.2 AA token contrast ratios", () => {
 
   it("attention on paper passes large text/graphical object AA (>=3:1) but fails normal text (<4.5:1)", () => {
     const ratio = contrastRatio(colorRgb.attention, colorRgb.paper);
-    expect(ratio).toBeGreaterThanOrEqual(4.1);
-    expect(ratio).toBeLessThan(4.5);
     expect(ratio).toBeGreaterThanOrEqual(3.0);
+    expect(ratio).toBeLessThan(4.5);
   });
 });

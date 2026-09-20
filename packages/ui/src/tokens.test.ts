@@ -9,16 +9,19 @@ import { color, layout, motion, radius, spacing, typePx } from "./tokens.ts";
 describe("design tokens", () => {
   it("match contract color values", () => {
     expect(color).toEqual({
-      ink: "#172B35",
+      ink: "#14252E",
       paper: "#F7F4EC",
       surface: "#FFFEFA",
       muted: "#53636A",
       rule: "#D7DCD8",
-      data: "#2855D9",
-      attention: "#C84B31",
+      data: "#2B50E8",
+      dataTint30: "#C6D1FF",
+      attention: "#E04E1A",
       negative: "#A33224",
-      positive: "#116B63",
-      scenario: "#946000",
+      positive: "#0E8F7E",
+      positiveText: "#116B63",
+      scenario: "#B96F00",
+      scenarioText: "#946000",
     });
   });
 

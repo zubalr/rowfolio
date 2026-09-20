@@ -484,7 +484,7 @@ html[lang="ar"] .rf-scenario__scope {
 .rf-scenario__value {
   font-size: 28px;
   font-weight: 500;
-  color: var(--rf-scenario);
+  color: var(--rf-scenario-text);
 }
 html[lang="ar"] .rf-scenario__value {
   font-size: 26px;
@@ -622,7 +622,7 @@ html[lang="ar"] .rf-briefing__slide-title {
 .rf-briefing__state {
   margin-inline-start: auto;
   font-size: 13px;
-  color: var(--rf-positive);
+  color: var(--rf-positive-text);
 }
 .rf-briefing__workbook {
   display: flex;
@@ -827,7 +827,7 @@ html[lang="ar"] .rf-footer {
   gap: var(--rf-space-2);
 }
 .rf-footer .rf-icon {
-  color: var(--rf-positive);
+  color: var(--rf-positive-text);
   flex: none;
   align-self: center;
 }

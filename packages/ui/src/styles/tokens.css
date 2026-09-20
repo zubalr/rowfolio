@@ -7,26 +7,29 @@
 
 :root {
   /* Palette (contract) */
-  --rf-ink: #172B35;
+  --rf-ink: #14252E;
   --rf-paper: #F7F4EC;
   --rf-surface: #FFFEFA;
   --rf-muted: #53636A;
   --rf-rule: #D7DCD8;
-  --rf-data: #2855D9;
-  --rf-attention: #C84B31;
+  --rf-data: #2B50E8;
+  --rf-data-tint-30: #C6D1FF;
+  --rf-attention: #E04E1A;
   --rf-negative: #A33224;
-  --rf-positive: #116B63;
-  --rf-scenario: #946000;
+  --rf-positive: #0E8F7E;
+  --rf-positive-text: #116B63;
+  --rf-scenario: #B96F00;
+  --rf-scenario-text: #946000;
 
   /* On-ink tints — dark evidence surface only */
   --rf-ink-text: #FFFEFA;
   --rf-ink-muted: #AEC2CB;
-  --rf-ink-data: #9DB4F5;
-  --rf-ink-attention: #E8907C;
-  --rf-ink-positive: #7FC4BB;
-  --rf-ink-scenario: #E0B878;
+  --rf-ink-data: #A8BCFF;
+  --rf-ink-attention: #F0926C;
+  --rf-ink-positive: #74C6B8;
+  --rf-ink-scenario: #F0B45C;
   --rf-ink-rule: #3A4A53;
-  --rf-ink-surface: #1F3947;
+  --rf-ink-surface: #1E3846;
 
   /* Semantic aliases (light theme) */
   --rf-text: var(--rf-ink);
@@ -73,7 +76,7 @@
   --rf-font-mono: "IBM Plex Mono", "IBM Plex Sans", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
   /* Elevation: shadows are for overlays only */
-  --rf-shadow-overlay: 0 20px 70px #172B351F;
+  --rf-shadow-overlay: 0 20px 70px #14252E1F;
 
   color-scheme: light;
 }

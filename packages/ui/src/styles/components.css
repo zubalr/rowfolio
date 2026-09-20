@@ -79,7 +79,7 @@ html[lang="ar"] .rf-btn {
   color: var(--rf-attention);
 }
 .rf-btn--attention:hover:not(:disabled) {
-  background: #C84B310D;
+  background: #E04E1A0D;
 }
 [data-rf-surface="ink"] .rf-btn--attention {
   color: var(--rf-ink-attention);
@@ -261,7 +261,7 @@ html[lang="ar"] .rf-field__error {
   box-shadow: var(--rf-shadow-overlay);
 }
 .rf-dialog::backdrop {
-  background: #172B3559;
+  background: #14252E59;
 }
 .rf-dialog[open] {
   animation: rf-dialog-in var(--rf-panel-ms) var(--rf-ease);
@@ -509,7 +509,7 @@ html[lang="ar"] .rf-table thead th {
   text-align: center;
 }
 .rf-table tbody tr:hover {
-  background: #172B3508;
+  background: #14252E08;
 }
 [data-rf-surface="ink"] .rf-table tbody tr:hover {
   background: #FFFEFA08;
