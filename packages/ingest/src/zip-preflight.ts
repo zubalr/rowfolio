@@ -94,6 +94,9 @@ export function normalizeZipPath(name: string): string {
     }
     if (seg === '.') throw new IngestError('INVALID_FILE', { detail: 'zip.path-invalid' });
     if (seg === '..') throw new IngestError('INVALID_FILE', { detail: 'zip.path-traversal' });
+    // `__proto__` is magical on the plain objects fflate assigns into during
+    // repack — the entry would silently diverge from the admitted set.
+    if (seg === '__proto__') throw new IngestError('INVALID_FILE', { detail: 'zip.path-reserved' });
     out.push(seg);
   }
   const joined = out.join('/');

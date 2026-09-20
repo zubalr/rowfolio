@@ -23,6 +23,7 @@ import type { PendingDemoAction } from "./PreviewLoader.tsx";
 import { persistLocaleChoice } from "./i18n.ts";
 import { siblingLocaleHref, workspaceHref } from "./routes.ts";
 import { setWorkspaceIntent } from "./pendingUpload.ts";
+import "./landing.css";
 
 const PreviewLoader = lazy(() => import("./PreviewLoader.tsx"));
 

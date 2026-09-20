@@ -10,7 +10,7 @@ const SAMPLE_DIR = fileURLToPath(new URL('../../public/sample/', import.meta.url
 
 function diskFetch(overrides: Record<string, ArrayBuffer | '404' | string> = {}) {
   return async (url: string): Promise<Response> => {
-    const rel = url.replace(/^sample\/?/, '');
+    const rel = url.replace(/^.*?sample\//, '');
     const override = overrides[rel];
     if (override === '404') return new Response(null, { status: 404 });
     if (typeof override === 'string') return new Response(override, { status: 200 });

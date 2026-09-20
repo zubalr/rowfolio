@@ -24,7 +24,7 @@ const SAMPLE_DIR = fileURLToPath(new URL('../../public/sample/', import.meta.url
 /** Fetch the real bundled sample assets from disk (as the static host would). */
 function diskFetch(): (url: string) => Promise<Response> {
   return async (url: string) => {
-    const path = join(SAMPLE_DIR, url.replace(/^sample\/?/, ''));
+    const path = join(SAMPLE_DIR, url.replace(/^.*?sample\//, ''));
     try {
       const bytes = await readFile(path);
       return new Response(bytes, { status: 200 });
