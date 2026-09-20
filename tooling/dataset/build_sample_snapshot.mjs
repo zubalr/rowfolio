@@ -50,7 +50,7 @@ async function loadAdapter(spec,name,fns){
 }
 
 const manifest=JSON.parse(await readFile(path.join(root,'fixtures/sample/sample_manifest.json'),'utf8'));
-const calendar=JSON.parse(await readFile(path.join(root,'fixtures/sample/reporting_calendar.json'),'utf8'));
+JSON.parse(await readFile(path.join(root,'fixtures/sample/reporting_calendar.json'),'utf8'));
 const binding=JSON.parse(await readFile(path.join(root,'fixtures/sample/artifact_binding.json'),'utf8'));
 
 const bytes=await readFile(sourcePath);

@@ -261,7 +261,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ["scripts/**/*.{mjs,ts}", "*.config.{mjs,ts}", "apps/web/vite.config.ts", "vitest.config.ts"],
+    files: ["scripts/**/*.{mjs,ts}", "tooling/**/*.{mjs,ts,js}", "*.config.{mjs,ts}", "apps/web/vite.config.ts", "vitest.config.ts"],
     languageOptions: { globals: { ...globals.node } },
   },
   {
