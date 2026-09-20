@@ -23,6 +23,11 @@ const PARAM_PLAN: Record<string, readonly { param: string; metricId: string; for
     { param: 'categories', metricId: 'quality-category', format: 'unit' },
     { param: 'missing', metricId: 'quality-missing', format: 'unit' },
   ],
+  'finding.quality.body.pending': [
+    { param: 'duplicates', metricId: 'quality-duplicate', format: 'unit' },
+    { param: 'categories', metricId: 'quality-category', format: 'unit' },
+    { param: 'missing', metricId: 'quality-missing', format: 'unit' },
+  ],
 };
 
 export function findingTitle(i18n: I18n, finding: Finding): string {

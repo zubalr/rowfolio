@@ -144,6 +144,25 @@ describe('rule evaluation', () => {
     }
   });
 
+  it('claims quality exclusions only after they are applied', () => {
+    const proposed: NormalizedTable = {
+      ...table,
+      qualityIssues: table.qualityIssues.map((q) =>
+        q.status === 'resolved' ? { ...q, status: 'proposed' as const } : q),
+    };
+    const pending = analyze(proposed, { ...OPTIONS, samplePolicyId: null });
+    expect(pending.findings.find((f) => f.id === 'finding-quality')?.bodyKey)
+      .toBe('finding.quality.body.pending');
+    expect(pending.charts.find((c) => c.id === 'chart-quality')?.summaryKey)
+      .toBe('chart.quality.summary.generic');
+
+    const resolved = analyze(table, { ...OPTIONS, samplePolicyId: null });
+    expect(resolved.findings.find((f) => f.id === 'finding-quality')?.bodyKey)
+      .toBe('finding.quality.body');
+    expect(checkAnalysisSnapshot(pending, { table: proposed, sourceHash: table.sourceRef.sourceHash }))
+      .toEqual([]);
+  });
+
   it('keeps generic tables descriptive: no sample pack without a policy id', () => {
     expect(hasSampleColumns(table)).toBe(true);
     const generic = analyze(table, { ...OPTIONS, samplePolicyId: null });

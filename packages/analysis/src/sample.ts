@@ -562,7 +562,9 @@ export function buildSamplePack(table: NormalizedTable, scope: Scope): SamplePac
       kind: 'quality',
       severity: 'attention',
       titleKey: 'finding.quality.title',
-      bodyKey: 'finding.quality.body',
+      bodyKey: table.qualityIssues.some((q) => q.status === 'proposed')
+        ? 'finding.quality.body.pending'
+        : 'finding.quality.body',
       metricIds: ['quality-duplicate', 'quality-category', 'quality-missing'],
       provenanceIds: ['quality-duplicate-proof', 'quality-category-proof', 'quality-missing-proof'],
       qualityIssueIds: ordered.map((q) => q.id),

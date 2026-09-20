@@ -237,7 +237,11 @@ function genericFindings(
       kind: 'quality',
       severity: 'attention',
       titleKey: 'finding.quality.title',
-      bodyKey: 'finding.quality.body',
+      // Proposed-but-unapplied issues mean the row-level fixes did not run:
+      // the body must say "flagged", not "excluded".
+      bodyKey: table.qualityIssues.some((q) => q.status === 'proposed')
+        ? 'finding.quality.body.pending'
+        : 'finding.quality.body',
       metricIds: ['quality-duplicate', 'quality-category', 'quality-missing'],
       provenanceIds: ['quality-duplicate-proof', 'quality-category-proof', 'quality-missing-proof'],
       qualityIssueIds: table.qualityIssues.map((q) => q.id),
@@ -285,7 +289,9 @@ function genericCharts(
       id: 'chart-quality',
       kind: 'quality-bars',
       titleKey: 'chart.quality.title',
-      summaryKey: 'chart.quality.summary',
+      // The sample's summary cites its fixed ledger counts; arbitrary uploads
+      // get a count-free summary — the bars carry the real numbers.
+      summaryKey: 'chart.quality.summary.generic',
       unit: { kind: 'count', label: 'records', currency: null },
       series: [{ id: 'issues', labelKey: 'quality.issues', semantic: 'attention' }],
       points: kinds.map((kind) => ({
