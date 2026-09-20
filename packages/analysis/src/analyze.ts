@@ -8,7 +8,7 @@
  * ledger is counted, and no management advice is invented. Findings are
  * ranked by the specified tuple and capped at three.
  */
-import { compareDecimal, isDecimal, POLICY } from '@rowfolio/contracts';
+import { compareDecimal, isDecimal, isTranslationKey, POLICY } from '@rowfolio/contracts';
 import type {
   AnalysisSnapshot,
   ChartSpec,
@@ -105,9 +105,15 @@ function genericMetrics(
     ).rows
     : table.rows;
   const resolved = table.qualityIssues.filter((q) => q.status === 'resolved').map((q) => q.id);
+  // Confirmed measures participate even when the column leans mixed:
+  // confirmation is the semantic gate, per-value decimal validity the rest.
+  // Exportable metrics additionally need a declared catalog key: the
+  // contract rejects invented `metric.*` labels, so measures without one
+  // stay in the table but get no metric (a catalog gap, not silent math).
   const measures = table.columns.filter(
     (c) => c.role === 'measure' && c.additive && c.confirmed
-      && (c.type === 'decimal' || c.type === 'integer'),
+      && (c.type === 'decimal' || c.type === 'integer' || c.type === 'mixed')
+      && isTranslationKey(`metric.${c.id}`),
   );
   for (const column of measures) {
     const sum = sumField(inScope, column.id);

@@ -255,7 +255,11 @@ export const buildPresentation = async (
       rtlMode: rtl,
       objectName: `${slide.id}-notes`,
     });
-    if (slide.notes.length > 0) deck.addNotes(slide.notes.join('\n'));
+    if (slide.notes.length > 0) {
+      // PptxGenJS 4.0.1 silently drops notes containing a line break, so
+      // multi-part provenance joins one paragraph rather than vanishing.
+      deck.addNotes(slide.notes.join(' · '));
+    }
     progress('charts', 0.2 + (0.6 * (index + 1)) / 6);
   });
 
