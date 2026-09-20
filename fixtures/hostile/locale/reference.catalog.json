@@ -1,0 +1,7 @@
+{
+  "brand.name": "Rowfolio",
+  "greet.user": "Hello {name}",
+  "summary.rows.other": "{count} rows retained",
+  "summary.rows.few": "{count} rows retained (few)",
+  "action.close": "Close"
+}

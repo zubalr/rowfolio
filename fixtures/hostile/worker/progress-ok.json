@@ -1,0 +1,9 @@
+[
+  { "stage": "preflight", "fraction": 0.5 },
+  { "stage": "preflight", "fraction": 1.0 },
+  { "stage": "parse", "fraction": null },
+  { "stage": "parse", "fraction": 0.1 },
+  { "stage": "parse", "fraction": 0.9 },
+  { "stage": "analyze", "fraction": null },
+  { "stage": "analyze", "fraction": 1.0 }
+]

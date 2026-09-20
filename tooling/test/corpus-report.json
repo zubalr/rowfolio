@@ -1,0 +1,517 @@
+{
+  "corpusVersion": "1.0.0",
+  "generatedBy": "tooling/test/run_corpus.ts",
+  "contractVersion": "1.0.0",
+  "entries": [
+    {
+      "path": "analysis/oracle-consistent.json",
+      "sha256": "1a74da16672dbfc69b89ff8590de5c9297f9f1c8218d23e5dc41026c3bd0d259",
+      "bytes": 360,
+      "inspector": "metric",
+      "expected": [],
+      "actual": [],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "analysis/planted-wrong-metric.json",
+      "sha256": "be8f702088a0d90616c80015fe20aa3e66c60b9231eafbb86b8f91e49b4f7d3d",
+      "bytes": 363,
+      "inspector": "metric",
+      "expected": [
+        "metric.mismatch"
+      ],
+      "actual": [
+        "metric.mismatch",
+        "metric.mismatch"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "csv/control-clean.csv",
+      "sha256": "d235bf3e70feae505471b983a5dffc59e704b2eeed0a6ce9a91035eea9898def",
+      "bytes": 70,
+      "inspector": "csv",
+      "expected": [],
+      "actual": [],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "csv/formula-injection.csv",
+      "sha256": "81231d451a04d485b51d767208d2a76fe3974d059908b8cf8db832263050e5fe",
+      "bytes": 139,
+      "inspector": "csv",
+      "expected": [
+        "csv.formula-prefix"
+      ],
+      "actual": [
+        "csv.formula-prefix",
+        "csv.ragged-row",
+        "csv.formula-prefix",
+        "csv.formula-prefix",
+        "csv.formula-prefix"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "csv/ragged.csv",
+      "sha256": "26bd522b502df613107a728146b6f52bc52a86d4aa8c240fbb9d0254c8b893cc",
+      "bytes": 24,
+      "inspector": "csv",
+      "expected": [
+        "csv.ragged-row"
+      ],
+      "actual": [
+        "csv.ragged-row",
+        "csv.ragged-row"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "locale/ar-extra-key.catalog.json",
+      "sha256": "34acd3a985faf8120013bab3d27b9a7d45f4df92ccc658bc9de81c594344122c",
+      "bytes": 313,
+      "inspector": "locale",
+      "expected": [
+        "locale.extra-key"
+      ],
+      "actual": [
+        "locale.extra-key"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "locale/ar-missing-key.catalog.json",
+      "sha256": "ec41e9be16da596c8ec8537dc5356a09a1bd9e729e6cc3bfefb3acd91948c87b",
+      "bytes": 209,
+      "inspector": "locale",
+      "expected": [
+        "locale.missing-key"
+      ],
+      "actual": [
+        "locale.missing-key"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "locale/ar-ok.catalog.json",
+      "sha256": "64eabf661bbbcaa5fc318e67f7702a86641a68dff1b7aa35faac28427b8da5a1",
+      "bytes": 248,
+      "inspector": "locale",
+      "expected": [],
+      "actual": [],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "locale/ar-placeholder-mismatch.catalog.json",
+      "sha256": "b5b4afe1040778e47f0ac9c3630e3fef0bfba6b5a20fcb4de850ad5899dd5947",
+      "bytes": 248,
+      "inspector": "locale",
+      "expected": [
+        "locale.placeholder-mismatch"
+      ],
+      "actual": [
+        "locale.placeholder-mismatch"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "native/control-minimal.xlsx",
+      "sha256": "8facb439519589258b31cc9132aa3c3b82ef3be8bdc3d6a2803de9d6396f1659",
+      "bytes": 3015,
+      "inspector": "native",
+      "expected": [],
+      "actual": [],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "native/corrupt-bad-crc.xlsx",
+      "sha256": "5759b9a273c5bed59517433bbba4dcd71a17736e70f61209e7265c1836e95b38",
+      "bytes": 3015,
+      "inspector": "native",
+      "expected": [
+        "zip.crc-mismatch"
+      ],
+      "actual": [
+        "zip.crc-mismatch"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "native/corrupt-cd-count.zip",
+      "sha256": "f21b119c7cd8968cf10a740794daeb599965ca715f0c28edf177087a7f4aab67",
+      "bytes": 200,
+      "inspector": "native",
+      "expected": [
+        "zip.entry-count",
+        "zip.cd-count-mismatch"
+      ],
+      "actual": [
+        "zip.entry-count",
+        "zip.cd-count-mismatch"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "native/corrupt-declared-oversize.xlsx",
+      "sha256": "8b0ba8bfec7a7dc002383b8a45ff5d92eec4ac305aa346312203b51ab08bbfef",
+      "bytes": 3015,
+      "inspector": "native",
+      "expected": [
+        "zip.entry-declared-oversize",
+        "zip.expanded-exceeds-limit",
+        "zip.expansion-ratio",
+        "zip.inflate-skipped"
+      ],
+      "actual": [
+        "zip.entry-declared-oversize",
+        "zip.expanded-exceeds-limit",
+        "zip.expansion-ratio",
+        "zip.inflate-skipped"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "native/corrupt-truncated.xlsx",
+      "sha256": "cce61a5346e51e0c54a402f0741dd9ee9bd5678295d5f59dc5b4a650c1a524c9",
+      "bytes": 1809,
+      "inspector": "native",
+      "expected": [
+        "zip.no-eocd"
+      ],
+      "actual": [
+        "zip.no-eocd"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "native/empty.zip",
+      "sha256": "8739c76e681f900923b900c9df0ef75cf421d39cabb54650c4b9ad19b6a76d85",
+      "bytes": 22,
+      "inspector": "native",
+      "expected": [
+        "zip.empty-archive"
+      ],
+      "actual": [
+        "zip.empty-archive",
+        "ooxml.missing-content-types"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "native/encrypted-ooxml.xlsx",
+      "sha256": "c4a70c95b71f8d796350cf9c4b2721274c5a1839d51918d0b085a304793a50bc",
+      "bytes": 9216,
+      "inspector": "native",
+      "expected": [
+        "cfb.compound-file",
+        "cfb.encryption-marker"
+      ],
+      "actual": [
+        "cfb.compound-file",
+        "cfb.encryption-marker",
+        "cfb.encryption-marker"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "native/external-hyperlink.xlsx",
+      "sha256": "9260ff5b4ada9a29540bac0219e219168bfe589d64d6c7915f2ca1d3ea9cd37a",
+      "bytes": 3491,
+      "inspector": "native",
+      "expected": [
+        "ooxml.external-relationship"
+      ],
+      "actual": [
+        "ooxml.external-relationship"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "native/external-workbook-link.xlsx",
+      "sha256": "d195a091f5e22a98e2c8fdffce1e6148a5f293e4b8d0b3234ef6892b34192c5a",
+      "bytes": 4228,
+      "inspector": "native",
+      "expected": [
+        "ooxml.external-relationship"
+      ],
+      "actual": [
+        "ooxml.external-link-part",
+        "ooxml.external-link-part",
+        "ooxml.external-relationship"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "native/macro-bearing.xlsm",
+      "sha256": "c859459d262f49e26df10e5758666b14c664590e7a7a088b384236ef6a3d615c",
+      "bytes": 3311,
+      "inspector": "native",
+      "expected": [
+        "ooxml.macro-content",
+        "ooxml.macro-part"
+      ],
+      "actual": [
+        "ooxml.macro-content",
+        "ooxml.macro-part"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "native/nested-archive.zip",
+      "sha256": "01f8eb382b29072ddd625a2b7bd7664802960c0707cc9091a91a2c9405ebce78",
+      "bytes": 357,
+      "inspector": "native",
+      "expected": [
+        "zip.nested-archive"
+      ],
+      "actual": [
+        "zip.nested-archive",
+        "ooxml.missing-content-types"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "native/not-a-zip.xlsx",
+      "sha256": "9215c2e30a245c54fb0d3c3234661760933d2448fb6256f756b8744b8af4e6a0",
+      "bytes": 49,
+      "inspector": "native",
+      "expected": [
+        "inspect.unknown-signature"
+      ],
+      "actual": [
+        "inspect.unknown-signature"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "native/oversize-cell.csv",
+      "sha256": "e148767b80fc59b73a58dd0d1be6d07bdb1d82366130939c6bf955601c1fb8d3",
+      "bytes": 33017,
+      "inspector": "csv",
+      "expected": [
+        "csv.cell-overflow"
+      ],
+      "actual": [
+        "csv.cell-overflow"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "native/path-traversal.zip",
+      "sha256": "4d3b2b4ae371e5398a55683b5da05bf562987bf94446557266d8cb6e835f3d84",
+      "bytes": 338,
+      "inspector": "native",
+      "expected": [
+        "zip.path-traversal"
+      ],
+      "actual": [
+        "zip.path-traversal",
+        "zip.path-traversal"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "worker/envelope-duplicate-slot.json",
+      "sha256": "374eea02d306fb6bb839d663f889f2e7e520920977371363c745d342f0bc33fe",
+      "bytes": 295,
+      "inspector": "envelope",
+      "expected": [
+        "envelope.slot-duplicate"
+      ],
+      "actual": [
+        "envelope.slot-duplicate"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "worker/envelope-missing-slot.json",
+      "sha256": "8c529314733301a6cc148f965a18e7ceeceb8013aeecfd2c51c37a31c2c28b2c",
+      "bytes": 270,
+      "inspector": "envelope",
+      "expected": [
+        "envelope.slot-missing"
+      ],
+      "actual": [
+        "envelope.slot-missing"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "worker/envelope-ok.json",
+      "sha256": "e09bd8a2c8ed875ac3930fb6066cf8168b2ea2d36ab1a97e7c601add1ae11468",
+      "bytes": 318,
+      "inspector": "envelope",
+      "expected": [],
+      "actual": [],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "worker/envelope-slot-size.json",
+      "sha256": "bdd59b8e05f3c5c30f922574105ae544761dfd46565b31c4375400832c3cd011",
+      "bytes": 320,
+      "inspector": "envelope",
+      "expected": [
+        "envelope.slot-size"
+      ],
+      "actual": [
+        "envelope.slot-size"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "worker/progress-ok.json",
+      "sha256": "bd987967be4a3bd19137d12bd061be19f59834a555de341586465ee65addc917",
+      "bytes": 304,
+      "inspector": "progress",
+      "expected": [],
+      "actual": [],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "worker/progress-regression.json",
+      "sha256": "c9b515a54517ffba072e040e8037d35f58158c7b75674615f3035a6e1d28b3df",
+      "bytes": 128,
+      "inspector": "progress",
+      "expected": [
+        "progress.regression"
+      ],
+      "actual": [
+        "progress.regression"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "worker/response-current.json",
+      "sha256": "53411a3f4070c229d1ab51b740712ca67eda4f52c245e6c221e7b9c297293c8e",
+      "bytes": 154,
+      "inspector": "worker-response",
+      "expected": [],
+      "actual": [
+        "envelope.current"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "worker/response-invalid-protocol.json",
+      "sha256": "b3f346c06defa2af6b9c5e64e082b193f93341f863b48725a80be980ea3ad788",
+      "bytes": 154,
+      "inspector": "worker-response",
+      "expected": [
+        "envelope.invalid"
+      ],
+      "actual": [
+        "envelope.invalid"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "worker/response-invalid-shape.json",
+      "sha256": "09cf3a19a8e79e38766fdebbb3e82dc2c8a7d14fc2d0e142edeb141591071986",
+      "bytes": 120,
+      "inspector": "worker-response",
+      "expected": [
+        "envelope.invalid"
+      ],
+      "actual": [
+        "envelope.invalid"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "worker/response-stale-revision.json",
+      "sha256": "680cf65253ac53d3f12cefdd6872fcb069822e037d3f37712a0c2eb610516370",
+      "bytes": 154,
+      "inspector": "worker-response",
+      "expected": [
+        "envelope.stale"
+      ],
+      "actual": [
+        "envelope.stale"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    },
+    {
+      "path": "worker/response-stale-session.json",
+      "sha256": "991b4c40539d7708e63417bbf8174cd7f46113957def9077d47b586a1c88cab7",
+      "bytes": 163,
+      "inspector": "worker-response",
+      "expected": [
+        "envelope.stale"
+      ],
+      "actual": [
+        "envelope.stale"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "verdict": "pass"
+    }
+  ],
+  "failed": 0,
+  "passed": 34
+}

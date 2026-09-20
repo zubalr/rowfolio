@@ -1,0 +1,5 @@
+[
+  { "stage": "parse", "fraction": 0.6 },
+  { "stage": "parse", "fraction": 0.2 },
+  { "stage": "analyze", "fraction": 0.1 }
+]
