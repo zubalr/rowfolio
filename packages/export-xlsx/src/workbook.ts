@@ -17,6 +17,7 @@ import {
   significantDigits,
 } from '@rowfolio/contracts';
 import type { ExportArtifact, ExportModel } from '@rowfolio/contracts';
+import { hasSheetLabel, sheetLabel } from './labels.ts';
 
 /**
  * Build progress callback. Structural mirror of the contract `Progress`
@@ -89,6 +90,28 @@ function toCellValue(value: string | boolean | null): string | number | boolean 
   // ExcelJS writes string values as shared strings, never as formulas.
   return value;
 }
+
+/** Unit codes never reach visible copy raw: fractions display as `%`. */
+function displayUnit(kind: string | undefined, labelText: string): string {
+  if (kind === 'ratio') return '%';
+  return labelText;
+}
+
+const GROUP_COUNT = new Intl.NumberFormat('en-US', { useGrouping: true });
+
+function formatCount(value: number): string {
+  return GROUP_COUNT.format(Math.trunc(value));
+}
+
+/** Cost-change fraction to whole percent: `0.08` → `8%`. */
+function formatChangePercent(fraction: string): string {
+  const num = Number(fraction);
+  if (!Number.isFinite(num)) return fraction;
+  return `${parseFloat((num * 100).toFixed(1))}%`;
+}
+
+/** Adverse red for explicitly negative results; restrained by design. */
+const ADVERSE_ARGB = 'FFB91C1C';
 
 function numFmtFor(kind: string | undefined): string {
   switch (kind) {
@@ -165,45 +188,109 @@ export const buildWorkbook = async (
   progress('layout', 0.25);
 
   // ---- Executive Summary -------------------------------------------------
+  // Observed facts first, assumptions physically separate below. Labels
+  // come from the workbook copy tables; numbers stay exact model values.
   const summary = get('summary');
-  summary.columns = [{ width: 28 }, { width: 72 }];
+  const locale = model.locale;
+  // Portrait A4 fits ~74 width units at body size; the value column wraps
+  // instead of spilling onto a second page.
+  summary.columns = [{ width: 26 }, { width: 48 }];
   const scopeText = [
     model.scope.periodStart ?? 'all',
     model.scope.periodEnd ?? 'all',
-    model.scope.regions.length > 0 ? model.scope.regions.join(', ') : 'all regions',
+    model.scope.regions.length > 0 ? model.scope.regions.join(', ') : sheetLabel(locale, 'common.allRegions'),
   ].join(' / ');
-  const summaryRows: Array<[string, string | number]> = [
-    ['Scope', scopeText],
-    ['Source', `${model.table.sourceRef.workbookName}#${model.table.sourceRef.sheetName}`],
-    ['Records', `${model.qualitySummary.retainedRows} retained / ${model.qualitySummary.rawRows} raw`],
-    [
-      'Scenario',
-      model.scenario !== null && model.scenario.status === 'defined'
-        ? `Includes ${formatPercent(model.scenario.costChange)} operating-cost scenario`
-        : 'Baseline (no scenario)',
-    ],
-    ['Generated', model.createdAt],
-  ];
-  summaryRows.forEach(([label, value], i) => {
-    const row = summary.getRow(i + 1);
-    row.getCell(1).value = label;
+  let summaryRow = 1;
+  const summaryTitle = summary.getRow(summaryRow);
+  summaryTitle.getCell(1).value = sheetLabel(locale, 'export.title');
+  summaryTitle.getCell(1).font = { bold: true, size: 14 };
+  summaryRow += 2;
+  const observedHeader = summary.getRow(summaryRow);
+  observedHeader.getCell(1).value = sheetLabel(locale, 'evidence.title');
+  observedHeader.getCell(1).font = { bold: true, size: 12 };
+  summaryRow += 1;
+  const putSummary = (labelText: string, value: string | number, link?: string): void => {
+    const row = summary.getRow(summaryRow);
+    if (link !== undefined) {
+      row.getCell(1).value = { text: labelText, hyperlink: link } as never;
+    } else {
+      row.getCell(1).value = labelText;
+    }
     row.getCell(2).value = value;
-  });
-  let headlineRow = summaryRows.length + 2;
-  summary.getRow(headlineRow).getCell(1).value = 'Key metrics';
-  headlineRow += 1;
-  const headlineIds = ['june-revenue', 'june-operating-cost', 'june-contribution', 'june-margin'];
-  for (const id of headlineIds) {
-    const metric = model.metrics.find((m) => m.id === id);
-    if (metric?.value == null) continue;
-    headlineRow += 1;
-    const row = summary.getRow(headlineRow);
-    row.getCell(1).value = metric.labelKey;
+    row.getCell(2).alignment = { wrapText: true };
+    summaryRow += 1;
+  };
+  putSummary(sheetLabel(locale, 'workspace.scope'), scopeText);
+  putSummary(
+    sheetLabel(locale, 'common.rows'),
+    sheetLabel(locale, 'workspace.records')
+      .replace('{raw}', formatCount(model.qualitySummary.rawRows))
+      .replace('{clean}', formatCount(model.qualitySummary.retainedRows)),
+  );
+  putSummary(
+    sheetLabel(locale, 'common.source'),
+    `${model.table.sourceRef.workbookName}#${model.table.sourceRef.sheetName}`,
+  );
+  // Proof row numbers in Methodology (8 fixed rows, then one per proof).
+  const methodName = (byId.get('methodology')?.name ?? 'Methodology').replace(/'/g, "''");
+  const proofRowOf = new Map(model.provenance.map((p, i) => [p.id, 9 + i] as const));
+  const proofLink = (provenanceId: string): string | undefined => {
+    const row = proofRowOf.get(provenanceId);
+    return row === undefined ? undefined : `#'${methodName}'!A${row}`;
+  };
+  const headlineMetrics = (() => {
+    const picked: NonNullable<ReturnType<typeof model.metrics.find>>[] = [];
+    const seen = new Set<string>();
+    const consider = (id: string): void => {
+      if (seen.has(id)) return;
+      const metric = model.metrics.find((m) => m.id === id);
+      if (metric === undefined || metric.id.startsWith('quality-')) return;
+      seen.add(id);
+      picked.push(metric);
+    };
+    for (const id of ['june-revenue', 'june-operating-cost', 'june-contribution', 'june-margin']) consider(id);
+    for (const metric of model.metrics) consider(metric.id);
+    return picked.slice(0, 4);
+  })();
+  for (const metric of headlineMetrics) {
+    const labelText = hasSheetLabel(metric.labelKey) ? sheetLabel(locale, metric.labelKey) : metric.labelKey;
+    const row = summary.getRow(summaryRow);
+    const link = proofLink(metric.provenanceId);
+    if (link !== undefined) {
+      row.getCell(1).value = { text: labelText, hyperlink: link } as never;
+    } else {
+      row.getCell(1).value = labelText;
+    }
+    const raw = metric.value !== null ? toCellValue(metric.value) : null;
     const cell = row.getCell(2);
-    const raw = toCellValue(metric.value);
-    cell.value = raw;
-    if (typeof raw === 'number') cell.numFmt = numFmtFor(metric.unit.kind);
+    if (typeof raw === 'number') {
+      cell.value = raw;
+      cell.numFmt = numFmtFor(metric.unit.kind);
+      if (metric.unit.kind === 'ratio' && raw < 0) {
+        cell.font = { color: { argb: ADVERSE_ARGB }, bold: true };
+      }
+    } else {
+      cell.value = raw;
+    }
+    summaryRow += 1;
   }
+  summaryRow += 1;
+  const assumptionsHeader = summary.getRow(summaryRow);
+  assumptionsHeader.getCell(1).value = sheetLabel(locale, 'scenario.title');
+  assumptionsHeader.getCell(1).font = { bold: true, size: 12 };
+  summaryRow += 1;
+  if (model.scenario !== null && model.scenario.status === 'defined') {
+    putSummary(
+      sheetLabel(locale, 'scenario.costChange'),
+      sheetLabel(locale, 'export.includesScenario')
+        .replace('{change}', formatChangePercent(model.scenario.costChange)),
+    );
+    putSummary(sheetLabel(locale, 'scenario.assumption.revenueFixed'), '');
+    putSummary(sheetLabel(locale, 'scenario.assumption.mechanical'), '');
+  } else {
+    putSummary(sheetLabel(locale, 'common.baseline'), '');
+  }
+  summary.pageSetup.printArea = `A1:B${summaryRow - 1}`;
 
   // ---- Cleaned Data --------------------------------------------------------
   const clean = get('clean');
@@ -274,14 +361,28 @@ export const buildWorkbook = async (
     if (metric.id.startsWith('quality-')) continue;
     const rowIndex = kpis.rowCount + 1;
     const row = kpis.getRow(rowIndex);
-    row.getCell(1).value = metric.labelKey;
+    const labelText = hasSheetLabel(metric.labelKey) ? sheetLabel(locale, metric.labelKey) : metric.labelKey;
+    const link = proofLink(metric.provenanceId);
+    if (link !== undefined) {
+      row.getCell(1).value = { text: labelText, hyperlink: link } as never;
+    } else {
+      row.getCell(1).value = labelText;
+    }
     const valueCell = row.getCell(2);
     const numeric = metric.value !== null ? toCellValue(metric.value) : null;
     placements.set(metric.id, { row: rowIndex, valueAddress: `$B$${rowIndex}` });
     valueCell.value = numeric;
-    if (typeof numeric === 'number') valueCell.numFmt = numFmtFor(metric.unit.kind);
-    row.getCell(3).value = metric.unit.label;
-    row.getCell(4).value = `eligible ${metric.eligibleRows}/${metric.totalRows}; ${metric.scope.coverageNoteKey}`;
+    if (typeof numeric === 'number') {
+      valueCell.numFmt = numFmtFor(metric.unit.kind);
+      if (metric.unit.kind === 'ratio' && numeric < 0) {
+        valueCell.font = { color: { argb: ADVERSE_ARGB }, bold: true };
+      }
+    }
+    row.getCell(3).value = displayUnit(metric.unit.kind, metric.unit.label);
+    const coverageKey = metric.scope.coverageNoteKey;
+    row.getCell(4).value = `eligible ${metric.eligibleRows}/${metric.totalRows}; ${
+      hasSheetLabel(coverageKey) ? sheetLabel(locale, coverageKey) : coverageKey
+    }`;
   }
   // Second pass: constant template formulas with the model's cached results.
   // Placements are complete, so cross-metric references always resolve.
@@ -311,6 +412,7 @@ export const buildWorkbook = async (
     rows: [],
   });
   kpis.autoFilter = { from: 'A1', to: `D${kpis.rowCount}` };
+  kpis.pageSetup.printArea = `A1:D${kpis.rowCount}`;
 
   progress('tables', 0.75);
 
@@ -352,10 +454,18 @@ export const buildWorkbook = async (
     rows: [],
   });
   quality.autoFilter = { from: 'A1', to: `I${model.table.qualityIssues.length + 1}` };
+  quality.pageSetup.printArea = `A1:I${model.table.qualityIssues.length + 1}`;
+  // Restrained emphasis: unresolved rows read red, nothing else shouts.
+  quality.eachRow((row, n) => {
+    if (n === 1) return;
+    if (row.getCell(7).value === 'unresolved') {
+      row.getCell(7).font = { color: { argb: ADVERSE_ARGB }, bold: true };
+    }
+  });
 
   // ---- Methodology -------------------------------------------------------------
   const method = get('methodology');
-  method.columns = [{ width: 30 }, { width: 90 }];
+  method.columns = [{ width: 26 }, { width: 60 }];
   const methodRows: Array<[string, string]> = [
     ['Policy', '1.0.0'],
     ['Analysis', model.analysisId],
@@ -389,6 +499,8 @@ export const buildWorkbook = async (
     columns: [{ name: 'Item' }, { name: 'Detail' }],
     rows: [],
   });
+  method.pageSetup.printArea = `A1:B${methodRows.length}`;
+  clean.pageSetup.printArea = `A1:${columnLetter(headers.length)}${model.table.rows.length + 1}`;
 
   progress('package', null);
   // writeBuffer resolves to a byte array (Uint8Array in browsers); the
@@ -495,10 +607,4 @@ function formulaForMetric(
     default:
       return null;
   }
-}
-
-function formatPercent(fraction: string): string {
-  const num = Number(fraction);
-  if (!Number.isFinite(num)) return String(fraction);
-  return `${Math.round(num * 1000) / 10}%`;
 }

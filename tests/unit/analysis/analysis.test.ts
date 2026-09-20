@@ -199,10 +199,24 @@ describe('mechanics', () => {
   });
 
   it('bounds chart domains above the data at two significant figures', () => {
+    // Smallest two-figure bound at or above max × 1.1: exact hits keep
+    // their headroom, and correct negative-exponent scaling keeps small
+    // magnitudes on-scale (the 0.23-for-1,1,2 defect flattened every bar).
     expect(domainMax(['881000.00', '1000000.00'])).toBe('1100000');
     expect(domainMax(['1194', '1565'])).toBe('1800');
     expect(domainMax(['0'])).toBe('10');
+    expect(domainMax(['1', '1', '2'])).toBe('2.2');
+    expect(domainMax(['0.1', '0.2'])).toBe('0.22');
     expect(absDecimal('-0.119')).toBe('0.119');
+  });
+
+  it('keeps domain bounds sane for signed zero and extremes', () => {
+    expect(domainMax(['-0.00', '0'])).toBe('10');
+    expect(domainMax(['-5', '-3'])).toBe('5.5');
+    expect(domainMax(['0.000000000000000001', '0.000000000000000002'])).toBe('0.0000000000000000022');
+    expect(domainMax(['999999999999999999999999999999.99'])).toBe('1100000000000000000000000000000');
+    expect(domainMax(['17', '7', '5'])).toBe('19');
+    expect(domainMax(['0.25', '0.19'])).toBe('0.28');
   });
 
   it('derives the previous calendar month with year wrap', () => {
