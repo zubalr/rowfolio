@@ -7,12 +7,14 @@
  * separate compositions (right-aligned, RTL paragraphs, unmirrored
  * chronology).
  *
- * Portable Arial references only; no embedded fonts, no remote images,
- * no external relationships. Content that cannot fit its box fails with
- * a typed error instead of clipping.
+ * Latin text stays on portable Arial; Arabic runs declare an
+ * Arabic-capable face (IBM Plex Sans Arabic) as their complex-script
+ * font. No embedded fonts, no remote images, no external relationships.
+ * Content that cannot fit its box fails with a typed error instead of
+ * clipping.
  */
 import PptxGenJS from 'pptxgenjs';
-import { assertExportModel, sha256Hex } from '@rowfolio/contracts';
+import { assertExportModel, DESIGN_TOKENS, sha256Hex } from '@rowfolio/contracts';
 import type { ExportArtifact, ExportModel } from '@rowfolio/contracts';
 import { isSampleModel, renderSlide, type LayoutContext } from './layouts.ts';
 
@@ -59,6 +61,14 @@ export const buildPresentation: BuildPresentation = async (
   pptx.title = model.slides[0]?.title ?? 'Rowfolio briefing';
 
   const rtl = model.locale === 'ar';
+  // Theme declares the portable Latin face; Arabic-capable complex-script
+  // faces ride on each run via layouts' FONT_AR. Presentation-level rtl
+  // hints RTL-aware viewers (it does not mirror geometry or digit shaping).
+  pptx.theme = {
+    headFontFace: DESIGN_TOKENS.font.deck,
+    bodyFontFace: DESIGN_TOKENS.font.deck,
+  };
+  pptx.rtlMode = rtl;
   const chartById = new Map(model.charts.map((c) => [c.id, c] as const));
   const metricById = new Map(model.metrics.map((m) => [m.id, m] as const));
   for (const scenarioMetric of model.scenario?.metrics ?? []) {

@@ -14,7 +14,7 @@
 import type PptxGenJS from 'pptxgenjs';
 
 type TextRun = PptxGenJS.TextProps;
-import { isDecimal } from '@rowfolio/contracts';
+import { DESIGN_TOKENS, isDecimal } from '@rowfolio/contracts';
 import type {
   ChartSpec,
   ExportModel,
@@ -35,15 +35,20 @@ import {
 
 type Deck = ReturnType<InstanceType<typeof PptxGenJS>['addSlide']>;
 
-const INK = '1A1A1A';
-const COBALT = '1D4ED8';
-const AMBER = 'D97706';
+const token = (hex: string): string => hex.replace('#', '').toUpperCase();
+const INK = token(DESIGN_TOKENS.color.ink);
+const COBALT = token(DESIGN_TOKENS.color.data);
+const AMBER = token(DESIGN_TOKENS.color.scenario);
 /** Restrained adverse red, re-exported for compatibility. */
-export const RED = 'B91C1C';
-const SLATE = '64748B';
-const GRAY = '555555';
-const PAPER = 'F8F5EC';
-const FONT = 'Arial';
+export const RED = token(DESIGN_TOKENS.color.negative);
+const SLATE = token(DESIGN_TOKENS.color.muted);
+const GRAY = token(DESIGN_TOKENS.color.muted);
+const PAPER = token(DESIGN_TOKENS.color.paper);
+const SURFACE = token(DESIGN_TOKENS.color.surface);
+const RULE = token(DESIGN_TOKENS.color.rule);
+const FONT = DESIGN_TOKENS.font.deck;
+/** Arabic-capable face for complex-script runs (Arabic glyphs + shaping). */
+const FONT_AR = DESIGN_TOKENS.font.arabic;
 
 const TITLE_SIZE = 32;
 const SUBTITLE_SIZE = 16;
@@ -79,13 +84,18 @@ export function isSampleModel(model: ExportModel): boolean {
     && model.metrics.some((m) => m.id === 'north-june-revenue');
 }
 
-function runsFor(text: string, locale: Locale): Array<{ text: string; options: { rtlMode: boolean } }> {
-  if (locale === 'en') return [{ text, options: { rtlMode: false } }];
+/**
+ * Runs with per-script font faces: Arabic words get the complex-script
+ * Arabic face so the declared cs typeface is Arabic-capable; digits and
+ * Latin tokens inside Arabic copy stay on the deck's portable Latin face.
+ */
+function runsFor(text: string, locale: Locale): Array<{ text: string; options: { rtlMode: boolean; fontFace: string } }> {
+  if (locale === 'en') return [{ text, options: { rtlMode: false, fontFace: FONT } }];
   const parts = text.split(/([0-9][0-9.,%]*|[A-Za-z_][A-Za-z0-9_.:-]*)/g).filter((p) => p !== '');
-  return parts.map((part) => ({
-    text: part,
-    options: { rtlMode: /^[0-9A-Za-z_]/.test(part) ? false : true },
-  }));
+  return parts.map((part) => {
+    const latin = /^[0-9A-Za-z_]/.test(part);
+    return { text: part, options: { rtlMode: !latin, fontFace: latin ? FONT : FONT_AR } };
+  });
 }
 
 /** Character budget guard: approximate Arial capacity, fail loudly. */
@@ -100,35 +110,69 @@ function fitGuard(slideId: string, box: string, text: string, fontPt: number, wi
   }
 }
 
-function metricLine(ctx: LayoutContext, metric: Metric): string {
+/** `Name: value` split into two runs — label recessive, value emphasized. */
+function metricLineRuns(ctx: LayoutContext, metric: Metric): TextRun[] {
   const name = hasLabel(metric.labelKey) ? label(ctx.locale, metric.labelKey) : metric.id;
-  return `${name}: ${formatMetricValue(metric.value, metric.unit)}`;
+  return [
+    { text: `${name}  `, options: { color: GRAY } },
+    { text: formatMetricValue(metric.value, metric.unit), options: { color: INK, bold: true } },
+  ];
+}
+
+const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'] as const;
+
+/**
+ * Display name for a metric within a slide set: when the same label key
+ * would name two cells identically (e.g. May vs June order volume), qualify
+ * with the metric's period-end month. Only rendered when that period key is
+ * in the copy table — otherwise the plain name stands.
+ */
+function metricDisplayName(ctx: LayoutContext, metric: Metric, siblings: readonly Metric[]): string {
+  const name = hasLabel(metric.labelKey) ? label(ctx.locale, metric.labelKey) : metric.id;
+  const duplicates = siblings.filter((m) => m.id !== metric.id && m.labelKey === metric.labelKey);
+  if (duplicates.length === 0) return name;
+  const end = metric.scope.periodEnd;
+  const month = end === null ? undefined : MONTHS[Number(end.slice(5, 7)) - 1];
+  const key = month !== undefined ? `period.${month}` : '';
+  if (key === '' || !hasLabel(key)) return name;
+  return `${name} · ${label(ctx.locale, key)}`;
 }
 
 function chrome(ctx: LayoutContext): void {
   const { deck, slide, locale, rtl, align } = ctx;
   deck.background = { color: PAPER };
+  // Cobalt tick + hairline rule: a reading frame that anchors the masthead
+  // and separates title block from evidence.
+  bar(ctx, 'masthead-tick', LEFT_X, 0.30, 0.62, 0.075, COBALT);
   deck.addText(runsFor(slide.title, locale), {
-    x: LEFT_X, y: 0.35, w: 12.23, h: 1.0,
+    x: LEFT_X, y: 0.42, w: 12.23, h: 0.95,
     fontSize: TITLE_SIZE, fontFace: FONT, bold: true, color: INK,
     align, rtlMode: rtl, objectName: `${slide.id}-title`,
   });
   deck.addText(runsFor(slide.subtitle, locale), {
-    x: LEFT_X, y: 1.35, w: 12.23, h: 0.5,
+    x: LEFT_X, y: 1.38, w: 12.23, h: 0.45,
     fontSize: SUBTITLE_SIZE, fontFace: FONT, color: GRAY,
     align, rtlMode: rtl, objectName: `${slide.id}-subtitle`,
   });
+  bar(ctx, 'masthead-rule', LEFT_X, 1.92, 12.23, 0.018, RULE);
   const notes = slide.notes.join(' · ');
   // Visible footer carries human evidence pointers only; raw IDs live in
   // speaker notes and object names, never in display text.
   const footer = footerContent(ctx);
+  bar(ctx, 'foot-rule', LEFT_X, 6.78, 12.23, 0.018, RULE);
   if (footer !== null) {
     deck.addText(runsFor(footer, locale), {
-      x: LEFT_X, y: FOOT_Y, w: 12.23, h: 0.5,
-      fontSize: FOOT_SIZE, fontFace: FONT, color: '666666',
+      x: LEFT_X, y: FOOT_Y, w: 10.4, h: 0.5,
+      fontSize: FOOT_SIZE, fontFace: FONT, color: GRAY,
       align, rtlMode: rtl, objectName: `${slide.id}-notes`,
     });
   }
+  const index = Number(slide.id.replace('slide-', '')) || 0;
+  deck.addText([{ text: `${index} / ${ctx.model.slides.length}`, options: { rtlMode: false, fontFace: FONT } }], {
+    x: 11.2, y: FOOT_Y, w: 1.58, h: 0.4,
+    fontSize: FOOT_SIZE, fontFace: FONT, color: GRAY, align: 'right',
+    objectName: `${slide.id}-folio`,
+  });
   if (slide.notes.length > 0) {
     // PptxGenJS 4.0.1 silently drops notes containing a line break, so
     // multi-part provenance joins one paragraph rather than vanishing.
@@ -178,7 +222,7 @@ function textBox(
   ctx: LayoutContext,
   name: string,
   runs: TextRun[],
-  box: { x: number; y: number; w: number; h: number; fontSize: number; color?: string; bold?: boolean; align?: 'left' | 'right' | 'center' },
+  box: { x: number; y: number; w: number; h: number; fontSize: number; color?: string; bold?: boolean; align?: 'left' | 'right' | 'center'; valign?: 'top' | 'middle' | 'bottom' },
 ): void {
   const plain = runs.map((r) => r.text ?? '').join('');
   fitGuard(ctx.slide.id, name, plain, box.fontSize, box.w, box.h);
@@ -187,6 +231,7 @@ function textBox(
     fontSize: box.fontSize, fontFace: FONT,
     color: box.color ?? INK, bold: box.bold ?? false,
     align: box.align ?? ctx.align, rtlMode: ctx.rtl,
+    ...(box.valign !== undefined ? { valign: box.valign } : {}),
     objectName: `${ctx.slide.id}-${name}`,
   });
 }
@@ -264,19 +309,36 @@ export function chartBox(
   // Stored fractions display as whole percents on data labels; counts and
   // money keep the general format. (Labels never alter the cached values.)
   const labelFormat = chart.unit.kind === 'ratio' ? '0%' : undefined;
+  const axisFont = ctx.rtl ? FONT_AR : FONT;
   ctx.deck.addChart('bar', data, {
     x: box.x, y: box.y, w: box.w, h: box.h,
     barDir: 'col',
     showLegend: seriesIds.length > 1,
+    legendPos: 'b',
+    legendFontSize: 10,
+    legendFontFace: axisFont,
+    legendColor: GRAY,
     showTitle: false,
     showValue: true,
-    dataLabelFontSize: 11,
+    // pptxgenjs only emits dLblPos for clustered bars as ctr/inBase/inEnd;
+    // omitting it keeps PowerPoint's default outEnd placement — labels sit
+    // above each bar end, never clipped inside the plot.
+    dataLabelColor: INK,
+    dataLabelFontSize: 10,
+    dataLabelFontFace: axisFont,
     ...(labelFormat !== undefined ? { dataLabelFormatCode: labelFormat } : {}),
     chartColors: colors,
     valAxisMinVal: Number(chart.domain.min),
     valAxisMaxVal: Number(chart.domain.max),
+    valGridLine: { color: RULE, size: 0.5 },
+    catAxisLineColor: GRAY,
+    valAxisLineColor: GRAY,
     catAxisLabelFontSize: 11,
-    valAxisLabelFontSize: 11,
+    catAxisLabelColor: GRAY,
+    catAxisLabelFontFace: axisFont,
+    valAxisLabelFontSize: 10,
+    valAxisLabelColor: GRAY,
+    valAxisLabelFontFace: axisFont,
   });
 }
 
@@ -312,11 +374,16 @@ function layoutSummary(ctx: LayoutContext): void {
   const { model, slide, locale } = ctx;
   const finding = slide.findingIds.map((id) => ctx.findingById.get(id)).find((f) => f !== undefined)
     ?? model.findings[0];
-  const left: Array<{ text: string; options?: Record<string, unknown> }> = [];
   if (finding === undefined) {
-    left.push({ text: label(locale, 'empty.noFindings') });
+    textBox(ctx, 'body', [{ text: label(locale, 'empty.noFindings') }], {
+      x: LEFT_X, y: BODY_Y, w: LEFT_W, h: 0.6, fontSize: BODY_SIZE, color: GRAY,
+    });
   } else {
-    left.push({ text: label(locale, finding.titleKey), options: { bold: true, fontSize: 20 } });
+    // Lead statement reads as a headline; evidence lines stay recessive.
+    bar(ctx, 'finding-accent', LEFT_X, BODY_Y + 0.06, 0.07, 0.62, COBALT);
+    textBox(ctx, 'headline', [{ text: label(locale, finding.titleKey) }], {
+      x: LEFT_X + 0.28, y: BODY_Y, w: LEFT_W - 0.28, h: 0.75, fontSize: 22, bold: true, color: INK,
+    });
     if (finding.metricIds.length > 8) {
       throw new ExportPptxError(
         'layout-overflow',
@@ -326,31 +393,55 @@ function layoutSummary(ctx: LayoutContext): void {
     const annotated = finding.metricIds
       .map((id) => ctx.metricById.get(id))
       .filter((m) => m !== undefined);
+    const lines: TextRun[] = [];
     for (const metric of annotated) {
-      left.push({ text: metricLine(ctx, metric as Metric) });
+      const runs = metricLineRuns(ctx, metric as Metric);
+      runs.forEach((run, i) => {
+        const last = i === runs.length - 1;
+        lines.push({
+          ...run,
+          options: {
+            ...(run.options ?? {}),
+            ...(i === 0 ? { bullet: { code: '25AA' } } : {}),
+            ...(last ? { breakLine: true, paraSpaceAfter: 10 } : {}),
+          },
+        });
+      });
     }
     // The lead caveat lives in the footer; the body stays comparative.
+    textBox(ctx, 'body', lines, {
+      x: LEFT_X + 0.28, y: BODY_Y + 0.95, w: LEFT_W - 0.28, h: BODY_H - 0.95, fontSize: SMALL_SIZE + 2, color: INK,
+    });
   }
-  textBox(ctx, 'body', left.map((line) => ({
-    ...line,
-    options: { ...(line.options ?? {}), bullet: { code: '25AA' }, breakLine: true },
-  })), { x: LEFT_X, y: BODY_Y, w: LEFT_W, h: BODY_H, fontSize: BODY_SIZE, color: COBALT });
 
-  // Lineage visual: retained records against raw input, widths to scale.
+  // Lineage visual: retained records against raw input on a surface card,
+  // bars to scale, each labeled so the diagram needs no legend.
+  ctx.deck.addShape('roundRect', {
+    x: RIGHT_X - 0.22, y: BODY_Y - 0.05, w: RIGHT_W + 0.44, h: 3.05,
+    rectRadius: 0.09, fill: { color: SURFACE }, line: { color: RULE, width: 0.75 },
+    objectName: `${slide.id}-lineage-card`,
+  });
   const { rawRows, retainedRows } = model.qualitySummary;
-  const rowsLabel = label(locale, 'common.rows');
   const keptW = rawRows > 0 ? (RIGHT_W * retainedRows) / rawRows : 0;
-  bar(ctx, 'lineage-raw', RIGHT_X, 2.4, RIGHT_W, 0.55, 'D8D2C4');
-  bar(ctx, 'lineage-kept', RIGHT_X, 3.2, keptW, 0.55, COBALT);
-  const keptText = `${formatInteger(String(retainedRows))} / ${formatInteger(String(rawRows))} ${rowsLabel}`;
-  textBox(ctx, 'lineage', [{ text: keptText }], {
-    x: RIGHT_X, y: 3.95, w: RIGHT_W, h: 0.6, fontSize: SMALL_SIZE, color: INK,
+  textBox(ctx, 'lineage-raw-label', [{ text: label(locale, 'common.rawInput') }], {
+    x: RIGHT_X, y: 2.22, w: RIGHT_W, h: 0.3, fontSize: FOOT_SIZE, color: GRAY,
+  });
+  bar(ctx, 'lineage-raw', RIGHT_X, 2.5, RIGHT_W, 0.4, RULE);
+  textBox(ctx, 'lineage-raw-value', [{ text: formatInteger(String(rawRows)) }], {
+    x: RIGHT_X, y: 2.56, w: RIGHT_W - 0.1, h: 0.3, fontSize: FOOT_SIZE, color: INK, align: 'right',
+  });
+  textBox(ctx, 'lineage-kept-label', [{ text: label(locale, 'common.retained') }], {
+    x: RIGHT_X, y: 3.14, w: RIGHT_W, h: 0.3, fontSize: FOOT_SIZE, color: GRAY,
+  });
+  bar(ctx, 'lineage-kept', RIGHT_X, 3.42, keptW, 0.4, COBALT);
+  textBox(ctx, 'lineage-kept-value', [{ text: formatInteger(String(retainedRows)) }], {
+    x: RIGHT_X, y: 3.48, w: RIGHT_W - 0.1, h: 0.3, fontSize: FOOT_SIZE, color: INK, align: 'right',
   });
   const disclosure = ctx.isSample ? label(locale, 'common.prepared') : label(locale, 'common.local');
   const coverage = coverageLine(ctx);
   const contextLines = coverage !== null ? `${disclosure} · ${coverage}` : disclosure;
   textBox(ctx, 'context', [{ text: contextLines }], {
-    x: RIGHT_X, y: 4.7, w: RIGHT_W, h: 1.2, fontSize: SMALL_SIZE, color: GRAY,
+    x: RIGHT_X, y: 4.14, w: RIGHT_W, h: 0.7, fontSize: FOOT_SIZE, color: GRAY,
   });
 }
 
@@ -378,26 +469,34 @@ function layoutKpis(ctx: LayoutContext): void {
     const big = metric.unit.kind === 'currency' && metric.value !== null
       ? `${exportUnitLabel(metric.unit)} ${formatCompact(metric.value)}`.trim()
       : formatMetricValue(metric.value, metric.unit);
-    const name = hasLabel(metric.labelKey) ? label(locale, metric.labelKey) : metric.id;
+    const name = metricDisplayName(ctx, metric, metrics);
+    if (i > 0) {
+      bar(ctx, `kpi-sep-${i}`, LEFT_X + i * colW - 0.07, BODY_Y + 0.08, 0.014, 1.35, RULE);
+    }
     textBox(ctx, `kpi-${i}`, [
       { text: big, options: { breakLine: true } },
-      { text: name, options: { fontSize: 14, color: GRAY } },
+      { text: name, options: { fontSize: FOOT_SIZE, color: GRAY } },
     ], {
-      x: LEFT_X + i * colW, y: BODY_Y, w: colW - 0.15, h: 1.6, fontSize: HEADLINE_SIZE, bold: true, color,
+      x: LEFT_X + i * colW + (i > 0 ? 0.05 : 0), y: BODY_Y, w: colW - 0.12, h: 1.5, fontSize: big.length > 10 ? 21 : HEADLINE_SIZE, bold: true, color,
     });
   });
-  // Native data panel: exact values beside the headlines.
-  const rows = metrics.map((metric) => [
-    { text: hasLabel(metric.labelKey) ? label(locale, metric.labelKey) : metric.id, options: {} },
-    { text: formatMetricValue(metric.value, metric.unit), options: {} },
-    { text: exportUnitLabel(metric.unit), options: {} },
-  ]);
+  // Native data panel: exact values under the headlines, header band on top.
+  const header = [
+    { text: label(locale, 'table.metric'), options: { bold: true, fill: { color: SURFACE } } },
+    { text: label(locale, 'table.value'), options: { bold: true, fill: { color: SURFACE } } },
+    { text: label(locale, 'table.unit'), options: { bold: true, fill: { color: SURFACE } } },
+  ];
+  const rows = [header, ...metrics.map((metric) => [
+    { text: metricDisplayName(ctx, metric, metrics), options: {} },
+    { text: formatMetricValue(metric.value, metric.unit), options: { bold: true } },
+    { text: exportUnitLabel(metric.unit), options: { color: GRAY } },
+  ])];
   fitGuard(slide.id, 'table', JSON.stringify(rows), SMALL_SIZE, 12.23, 1.9);
   ctx.deck.addTable(rows, {
     x: LEFT_X, y: 4.4, w: 12.23,
     colW: [5.5, 4.0, 2.73],
-    fontSize: SMALL_SIZE, fontFace: FONT, color: INK,
-    border: { pt: 0.5, color: 'D8D2C4' },
+    fontSize: SMALL_SIZE, fontFace: ctx.rtl ? FONT_AR : FONT, color: INK,
+    border: { pt: 0.5, color: RULE },
     objectName: `${slide.id}-table`,
   });
   if (model.scenario !== null && model.scenario.status === 'defined') {
@@ -421,9 +520,12 @@ function layoutFinding(ctx: LayoutContext): void {
     });
     return;
   }
-  const lines: Array<{ text: string; options?: Record<string, unknown> }> = [
-    { text: label(locale, finding.titleKey), options: { bold: true, fontSize: 20 } },
-  ];
+  // Accent tick anchors the finding headline; metrics render label-dim,
+  // value-strong so the numbers carry the scan order.
+  bar(ctx, 'finding-accent', LEFT_X, BODY_Y + 0.06, 0.07, 0.62, COBALT);
+  textBox(ctx, 'headline', [{ text: label(locale, finding.titleKey) }], {
+    x: LEFT_X + 0.28, y: BODY_Y, w: LEFT_W - 0.28, h: 1.0, fontSize: 20, bold: true, color: INK,
+  });
   // No silent truncation: an over-long metric list fails visibly instead
   // of clipping into unreadable overflow.
   if (finding.metricIds.length > 8) {
@@ -432,19 +534,27 @@ function layoutFinding(ctx: LayoutContext): void {
       `slide ${slide.id} finding carries ${finding.metricIds.length} metrics over the 8-line budget`,
     );
   }
+  const lines: TextRun[] = [];
   for (const metric of finding.metricIds
     .map((id) => ctx.metricById.get(id))
     .filter((m) => m !== undefined)) {
-    lines.push({ text: metricLine(ctx, metric as Metric) });
+    const runs = metricLineRuns(ctx, metric as Metric);
+    runs.forEach((run, i) => {
+      const last = i === runs.length - 1;
+      lines.push({
+        ...run,
+        options: {
+          ...(run.options ?? {}),
+          ...(last ? { breakLine: true, paraSpaceAfter: 8 } : {}),
+        },
+      });
+    });
   }
   const coverage = coverageLine(ctx);
   if (coverage !== null) {
-    lines.push({ text: coverage, options: { fontSize: SMALL_SIZE, color: GRAY } });
+    lines.push({ text: coverage, options: { fontSize: SMALL_SIZE, color: GRAY, breakLine: true, paraSpaceBefore: 8 } });
   }
-  textBox(ctx, 'body', lines.map((line) => ({
-    ...line,
-    options: { ...(line.options ?? {}), breakLine: true },
-  })), { x: LEFT_X, y: BODY_Y, w: LEFT_W, h: BODY_H, fontSize: BODY_SIZE, color: INK });
+  textBox(ctx, 'body', lines, { x: LEFT_X + 0.28, y: BODY_Y + 1.1, w: LEFT_W - 0.28, h: BODY_H - 1.1, fontSize: BODY_SIZE - 2, color: INK });
 
   const chartId = slide.chartIds.find((id) => ctx.chartById.has(id));
   if (chartId !== undefined) {
@@ -468,14 +578,24 @@ function layoutScenario(ctx: LayoutContext): void {
   const { model, slide, locale } = ctx;
   const scenario = model.scenario;
   if (scenario === null || scenario.status !== 'defined') {
-    const reason = scenario?.reasonKey !== null && scenario?.reasonKey !== undefined && hasLabel(scenario.reasonKey)
-      ? label(locale, scenario.reasonKey)
-      : label(locale, 'scenario.unavailable');
-    textBox(ctx, 'body', [
-      { text: label(locale, 'scenario.question'), options: { bold: true, fontSize: 20 } },
-      { text: reason },
-    ].map((line) => ({ ...line, options: { ...(line.options ?? {}), breakLine: true } })), {
-      x: LEFT_X, y: BODY_Y, w: 12.23, h: BODY_H, fontSize: BODY_SIZE, color: INK,
+    // Designed empty state: a quiet panel that states what this page
+    // would have shown and why it cannot — never naked text on paper.
+    const reason = scenario === null
+      ? label(locale, 'scenario.notCommitted')
+      : scenario.reasonKey !== null && scenario.reasonKey !== undefined && hasLabel(scenario.reasonKey)
+        ? label(locale, scenario.reasonKey)
+        : label(locale, 'scenario.unavailable');
+    ctx.deck.addShape('roundRect', {
+      x: LEFT_X, y: BODY_Y + 0.3, w: 8.6, h: 2.9,
+      rectRadius: 0.09, fill: { color: SURFACE }, line: { color: RULE, width: 0.75 },
+      objectName: `${slide.id}-empty-panel`,
+    });
+    textBox(ctx, 'empty', [
+      { text: label(locale, 'scenario.layer'), options: { fontSize: FOOT_SIZE, color: AMBER, bold: true, breakLine: true } },
+      { text: label(locale, 'scenario.question'), options: { bold: true, fontSize: 20, breakLine: true, paraSpaceBefore: 6 } },
+      { text: reason, options: { fontSize: SMALL_SIZE, color: GRAY, paraSpaceBefore: 8 } },
+    ], {
+      x: LEFT_X + 0.45, y: BODY_Y + 0.62, w: 7.7, h: 2.3, fontSize: BODY_SIZE, color: INK, valign: 'top',
     });
     return;
   }
@@ -483,25 +603,36 @@ function layoutScenario(ctx: LayoutContext): void {
   const cost = byId.get('scenario-cost');
   const contribution = byId.get('scenario-contribution');
   const margin = byId.get('scenario-margin');
-  const lines: Array<{ text: string; options?: Record<string, unknown> }> = [
-    { text: label(locale, 'scenario.question'), options: { bold: true, fontSize: 20 } },
+  // Amber marks the editable assumption layer everywhere it appears —
+  // kicker tag, tick, and the scenario metric values themselves.
+  bar(ctx, 'scenario-accent', LEFT_X, BODY_Y + 0.06, 0.07, 0.62, AMBER);
+  textBox(ctx, 'kicker', [{ text: label(locale, 'scenario.layer') }], {
+    x: LEFT_X + 0.28, y: BODY_Y - 0.05, w: LEFT_W - 0.28, h: 0.3, fontSize: FOOT_SIZE, bold: true, color: AMBER,
+  });
+  textBox(ctx, 'headline', [{ text: label(locale, 'scenario.question') }], {
+    x: LEFT_X + 0.28, y: BODY_Y + 0.3, w: LEFT_W - 0.28, h: 0.9, fontSize: 20, bold: true, color: INK,
+  });
+  const lines: TextRun[] = [];
+  const amberLine = (name: string, m: Metric): void => {
+    lines.push({ text: `${name}  `, options: { color: GRAY } });
+    lines.push({ text: formatMetricValue(m.value, m.unit), options: { color: AMBER, bold: true, breakLine: true, paraSpaceAfter: 8 } });
+  };
+  if (cost !== undefined) amberLine(label(locale, 'scenario.costChange'), cost);
+  if (contribution !== undefined) amberLine(label(locale, 'metric.contribution'), contribution);
+  if (margin !== undefined) amberLine(label(locale, 'metric.margin'), margin);
+  const notes: TextRun[] = [
+    { text: label(locale, 'limitations.noForecast'), options: { fontSize: SMALL_SIZE, color: GRAY, breakLine: true } },
   ];
-  if (cost !== undefined) lines.push({ text: `${label(locale, 'scenario.costChange')}: ${formatMetricValue(cost.value, cost.unit)}`, options: { color: AMBER } });
-  if (contribution !== undefined) {
-    lines.push({ text: `${label(locale, 'metric.contribution')}: ${formatMetricValue(contribution.value, contribution.unit)}`, options: { color: AMBER } });
-  }
-  if (margin !== undefined) {
-    lines.push({ text: `${label(locale, 'metric.margin')}: ${formatMetricValue(margin.value, margin.unit)}`, options: { color: AMBER } });
-  }
-  lines.push({ text: label(locale, 'limitations.noForecast'), options: { fontSize: SMALL_SIZE, color: GRAY } });
   if (scenario.definitionId === 'operating-cost-v1') {
-    lines.push({ text: label(locale, 'scenario.assumption.revenueFixed'), options: { fontSize: SMALL_SIZE, color: GRAY } });
-    lines.push({ text: label(locale, 'scenario.assumption.mechanical'), options: { fontSize: SMALL_SIZE, color: GRAY } });
+    notes.push({ text: label(locale, 'scenario.assumption.revenueFixed'), options: { fontSize: SMALL_SIZE, color: GRAY, breakLine: true } });
+    notes.push({ text: label(locale, 'scenario.assumption.mechanical'), options: { fontSize: SMALL_SIZE, color: GRAY } });
   }
-  textBox(ctx, 'body', lines.map((line) => ({
-    ...line,
-    options: { ...(line.options ?? {}), breakLine: true },
-  })), { x: LEFT_X, y: BODY_Y, w: LEFT_W, h: BODY_H, fontSize: BODY_SIZE, color: INK });
+  textBox(ctx, 'body', lines, {
+    x: LEFT_X + 0.28, y: BODY_Y + 1.25, w: LEFT_W - 0.28, h: 1.8, fontSize: BODY_SIZE, color: INK,
+  });
+  textBox(ctx, 'assumptions', notes, {
+    x: LEFT_X + 0.28, y: BODY_Y + 3.0, w: LEFT_W - 0.28, h: 0.85, fontSize: SMALL_SIZE, color: GRAY,
+  });
 
   const chartId = slide.chartIds.find((id) => ctx.chartById.has(id));
   if (chartId !== undefined) {
@@ -523,7 +654,7 @@ function layoutScenario(ctx: LayoutContext): void {
 /* ------------------------------------------------------------------ */
 
 function layoutQuality(ctx: LayoutContext): void {
-  const { model, locale } = ctx;
+  const { model, locale, slide } = ctx;
   const trio = (['quality-duplicate', 'quality-category', 'quality-missing'] as const)
     .map((id) => ctx.metricById.get(id))
     .filter((m) => m !== undefined) as Metric[];
@@ -531,19 +662,31 @@ function layoutQuality(ctx: LayoutContext): void {
   const peak = Math.max(1, ...counts);
   trio.forEach((metric, i) => {
     const count = counts[i] as number;
-    const y = BODY_Y + i * 0.85;
-    textBox(ctx, `q-label-${i}`, [{
-      text: `${hasLabel(metric.labelKey) ? label(locale, metric.labelKey) : metric.id}: ${formatInteger(metric.value ?? '0')}`,
-    }], { x: LEFT_X, y, w: LEFT_W, h: 0.55, fontSize: 16, color: INK });
-    bar(ctx, `q-bar-${i}`, LEFT_X, y + 0.5, (LEFT_W * count) / peak, 0.28, i === 0 ? COBALT : i === 1 ? SLATE : AMBER);
+    const y = BODY_Y + i * 0.95;
+    textBox(ctx, `q-label-${i}`, [
+      { text: `${hasLabel(metric.labelKey) ? label(locale, metric.labelKey) : metric.id}  `, options: { color: GRAY } },
+      { text: formatInteger(metric.value ?? '0'), options: { color: INK, bold: true } },
+    ], { x: LEFT_X, y, w: LEFT_W, h: 0.5, fontSize: 16, color: INK });
+    // Track bar shows the shared scale; the filled bar reads against it.
+    bar(ctx, `q-track-${i}`, LEFT_X, y + 0.52, LEFT_W, 0.26, RULE);
+    bar(ctx, `q-bar-${i}`, LEFT_X, y + 0.52, (LEFT_W * count) / peak, 0.26, i === 0 ? COBALT : i === 1 ? SLATE : AMBER);
   });
   const { issueCount, resolved, unresolved } = model.qualitySummary;
+  ctx.deck.addShape('roundRect', {
+    x: RIGHT_X - 0.22, y: BODY_Y - 0.05, w: RIGHT_W + 0.44, h: 3.0,
+    rectRadius: 0.09, fill: { color: SURFACE }, line: { color: RULE, width: 0.75 },
+    objectName: `${slide.id}-reconcile-card`,
+  });
   textBox(ctx, 'reconcile', [
-    { text: `${label(locale, 'quality.resolved')}: ${formatInteger(String(resolved))}`, options: { breakLine: true } },
-    { text: `${label(locale, 'quality.unresolved')}: ${formatInteger(String(unresolved))}`, options: { breakLine: true } },
-    { text: `${label(locale, 'quality.noImputation')}`, options: { fontSize: SMALL_SIZE, color: GRAY, breakLine: true } },
-    { text: `${label(locale, 'quality.issues')}: ${formatInteger(String(issueCount))}`, options: { fontSize: SMALL_SIZE, color: GRAY } },
-  ], { x: RIGHT_X, y: BODY_Y, w: RIGHT_W, h: BODY_H, fontSize: BODY_SIZE, color: INK });
+    { text: label(locale, 'quality.reconciliation'), options: { fontSize: FOOT_SIZE, bold: true, color: GRAY, breakLine: true, paraSpaceAfter: 12 } },
+    { text: `${label(locale, 'quality.resolved')}  `, options: { color: GRAY } },
+    { text: formatInteger(String(resolved)), options: { bold: true, breakLine: true, paraSpaceAfter: 8 } },
+    { text: `${label(locale, 'quality.unresolved')}  `, options: { color: GRAY } },
+    { text: formatInteger(String(unresolved)), options: { bold: true, breakLine: true, paraSpaceAfter: 12 } },
+    { text: `${label(locale, 'quality.issues')}  `, options: { fontSize: SMALL_SIZE, color: GRAY } },
+    { text: formatInteger(String(issueCount)), options: { fontSize: SMALL_SIZE, color: INK, bold: true, breakLine: true, paraSpaceAfter: 10 } },
+    { text: label(locale, 'quality.noImputation'), options: { fontSize: FOOT_SIZE, color: GRAY } },
+  ], { x: RIGHT_X + 0.25, y: BODY_Y + 0.3, w: RIGHT_W - 0.5, h: 2.5, fontSize: BODY_SIZE, color: INK, valign: 'top' });
 }
 
 /* ------------------------------------------------------------------ */
@@ -554,7 +697,8 @@ function layoutMethodology(ctx: LayoutContext): void {
   const { model, locale } = ctx;
   const ref = model.table.sourceRef;
   const lines: Array<{ text: string; options?: Record<string, unknown> }> = [
-    { text: `${label(locale, 'common.source')}: ${ref.workbookName}`, options: { breakLine: true } },
+    { text: label(locale, 'common.source'), options: { bold: true, fontSize: FOOT_SIZE, color: GRAY, breakLine: true, paraSpaceAfter: 8 } },
+    { text: ref.workbookName, options: { breakLine: true } },
     { text: `${label(locale, 'common.sheet')}: ${ref.sheetName}`, options: { breakLine: true } },
     { text: `${label(locale, 'evidence.hash')}: ${model.sourceHash.slice(0, 12)}`, options: { breakLine: true } },
     {
@@ -584,11 +728,11 @@ function layoutMethodology(ctx: LayoutContext): void {
     const shown = metric !== undefined && metric.value !== null
       ? formatMetricValue(metric.value, metric.unit)
       : (proof.result ?? '');
-    return { text: `${name} = ${shown}`, options: { breakLine: true } };
+    return { text: `${name} = ${shown}`, options: { breakLine: true, paraSpaceAfter: 8 } };
   });
   textBox(ctx, 'trace', [
+    { text: label(locale, 'common.verified'), options: { bold: true, fontSize: FOOT_SIZE, color: GRAY, breakLine: true, paraSpaceAfter: 12 } },
     ...verified,
-    { text: label(locale, 'common.verified'), options: { fontSize: SMALL_SIZE, color: GRAY } },
   ], { x: RIGHT_X, y: BODY_Y, w: RIGHT_W, h: 1.6, fontSize: SMALL_SIZE, color: INK });
 }
 
