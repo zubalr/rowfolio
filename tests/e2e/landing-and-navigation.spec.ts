@@ -23,9 +23,11 @@ test.describe("Landing & Responsive Viewports", () => {
     expect(lang).toBe("en");
     expect(dir).toBe("ltr");
 
-    // Title / heading check
+    // Brand and heading check
+    const brand = await page.textContent(".rf-brand");
+    expect(brand).toContain("Rowfolio");
     const heading = await page.textContent("h1");
-    expect(heading).toContain("Rowfolio");
+    expect(heading).toBeTruthy();
 
     expect(consoleErrors).toEqual([]);
   });
@@ -43,9 +45,11 @@ test.describe("Landing & Responsive Viewports", () => {
     expect(lang).toBe("ar");
     expect(dir).toBe("rtl");
 
-    // Arabic title check
+    // Arabic brand and heading check
+    const brand = await page.textContent(".rf-brand");
+    expect(brand).toContain("روفوليو");
     const heading = await page.textContent("h1");
-    expect(heading).toContain("روفوليو");
+    expect(heading).toBeTruthy();
 
     expect(consoleErrors).toEqual([]);
   });
