@@ -57,10 +57,24 @@ export function isIngestError(value: unknown): value is IngestError {
 /** Every code that can reach a worker error response (TIMEOUT/EXPORT_FAILED are supervisor-side). */
 export type WorkerErrorCode = IngestErrorCode | 'TIMEOUT' | 'EXPORT_FAILED';
 
+const WIRE_CODES = new Set<string>([
+  'INVALID_FILE',
+  'LIMIT_EXCEEDED',
+  'AMBIGUOUS_INPUT',
+  'UNSUPPORTED',
+  'CANCELLED',
+  'TIMEOUT',
+  'EXPORT_FAILED',
+  'SCHEMA_MISMATCH',
+  'INTERNAL',
+]);
+
 /**
  * Map any thrown value to the wire error shape. Source text, stacks and file
  * internals never cross this boundary — only the code, its declared
  * translation key, recoverability and a content-free detail qualifier.
+ * Foreign structured errors (WorkerRequestError, SupervisorError) keep their
+ * declared code so a worker-side CANCELLED/TIMEOUT is not relabelled INTERNAL.
  */
 export function toWorkerError(error: unknown): {
   code: WorkerErrorCode;
@@ -74,6 +88,18 @@ export function toWorkerError(error: unknown): {
       messageKey: `error.${error.code}`,
       recoverable: error.recoverable,
       detail: error.detail,
+    };
+  }
+  const code = (error as { code?: unknown })?.code;
+  if (typeof code === 'string' && WIRE_CODES.has(code)) {
+    const messageKey = (error as { messageKey?: unknown })?.messageKey;
+    const detail = (error as { detail?: unknown })?.detail;
+    const recoverable = (error as { recoverable?: unknown })?.recoverable;
+    return {
+      code: code as WorkerErrorCode,
+      messageKey: typeof messageKey === 'string' ? messageKey : `error.${code}`,
+      recoverable: typeof recoverable === 'boolean' ? recoverable : code !== 'INTERNAL' && code !== 'SCHEMA_MISMATCH',
+      detail: typeof detail === 'string' ? detail : code.toLowerCase(),
     };
   }
   return {

@@ -270,4 +270,62 @@ describe("upload controller", () => {
     controller.cancel();
     expect(controller.getState().stage).toBe("idle");
   });
+
+  it("cancel during profile exits pending — a late resolve never emits review", async () => {
+    let releaseProfile!: (v: { proposedColumns: Column[]; issues: QualityIssue[] }) => void;
+    let profileStarted = false;
+    const gate = new Promise<{ proposedColumns: Column[]; issues: QualityIssue[] }>((r) => {
+      releaseProfile = r;
+    });
+    const controller = createUploadController(
+      { ...ingestPorts(), profile: () => { profileStarted = true; return gate; } },
+      {},
+    );
+    controller.acceptFile(csvBytes(CSV), "t.csv");
+    await waitFor(controller, (s) => s.stage === "configure");
+    controller.proceed();
+    await waitFor(controller, () => profileStarted);
+    controller.cancel();
+    releaseProfile({ proposedColumns: [], issues: [] });
+    // Give the superseded job a chance to emit — it must not.
+    await new Promise((r) => setTimeout(r, 30));
+    expect(controller.getState().stage).toBe("idle");
+  });
+
+  it("a superseded job's profile rejection never surfaces as an error", async () => {
+    let rejectProfile!: (e: unknown) => void;
+    let profileStarted = false;
+    const gate = new Promise<never>((_, rej) => { rejectProfile = rej; });
+    const controller = createUploadController(
+      { ...ingestPorts(), profile: () => { profileStarted = true; return gate; } },
+      {},
+    );
+    controller.acceptFile(csvBytes(CSV), "t.csv");
+    await waitFor(controller, (s) => s.stage === "configure");
+    controller.proceed();
+    await waitFor(controller, () => profileStarted);
+    controller.cancel();
+    rejectProfile({ code: "CANCELLED" });
+    await new Promise((r) => setTimeout(r, 30));
+    expect(controller.getState().stage).toBe("idle");
+  });
+
+  it("a live CANCELLED rejection exits to idle, not the error surface", async () => {
+    // The worker-side hard cancel rejects the in-flight profile while the
+    // upload job is still current — the stage must leave pending, not error.
+    let rejectProfile!: (e: unknown) => void;
+    let profileStarted = false;
+    const gate = new Promise<never>((_, rej) => { rejectProfile = rej; });
+    const controller = createUploadController(
+      { ...ingestPorts(), profile: () => { profileStarted = true; return gate; } },
+      {},
+    );
+    controller.acceptFile(csvBytes(CSV), "t.csv");
+    await waitFor(controller, (s) => s.stage === "configure");
+    controller.proceed();
+    await waitFor(controller, () => profileStarted);
+    rejectProfile({ code: "CANCELLED", messageKey: "error.CANCELLED", recoverable: true });
+    const settled = await waitFor(controller, (s) => s.stage !== "parsing");
+    expect(settled.stage).toBe("idle");
+  });
 });

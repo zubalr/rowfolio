@@ -70,7 +70,6 @@ function makeController(overrides?: {
 
   const controller = new SessionController({
     adapters: {
-      profileTable: (raw) => profileTable(raw as RawTable),
       inspectSource: (bytes, name, options) =>
         inspectSource(bytes, name, options as never) as never,
       buildExportModel: (snapshot, table, scenario, locale, numberingSystem, createdAt) =>

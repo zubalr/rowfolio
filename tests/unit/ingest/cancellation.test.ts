@@ -5,7 +5,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { RawTable } from '../../../packages/contracts/src/index.ts';
-import { handleIngestRequest, parseSource } from '../../../packages/ingest/src/index.ts';
+import { handleIngestRequest, parseSource, toWorkerError, IngestError } from '../../../packages/ingest/src/index.ts';
 import { expectIngestError, fixtureBytes, progressRecorder, sampleBytes, toArrayBuffer } from './helpers.ts';
 
 const OPTS = { allowHiddenSheet: false };
@@ -93,5 +93,27 @@ describe('progress semantics', () => {
     await parseSource(toArrayBuffer(sampleBytes('sample_operations.csv')), 's.csv', OPTS, fn);
     expect(events.length).toBeGreaterThan(0);
     for (const e of events) expect(['preflight', 'parse']).toContain(e.stage);
+  });
+});
+
+describe('toWorkerError', () => {
+  it('preserves structured codes from foreign worker errors (CANCELLED/TIMEOUT)', () => {
+    // The WorkerClient rejects with WorkerRequestError{code} — the upload
+    // flow maps it through toWorkerError; typed codes must survive.
+    expect(toWorkerError({ code: 'CANCELLED' }).code).toBe('CANCELLED');
+    expect(toWorkerError({ code: 'TIMEOUT' }).code).toBe('TIMEOUT');
+    expect(toWorkerError({ code: 'CANCELLED' }).recoverable).toBe(true);
+  });
+
+  it('still maps plain errors to INTERNAL and unknown codes to INTERNAL', () => {
+    expect(toWorkerError(new Error('boom')).code).toBe('INTERNAL');
+    expect(toWorkerError({ code: 'NOT_A_CODE' }).code).toBe('INTERNAL');
+    expect(toWorkerError('string-throw').code).toBe('INTERNAL');
+  });
+
+  it('IngestError keeps its detail qualifier', () => {
+    const mapped = toWorkerError(new IngestError('INVALID_FILE', { detail: 'zip.bad' }));
+    expect(mapped.code).toBe('INVALID_FILE');
+    expect(mapped.detail).toBe('zip.bad');
   });
 });

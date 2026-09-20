@@ -29,7 +29,7 @@ export const SAMPLE_POLICY_ID = 'sample-manifest-v1';
 /** SHA-256 of the bundled `sample_operations.xlsx` bytes (apps/web/public/sample). */
 export const BOUND_SAMPLE_SHA256 = 'f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e';
 
-const STAGES = new Set(['preflight', 'parse', 'normalize', 'analyze', 'model', 'layout', 'charts', 'package']);
+const STAGES = new Set(['preflight', 'parse', 'profile', 'normalize', 'analyze', 'model', 'layout', 'charts', 'package']);
 
 type ProgressFn = (stage: string, fraction: number | null) => void;
 
