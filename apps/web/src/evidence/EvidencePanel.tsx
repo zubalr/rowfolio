@@ -165,7 +165,7 @@ function InputsList({
                   <Bidi dir="ltr" className="rf-evidence__num">
                     {formatted}
                   </Bidi>
-                  {m.unit.label ? (
+                  {m.unit.kind !== 'unknown' && m.unit.label ? (
                     <Bidi dir="ltr" className="rf-evidence__unit">
                       {m.unit.label}
                     </Bidi>
