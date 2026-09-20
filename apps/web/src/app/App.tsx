@@ -87,9 +87,29 @@ function ControllerGate({ children }: { children: ReactNode }) {
 }
 
 export function App({ services }: { services: AppServices }) {
+  // The i18n service itself is a lazy boundary (it value-imports the
+  // contracts schema barrel + both locale catalogs), so the whole shell
+  // suspends on `i18nReady`. The boot fallback predates i18n, so its
+  // string is a document-language literal, not a catalog key.
+  const bootTitle =
+    typeof document !== 'undefined' && document.documentElement.lang === 'ar'
+      ? 'جارٍ التحميل…'
+      : 'Loading…';
   return (
     <ServicesProvider services={services}>
-      <AppShell />
+      <Suspense fallback={<Status kind="loading" title={bootTitle} />}>
+        <I18nGate>
+          <AppShell />
+        </I18nGate>
+      </Suspense>
     </ServicesProvider>
   );
+}
+
+/** Suspends until the lazily-imported i18n service resolves — every consumer
+ *  may then read `services.i18n` synchronously. */
+function I18nGate({ children }: { children: ReactNode }) {
+  const { i18nReady } = useServices();
+  use(i18nReady);
+  return children;
 }
