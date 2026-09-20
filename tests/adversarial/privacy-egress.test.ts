@@ -1,5 +1,5 @@
 /**
- * A22 privacy suite — "source data never leaves the browser" is enforced
+ * privacy suite — "source data never leaves the browser" is enforced
  * statically here (dynamic checks need a browser — see e2e/privacy owner).
  * Scans every shipped source file for network primitives and non-literal
  * dynamic imports, and asserts the only fetch call sites are the declared

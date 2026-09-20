@@ -1,5 +1,5 @@
 /**
- * A22 adversarial engine suite — decimal/scenario/analysis/provenance edge
+ * Adversarial engine suite — decimal/scenario/analysis/provenance edge
  * cases: huge numbers, strange dates, zero denominators, crafted spans,
  * formula-cache values that are formatted text, and scope filters that
  * silently no-op. `it.fails` = demonstrated defect (assertion encodes the
@@ -51,7 +51,7 @@ describe('decimal edges', () => {
   });
 
   it.fails('quantizeMoney never emits negative zero (canonical-form violation)', () => {
-    // DEFECT A22-F10: values like '-0.004' with places=2 produce '-0.00',
+    // DEFECT: values like '-0.004' with places=2 produce '-0.00',
     // which violates the canonical-decimal rule (isDecimal('-0.00') ===
     // false). Latent: runScenario's call graph currently only feeds inputs
     // whose fraction length ≤ places, so this can't ship a bad metric today —
@@ -156,7 +156,7 @@ describe('scenario edges', () => {
 /* ------------------------------------------------------------------ */
 
 describe('scope attacks', () => {
-  it.fails('confirmedScope.regions must not silently pass all rows when no region column exists (A22-F06)', () => {
+  it.fails('confirmedScope.regions must not silently pass all rows when no region column exists', () => {
     const raw = rawTable(['date', 'amount'], [['2026-06-01', '10'], ['2026-06-02', '20']]);
     const table = normalizedOf(raw);
     const dateCol = findDateColumn(table);
@@ -175,7 +175,7 @@ describe('scope attacks', () => {
 /* ------------------------------------------------------------------ */
 
 describe('provenance span attacks', () => {
-  it.fails('expandSpans must refuse oversize spans, not materialize millions of ids (A22-F07)', () => {
+  it.fails('expandSpans must refuse oversize spans, not materialize millions of ids', () => {
     // expandSpans pushes one number per row with no bound: [{start:1,
     // end:2^31-1}] crashes the process at ~16GB heap (verified out-of-band —
     // fatal V8 OOM, not a catchable error). Correct contract: a typed
@@ -184,7 +184,7 @@ describe('provenance span attacks', () => {
     const start = performance.now();
     const rows = expandSpans([{ start: 1, end: 20_000_000 }]);
     const ms = performance.now() - start;
-    console.log(`[A22-F07] expanded ${rows.length} ids in ${ms.toFixed(0)}ms`);
+    console.log(`expanded ${rows.length} ids in ${ms.toFixed(0)}ms`);
     expect(rows.length).toBeLessThanOrEqual(MAX_EVIDENCE_PAGE);
   });
 

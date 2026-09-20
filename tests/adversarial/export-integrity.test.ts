@@ -1,5 +1,5 @@
 /**
- * A22 adversarial export suite — the generated .xlsx must never carry an
+ * Adversarial export suite — the generated .xlsx must never carry an
  * injected or corrupt formula, user text must stay inert, and stale-model
  * bindings must fail typed. Generated workbooks are unzipped and the sheet
  * XML is inspected directly (no Office install required).
@@ -35,7 +35,7 @@ function sheetTexts(files: Map<string, Uint8Array>): { name: string; xml: string
 /* ------------------------------------------------------------------ */
 
 describe('formula injection and integrity', () => {
-  it.fails('a region containing a double quote must not corrupt the SUMIFS criteria (A22-F11)', async () => {
+  it.fails('a region containing a double quote must not corrupt the SUMIFS criteria', async () => {
     // Craft a model whose metric scope carries a hostile region name. Metric
     // ids 'north-june-*' are the sample-pack ids the template-formula writer
     // recognizes; the region string is attacker data when reached via a

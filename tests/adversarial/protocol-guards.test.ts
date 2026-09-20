@@ -1,5 +1,5 @@
 /**
- * A22 adversarial protocol suite — stale/duplicate/malformed worker
+ * Adversarial protocol suite — stale/duplicate/malformed worker
  * responses, mid-flight replacement, watchdog termination, envelope/binary
  * consistency, and dispose semantics. Uses WorkerClient against scripted
  * WorkerLike fakes (no engines needed — this layer is pure transport).

@@ -1,5 +1,5 @@
 /**
- * A22 adversarial ingest suite — malformed/hostile bytes through the real
+ * Adversarial ingest suite — malformed/hostile bytes through the real
  * `parseSource`/`inspectSource` path. Asserts three things for every case:
  *   1. the outcome is a typed failure or a contract-valid table (never a hang
  *      or an unclassified exception),
@@ -50,14 +50,11 @@ function expectNoContentLeak(error: IngestError): void {
 /* ------------------------------------------------------------------ */
 
 describe('adversarial: ZIP structure', () => {
-  it.fails('entry named __proto__ is preserved by the repack or refused as a typed error (A22-F08)', async () => {
-    // normalizeZipPath allows `__proto__` (not traversal). Upstream a6d6af1
-    // changed `stored` to a null-prototype object — but fflate's zipSync
-    // internally assigns into a PLAIN object (`r[fn]`), so `__proto__`
-    // pollutes there instead and preflight now throws an untyped TypeError:
-    //   "Cannot read properties of undefined (reading 'level')"
-    // Correct contract: either the repack preserves the entry, or the name
-    // is refused with a typed IngestError — never a library internals crash.
+  it('entry named __proto__ is preserved by the repack or refused as a typed error', async () => {
+    // `__proto__` is not traversal, but it is magical on the plain objects
+    // fflate assigns into during repack — the name is refused up front as a
+    // typed IngestError ('zip.path-reserved'). Preserved-or-refused is the
+    // contract; a library internals crash is not.
     const zip = buildZip([
       { name: '__proto__', data: new TextEncoder().encode('junk') },
       { name: 'note.txt', data: new TextEncoder().encode('hello') },
@@ -156,7 +153,7 @@ describe('adversarial: XLSX content', () => {
     }
   });
 
-  it('formula cell with a formatted currency cache keeps formatted text as cachedValue (A22-F09)', async () => {
+  it('formula cell with a formatted currency cache keeps formatted text as cachedValue', async () => {
     // `cell.w` is display-formatted ("$1,234.56"); `cell.v` is the raw number.
     // ingest prefers `w` → the "unverified cache" the user can opt into is
     // already lossy before normalize ever sees it.

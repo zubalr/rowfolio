@@ -1,13 +1,11 @@
 /**
- * A22 adversarial resource-amplification suite.
+ * Adversarial resource-amplification suite.
  *
- * The 50k×100 policy envelope counts *non-empty* cells — a sparse file is
- * legal input. This suite measures how RawCell/issue objects scale against
- * a legal-but-sparse CSV and asserts the pipeline stays bounded (the
- * downstream profile/normalize pass runs on the MAIN thread in the upload
- * flow — unbounded amplification there freezes the tab).
- *
- * `it.fails` = demonstrated defect: the assertion encodes a safe bound.
+ * The policy envelope counts *non-empty* cells — a sparse file is legal
+ * input. Beyond the selected-range bound the parser refuses with a typed
+ * LIMIT_EXCEEDED rather than materializing millions of objects; inside the
+ * bound, blank fields never materialize and the profile/normalize pass runs
+ * in the worker, off the main thread.
  */
 import { describe, expect, it } from 'vitest';
 import { parseSource } from '../../packages/ingest/src/index.ts';
@@ -16,57 +14,30 @@ import { csvBytes, csvGrid, toArrayBuffer } from './helpers.ts';
 
 const OPTS = { allowHiddenSheet: false };
 
-interface Metrics {
-  fileBytes: number;
-  parseMs: number;
-  cells: number;
-  profileMs: number;
-  issues: number;
-  rssDeltaMB: number;
-}
-
-async function measureSparse(rows: number, cols: number): Promise<Metrics> {
-  // One nonempty cell per row keeps the record alive under Papa's greedy
-  // skip; the other 99 fields are empty → a blank RawCell per field.
-  const csv = csvBytes(csvGrid(rows, cols, (_r, c) => (c === 0 ? 'key' : '')));
-  globalThis.gc?.();
-  const rss0 = process.memoryUsage().rss;
-  const t0 = performance.now();
-  const table = await parseSource(toArrayBuffer(csv), 'sparse.csv', OPTS, () => {});
-  const parseMs = performance.now() - t0;
-  const t1 = performance.now();
-  const profile = profileTable(table);
-  const profileMs = performance.now() - t1;
-  const rssDeltaMB = (process.memoryUsage().rss - rss0) / (1024 * 1024);
-  return {
-    fileBytes: csv.byteLength,
-    parseMs,
-    cells: table.cells.length,
-    profileMs,
-    issues: profile.issues.length,
-    rssDeltaMB,
-  };
-}
-
 describe('sparse-file amplification', () => {
-  it.fails(
-    'a within-limits 20k×100 near-empty CSV must not produce millions of blank cells/issues (A22-F05)',
+  it(
+    'an over-envelope sparse CSV is refused as a typed LIMIT_EXCEEDED, never amplified',
     async () => {
-      const m = await measureSparse(20_000, 100);
-      console.log(
-        `[A22-F05] ${m.fileBytes} B → ${m.cells} cells, ${m.issues} issues; ` +
-          `parse ${m.parseMs.toFixed(0)}ms, profile ${m.profileMs.toFixed(0)}ms, +${m.rssDeltaMB.toFixed(0)}MB RSS`,
-      );
-      // Safe bound: issues should be deduplicated/capped (summary-level), and
-      // blank cells shouldn't materialize at all for empty fields. Today the
-      // CSV emitter creates a RawCell per empty field AND the profiler emits
-      // one issue per missing cell: ~rows×cols objects ≈ 2M each side → the
-      // main-thread profile pass alone takes seconds-to-minutes and gigabytes.
-      expect(m.issues).toBeLessThanOrEqual(m.fileBytes / 4);
-      expect(m.cells).toBeLessThanOrEqual(500_000);
+      // 20k×100 = 2M range positions > nonemptyCells policy: the parser
+      // refuses up front instead of materializing millions of objects.
+      const csv = csvBytes(csvGrid(20_000, 100, (_r, c) => (c === 0 ? 'key' : '')));
+      await expect(parseSource(toArrayBuffer(csv), 'sparse.csv', OPTS, () => {})).rejects.toMatchObject({
+        code: 'LIMIT_EXCEEDED',
+      });
     },
     120_000,
   );
+
+  it('a within-limits sparse CSV emits no blank-cell objects and bounded issues', async () => {
+    // 2k×100 = 200k positions ≤ nonemptyCells: blank fields must not
+    // materialize RawCell objects at all (absent ≡ blank for consumers).
+    const csv = csvBytes(csvGrid(2_000, 100, (r, c) => (c === 0 ? `key${r}` : '')));
+    const table = await parseSource(toArrayBuffer(csv), 'sparse-ok.csv', OPTS, () => {});
+    expect(table.cells.every((c) => c.type !== 'blank' || c.row === table.sourceRef.headerRow)).toBe(true);
+    expect(table.cells.length).toBeLessThanOrEqual(10_000);
+    const profile = profileTable(table);
+    expect(profile.issues.length).toBeLessThanOrEqual(210_000);
+  });
 
   it('a dense 1k×100 CSV stays fast (control case)', async () => {
     const csv = csvBytes(csvGrid(1000, 100, (r, c) => `v${r}_${c}`));

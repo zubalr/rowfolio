@@ -1,5 +1,5 @@
 /**
- * Shared builders for the A22 adversarial suite.
+ * Shared builders for the Adversarial suite.
  *
  * Everything here is synthetic — no private or business data. Generators
  * reuse the checked-in ingest fixture kits (fixtures/ingest/*.mjs) so the

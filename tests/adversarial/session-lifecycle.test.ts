@@ -1,5 +1,5 @@
 /**
- * A22 adversarial session/worker-lifecycle suite.
+ * Adversarial session/worker-lifecycle suite.
  *
  * Drives the REAL wire protocol: SessionController → WorkerClient →
  * InProcessWorker → WorkerSupervisor → real ingest/normalize/analysis/
@@ -107,13 +107,13 @@ async function uploadCsvToReady(controller: SessionController, bytes = CLEAN_CSV
 }
 
 /* ------------------------------------------------------------------ */
-/* A22-F01 — adoptUploadOutcome cancels the worker that retains the    */
+/* — adoptUploadOutcome cancels the worker that retains the    */
 /*           parsed RawTable; the committed upload path always fails.  */
 /* ------------------------------------------------------------------ */
 
-describe('A22-F01: upload review commit path', () => {
+describe('upload review commit path', () => {
   it('a committed UploadFlow outcome reaches phase ready', async () => {
-    // Was A22-F01: adoptUploadOutcome() called cancelWork() which terminated
+    // Previously: adoptUploadOutcome() called cancelWork() which terminated
     // the worker retaining the raw table → every committed upload failed
     // with INTERNAL. Fixed upstream by d8beb01 — this test is now the
     // regression lock for it.
@@ -142,14 +142,14 @@ describe('A22-F01: upload review commit path', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/* A22-F02 — the formula-cache opt-in cannot cross the wire: the        */
+/* — the formula-cache opt-in cannot cross the wire: the        */
 /*           normalize payload has no such field (schema rejects it),   */
 /*           and the supervisor hardcodes useUnverifiedFormulaCaches:[].*/
 /* ------------------------------------------------------------------ */
 
-describe('A22-F02: formula-cache opt-in is dropped at the wire', () => {
+describe('formula-cache opt-in wire propagation', () => {
   it('WorkerRequest schema accepts a normalize payload carrying useUnverifiedFormulaCaches', () => {
-    // Was A22-F02 part 1: the schema had no slot, silently dropping the
+    // Was part 1: the schema had no slot, silently dropping the
     // user's opt-in. Fixed upstream at a6d6af1 — the field validates now.
     const req = {
       protocolVersion: 1,
@@ -170,7 +170,7 @@ describe('A22-F02: formula-cache opt-in is dropped at the wire', () => {
   });
 
   it('an opted-in formula cache flows to normalized values over the real wire path', async () => {
-    // Was A22-F02 part 2: the supervisor hardcoded useUnverifiedFormulaCaches:[].
+    // Was part 2: the supervisor hardcoded useUnverifiedFormulaCaches:[].
     // Fixed upstream at a6d6af1 — the wire slot exists and is forwarded.
     const client = new WorkerClient(() => new InProcessWorker({ adapters: realAdapters }));
     // Ingest a formula-bearing workbook over the wire so the supervisor
@@ -215,13 +215,13 @@ describe('A22-F02: formula-cache opt-in is dropped at the wire', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/* A22-F03 — parse transfers (detaches) the caller's ArrayBuffer; the   */
+/* — parse transfers (detaches) the caller's ArrayBuffer; the   */
 /*           upload controller's retry() reuses it and can never win.   */
 /* ------------------------------------------------------------------ */
 
-describe('A22-F03: detached-buffer retry', () => {
+describe('detached-buffer retry', () => {
   it('a parse retry after a recoverable error can reuse the original file bytes', async () => {
-    // Was A22-F03: parseViaWorker transferred the caller's ArrayBuffer,
+    // Previously: parseViaWorker transferred the caller's ArrayBuffer,
     // detaching it — retry() on file.bytes could never win. Fixed upstream
     // at a6d6af1 (transfers bytes.slice(0)); caller's buffer stays attached.
     const { controller } = makeController();
@@ -236,13 +236,13 @@ describe('A22-F03: detached-buffer retry', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/* A22-F04 — export.finished/export.done carry no requestId or phase    */
+/* — export.finished/export.done carry no requestId or phase    */
 /*           guard: an export that outlives its source still commits.   */
 /* ------------------------------------------------------------------ */
 
-describe('A22-F04: stale export commits over a newer session', () => {
+describe('stale export commits over a newer session', () => {
   it('a superseded export cannot record artifacts or force phase=ready', async () => {
-    // Was A22-F04: export.done/finished merged artifacts unconditionally.
+    // Previously: export.done/finished merged artifacts unconditionally.
     // Fixed upstream at a6d6af1 — export.begin stamps epoch=revision and
     // done/failed/finished/progress drop mismatched-epoch commits.
     let release!: () => void;
