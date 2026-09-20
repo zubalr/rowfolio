@@ -28,6 +28,7 @@ import sys
 import unicodedata
 import xml.etree.ElementTree as ET
 import zipfile
+from decimal import Decimal, localcontext
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -134,6 +135,63 @@ def _structural_csv(case_id: str, manifest: dict, data: bytes, issues: list[dict
             issues.append(_issue(case_id, "structural.normalizationPair", "rawBytesDiffer declaration disagrees with bytes"))
         if (unicodedata.normalize("NFC", va) == unicodedata.normalize("NFC", vb)) != pair["nfcComparisonKeysEqual"]:
             issues.append(_issue(case_id, "structural.normalizationPair", "nfcComparisonKeysEqual declaration disagrees"))
+
+
+def _decimal_sum(values: list[str]) -> Decimal:
+    with localcontext() as ctx:
+        ctx.prec = 60
+        total = Decimal("0")
+        for value in values:
+            if value == "":
+                continue  # blank cells are missing, not zero — sums skip them
+            total += Decimal(value)
+        return +total
+
+
+def _exact_sums(case_id: str, manifest: dict, rows: list[list[str]], issues: list[dict]) -> None:
+    """Recompute declared exact column sums with Decimal arithmetic."""
+    header = rows[0] if rows else []
+    for column, declared in (manifest["expected"].get("exactSums") or {}).items():
+        if column not in header:
+            issues.append(_issue(case_id, "structural.exactSums", f"column {column} not in header"))
+            continue
+        ci = header.index(column)
+        values = [(r[ci] if len(r) > ci else "") for r in rows[1:]]
+        try:
+            total = _decimal_sum(values)
+        except Exception as exc:  # noqa: BLE001 - report any arithmetic failure as an issue
+            issues.append(_issue(case_id, "structural.exactSums", f"column {column}: {exc}"))
+            continue
+        if total != Decimal(declared):
+            issues.append(
+                _issue(case_id, "structural.exactSums", f"column {column}: declared {declared}, exact sum {total}")
+            )
+    grouped = manifest["expected"].get("exactSumsByGroup")
+    if grouped:
+        group_col = grouped.get("groupBy")
+        sum_col = grouped.get("column")
+        if group_col not in header or sum_col not in header:
+            issues.append(_issue(case_id, "structural.exactSumsByGroup", "group or sum column not in header"))
+            return
+        gi, si = header.index(group_col), header.index(sum_col)
+        totals: dict[str, Decimal] = {}
+        for r in rows[1:]:
+            key = r[gi] if len(r) > gi else ""
+            value = r[si] if len(r) > si else ""
+            if value == "":
+                continue
+            totals[key] = totals.get(key, Decimal("0")) + Decimal(value)
+        for key, declared in (grouped.get("values") or {}).items():
+            actual = totals.get(key)
+            if actual is None:
+                issues.append(_issue(case_id, "structural.exactSumsByGroup", f"group {key} absent"))
+            elif actual != Decimal(declared):
+                issues.append(
+                    _issue(case_id, "structural.exactSumsByGroup", f"group {key}: declared {declared}, exact sum {actual}")
+                )
+        undeclared = sorted(set(totals) - set(grouped.get("values") or {}))
+        if undeclared:
+            issues.append(_issue(case_id, "structural.exactSumsByGroup", f"groups present but undeclared: {undeclared}"))
 
 
 def _col_to_index(ref: str) -> int:
@@ -284,6 +342,7 @@ def validate_corpus(dir_path: Path, structural: bool = False) -> list[dict]:
                         issues.append(_issue(case_id, "structural.records", "empty file must declare 0 records"))
                 else:
                     _structural_csv(case_id, manifest, data, issues)
+                    _exact_sums(case_id, manifest, _read_csv_rows(data), issues)
             else:
                 _structural_xlsx(case_id, manifest, data, issues)
 

@@ -10,8 +10,8 @@
     "cellTextMaxChars": 32000
   },
   "totals": {
-    "cases": 24,
-    "bytes": 22183
+    "cases": 30,
+    "bytes": 23333
   },
   "cases": [
     {
@@ -121,6 +121,42 @@
       "artifact": "csv-empty-file.csv",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "bytes": 0
+    },
+    {
+      "caseId": "csv-decimal-extremes",
+      "artifact": "csv-decimal-extremes.csv",
+      "sha256": "cafd342fea8e95a5528b833a074d9be1a8a1e9c3eb6f02e1745ba940e0d9401f",
+      "bytes": 156
+    },
+    {
+      "caseId": "csv-fractional-pp",
+      "artifact": "csv-fractional-pp.csv",
+      "sha256": "3dffc065fe34d2e889421ad58ccf03ef16c5550b18d36f5c00558fa0233e4127",
+      "bytes": 140
+    },
+    {
+      "caseId": "csv-quoted-criteria",
+      "artifact": "csv-quoted-criteria.csv",
+      "sha256": "1eb0de8e5ffdcaf195b6651d71cd726bbc22ea1e379ec6c5b240a25584d66d96",
+      "bytes": 110
+    },
+    {
+      "caseId": "csv-regionless-table",
+      "artifact": "csv-regionless-table.csv",
+      "sha256": "94dbddd0b144d97a47e364027dc442abbe122871ae1d1af8840ecdbce28f189a",
+      "bytes": 182
+    },
+    {
+      "caseId": "csv-incomplete-periods",
+      "artifact": "csv-incomplete-periods.csv",
+      "sha256": "ad4707f6a628a1147e019a244ae1d7e8143ed84ed23e1d7de8c82d2533e8cd70",
+      "bytes": 245
+    },
+    {
+      "caseId": "csv-arabic-mixed-script",
+      "artifact": "csv-arabic-mixed-script.csv",
+      "sha256": "7c49ce8f769fb5206859f8bc780718e4db48977874bae1a21306409d7219565e",
+      "bytes": 317
     },
     {
       "caseId": "xlsx-minimal-valid",

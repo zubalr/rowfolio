@@ -1,0 +1,37 @@
+{
+  "caseId": "csv-regionless-table",
+  "category": "csv_missing_values",
+  "description": "A valid table with no dimension columns at all (no region, category, or group axis).",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 7,
+      "headerColumns": 3,
+      "perRecordFieldCounts": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ]
+    },
+    "exactSums": {
+      "amount_usd": "770.00"
+    },
+    "requiredBehavior": [
+      "analysis is whole-table only: counts, missingness and range of the single additive measure",
+      "no per-region or per-category split exists; none may be inferred from column names or values",
+      "single-month coverage is not a declared complete period, so no period-over-period claims"
+    ]
+  },
+  "notes": [
+    "Complements the regionless-scope engine coverage with a parser-facing fixture."
+  ],
+  "artifact": "csv-regionless-table.csv",
+  "sha256": "94dbddd0b144d97a47e364027dc442abbe122871ae1d1af8840ecdbce28f189a",
+  "bytes": 182,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}
