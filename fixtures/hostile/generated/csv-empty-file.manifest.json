@@ -1,0 +1,22 @@
+{
+  "caseId": "csv-empty-file",
+  "category": "csv_headers",
+  "description": "Zero-byte CSV file.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 0,
+      "headerColumns": 0,
+      "perRecordFieldCounts": []
+    },
+    "requiredBehavior": [
+      "no usable table: clear recoverable error explaining the supported shape; never an unhandled exception"
+    ]
+  },
+  "notes": [],
+  "artifact": "csv-empty-file.csv",
+  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "bytes": 0,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

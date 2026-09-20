@@ -1,0 +1,156 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "rowfolio-hostile-corpus-index",
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "bounds": {
+    "totalMaxBytes": 20971520,
+    "csvMaxDataRows": 5000,
+    "xlsxMaxExpandedBytes": 1048576,
+    "xlsxMaxEntries": 100,
+    "cellTextMaxChars": 32000
+  },
+  "totals": {
+    "cases": 23,
+    "bytes": 18404
+  },
+  "cases": [
+    {
+      "caseId": "csv-quoted-basics",
+      "artifact": "csv-quoted-basics.csv",
+      "sha256": "08378d9ae5335927e72a19ab757286a9326d4702cc784bd09ebdfbb9db486bdf",
+      "bytes": 192
+    },
+    {
+      "caseId": "csv-utf8-bom",
+      "artifact": "csv-utf8-bom.csv",
+      "sha256": "7789ea8673d83a98c61a1023d99004cede8c60e4ab819ade90ca5c9027febc1b",
+      "bytes": 100
+    },
+    {
+      "caseId": "csv-crlf-line-endings",
+      "artifact": "csv-crlf-line-endings.csv",
+      "sha256": "82b81bc51518c802d8745b6e0377df51db14ac89bf00951730a64a398e3e5706",
+      "bytes": 72
+    },
+    {
+      "caseId": "csv-duplicate-headers",
+      "artifact": "csv-duplicate-headers.csv",
+      "sha256": "9e49a6c4c3638c89bce3ad4cb1b3229d50d02a9d62d3f67108ce62df434d8fbd",
+      "bytes": 118
+    },
+    {
+      "caseId": "csv-empty-and-blank-headers",
+      "artifact": "csv-empty-and-blank-headers.csv",
+      "sha256": "c7458e5f11688798e57c3cd52c4ebe4b631a08d6c6098ad41bfd37454e973489",
+      "bytes": 52
+    },
+    {
+      "caseId": "csv-ragged-short-rows",
+      "artifact": "csv-ragged-short-rows.csv",
+      "sha256": "515746e03d9435f5d00e5a0db882f7f46f2db304a94adbcf0a2f0c9d6a808f03",
+      "bytes": 69
+    },
+    {
+      "caseId": "csv-ragged-long-row",
+      "artifact": "csv-ragged-long-row.csv",
+      "sha256": "b89d4195d419c887e9dce708964cca7a3b173bb8487e383d74f798b94ec2a63a",
+      "bytes": 30
+    },
+    {
+      "caseId": "csv-missing-optional-values",
+      "artifact": "csv-missing-optional-values.csv",
+      "sha256": "6b4bedbc1bf6c37f8bcbab4f3a589bd967be8779fcf5baa2b556102c751b1bfb",
+      "bytes": 205
+    },
+    {
+      "caseId": "csv-missing-required-measure",
+      "artifact": "csv-missing-required-measure.csv",
+      "sha256": "3d00b895fa01c9fadc40828883ce072b8650aee51dfcaf07569b1be3492ece98",
+      "bytes": 151
+    },
+    {
+      "caseId": "csv-invalid-numeric-values",
+      "artifact": "csv-invalid-numeric-values.csv",
+      "sha256": "c80623a5150ef7559a749e6c02efac92cde6e9d5f949274de02b6546edb1dee4",
+      "bytes": 56
+    },
+    {
+      "caseId": "csv-zero-and-negative-baselines",
+      "artifact": "csv-zero-and-negative-baselines.csv",
+      "sha256": "b56cc66f22f97f1b2291c5a95f3b15880ef834fefb6ba869aee7c7ca4e038c9c",
+      "bytes": 118
+    },
+    {
+      "caseId": "csv-ambiguous-slash-dates",
+      "artifact": "csv-ambiguous-slash-dates.csv",
+      "sha256": "c8378ff5a06f3b71ada593fac49f2c63bfc4c8020fa3e3be60cf6d26b2e8897d",
+      "bytes": 93
+    },
+    {
+      "caseId": "csv-numeric-separator-profiles",
+      "artifact": "csv-numeric-separator-profiles.csv",
+      "sha256": "83a81b6feb91be11f1bb52179a3c74ec24e184bc498c5ea5cb86c6fda3d60b48",
+      "bytes": 75
+    },
+    {
+      "caseId": "csv-leading-zero-identifiers",
+      "artifact": "csv-leading-zero-identifiers.csv",
+      "sha256": "028889aa88174afa9d991f85761789fa7010b1d85166ac5ab093102db8747205",
+      "bytes": 42
+    },
+    {
+      "caseId": "csv-formula-like-strings",
+      "artifact": "csv-formula-like-strings.csv",
+      "sha256": "2bc3026263b9aacf04db9e11ca639a12b132b3c945f939466f659ef2145272b4",
+      "bytes": 91
+    },
+    {
+      "caseId": "csv-unicode-rtl-category-names",
+      "artifact": "csv-unicode-rtl-category-names.csv",
+      "sha256": "9857b6abf608de75d7a9eae7261ea7f5cb508dd40aeaf57fec763af4068ab028",
+      "bytes": 125
+    },
+    {
+      "caseId": "csv-header-only",
+      "artifact": "csv-header-only.csv",
+      "sha256": "79d4e332d580f61d88f34a7438c969cdc5ad63d0689569044111306d2482b7ba",
+      "bytes": 9
+    },
+    {
+      "caseId": "csv-empty-file",
+      "artifact": "csv-empty-file.csv",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "caseId": "xlsx-minimal-valid",
+      "artifact": "xlsx-minimal-valid.xlsx",
+      "sha256": "bd341c942b60bafc95a75da449e9fdf1f48b82b7b472cf5f90858f194bc3035d",
+      "bytes": 3457
+    },
+    {
+      "caseId": "xlsx-empty-sheetdata",
+      "artifact": "xlsx-empty-sheetdata.xlsx",
+      "sha256": "212e2b36a40792cf615068797f6fff8fb7316c5f866b7ad21219f0c313590a4e",
+      "bytes": 2828
+    },
+    {
+      "caseId": "xlsx-header-on-row-2",
+      "artifact": "xlsx-header-on-row-2.xlsx",
+      "sha256": "24079a54e61bbe1f9d0fa334364217cae5801648cb78df7d76fb69194a6ec72f",
+      "bytes": 3228
+    },
+    {
+      "caseId": "xlsx-duplicate-sheet-names",
+      "artifact": "xlsx-duplicate-sheet-names.xlsx",
+      "sha256": "d105d9f316cddb00047a2fb2f0d1ce4a08a731850dcf223186a9c8dc1187413e",
+      "bytes": 3976
+    },
+    {
+      "caseId": "xlsx-ragged-trailing-empty-cells",
+      "artifact": "xlsx-ragged-trailing-empty-cells.xlsx",
+      "sha256": "78e0c91eb2e93ff7e5619f17b0d73e9d5902a607da06b9dd839dcb3150496bd0",
+      "bytes": 3317
+    }
+  ]
+}

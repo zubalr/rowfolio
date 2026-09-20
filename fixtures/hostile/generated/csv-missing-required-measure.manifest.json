@@ -1,0 +1,39 @@
+{
+  "caseId": "csv-missing-required-measure",
+  "category": "csv_missing_values",
+  "description": "Additive measure blank on two of five records.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 5,
+      "headerColumns": 3,
+      "perRecordFieldCounts": [
+        3,
+        3,
+        3,
+        3,
+        3
+      ]
+    },
+    "missingCells": [
+      {
+        "row": 2,
+        "column": "amount_usd"
+      },
+      {
+        "row": 4,
+        "column": "amount_usd"
+      }
+    ],
+    "requiredBehavior": [
+      "amount_usd aggregates include 3 of 5 rows; eligible/included/excluded counts disclosed (excluded=2)",
+      "an empty cell is not zero and never becomes zero"
+    ]
+  },
+  "notes": [],
+  "artifact": "csv-missing-required-measure.csv",
+  "sha256": "3d00b895fa01c9fadc40828883ce072b8650aee51dfcaf07569b1be3492ece98",
+  "bytes": 151,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

@@ -1,0 +1,22 @@
+{
+  "caseId": "csv-header-only",
+  "category": "csv_headers",
+  "description": "A well-formed table with a header and zero records.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 0,
+      "headerColumns": 2,
+      "perRecordFieldCounts": []
+    },
+    "requiredBehavior": [
+      "valid table with no observations; descriptive-only output, no trend or comparison claims"
+    ]
+  },
+  "notes": [],
+  "artifact": "csv-header-only.csv",
+  "sha256": "79d4e332d580f61d88f34a7438c969cdc5ad63d0689569044111306d2482b7ba",
+  "bytes": 9,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

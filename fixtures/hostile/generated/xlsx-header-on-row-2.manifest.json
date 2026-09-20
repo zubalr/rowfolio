@@ -1,0 +1,39 @@
+{
+  "caseId": "xlsx-header-on-row-2",
+  "category": "ooxml_structure",
+  "description": "Header row on physical worksheet row 2; physical row 1 is empty.",
+  "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "expected": {
+    "sheets": [
+      {
+        "name": "Offset",
+        "headerPhysicalRow": 2,
+        "records": 2,
+        "header": [
+          "id",
+          "val"
+        ],
+        "rows": [
+          [
+            "K-1",
+            "5"
+          ],
+          [
+            "K-2",
+            "6"
+          ]
+        ]
+      }
+    ],
+    "requiredBehavior": [
+      "table bounds start below row 1; physical 1-based coordinates are preserved for provenance (data rows 3–4)",
+      "row 1 emptiness is not silently discarded from source coordinates"
+    ]
+  },
+  "notes": [],
+  "artifact": "xlsx-header-on-row-2.xlsx",
+  "sha256": "24079a54e61bbe1f9d0fa334364217cae5801648cb78df7d76fb69194a6ec72f",
+  "bytes": 3228,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

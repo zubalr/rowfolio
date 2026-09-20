@@ -1,0 +1,5 @@
+id,memo,value
+F-1,=SUM(A2:A3),10
+F-2,+470011002233,20
+F-3,-status,30
+F-4,@risk_register,40

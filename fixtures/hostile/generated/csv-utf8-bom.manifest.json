@@ -1,0 +1,30 @@
+{
+  "caseId": "csv-utf8-bom",
+  "category": "csv_bom",
+  "description": "UTF-8 BOM before the header row; first header name must not absorb the BOM.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 3,
+      "headerColumns": 3,
+      "perRecordFieldCounts": [
+        3,
+        3,
+        3
+      ]
+    },
+    "firstThreeBytesHex": "efbbbf",
+    "requiredBehavior": [
+      "BOM stripped before header interpretation; first header is exactly 'date'",
+      "UTF-8 decode without silent replacement; non-ASCII city names preserved"
+    ]
+  },
+  "notes": [
+    "Synthetic city names chosen for accented Latin coverage."
+  ],
+  "artifact": "csv-utf8-bom.csv",
+  "sha256": "7789ea8673d83a98c61a1023d99004cede8c60e4ab819ade90ca5c9027febc1b",
+  "bytes": 100,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

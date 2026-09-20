@@ -1,0 +1,52 @@
+{
+  "caseId": "xlsx-duplicate-sheet-names",
+  "category": "ooxml_structure",
+  "description": "Two worksheet parts with the identical display name 'Data'.",
+  "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "expected": {
+    "sheets": [
+      {
+        "name": "Data",
+        "sheetPart": "xl/worksheets/sheet1.xml",
+        "headerPhysicalRow": 1,
+        "records": 1,
+        "header": [
+          "id",
+          "val"
+        ],
+        "rows": [
+          [
+            "S-1",
+            "1"
+          ]
+        ]
+      },
+      {
+        "name": "Data",
+        "sheetPart": "xl/worksheets/sheet2.xml",
+        "headerPhysicalRow": 1,
+        "records": 1,
+        "header": [
+          "k",
+          "v"
+        ],
+        "rows": [
+          [
+            "alpha",
+            "2"
+          ]
+        ]
+      }
+    ],
+    "requiredBehavior": [
+      "both parts enumerated with stable sheet ordinals; identical display names never merged or deduplicated",
+      "selection identifies sheets by part/ordinal, not display name alone"
+    ]
+  },
+  "notes": [],
+  "artifact": "xlsx-duplicate-sheet-names.xlsx",
+  "sha256": "d105d9f316cddb00047a2fb2f0d1ce4a08a731850dcf223186a9c8dc1187413e",
+  "bytes": 3976,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

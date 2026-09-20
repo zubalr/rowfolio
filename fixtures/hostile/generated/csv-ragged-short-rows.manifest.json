@@ -1,0 +1,28 @@
+{
+  "caseId": "csv-ragged-short-rows",
+  "category": "csv_ragged",
+  "description": "Records with fewer fields than the header row.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 4,
+      "headerColumns": 4,
+      "perRecordFieldCounts": [
+        4,
+        4,
+        3,
+        2
+      ]
+    },
+    "requiredBehavior": [
+      "records 3 and 4 are malformed against the header; absent trailing fields are absent, not empty strings",
+      "malformed records are disclosed with per-record counts, never silently padded or dropped"
+    ]
+  },
+  "notes": [],
+  "artifact": "csv-ragged-short-rows.csv",
+  "sha256": "515746e03d9435f5d00e5a0db882f7f46f2db304a94adbcf0a2f0c9d6a808f03",
+  "bytes": 69,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

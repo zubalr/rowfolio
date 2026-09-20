@@ -1,0 +1,47 @@
+{
+  "caseId": "xlsx-ragged-trailing-empty-cells",
+  "category": "ooxml_structure",
+  "description": "Rows with differing physical widths including present-but-empty cell elements.",
+  "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "expected": {
+    "sheets": [
+      {
+        "name": "Ragged",
+        "headerPhysicalRow": 1,
+        "records": 3,
+        "header": [
+          "a",
+          "b",
+          "c"
+        ],
+        "rows": [
+          [
+            "1",
+            "2",
+            "3"
+          ],
+          [
+            "4",
+            "5",
+            "6",
+            "",
+            ""
+          ],
+          [
+            "7"
+          ]
+        ]
+      }
+    ],
+    "requiredBehavior": [
+      "an empty <c/> element contributes no value; record 2 has physical width 5 with two absent values",
+      "row widths disclosed per record; no silent padding to the header width"
+    ]
+  },
+  "notes": [],
+  "artifact": "xlsx-ragged-trailing-empty-cells.xlsx",
+  "sha256": "78e0c91eb2e93ff7e5619f17b0d73e9d5902a607da06b9dd839dcb3150496bd0",
+  "bytes": 3317,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

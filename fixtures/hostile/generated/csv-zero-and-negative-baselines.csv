@@ -1,0 +1,5 @@
+id,metric,previous,current
+Z-1,revenue_usd,0,500
+Z-2,revenue_usd,400,0
+Z-3,returns_count,-40,-10
+Z-4,cost_usd,250,300
