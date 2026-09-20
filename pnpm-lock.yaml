@@ -401,6 +401,12 @@ importers:
         specifier: 19.3.0
         version: 19.3.0(react@19.3.0)
 
+  tooling/dataset:
+    dependencies:
+      exceljs:
+        specifier: 4.4.0
+        version: 4.4.0
+
 packages:
 
   '@cacheable/memory@2.2.0':
