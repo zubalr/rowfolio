@@ -1,0 +1,43 @@
+{
+  "version": "1.0.0",
+  "numeric": {
+    "precision": 40,
+    "rounding": "ROUND_HALF_UP",
+    "maxInputSignificantDigits": 30,
+    "maxInputExponent": 18,
+    "excelNumericMaxSignificantDigits": 15
+  },
+  "limits": {
+    "compressedBytes": 10485760,
+    "expandedBytes": 104857600,
+    "entryBytes": 33554432,
+    "entries": 2000,
+    "expansionRatio": 200,
+    "rowsIncludingHeader": 50000,
+    "columns": 100,
+    "nonemptyCells": 500000,
+    "visibleSheets": 20,
+    "cellCharacters": 32000,
+    "watchdogMs": 15000
+  },
+  "thresholds": {
+    "numericInferenceFraction": "0.95",
+    "dateInferenceFraction": "0.98",
+    "minComparisonRows": 20,
+    "targetGapFraction": "0.05",
+    "periodChangeFraction": "0.10",
+    "minAbsoluteChangeShareOfPriorScope": "0.05",
+    "ordersIncreaseFraction": "0.05",
+    "outlierMinRows": 30,
+    "iqrMultiplier": "3",
+    "trendMinPeriods": 4
+  },
+  "ranking": {
+    "sampleTopRuleIds": [
+      "north-target-orders-v1",
+      "north-downtime-mom-v1",
+      "quality-ledger-v1"
+    ],
+    "note": "Allowlist eligibility/rank preferences only; all rule conditions and evidence must still be computed."
+  }
+}

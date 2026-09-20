@@ -1,12 +1,30 @@
 {
   "name": "@rowfolio/contracts",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
+  "description": "Rowfolio wire-schema authority (contract v1.0.0): versioned JSON Schema, generated structural types, runtime validators, semantic refinements, worker envelopes and importable contract examples.",
+  "license": "MIT",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./interfaces": "./src/interfaces.ts",
+    "./examples": "./src/examples.ts",
+    "./schema": "./src/schema-document.ts",
+    "./source/*": "./source/*",
+    "./package.json": "./package.json"
   },
+  "files": [
+    "src",
+    "source",
+    "scripts"
+  ],
   "scripts": {
+    "generate:types": "node scripts/generate-types.mjs",
+    "check:generated": "node scripts/check-generated.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }

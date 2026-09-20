@@ -1,0 +1,22 @@
+{
+  "id": "operating-cost-v1",
+  "version": "1.0.0",
+  "parameter": {
+    "id": "costChange",
+    "unit": "fraction",
+    "min": "-0.20",
+    "max": "0.30",
+    "sliderStep": "0.01",
+    "typedStep": "0.001",
+    "default": "0"
+  },
+  "requiresMetricIds": [
+    "june-revenue",
+    "june-operating-cost"
+  ],
+  "aggregationPolicy": "factor-after-aggregate",
+  "assumptionKeys": [
+    "scenario.assumption.revenueFixed",
+    "scenario.assumption.mechanical"
+  ]
+}

@@ -1,0 +1,1932 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "analysis-a645db6d54cee88e2aa3",
+  "tableId": "operations-v1",
+  "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+  "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+  "analysisVersion": "1.0.0",
+  "scope": {
+    "tableId": "operations-v1",
+    "periodStart": "2026-06-01",
+    "periodEnd": "2026-06-30",
+    "regions": [],
+    "complete": true,
+    "coverageNoteKey": "coverage.scheduledComplete"
+  },
+  "metrics": [
+    {
+      "id": "north-june-revenue",
+      "labelKey": "metric.revenue",
+      "value": "881000.00",
+      "status": "defined",
+      "reasonKey": null,
+      "unit": {
+        "kind": "currency",
+        "label": "USD",
+        "currency": "USD"
+      },
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-06-01",
+        "periodEnd": "2026-06-30",
+        "regions": [
+          "North"
+        ],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "eligibleRows": 100,
+      "totalRows": 100,
+      "provenanceId": "north-june-revenue-proof",
+      "warnings": []
+    },
+    {
+      "id": "north-june-target",
+      "labelKey": "metric.target_revenue",
+      "value": "1000000.00",
+      "status": "defined",
+      "reasonKey": null,
+      "unit": {
+        "kind": "currency",
+        "label": "USD",
+        "currency": "USD"
+      },
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-06-01",
+        "periodEnd": "2026-06-30",
+        "regions": [
+          "North"
+        ],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "eligibleRows": 100,
+      "totalRows": 100,
+      "provenanceId": "north-june-target-proof",
+      "warnings": []
+    },
+    {
+      "id": "north-may-orders",
+      "labelKey": "metric.order_volume",
+      "value": "10000",
+      "status": "defined",
+      "reasonKey": null,
+      "unit": {
+        "kind": "count",
+        "label": "orders",
+        "currency": null
+      },
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-05-01",
+        "periodEnd": "2026-05-31",
+        "regions": [
+          "North"
+        ],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "eligibleRows": 100,
+      "totalRows": 100,
+      "provenanceId": "north-may-orders-proof",
+      "warnings": []
+    },
+    {
+      "id": "north-june-orders",
+      "labelKey": "metric.order_volume",
+      "value": "10800",
+      "status": "defined",
+      "reasonKey": null,
+      "unit": {
+        "kind": "count",
+        "label": "orders",
+        "currency": null
+      },
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-06-01",
+        "periodEnd": "2026-06-30",
+        "regions": [
+          "North"
+        ],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "eligibleRows": 100,
+      "totalRows": 100,
+      "provenanceId": "north-june-orders-proof",
+      "warnings": []
+    },
+    {
+      "id": "north-may-downtime",
+      "labelKey": "metric.downtime_minutes",
+      "value": "1194",
+      "status": "defined",
+      "reasonKey": null,
+      "unit": {
+        "kind": "minutes",
+        "label": "minutes",
+        "currency": null
+      },
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-05-01",
+        "periodEnd": "2026-05-31",
+        "regions": [
+          "North"
+        ],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "eligibleRows": 100,
+      "totalRows": 100,
+      "provenanceId": "north-may-downtime-proof",
+      "warnings": []
+    },
+    {
+      "id": "north-june-downtime",
+      "labelKey": "metric.downtime_minutes",
+      "value": "1565",
+      "status": "defined",
+      "reasonKey": null,
+      "unit": {
+        "kind": "minutes",
+        "label": "minutes",
+        "currency": null
+      },
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-06-01",
+        "periodEnd": "2026-06-30",
+        "regions": [
+          "North"
+        ],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "eligibleRows": 100,
+      "totalRows": 100,
+      "provenanceId": "north-june-downtime-proof",
+      "warnings": []
+    },
+    {
+      "id": "june-revenue",
+      "labelKey": "metric.revenue",
+      "value": "6000000.00",
+      "status": "defined",
+      "reasonKey": null,
+      "unit": {
+        "kind": "currency",
+        "label": "USD",
+        "currency": "USD"
+      },
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-06-01",
+        "periodEnd": "2026-06-30",
+        "regions": [],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "eligibleRows": 600,
+      "totalRows": 600,
+      "provenanceId": "june-revenue-proof",
+      "warnings": []
+    },
+    {
+      "id": "june-operating-cost",
+      "labelKey": "metric.operating_cost",
+      "value": "4500000.00",
+      "status": "defined",
+      "reasonKey": null,
+      "unit": {
+        "kind": "currency",
+        "label": "USD",
+        "currency": "USD"
+      },
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-06-01",
+        "periodEnd": "2026-06-30",
+        "regions": [],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "eligibleRows": 600,
+      "totalRows": 600,
+      "provenanceId": "june-operating-cost-proof",
+      "warnings": []
+    },
+    {
+      "id": "north-target-gap",
+      "labelKey": "metric.targetGap",
+      "value": "-0.119",
+      "status": "defined",
+      "reasonKey": null,
+      "unit": {
+        "kind": "ratio",
+        "label": "fraction",
+        "currency": null
+      },
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-06-01",
+        "periodEnd": "2026-06-30",
+        "regions": [
+          "North"
+        ],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "eligibleRows": 100,
+      "totalRows": 100,
+      "provenanceId": "north-target-gap-proof",
+      "warnings": []
+    },
+    {
+      "id": "north-orders-change",
+      "labelKey": "metric.ordersChange",
+      "value": "0.08",
+      "status": "defined",
+      "reasonKey": null,
+      "unit": {
+        "kind": "ratio",
+        "label": "fraction",
+        "currency": null
+      },
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-06-01",
+        "periodEnd": "2026-06-30",
+        "regions": [
+          "North"
+        ],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "eligibleRows": 100,
+      "totalRows": 100,
+      "provenanceId": "north-orders-change-proof",
+      "warnings": []
+    },
+    {
+      "id": "north-downtime-change",
+      "labelKey": "metric.downtimeChange",
+      "value": "0.3107202680067001675041876046901172529313",
+      "status": "defined",
+      "reasonKey": null,
+      "unit": {
+        "kind": "ratio",
+        "label": "fraction",
+        "currency": null
+      },
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-06-01",
+        "periodEnd": "2026-06-30",
+        "regions": [
+          "North"
+        ],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "eligibleRows": 100,
+      "totalRows": 100,
+      "provenanceId": "north-downtime-change-proof",
+      "warnings": []
+    },
+    {
+      "id": "june-contribution",
+      "labelKey": "metric.contribution",
+      "value": "1500000.00",
+      "status": "defined",
+      "reasonKey": null,
+      "unit": {
+        "kind": "currency",
+        "label": "USD",
+        "currency": "USD"
+      },
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-06-01",
+        "periodEnd": "2026-06-30",
+        "regions": [],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "eligibleRows": 600,
+      "totalRows": 600,
+      "provenanceId": "june-contribution-proof",
+      "warnings": []
+    },
+    {
+      "id": "june-margin",
+      "labelKey": "metric.margin",
+      "value": "0.25",
+      "status": "defined",
+      "reasonKey": null,
+      "unit": {
+        "kind": "ratio",
+        "label": "fraction",
+        "currency": null
+      },
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-06-01",
+        "periodEnd": "2026-06-30",
+        "regions": [],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "eligibleRows": 600,
+      "totalRows": 600,
+      "provenanceId": "june-margin-proof",
+      "warnings": []
+    },
+    {
+      "id": "quality-duplicate",
+      "labelKey": "quality.duplicate",
+      "value": "17",
+      "status": "defined",
+      "reasonKey": null,
+      "unit": {
+        "kind": "count",
+        "label": "records",
+        "currency": null
+      },
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": null,
+        "periodEnd": null,
+        "regions": [],
+        "complete": true,
+        "coverageNoteKey": "coverage.allSource"
+      },
+      "eligibleRows": 2400,
+      "totalRows": 2400,
+      "provenanceId": "quality-duplicate-proof",
+      "warnings": []
+    },
+    {
+      "id": "quality-category",
+      "labelKey": "quality.category",
+      "value": "7",
+      "status": "defined",
+      "reasonKey": null,
+      "unit": {
+        "kind": "count",
+        "label": "records",
+        "currency": null
+      },
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": null,
+        "periodEnd": null,
+        "regions": [],
+        "complete": true,
+        "coverageNoteKey": "coverage.allSource"
+      },
+      "eligibleRows": 2400,
+      "totalRows": 2400,
+      "provenanceId": "quality-category-proof",
+      "warnings": []
+    },
+    {
+      "id": "quality-missing",
+      "labelKey": "quality.missing",
+      "value": "5",
+      "status": "defined",
+      "reasonKey": null,
+      "unit": {
+        "kind": "count",
+        "label": "records",
+        "currency": null
+      },
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": null,
+        "periodEnd": null,
+        "regions": [],
+        "complete": true,
+        "coverageNoteKey": "coverage.allSource"
+      },
+      "eligibleRows": 2400,
+      "totalRows": 2400,
+      "provenanceId": "quality-missing-proof",
+      "warnings": []
+    }
+  ],
+  "findings": [
+    {
+      "id": "finding-north-target",
+      "ruleId": "north-target-orders-v1",
+      "kind": "divergence",
+      "severity": "attention",
+      "titleKey": "finding.north.title",
+      "bodyKey": "finding.north.body",
+      "metricIds": [
+        "north-june-revenue",
+        "north-june-target",
+        "north-target-gap",
+        "north-orders-change"
+      ],
+      "provenanceIds": [
+        "north-june-revenue-proof",
+        "north-june-target-proof",
+        "north-target-gap-proof",
+        "north-orders-change-proof"
+      ],
+      "qualityIssueIds": [],
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-06-01",
+        "periodEnd": "2026-06-30",
+        "regions": [
+          "North"
+        ],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "rank": {
+        "classPriority": 1,
+        "coverage": "1",
+        "magnitude": "0.119"
+      },
+      "chartId": "chart-north-target",
+      "limitations": [
+        "limitations.noCausality"
+      ]
+    },
+    {
+      "id": "finding-north-downtime",
+      "ruleId": "north-downtime-mom-v1",
+      "kind": "period-change",
+      "severity": "attention",
+      "titleKey": "finding.downtime.title",
+      "bodyKey": "finding.downtime.body",
+      "metricIds": [
+        "north-may-downtime",
+        "north-june-downtime",
+        "north-downtime-change"
+      ],
+      "provenanceIds": [
+        "north-may-downtime-proof",
+        "north-june-downtime-proof",
+        "north-downtime-change-proof"
+      ],
+      "qualityIssueIds": [],
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-06-01",
+        "periodEnd": "2026-06-30",
+        "regions": [
+          "North"
+        ],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "rank": {
+        "classPriority": 2,
+        "coverage": "1",
+        "magnitude": "0.3107202680067001675041876046901172529313"
+      },
+      "chartId": "chart-downtime",
+      "limitations": [
+        "limitations.noCausality"
+      ]
+    },
+    {
+      "id": "finding-quality",
+      "ruleId": "quality-ledger-v1",
+      "kind": "quality",
+      "severity": "attention",
+      "titleKey": "finding.quality.title",
+      "bodyKey": "finding.quality.body",
+      "metricIds": [
+        "quality-duplicate",
+        "quality-category",
+        "quality-missing"
+      ],
+      "provenanceIds": [
+        "quality-duplicate-proof",
+        "quality-category-proof",
+        "quality-missing-proof"
+      ],
+      "qualityIssueIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-missing-40",
+        "quality-missing-447",
+        "quality-missing-999",
+        "quality-missing-1645",
+        "quality-missing-2257",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": null,
+        "periodEnd": null,
+        "regions": [],
+        "complete": true,
+        "coverageNoteKey": "coverage.allSource"
+      },
+      "rank": {
+        "classPriority": 3,
+        "coverage": "1",
+        "magnitude": "29"
+      },
+      "chartId": "chart-quality",
+      "limitations": [
+        "limitations.missingRetained"
+      ]
+    }
+  ],
+  "provenance": [
+    {
+      "id": "north-june-revenue-proof",
+      "sourceRefs": [
+        {
+          "id": "source-operations",
+          "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+          "workbookName": "sample_operations.xlsx",
+          "format": "xlsx",
+          "sheetId": "S0",
+          "sheetName": "Operations",
+          "headerRow": 1,
+          "range": {
+            "firstRow": 1,
+            "lastRow": 2418,
+            "firstColumn": 1,
+            "lastColumn": 11
+          }
+        }
+      ],
+      "selections": [
+        {
+          "id": "north-june-revenue-rows",
+          "sourceRefId": "source-operations",
+          "spans": [
+            {
+              "start": 1802,
+              "end": 1901
+            }
+          ],
+          "rowCount": 100,
+          "fieldIds": [
+            "revenue"
+          ],
+          "excludedRowIds": [],
+          "maskPolicy": "shared-valid"
+        }
+      ],
+      "expression": {
+        "op": "sum",
+        "selectionId": "north-june-revenue-rows",
+        "fieldId": "revenue"
+      },
+      "result": "881000.00",
+      "status": "defined",
+      "reasonKey": null,
+      "policyVersion": "1.0.0",
+      "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+      "transformIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "precision": 40,
+      "rounding": "ROUND_HALF_UP"
+    },
+    {
+      "id": "north-june-target-proof",
+      "sourceRefs": [
+        {
+          "id": "source-operations",
+          "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+          "workbookName": "sample_operations.xlsx",
+          "format": "xlsx",
+          "sheetId": "S0",
+          "sheetName": "Operations",
+          "headerRow": 1,
+          "range": {
+            "firstRow": 1,
+            "lastRow": 2418,
+            "firstColumn": 1,
+            "lastColumn": 11
+          }
+        }
+      ],
+      "selections": [
+        {
+          "id": "north-june-target-rows",
+          "sourceRefId": "source-operations",
+          "spans": [
+            {
+              "start": 1802,
+              "end": 1901
+            }
+          ],
+          "rowCount": 100,
+          "fieldIds": [
+            "target_revenue"
+          ],
+          "excludedRowIds": [],
+          "maskPolicy": "shared-valid"
+        }
+      ],
+      "expression": {
+        "op": "sum",
+        "selectionId": "north-june-target-rows",
+        "fieldId": "target_revenue"
+      },
+      "result": "1000000.00",
+      "status": "defined",
+      "reasonKey": null,
+      "policyVersion": "1.0.0",
+      "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+      "transformIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "precision": 40,
+      "rounding": "ROUND_HALF_UP"
+    },
+    {
+      "id": "north-may-orders-proof",
+      "sourceRefs": [
+        {
+          "id": "source-operations",
+          "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+          "workbookName": "sample_operations.xlsx",
+          "format": "xlsx",
+          "sheetId": "S0",
+          "sheetName": "Operations",
+          "headerRow": 1,
+          "range": {
+            "firstRow": 1,
+            "lastRow": 2418,
+            "firstColumn": 1,
+            "lastColumn": 11
+          }
+        }
+      ],
+      "selections": [
+        {
+          "id": "north-may-orders-rows",
+          "sourceRefId": "source-operations",
+          "spans": [
+            {
+              "start": 1202,
+              "end": 1301
+            }
+          ],
+          "rowCount": 100,
+          "fieldIds": [
+            "order_volume"
+          ],
+          "excludedRowIds": [
+            "S0:R2411"
+          ],
+          "maskPolicy": "shared-valid"
+        }
+      ],
+      "expression": {
+        "op": "sum",
+        "selectionId": "north-may-orders-rows",
+        "fieldId": "order_volume"
+      },
+      "result": "10000",
+      "status": "defined",
+      "reasonKey": null,
+      "policyVersion": "1.0.0",
+      "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+      "transformIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "precision": 40,
+      "rounding": "ROUND_HALF_UP"
+    },
+    {
+      "id": "north-june-orders-proof",
+      "sourceRefs": [
+        {
+          "id": "source-operations",
+          "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+          "workbookName": "sample_operations.xlsx",
+          "format": "xlsx",
+          "sheetId": "S0",
+          "sheetName": "Operations",
+          "headerRow": 1,
+          "range": {
+            "firstRow": 1,
+            "lastRow": 2418,
+            "firstColumn": 1,
+            "lastColumn": 11
+          }
+        }
+      ],
+      "selections": [
+        {
+          "id": "north-june-orders-rows",
+          "sourceRefId": "source-operations",
+          "spans": [
+            {
+              "start": 1802,
+              "end": 1901
+            }
+          ],
+          "rowCount": 100,
+          "fieldIds": [
+            "order_volume"
+          ],
+          "excludedRowIds": [],
+          "maskPolicy": "shared-valid"
+        }
+      ],
+      "expression": {
+        "op": "sum",
+        "selectionId": "north-june-orders-rows",
+        "fieldId": "order_volume"
+      },
+      "result": "10800",
+      "status": "defined",
+      "reasonKey": null,
+      "policyVersion": "1.0.0",
+      "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+      "transformIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "precision": 40,
+      "rounding": "ROUND_HALF_UP"
+    },
+    {
+      "id": "north-may-downtime-proof",
+      "sourceRefs": [
+        {
+          "id": "source-operations",
+          "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+          "workbookName": "sample_operations.xlsx",
+          "format": "xlsx",
+          "sheetId": "S0",
+          "sheetName": "Operations",
+          "headerRow": 1,
+          "range": {
+            "firstRow": 1,
+            "lastRow": 2418,
+            "firstColumn": 1,
+            "lastColumn": 11
+          }
+        }
+      ],
+      "selections": [
+        {
+          "id": "north-may-downtime-rows",
+          "sourceRefId": "source-operations",
+          "spans": [
+            {
+              "start": 1202,
+              "end": 1301
+            }
+          ],
+          "rowCount": 100,
+          "fieldIds": [
+            "downtime_minutes"
+          ],
+          "excludedRowIds": [
+            "S0:R2411"
+          ],
+          "maskPolicy": "shared-valid"
+        }
+      ],
+      "expression": {
+        "op": "sum",
+        "selectionId": "north-may-downtime-rows",
+        "fieldId": "downtime_minutes"
+      },
+      "result": "1194",
+      "status": "defined",
+      "reasonKey": null,
+      "policyVersion": "1.0.0",
+      "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+      "transformIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "precision": 40,
+      "rounding": "ROUND_HALF_UP"
+    },
+    {
+      "id": "north-june-downtime-proof",
+      "sourceRefs": [
+        {
+          "id": "source-operations",
+          "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+          "workbookName": "sample_operations.xlsx",
+          "format": "xlsx",
+          "sheetId": "S0",
+          "sheetName": "Operations",
+          "headerRow": 1,
+          "range": {
+            "firstRow": 1,
+            "lastRow": 2418,
+            "firstColumn": 1,
+            "lastColumn": 11
+          }
+        }
+      ],
+      "selections": [
+        {
+          "id": "north-june-downtime-rows",
+          "sourceRefId": "source-operations",
+          "spans": [
+            {
+              "start": 1802,
+              "end": 1901
+            }
+          ],
+          "rowCount": 100,
+          "fieldIds": [
+            "downtime_minutes"
+          ],
+          "excludedRowIds": [],
+          "maskPolicy": "shared-valid"
+        }
+      ],
+      "expression": {
+        "op": "sum",
+        "selectionId": "north-june-downtime-rows",
+        "fieldId": "downtime_minutes"
+      },
+      "result": "1565",
+      "status": "defined",
+      "reasonKey": null,
+      "policyVersion": "1.0.0",
+      "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+      "transformIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "precision": 40,
+      "rounding": "ROUND_HALF_UP"
+    },
+    {
+      "id": "june-revenue-proof",
+      "sourceRefs": [
+        {
+          "id": "source-operations",
+          "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+          "workbookName": "sample_operations.xlsx",
+          "format": "xlsx",
+          "sheetId": "S0",
+          "sheetName": "Operations",
+          "headerRow": 1,
+          "range": {
+            "firstRow": 1,
+            "lastRow": 2418,
+            "firstColumn": 1,
+            "lastColumn": 11
+          }
+        }
+      ],
+      "selections": [
+        {
+          "id": "june-revenue-rows",
+          "sourceRefId": "source-operations",
+          "spans": [
+            {
+              "start": 1802,
+              "end": 2401
+            }
+          ],
+          "rowCount": 600,
+          "fieldIds": [
+            "revenue"
+          ],
+          "excludedRowIds": [
+            "S0:R2416",
+            "S0:R2417",
+            "S0:R2418"
+          ],
+          "maskPolicy": "shared-valid"
+        }
+      ],
+      "expression": {
+        "op": "sum",
+        "selectionId": "june-revenue-rows",
+        "fieldId": "revenue"
+      },
+      "result": "6000000.00",
+      "status": "defined",
+      "reasonKey": null,
+      "policyVersion": "1.0.0",
+      "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+      "transformIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "precision": 40,
+      "rounding": "ROUND_HALF_UP"
+    },
+    {
+      "id": "june-operating-cost-proof",
+      "sourceRefs": [
+        {
+          "id": "source-operations",
+          "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+          "workbookName": "sample_operations.xlsx",
+          "format": "xlsx",
+          "sheetId": "S0",
+          "sheetName": "Operations",
+          "headerRow": 1,
+          "range": {
+            "firstRow": 1,
+            "lastRow": 2418,
+            "firstColumn": 1,
+            "lastColumn": 11
+          }
+        }
+      ],
+      "selections": [
+        {
+          "id": "june-operating-cost-rows",
+          "sourceRefId": "source-operations",
+          "spans": [
+            {
+              "start": 1802,
+              "end": 2401
+            }
+          ],
+          "rowCount": 600,
+          "fieldIds": [
+            "operating_cost"
+          ],
+          "excludedRowIds": [
+            "S0:R2416",
+            "S0:R2417",
+            "S0:R2418"
+          ],
+          "maskPolicy": "shared-valid"
+        }
+      ],
+      "expression": {
+        "op": "sum",
+        "selectionId": "june-operating-cost-rows",
+        "fieldId": "operating_cost"
+      },
+      "result": "4500000.00",
+      "status": "defined",
+      "reasonKey": null,
+      "policyVersion": "1.0.0",
+      "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+      "transformIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "precision": 40,
+      "rounding": "ROUND_HALF_UP"
+    },
+    {
+      "id": "north-target-gap-proof",
+      "sourceRefs": [
+        {
+          "id": "source-operations",
+          "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+          "workbookName": "sample_operations.xlsx",
+          "format": "xlsx",
+          "sheetId": "S0",
+          "sheetName": "Operations",
+          "headerRow": 1,
+          "range": {
+            "firstRow": 1,
+            "lastRow": 2418,
+            "firstColumn": 1,
+            "lastColumn": 11
+          }
+        }
+      ],
+      "selections": [],
+      "expression": {
+        "op": "divide",
+        "left": {
+          "op": "subtract",
+          "left": {
+            "op": "metric",
+            "metricId": "north-june-revenue"
+          },
+          "right": {
+            "op": "metric",
+            "metricId": "north-june-target"
+          }
+        },
+        "right": {
+          "op": "metric",
+          "metricId": "north-june-target"
+        }
+      },
+      "result": "-0.119",
+      "status": "defined",
+      "reasonKey": null,
+      "policyVersion": "1.0.0",
+      "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+      "transformIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "precision": 40,
+      "rounding": "ROUND_HALF_UP"
+    },
+    {
+      "id": "north-orders-change-proof",
+      "sourceRefs": [
+        {
+          "id": "source-operations",
+          "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+          "workbookName": "sample_operations.xlsx",
+          "format": "xlsx",
+          "sheetId": "S0",
+          "sheetName": "Operations",
+          "headerRow": 1,
+          "range": {
+            "firstRow": 1,
+            "lastRow": 2418,
+            "firstColumn": 1,
+            "lastColumn": 11
+          }
+        }
+      ],
+      "selections": [],
+      "expression": {
+        "op": "divide",
+        "left": {
+          "op": "subtract",
+          "left": {
+            "op": "metric",
+            "metricId": "north-june-orders"
+          },
+          "right": {
+            "op": "metric",
+            "metricId": "north-may-orders"
+          }
+        },
+        "right": {
+          "op": "metric",
+          "metricId": "north-may-orders"
+        }
+      },
+      "result": "0.08",
+      "status": "defined",
+      "reasonKey": null,
+      "policyVersion": "1.0.0",
+      "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+      "transformIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "precision": 40,
+      "rounding": "ROUND_HALF_UP"
+    },
+    {
+      "id": "north-downtime-change-proof",
+      "sourceRefs": [
+        {
+          "id": "source-operations",
+          "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+          "workbookName": "sample_operations.xlsx",
+          "format": "xlsx",
+          "sheetId": "S0",
+          "sheetName": "Operations",
+          "headerRow": 1,
+          "range": {
+            "firstRow": 1,
+            "lastRow": 2418,
+            "firstColumn": 1,
+            "lastColumn": 11
+          }
+        }
+      ],
+      "selections": [],
+      "expression": {
+        "op": "divide",
+        "left": {
+          "op": "subtract",
+          "left": {
+            "op": "metric",
+            "metricId": "north-june-downtime"
+          },
+          "right": {
+            "op": "metric",
+            "metricId": "north-may-downtime"
+          }
+        },
+        "right": {
+          "op": "metric",
+          "metricId": "north-may-downtime"
+        }
+      },
+      "result": "0.3107202680067001675041876046901172529313",
+      "status": "defined",
+      "reasonKey": null,
+      "policyVersion": "1.0.0",
+      "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+      "transformIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "precision": 40,
+      "rounding": "ROUND_HALF_UP"
+    },
+    {
+      "id": "june-contribution-proof",
+      "sourceRefs": [
+        {
+          "id": "source-operations",
+          "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+          "workbookName": "sample_operations.xlsx",
+          "format": "xlsx",
+          "sheetId": "S0",
+          "sheetName": "Operations",
+          "headerRow": 1,
+          "range": {
+            "firstRow": 1,
+            "lastRow": 2418,
+            "firstColumn": 1,
+            "lastColumn": 11
+          }
+        }
+      ],
+      "selections": [],
+      "expression": {
+        "op": "subtract",
+        "left": {
+          "op": "metric",
+          "metricId": "june-revenue"
+        },
+        "right": {
+          "op": "metric",
+          "metricId": "june-operating-cost"
+        }
+      },
+      "result": "1500000.00",
+      "status": "defined",
+      "reasonKey": null,
+      "policyVersion": "1.0.0",
+      "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+      "transformIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "precision": 40,
+      "rounding": "ROUND_HALF_UP"
+    },
+    {
+      "id": "june-margin-proof",
+      "sourceRefs": [
+        {
+          "id": "source-operations",
+          "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+          "workbookName": "sample_operations.xlsx",
+          "format": "xlsx",
+          "sheetId": "S0",
+          "sheetName": "Operations",
+          "headerRow": 1,
+          "range": {
+            "firstRow": 1,
+            "lastRow": 2418,
+            "firstColumn": 1,
+            "lastColumn": 11
+          }
+        }
+      ],
+      "selections": [],
+      "expression": {
+        "op": "divide",
+        "left": {
+          "op": "metric",
+          "metricId": "june-contribution"
+        },
+        "right": {
+          "op": "metric",
+          "metricId": "june-revenue"
+        }
+      },
+      "result": "0.25",
+      "status": "defined",
+      "reasonKey": null,
+      "policyVersion": "1.0.0",
+      "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+      "transformIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "precision": 40,
+      "rounding": "ROUND_HALF_UP"
+    },
+    {
+      "id": "quality-duplicate-proof",
+      "sourceRefs": [
+        {
+          "id": "source-operations",
+          "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+          "workbookName": "sample_operations.xlsx",
+          "format": "xlsx",
+          "sheetId": "S0",
+          "sheetName": "Operations",
+          "headerRow": 1,
+          "range": {
+            "firstRow": 1,
+            "lastRow": 2418,
+            "firstColumn": 1,
+            "lastColumn": 11
+          }
+        }
+      ],
+      "selections": [],
+      "expression": {
+        "op": "count-issues",
+        "issueIds": [
+          "quality-duplicate-2402",
+          "quality-duplicate-2403",
+          "quality-duplicate-2404",
+          "quality-duplicate-2405",
+          "quality-duplicate-2406",
+          "quality-duplicate-2407",
+          "quality-duplicate-2408",
+          "quality-duplicate-2409",
+          "quality-duplicate-2410",
+          "quality-duplicate-2411",
+          "quality-duplicate-2412",
+          "quality-duplicate-2413",
+          "quality-duplicate-2414",
+          "quality-duplicate-2415",
+          "quality-duplicate-2416",
+          "quality-duplicate-2417",
+          "quality-duplicate-2418"
+        ]
+      },
+      "result": "17",
+      "status": "defined",
+      "reasonKey": null,
+      "policyVersion": "1.0.0",
+      "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+      "transformIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "precision": 40,
+      "rounding": "ROUND_HALF_UP"
+    },
+    {
+      "id": "quality-category-proof",
+      "sourceRefs": [
+        {
+          "id": "source-operations",
+          "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+          "workbookName": "sample_operations.xlsx",
+          "format": "xlsx",
+          "sheetId": "S0",
+          "sheetName": "Operations",
+          "headerRow": 1,
+          "range": {
+            "firstRow": 1,
+            "lastRow": 2418,
+            "firstColumn": 1,
+            "lastColumn": 11
+          }
+        }
+      ],
+      "selections": [],
+      "expression": {
+        "op": "count-issues",
+        "issueIds": [
+          "quality-category-19",
+          "quality-category-91",
+          "quality-category-262",
+          "quality-category-590",
+          "quality-category-825",
+          "quality-category-1120",
+          "quality-category-1536"
+        ]
+      },
+      "result": "7",
+      "status": "defined",
+      "reasonKey": null,
+      "policyVersion": "1.0.0",
+      "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+      "transformIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "precision": 40,
+      "rounding": "ROUND_HALF_UP"
+    },
+    {
+      "id": "quality-missing-proof",
+      "sourceRefs": [
+        {
+          "id": "source-operations",
+          "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+          "workbookName": "sample_operations.xlsx",
+          "format": "xlsx",
+          "sheetId": "S0",
+          "sheetName": "Operations",
+          "headerRow": 1,
+          "range": {
+            "firstRow": 1,
+            "lastRow": 2418,
+            "firstColumn": 1,
+            "lastColumn": 11
+          }
+        }
+      ],
+      "selections": [],
+      "expression": {
+        "op": "count-issues",
+        "issueIds": [
+          "quality-missing-40",
+          "quality-missing-447",
+          "quality-missing-999",
+          "quality-missing-1645",
+          "quality-missing-2257"
+        ]
+      },
+      "result": "5",
+      "status": "defined",
+      "reasonKey": null,
+      "policyVersion": "1.0.0",
+      "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+      "transformIds": [
+        "quality-category-19",
+        "quality-category-91",
+        "quality-category-262",
+        "quality-category-590",
+        "quality-category-825",
+        "quality-category-1120",
+        "quality-category-1536",
+        "quality-duplicate-2402",
+        "quality-duplicate-2403",
+        "quality-duplicate-2404",
+        "quality-duplicate-2405",
+        "quality-duplicate-2406",
+        "quality-duplicate-2407",
+        "quality-duplicate-2408",
+        "quality-duplicate-2409",
+        "quality-duplicate-2410",
+        "quality-duplicate-2411",
+        "quality-duplicate-2412",
+        "quality-duplicate-2413",
+        "quality-duplicate-2414",
+        "quality-duplicate-2415",
+        "quality-duplicate-2416",
+        "quality-duplicate-2417",
+        "quality-duplicate-2418"
+      ],
+      "precision": 40,
+      "rounding": "ROUND_HALF_UP"
+    }
+  ],
+  "charts": [
+    {
+      "id": "chart-north-target",
+      "kind": "target-bars",
+      "titleKey": "chart.north.title",
+      "summaryKey": "chart.north.summary",
+      "unit": {
+        "kind": "currency",
+        "label": "USD",
+        "currency": "USD"
+      },
+      "series": [
+        {
+          "id": "actual",
+          "labelKey": "common.actual",
+          "semantic": "observed"
+        },
+        {
+          "id": "target",
+          "labelKey": "common.target",
+          "semantic": "target"
+        }
+      ],
+      "points": [
+        {
+          "key": "north",
+          "labelKey": "region.North",
+          "values": {
+            "actual": "881000",
+            "target": "1000000"
+          },
+          "metricIds": [
+            "north-june-revenue",
+            "north-june-target"
+          ]
+        }
+      ],
+      "domain": {
+        "min": "0",
+        "max": "1100000"
+      },
+      "chronology": "not-temporal",
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-06-01",
+        "periodEnd": "2026-06-30",
+        "regions": [
+          "North"
+        ],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "provenanceIds": [
+        "north-june-revenue-proof",
+        "north-june-target-proof"
+      ]
+    },
+    {
+      "id": "chart-downtime",
+      "kind": "bars",
+      "titleKey": "chart.downtime.title",
+      "summaryKey": "chart.downtime.summary",
+      "unit": {
+        "kind": "minutes",
+        "label": "minutes",
+        "currency": null
+      },
+      "series": [
+        {
+          "id": "actual",
+          "labelKey": "common.actual",
+          "semantic": "observed"
+        }
+      ],
+      "points": [
+        {
+          "key": "2026-05",
+          "labelKey": "period.may",
+          "values": {
+            "actual": "1194"
+          },
+          "metricIds": [
+            "north-may-downtime"
+          ]
+        },
+        {
+          "key": "2026-06",
+          "labelKey": "period.june",
+          "values": {
+            "actual": "1565"
+          },
+          "metricIds": [
+            "north-june-downtime"
+          ]
+        }
+      ],
+      "domain": {
+        "min": "0",
+        "max": "1800"
+      },
+      "chronology": "ltr",
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": "2026-06-01",
+        "periodEnd": "2026-06-30",
+        "regions": [
+          "North"
+        ],
+        "complete": true,
+        "coverageNoteKey": "coverage.scheduledComplete"
+      },
+      "provenanceIds": [
+        "north-may-downtime-proof",
+        "north-june-downtime-proof"
+      ]
+    },
+    {
+      "id": "chart-quality",
+      "kind": "quality-bars",
+      "titleKey": "chart.quality.title",
+      "summaryKey": "chart.quality.summary",
+      "unit": {
+        "kind": "count",
+        "label": "records",
+        "currency": null
+      },
+      "series": [
+        {
+          "id": "issues",
+          "labelKey": "quality.issues",
+          "semantic": "attention"
+        }
+      ],
+      "points": [
+        {
+          "key": "duplicate",
+          "labelKey": "quality.duplicate",
+          "values": {
+            "issues": "17"
+          },
+          "metricIds": [
+            "quality-duplicate"
+          ]
+        },
+        {
+          "key": "category",
+          "labelKey": "quality.category",
+          "values": {
+            "issues": "7"
+          },
+          "metricIds": [
+            "quality-category"
+          ]
+        },
+        {
+          "key": "missing",
+          "labelKey": "quality.missing",
+          "values": {
+            "issues": "5"
+          },
+          "metricIds": [
+            "quality-missing"
+          ]
+        }
+      ],
+      "domain": {
+        "min": "0",
+        "max": "20"
+      },
+      "chronology": "not-temporal",
+      "scope": {
+        "tableId": "operations-v1",
+        "periodStart": null,
+        "periodEnd": null,
+        "regions": [],
+        "complete": true,
+        "coverageNoteKey": "coverage.allSource"
+      },
+      "provenanceIds": [
+        "quality-duplicate-proof",
+        "quality-category-proof",
+        "quality-missing-proof"
+      ]
+    }
+  ],
+  "qualitySummary": {
+    "rawRows": 2417,
+    "retainedRows": 2400,
+    "issueCount": 29,
+    "resolved": 24,
+    "unresolved": 5
+  }
+}

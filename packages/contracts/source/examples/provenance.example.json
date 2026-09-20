@@ -1,0 +1,72 @@
+{
+  "id": "north-downtime-change-proof",
+  "sourceRefs": [
+    {
+      "id": "source-operations",
+      "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+      "workbookName": "sample_operations.xlsx",
+      "format": "xlsx",
+      "sheetId": "S0",
+      "sheetName": "Operations",
+      "headerRow": 1,
+      "range": {
+        "firstRow": 1,
+        "lastRow": 2418,
+        "firstColumn": 1,
+        "lastColumn": 11
+      }
+    }
+  ],
+  "selections": [],
+  "expression": {
+    "op": "divide",
+    "left": {
+      "op": "subtract",
+      "left": {
+        "op": "metric",
+        "metricId": "north-june-downtime"
+      },
+      "right": {
+        "op": "metric",
+        "metricId": "north-may-downtime"
+      }
+    },
+    "right": {
+      "op": "metric",
+      "metricId": "north-may-downtime"
+    }
+  },
+  "result": "0.3107202680067001675041876046901172529313",
+  "status": "defined",
+  "reasonKey": null,
+  "policyVersion": "1.0.0",
+  "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+  "transformIds": [
+    "quality-category-19",
+    "quality-category-91",
+    "quality-category-262",
+    "quality-category-590",
+    "quality-category-825",
+    "quality-category-1120",
+    "quality-category-1536",
+    "quality-duplicate-2402",
+    "quality-duplicate-2403",
+    "quality-duplicate-2404",
+    "quality-duplicate-2405",
+    "quality-duplicate-2406",
+    "quality-duplicate-2407",
+    "quality-duplicate-2408",
+    "quality-duplicate-2409",
+    "quality-duplicate-2410",
+    "quality-duplicate-2411",
+    "quality-duplicate-2412",
+    "quality-duplicate-2413",
+    "quality-duplicate-2414",
+    "quality-duplicate-2415",
+    "quality-duplicate-2416",
+    "quality-duplicate-2417",
+    "quality-duplicate-2418"
+  ],
+  "precision": 40,
+  "rounding": "ROUND_HALF_UP"
+}
