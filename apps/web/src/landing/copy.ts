@@ -40,7 +40,6 @@ type CopyKey =
   | "landing.chart.summary"
   | "landing.chart.title"
   | "landing.close.body"
-  | "landing.close.return"
   | "landing.close.title"
   | "landing.specimen.note"
   | "scenario.assumed"
@@ -81,7 +80,6 @@ const COPY: Record<CopyKey, Record<Locale, string>> = {
   "landing.chart.summary": { en: "North is the visible exception: 881,000 against a 1,000,000 target; the other five regions sit within four percent of plan.", ar: "الشمال هو الاستثناء الواضح: ٨٨١٬٠٠٠ مقابل مستهدف ١٬٠٠٠٬٠٠٠، بينما تقع المناطق الخمس الأخرى ضمن أربعة بالمئة من الخطة." },
   "landing.chart.title": { en: "June revenue vs target by region", ar: "إيراد يونيو مقابل المستهدف حسب المنطقة" },
   "landing.close.body": { en: "The parser, the arithmetic and the exports run in this page. Your file is never uploaded, and clearing the tab clears the data.", ar: "المحلل والحسابات والتصديرات تعمل داخل هذه الصفحة. لا يُرفع ملفك أبدًا، ومسح التبويب يمسح البيانات." },
-  "landing.close.return": { en: "Open the full workspace", ar: "افتح مساحة العمل الكاملة" },
   "landing.close.title": { en: "Everything stays on this device.", ar: "كل شيء يبقى على هذا الجهاز." },
   "landing.specimen.note": { en: "A working slice of the product — the same parser, arithmetic and components the app uses, driven by the checked-in sample.", ar: "مقطع عملي من المنتج — المحلل والحسابات والمكوّنات الحقيقية نفسها، مدفوعة بالنموذج المضمّن." },
   "scenario.assumed": { en: "Assumed layer", ar: "طبقة الافتراض" },

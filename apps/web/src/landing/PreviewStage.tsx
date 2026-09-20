@@ -560,6 +560,8 @@ export function PreviewStage({
       </Target>
 
       {guideVisible ? <div className="rf-preview__guide">{children}</div> : null}
+
+      <p className="rf-stage__note">{landingCopy(i18n.locale, "landing.specimen.note")}</p>
     </section>
   );
 }

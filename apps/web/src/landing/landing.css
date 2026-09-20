@@ -164,6 +164,12 @@ html[lang="ar"] .rf-stage__title {
   line-height: 1.5;
   letter-spacing: normal;
 }
+.rf-stage__note {
+  margin: var(--rf-space-4) 0 0;
+  color: var(--rf-text-muted);
+  font-size: 13px;
+  max-width: 62ch;
+}
 .rf-stage__meta {
   display: flex;
   flex-wrap: wrap;
