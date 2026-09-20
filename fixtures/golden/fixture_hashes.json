@@ -1,0 +1,15 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "artifact_binding.json": "9629fe432c8abe5d1eeba1d867fe6e113dbf7fded27e7105520eee2406fba219",
+    "expected_clean.csv": "4bf58b4f5cc19374c6b93460b2ac08373470174a625a5ca0db0192648be8e066",
+    "expected_monthly.json": "44f0dc2bb5df92cb0869cb161c8f6b30ba49f90c5cb892972e8b7a30351e4600",
+    "expected_quality.json": "ba42cf20c18795ec3ddad566743b8adbf1aad939f05a951d11179a52dbd14ee1",
+    "reporting_calendar.json": "78e25ff9d08285186bcc9d57fc97a7a9e373a2058dcdea466bcefa51e4d0210c",
+    "sample_manifest.json": "abd47e23a619a9c2922004d6709a7e87b484e40364c5c3df5425e75139b0b40e",
+    "sample_operations.csv": "84c945daa1d4a452feb4167197e6246b2f14234f490a1ce0ac3b1bfb07e64eb5",
+    "sample_operations.xlsx": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+    "sample_rows.json": "b2989c6a511b976a5206f28b18f443a06a580e2f665ecf654eda78c9b20913f8"
+  },
+  "schemaVersion": "1.0.0"
+}

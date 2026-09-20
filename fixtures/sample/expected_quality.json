@@ -1,0 +1,309 @@
+[
+  {
+    "action": "normalize",
+    "cleanValue": "North",
+    "column": "region",
+    "id": "quality-category-19",
+    "kind": "category_variant",
+    "policy": "sample-manifest-v1",
+    "rawValue": "NORTH",
+    "sourceRow": 19
+  },
+  {
+    "action": "normalize",
+    "cleanValue": "North",
+    "column": "region",
+    "id": "quality-category-91",
+    "kind": "category_variant",
+    "policy": "sample-manifest-v1",
+    "rawValue": " north ",
+    "sourceRow": 91
+  },
+  {
+    "action": "normalize",
+    "cleanValue": "East",
+    "column": "region",
+    "id": "quality-category-262",
+    "kind": "category_variant",
+    "policy": "sample-manifest-v1",
+    "rawValue": "EAST",
+    "sourceRow": 262
+  },
+  {
+    "action": "normalize",
+    "cleanValue": "Coast",
+    "column": "region",
+    "id": "quality-category-590",
+    "kind": "category_variant",
+    "policy": "sample-manifest-v1",
+    "rawValue": " coast ",
+    "sourceRow": 590
+  },
+  {
+    "action": "normalize",
+    "cleanValue": "East",
+    "column": "region",
+    "id": "quality-category-825",
+    "kind": "category_variant",
+    "policy": "sample-manifest-v1",
+    "rawValue": "EAST",
+    "sourceRow": 825
+  },
+  {
+    "action": "normalize",
+    "cleanValue": "Coast",
+    "column": "region",
+    "id": "quality-category-1120",
+    "kind": "category_variant",
+    "policy": "sample-manifest-v1",
+    "rawValue": " coast ",
+    "sourceRow": 1120
+  },
+  {
+    "action": "normalize",
+    "cleanValue": "West",
+    "column": "region",
+    "id": "quality-category-1536",
+    "kind": "category_variant",
+    "policy": "sample-manifest-v1",
+    "rawValue": "WEST",
+    "sourceRow": 1536
+  },
+  {
+    "action": "retain_missing",
+    "cleanValue": null,
+    "column": "csat_score",
+    "id": "quality-missing-40",
+    "kind": "missing_optional",
+    "policy": "never-impute-v1",
+    "rawValue": null,
+    "sourceRow": 40
+  },
+  {
+    "action": "retain_missing",
+    "cleanValue": null,
+    "column": "csat_score",
+    "id": "quality-missing-447",
+    "kind": "missing_optional",
+    "policy": "never-impute-v1",
+    "rawValue": null,
+    "sourceRow": 447
+  },
+  {
+    "action": "retain_missing",
+    "cleanValue": null,
+    "column": "csat_score",
+    "id": "quality-missing-999",
+    "kind": "missing_optional",
+    "policy": "never-impute-v1",
+    "rawValue": null,
+    "sourceRow": 999
+  },
+  {
+    "action": "retain_missing",
+    "cleanValue": null,
+    "column": "csat_score",
+    "id": "quality-missing-1645",
+    "kind": "missing_optional",
+    "policy": "never-impute-v1",
+    "rawValue": null,
+    "sourceRow": 1645
+  },
+  {
+    "action": "retain_missing",
+    "cleanValue": null,
+    "column": "csat_score",
+    "id": "quality-missing-2257",
+    "kind": "missing_optional",
+    "policy": "never-impute-v1",
+    "rawValue": null,
+    "sourceRow": 2257
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2402",
+    "keptSourceRow": 9,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-00008",
+    "sourceRow": 2402
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2403",
+    "keptSourceRow": 146,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-00145",
+    "sourceRow": 2403
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2404",
+    "keptSourceRow": 283,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-00282",
+    "sourceRow": 2404
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2405",
+    "keptSourceRow": 420,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-00419",
+    "sourceRow": 2405
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2406",
+    "keptSourceRow": 557,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-00556",
+    "sourceRow": 2406
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2407",
+    "keptSourceRow": 694,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-00693",
+    "sourceRow": 2407
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2408",
+    "keptSourceRow": 831,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-00830",
+    "sourceRow": 2408
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2409",
+    "keptSourceRow": 968,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-00967",
+    "sourceRow": 2409
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2410",
+    "keptSourceRow": 1105,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-01104",
+    "sourceRow": 2410
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2411",
+    "keptSourceRow": 1242,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-01241",
+    "sourceRow": 2411
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2412",
+    "keptSourceRow": 1379,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-01378",
+    "sourceRow": 2412
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2413",
+    "keptSourceRow": 1516,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-01515",
+    "sourceRow": 2413
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2414",
+    "keptSourceRow": 1653,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-01652",
+    "sourceRow": 2414
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2415",
+    "keptSourceRow": 1790,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-01789",
+    "sourceRow": 2415
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2416",
+    "keptSourceRow": 1927,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-01926",
+    "sourceRow": 2416
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2417",
+    "keptSourceRow": 2064,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-02063",
+    "sourceRow": 2417
+  },
+  {
+    "action": "exclude",
+    "cleanValue": null,
+    "column": null,
+    "id": "quality-duplicate-2418",
+    "keptSourceRow": 2201,
+    "kind": "duplicate",
+    "policy": "sample-operation-id-and-all-cells-v1",
+    "rawValue": "OP-02200",
+    "sourceRow": 2418
+  }
+]

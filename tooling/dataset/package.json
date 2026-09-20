@@ -1,0 +1,18 @@
+{
+  "name": "rowfolio-dataset-tools",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Deterministic sample dataset tooling: generator, oracle, binder, XLSX writer, production snapshot builder",
+  "scripts": {
+    "generate": "python3 generate_sample.py",
+    "verify": "python3 verify_sample.py",
+    "bind": "python3 bind_artifacts.py",
+    "golden": "python3 export_golden.py",
+    "test": "python3 -m unittest discover -s tests -v",
+    "write-xlsx": "node write_sample_xlsx.mjs",
+    "build-snapshot": "node build_sample_snapshot.mjs"
+  },
+  "dependencies": {
+    "exceljs": "4.4.0"
+  }
+}

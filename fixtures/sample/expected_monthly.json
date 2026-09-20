@@ -1,0 +1,218 @@
+[
+  {
+    "downtime_minutes": 970,
+    "operating_cost": "627200",
+    "order_volume": 9200,
+    "period": "2026-03",
+    "region": "North",
+    "revenue": "980000",
+    "target_revenue": "1000000"
+  },
+  {
+    "downtime_minutes": 920,
+    "operating_cost": "623070",
+    "order_volume": 9450,
+    "period": "2026-03",
+    "region": "South",
+    "revenue": "903000",
+    "target_revenue": "1030000"
+  },
+  {
+    "downtime_minutes": 990,
+    "operating_cost": "648200",
+    "order_volume": 9700,
+    "period": "2026-03",
+    "region": "East",
+    "revenue": "926000",
+    "target_revenue": "1040000"
+  },
+  {
+    "downtime_minutes": 1060,
+    "operating_cost": "673790",
+    "order_volume": 9950,
+    "period": "2026-03",
+    "region": "West",
+    "revenue": "949000",
+    "target_revenue": "1050000"
+  },
+  {
+    "downtime_minutes": 1130,
+    "operating_cost": "699840",
+    "order_volume": 10200,
+    "period": "2026-03",
+    "region": "Central",
+    "revenue": "972000",
+    "target_revenue": "1060000"
+  },
+  {
+    "downtime_minutes": 1200,
+    "operating_cost": "726350",
+    "order_volume": 10450,
+    "period": "2026-03",
+    "region": "Coast",
+    "revenue": "995000",
+    "target_revenue": "1070000"
+  },
+  {
+    "downtime_minutes": 1080,
+    "operating_cost": "659600",
+    "order_volume": 9500,
+    "period": "2026-04",
+    "region": "North",
+    "revenue": "970000",
+    "target_revenue": "1000000"
+  },
+  {
+    "downtime_minutes": 940,
+    "operating_cost": "641700",
+    "order_volume": 9650,
+    "period": "2026-04",
+    "region": "South",
+    "revenue": "930000",
+    "target_revenue": "1030000"
+  },
+  {
+    "downtime_minutes": 1010,
+    "operating_cost": "667100",
+    "order_volume": 9900,
+    "period": "2026-04",
+    "region": "East",
+    "revenue": "953000",
+    "target_revenue": "1040000"
+  },
+  {
+    "downtime_minutes": 1080,
+    "operating_cost": "692960",
+    "order_volume": 10150,
+    "period": "2026-04",
+    "region": "West",
+    "revenue": "976000",
+    "target_revenue": "1050000"
+  },
+  {
+    "downtime_minutes": 1150,
+    "operating_cost": "719280",
+    "order_volume": 10400,
+    "period": "2026-04",
+    "region": "Central",
+    "revenue": "999000",
+    "target_revenue": "1060000"
+  },
+  {
+    "downtime_minutes": 1220,
+    "operating_cost": "746060",
+    "order_volume": 10650,
+    "period": "2026-04",
+    "region": "Coast",
+    "revenue": "1022000",
+    "target_revenue": "1070000"
+  },
+  {
+    "downtime_minutes": 1194,
+    "operating_cost": "693500",
+    "order_volume": 10000,
+    "period": "2026-05",
+    "region": "North",
+    "revenue": "950000",
+    "target_revenue": "1000000"
+  },
+  {
+    "downtime_minutes": 960,
+    "operating_cost": "660330",
+    "order_volume": 9850,
+    "period": "2026-05",
+    "region": "South",
+    "revenue": "957000",
+    "target_revenue": "1030000"
+  },
+  {
+    "downtime_minutes": 1030,
+    "operating_cost": "686000",
+    "order_volume": 10100,
+    "period": "2026-05",
+    "region": "East",
+    "revenue": "980000",
+    "target_revenue": "1040000"
+  },
+  {
+    "downtime_minutes": 1100,
+    "operating_cost": "712130",
+    "order_volume": 10350,
+    "period": "2026-05",
+    "region": "West",
+    "revenue": "1003000",
+    "target_revenue": "1050000"
+  },
+  {
+    "downtime_minutes": 1170,
+    "operating_cost": "738720",
+    "order_volume": 10600,
+    "period": "2026-05",
+    "region": "Central",
+    "revenue": "1026000",
+    "target_revenue": "1060000"
+  },
+  {
+    "downtime_minutes": 1240,
+    "operating_cost": "765770",
+    "order_volume": 10850,
+    "period": "2026-05",
+    "region": "Coast",
+    "revenue": "1049000",
+    "target_revenue": "1070000"
+  },
+  {
+    "downtime_minutes": 1565,
+    "operating_cost": "740000",
+    "order_volume": 10800,
+    "period": "2026-06",
+    "region": "North",
+    "revenue": "881000",
+    "target_revenue": "1000000"
+  },
+  {
+    "downtime_minutes": 980,
+    "operating_cost": "765000",
+    "order_volume": 10050,
+    "period": "2026-06",
+    "region": "South",
+    "revenue": "1060000",
+    "target_revenue": "1030000"
+  },
+  {
+    "downtime_minutes": 1320,
+    "operating_cost": "750000",
+    "order_volume": 10300,
+    "period": "2026-06",
+    "region": "East",
+    "revenue": "1020000",
+    "target_revenue": "1040000"
+  },
+  {
+    "downtime_minutes": 1120,
+    "operating_cost": "760000",
+    "order_volume": 10550,
+    "period": "2026-06",
+    "region": "West",
+    "revenue": "1040000",
+    "target_revenue": "1050000"
+  },
+  {
+    "downtime_minutes": 1190,
+    "operating_cost": "745000",
+    "order_volume": 10800,
+    "period": "2026-06",
+    "region": "Central",
+    "revenue": "1049000",
+    "target_revenue": "1060000"
+  },
+  {
+    "downtime_minutes": 1260,
+    "operating_cost": "740000",
+    "order_volume": 11050,
+    "period": "2026-06",
+    "region": "Coast",
+    "revenue": "950000",
+    "target_revenue": "1070000"
+  }
+]

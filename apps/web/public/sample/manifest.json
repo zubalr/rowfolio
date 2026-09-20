@@ -1,0 +1,55 @@
+{
+  "categoryPolicy": "Only manifest-approved case/outer-space variants; never fuzzy merge",
+  "cleanCsvSha256": "4bf58b4f5cc19374c6b93460b2ac08373470174a625a5ca0db0192648be8e066",
+  "cleanRecords": 2400,
+  "currency": "USD",
+  "datasetId": "regional-services-v1",
+  "fictional": true,
+  "grain": [
+    "date",
+    "site"
+  ],
+  "headerRow": 1,
+  "maintenanceIsSubsetOfOperatingCost": true,
+  "missingPolicy": "No imputation; optional CSAT remains missing",
+  "moneyScale": 2,
+  "notes": [
+    "All values synthetic. No company represented.",
+    "Target is allocated per site-day, additive once at this grain.",
+    "Operations rows 2–2401 retained; duplicate rows 2402–2418 excluded.",
+    "Compare May with June over their complete scheduled reporting periods, not a prediction."
+  ],
+  "periodCoverage": "20 scheduled reporting days per period; reporting_calendar.json is authoritative",
+  "periods": [
+    "2026-03",
+    "2026-04",
+    "2026-05",
+    "2026-06"
+  ],
+  "primaryKey": [
+    "operation_id"
+  ],
+  "quality": {
+    "categoryCells": 7,
+    "duplicateRows": 17,
+    "issueCount": 29,
+    "missingOptionalCells": 5,
+    "resolved": 24,
+    "unresolved": 5
+  },
+  "rawRecords": 2417,
+  "regions": [
+    "North",
+    "South",
+    "East",
+    "West",
+    "Central",
+    "Coast"
+  ],
+  "schemaVersion": "1.0.0",
+  "seed": 260920,
+  "sitesPerRegion": 5,
+  "sourceCsvSha256": "84c945daa1d4a452feb4167197e6246b2f14234f490a1ce0ac3b1bfb07e64eb5",
+  "sourceSheet": "Operations",
+  "sourceSheetId": "S0"
+}
