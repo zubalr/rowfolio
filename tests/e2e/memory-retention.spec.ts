@@ -19,7 +19,7 @@ import { test, expect, type CDPSession } from "@playwright/test";
 import { ensureStaticServer, stopStaticServer } from "./helpers.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const evidenceDir = "/home/wertyp/.local/share/rowfolio/evidence/agy/heap";
+const evidenceDir = path.join(repoRoot, "tests/e2e/.evidence/heap");
 
 test.beforeAll(async () => {
   await ensureStaticServer(4173);

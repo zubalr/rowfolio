@@ -15,3 +15,6 @@ __pycache__/
 .wrangler/
 *.local
 *.log
+
+# Local e2e evidence output (never committed)
+tests/e2e/.evidence/
