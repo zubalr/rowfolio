@@ -12,42 +12,325 @@
     "generate.ts",
     "native/GENERATION.md",
     "native/MANIFEST.sha256",
-    "locale/reference.catalog.json"
+    "locale/reference.catalog.json",
+    "generated/README.md",
+    "generated/corpus-index.json"
   ],
   "fixtures": [
-    { "path": "native/control-minimal.xlsx", "inspector": "native", "expect": [], "description": "clean minimal XLSX — positive control" },
-    { "path": "native/corrupt-truncated.xlsx", "inspector": "native", "expect": ["zip.no-eocd"], "description": "truncated mid-central-directory" },
-    { "path": "native/corrupt-bad-crc.xlsx", "inspector": "native", "expect": ["zip.crc-mismatch"], "description": "payload byte flipped under original CRC" },
-    { "path": "native/corrupt-declared-oversize.xlsx", "inspector": "native", "expect": ["zip.entry-declared-oversize", "zip.expanded-exceeds-limit", "zip.expansion-ratio", "zip.inflate-skipped"], "description": "declares 200 MB sheet over ~3 KB of bytes" },
-    { "path": "native/corrupt-cd-count.zip", "inspector": "native", "expect": ["zip.entry-count", "zip.cd-count-mismatch"], "description": "EOCD entry-count lies" },
-    { "path": "native/external-workbook-link.xlsx", "inspector": "native", "expect": ["ooxml.external-relationship"], "description": "externalLink part targeting attacker.invalid" },
-    { "path": "native/external-hyperlink.xlsx", "inspector": "native", "expect": ["ooxml.external-relationship"], "description": "worksheet .rels external hyperlink" },
-    { "path": "native/macro-bearing.xlsm", "inspector": "native", "expect": ["ooxml.macro-content", "ooxml.macro-part"], "description": "macroEnabled type + vbaProject.bin" },
-    { "path": "native/nested-archive.zip", "inspector": "native", "expect": ["zip.nested-archive"], "description": "zip-in-zip nesting flagged at scan depth 1" },
-    { "path": "native/path-traversal.zip", "inspector": "native", "expect": ["zip.path-traversal"], "description": "../ and drive-letter entry names" },
-    { "path": "native/not-a-zip.xlsx", "inspector": "native", "expect": ["inspect.unknown-signature"], "description": "text bytes under an .xlsx name" },
-    { "path": "native/encrypted-ooxml.xlsx", "inspector": "native", "expect": ["cfb.compound-file", "cfb.encryption-marker"], "description": "CFB with EncryptionInfo/EncryptedPackage streams" },
-    { "path": "native/empty.zip", "inspector": "native", "expect": ["zip.empty-archive"], "description": "zero-entry archive" },
-    { "path": "native/oversize-cell.csv", "inspector": "csv", "expect": ["csv.cell-overflow"], "description": "33,000-char cell over policy 32,000" },
-    { "path": "csv/formula-injection.csv", "inspector": "csv", "expect": ["csv.formula-prefix"], "description": "=, +, @, - and tab-prefixed cells" },
-    { "path": "csv/control-clean.csv", "inspector": "csv", "expect": [], "description": "clean CSV control" },
-    { "path": "csv/ragged.csv", "inspector": "csv", "expect": ["csv.ragged-row"], "description": "inconsistent column counts" },
-    { "path": "worker/response-current.json", "inspector": "worker-response", "context": { "requestId": "req-current", "sessionId": "sess-a", "revision": 3 }, "expect": [], "description": "fresh response control" },
-    { "path": "worker/response-stale-revision.json", "inspector": "worker-response", "context": { "requestId": "req-current", "sessionId": "sess-a", "revision": 3 }, "expect": ["envelope.stale"], "description": "echoes revision 2 while 3 is in flight" },
-    { "path": "worker/response-stale-session.json", "inspector": "worker-response", "context": { "requestId": "req-current", "sessionId": "sess-a", "revision": 3 }, "expect": ["envelope.stale"], "description": "wrong sessionId" },
-    { "path": "worker/response-invalid-protocol.json", "inspector": "worker-response", "context": { "requestId": "req-current", "sessionId": "sess-a", "revision": 3 }, "expect": ["envelope.invalid"], "description": "protocolVersion 0" },
-    { "path": "worker/response-invalid-shape.json", "inspector": "worker-response", "context": { "requestId": "req-current", "sessionId": "sess-a", "revision": 3 }, "expect": ["envelope.invalid"], "description": "success kind without result" },
-    { "path": "worker/progress-ok.json", "inspector": "progress", "expect": [], "description": "monotonic within-stage fractions, null on stage change" },
-    { "path": "worker/progress-regression.json", "inspector": "progress", "expect": ["progress.regression"], "description": "fraction regresses inside one stage" },
-    { "path": "worker/envelope-ok.json", "inspector": "envelope", "expect": [], "description": "slot declared and present with matching byteLength" },
-    { "path": "worker/envelope-missing-slot.json", "inspector": "envelope", "expect": ["envelope.slot-missing"], "description": "binarySlot declared, binaries empty" },
-    { "path": "worker/envelope-slot-size.json", "inspector": "envelope", "expect": ["envelope.slot-size"], "description": "declared byteLength != buffer.byteLength" },
-    { "path": "worker/envelope-duplicate-slot.json", "inspector": "envelope", "expect": ["envelope.slot-duplicate"], "description": "two binaries share one slot name" },
-    { "path": "locale/ar-ok.catalog.json", "inspector": "locale", "reference": "locale/reference.catalog.json", "expect": [], "description": "full parity Arabic control" },
-    { "path": "locale/ar-missing-key.catalog.json", "inspector": "locale", "reference": "locale/reference.catalog.json", "expect": ["locale.missing-key"], "description": "greet.user dropped" },
-    { "path": "locale/ar-placeholder-mismatch.catalog.json", "inspector": "locale", "reference": "locale/reference.catalog.json", "expect": ["locale.placeholder-mismatch"], "description": "{name} renamed to {user}" },
-    { "path": "locale/ar-extra-key.catalog.json", "inspector": "locale", "reference": "locale/reference.catalog.json", "expect": ["locale.extra-key"], "description": "key not in reference" },
-    { "path": "analysis/oracle-consistent.json", "inspector": "metric", "oracle": "fixtures/golden/oracle_report.json", "fields": ["northJuneRevenue", "northJuneTarget", "juneRevenue", "juneCost", "baseMargin", "scenarioMargin", "northMayDowntime", "northJuneDowntime"], "expect": [], "description": "claims copied verbatim from the independent oracle" },
-    { "path": "analysis/planted-wrong-metric.json", "inspector": "metric", "oracle": "fixtures/golden/oracle_report.json", "fields": ["northJuneRevenue", "northJuneTarget", "juneRevenue", "juneCost", "baseMargin", "scenarioMargin", "northMayDowntime", "northJuneDowntime"], "expect": ["metric.mismatch"], "description": "northJuneRevenue 881000->882000 and northJuneDowntime 1565->1565.5 planted" }
+    {
+      "path": "native/control-minimal.xlsx",
+      "inspector": "native",
+      "expect": [],
+      "description": "clean minimal XLSX — positive control"
+    },
+    {
+      "path": "native/corrupt-truncated.xlsx",
+      "inspector": "native",
+      "expect": [
+        "zip.no-eocd"
+      ],
+      "description": "truncated mid-central-directory"
+    },
+    {
+      "path": "native/corrupt-bad-crc.xlsx",
+      "inspector": "native",
+      "expect": [
+        "zip.crc-mismatch"
+      ],
+      "description": "payload byte flipped under original CRC"
+    },
+    {
+      "path": "native/corrupt-declared-oversize.xlsx",
+      "inspector": "native",
+      "expect": [
+        "zip.entry-declared-oversize",
+        "zip.expanded-exceeds-limit",
+        "zip.expansion-ratio",
+        "zip.inflate-skipped"
+      ],
+      "description": "declares 200 MB sheet over ~3 KB of bytes"
+    },
+    {
+      "path": "native/corrupt-cd-count.zip",
+      "inspector": "native",
+      "expect": [
+        "zip.entry-count",
+        "zip.cd-count-mismatch"
+      ],
+      "description": "EOCD entry-count lies"
+    },
+    {
+      "path": "native/external-workbook-link.xlsx",
+      "inspector": "native",
+      "expect": [
+        "ooxml.external-relationship"
+      ],
+      "description": "externalLink part targeting attacker.invalid"
+    },
+    {
+      "path": "native/external-hyperlink.xlsx",
+      "inspector": "native",
+      "expect": [
+        "ooxml.external-relationship"
+      ],
+      "description": "worksheet .rels external hyperlink"
+    },
+    {
+      "path": "native/macro-bearing.xlsm",
+      "inspector": "native",
+      "expect": [
+        "ooxml.macro-content",
+        "ooxml.macro-part"
+      ],
+      "description": "macroEnabled type + vbaProject.bin"
+    },
+    {
+      "path": "native/nested-archive.zip",
+      "inspector": "native",
+      "expect": [
+        "zip.nested-archive"
+      ],
+      "description": "zip-in-zip nesting flagged at scan depth 1"
+    },
+    {
+      "path": "native/path-traversal.zip",
+      "inspector": "native",
+      "expect": [
+        "zip.path-traversal"
+      ],
+      "description": "../ and drive-letter entry names"
+    },
+    {
+      "path": "native/not-a-zip.xlsx",
+      "inspector": "native",
+      "expect": [
+        "inspect.unknown-signature"
+      ],
+      "description": "text bytes under an .xlsx name"
+    },
+    {
+      "path": "native/encrypted-ooxml.xlsx",
+      "inspector": "native",
+      "expect": [
+        "cfb.compound-file",
+        "cfb.encryption-marker"
+      ],
+      "description": "CFB with EncryptionInfo/EncryptedPackage streams"
+    },
+    {
+      "path": "native/empty.zip",
+      "inspector": "native",
+      "expect": [
+        "zip.empty-archive"
+      ],
+      "description": "zero-entry archive"
+    },
+    {
+      "path": "native/oversize-cell.csv",
+      "inspector": "csv",
+      "expect": [
+        "csv.cell-overflow"
+      ],
+      "description": "33,000-char cell over policy 32,000"
+    },
+    {
+      "path": "csv/formula-injection.csv",
+      "inspector": "csv",
+      "expect": [
+        "csv.formula-prefix"
+      ],
+      "description": "=, +, @, - and tab-prefixed cells"
+    },
+    {
+      "path": "csv/control-clean.csv",
+      "inspector": "csv",
+      "expect": [],
+      "description": "clean CSV control"
+    },
+    {
+      "path": "csv/ragged.csv",
+      "inspector": "csv",
+      "expect": [
+        "csv.ragged-row"
+      ],
+      "description": "inconsistent column counts"
+    },
+    {
+      "path": "worker/response-current.json",
+      "inspector": "worker-response",
+      "context": {
+        "requestId": "req-current",
+        "sessionId": "sess-a",
+        "revision": 3
+      },
+      "expect": [],
+      "description": "fresh response control"
+    },
+    {
+      "path": "worker/response-stale-revision.json",
+      "inspector": "worker-response",
+      "context": {
+        "requestId": "req-current",
+        "sessionId": "sess-a",
+        "revision": 3
+      },
+      "expect": [
+        "envelope.stale"
+      ],
+      "description": "echoes revision 2 while 3 is in flight"
+    },
+    {
+      "path": "worker/response-stale-session.json",
+      "inspector": "worker-response",
+      "context": {
+        "requestId": "req-current",
+        "sessionId": "sess-a",
+        "revision": 3
+      },
+      "expect": [
+        "envelope.stale"
+      ],
+      "description": "wrong sessionId"
+    },
+    {
+      "path": "worker/response-invalid-protocol.json",
+      "inspector": "worker-response",
+      "context": {
+        "requestId": "req-current",
+        "sessionId": "sess-a",
+        "revision": 3
+      },
+      "expect": [
+        "envelope.invalid"
+      ],
+      "description": "protocolVersion 0"
+    },
+    {
+      "path": "worker/response-invalid-shape.json",
+      "inspector": "worker-response",
+      "context": {
+        "requestId": "req-current",
+        "sessionId": "sess-a",
+        "revision": 3
+      },
+      "expect": [
+        "envelope.invalid"
+      ],
+      "description": "success kind without result"
+    },
+    {
+      "path": "worker/progress-ok.json",
+      "inspector": "progress",
+      "expect": [],
+      "description": "monotonic within-stage fractions, null on stage change"
+    },
+    {
+      "path": "worker/progress-regression.json",
+      "inspector": "progress",
+      "expect": [
+        "progress.regression"
+      ],
+      "description": "fraction regresses inside one stage"
+    },
+    {
+      "path": "worker/envelope-ok.json",
+      "inspector": "envelope",
+      "expect": [],
+      "description": "slot declared and present with matching byteLength"
+    },
+    {
+      "path": "worker/envelope-missing-slot.json",
+      "inspector": "envelope",
+      "expect": [
+        "envelope.slot-missing"
+      ],
+      "description": "binarySlot declared, binaries empty"
+    },
+    {
+      "path": "worker/envelope-slot-size.json",
+      "inspector": "envelope",
+      "expect": [
+        "envelope.slot-size"
+      ],
+      "description": "declared byteLength != buffer.byteLength"
+    },
+    {
+      "path": "worker/envelope-duplicate-slot.json",
+      "inspector": "envelope",
+      "expect": [
+        "envelope.slot-duplicate"
+      ],
+      "description": "two binaries share one slot name"
+    },
+    {
+      "path": "locale/ar-ok.catalog.json",
+      "inspector": "locale",
+      "reference": "locale/reference.catalog.json",
+      "expect": [],
+      "description": "full parity Arabic control"
+    },
+    {
+      "path": "locale/ar-missing-key.catalog.json",
+      "inspector": "locale",
+      "reference": "locale/reference.catalog.json",
+      "expect": [
+        "locale.missing-key"
+      ],
+      "description": "greet.user dropped"
+    },
+    {
+      "path": "locale/ar-placeholder-mismatch.catalog.json",
+      "inspector": "locale",
+      "reference": "locale/reference.catalog.json",
+      "expect": [
+        "locale.placeholder-mismatch"
+      ],
+      "description": "{name} renamed to {user}"
+    },
+    {
+      "path": "locale/ar-extra-key.catalog.json",
+      "inspector": "locale",
+      "reference": "locale/reference.catalog.json",
+      "expect": [
+        "locale.extra-key"
+      ],
+      "description": "key not in reference"
+    },
+    {
+      "path": "analysis/oracle-consistent.json",
+      "inspector": "metric",
+      "oracle": "fixtures/golden/oracle_report.json",
+      "fields": [
+        "northJuneRevenue",
+        "northJuneTarget",
+        "juneRevenue",
+        "juneCost",
+        "baseMargin",
+        "scenarioMargin",
+        "northMayDowntime",
+        "northJuneDowntime"
+      ],
+      "expect": [],
+      "description": "claims copied verbatim from the independent oracle"
+    },
+    {
+      "path": "analysis/planted-wrong-metric.json",
+      "inspector": "metric",
+      "oracle": "fixtures/golden/oracle_report.json",
+      "fields": [
+        "northJuneRevenue",
+        "northJuneTarget",
+        "juneRevenue",
+        "juneCost",
+        "baseMargin",
+        "scenarioMargin",
+        "northMayDowntime",
+        "northJuneDowntime"
+      ],
+      "expect": [
+        "metric.mismatch"
+      ],
+      "description": "northJuneRevenue 881000->882000 and northJuneDowntime 1565->1565.5 planted"
+    }
   ]
 }

@@ -5,7 +5,7 @@
  * agree with the JS one (independent implementations, not shared code).
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { flipByte, truncateBytes, writeUint32LE } from '../../tooling/test/mutate.ts';
@@ -108,7 +108,7 @@ describe('cross-inspector agreement (Python stdlib vs JS)', () => {
 describe('deflated archives (method 8 coverage)', () => {
   it('real deflated sample xlsx inspects clean', () => {
     const sample = join(FIXTURES_SAMPLE, 'sample_operations.xlsx');
-    if (!existsSync(sample)) return; // fixture produced by A02 on its branch
+    if (!existsSync(sample)) return; // sample fixture may be absent on partial checkouts
     const report = inspectBytes(loadBytes(sample), 'sample_operations.xlsx');
     const zr = readZip(loadBytes(sample));
     expect(zr.entries.some((e) => e.method === 8), 'fixture exercises inflate path').toBe(true);
@@ -129,6 +129,17 @@ describe('scanXml robustness', () => {
 describe('fixture disk hygiene', () => {
   it('no stray files outside manifest coverage in fixtures/hostile', () => {
     const covered = new Set([...manifest.fixtures.map((f) => f.path), ...manifest.meta]);
+    // generated/ is covered by its own corpus index (caseId -> artifact + manifest).
+    const corpusIndexPath = join(FIXTURES_HOSTILE, 'generated', 'corpus-index.json');
+    if (existsSync(corpusIndexPath)) {
+      const index = JSON.parse(readFileSync(corpusIndexPath, 'utf8')) as {
+        cases: { artifact: string }[];
+      };
+      for (const c of index.cases) {
+        covered.add(`generated/${c.artifact}`);
+        covered.add(`generated/${c.artifact.replace(/\.[^.]+$/, '')}.manifest.json`);
+      }
+    }
     const walk = (dir: string, prefix: string): string[] =>
       readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
         d.isDirectory() ? walk(join(dir, d.name), `${prefix}${d.name}/`) : [`${prefix}${d.name}`],
