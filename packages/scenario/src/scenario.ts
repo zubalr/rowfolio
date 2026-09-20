@@ -233,8 +233,10 @@ export function runScenario(
   const contributionExact = subtractDecimal(revenueValue, scenarioCost);
   const scenarioContribution = quantizeMoney(contributionExact, moneyScale);
   const scenarioMargin = divideDecimal(scenarioContribution, revenueValue);
-  const baselineMargin = divideDecimal(subtractDecimal(revenueValue, costValue), revenueValue);
-  const marginDelta = multiplyDecimal(subtractDecimal(scenarioMargin, baselineMargin), '100');
+  // The delta leg needs a defined baseline margin in the snapshot scope.
+  // Generic snapshots may not have one; omitting the delta is explicit,
+  // inventing a baseline would fabricate the comparison.
+  const baselineMarginId = baselineMarginMetricId(snapshot);
 
   const costProofId = 'scenario-cost-proof';
   const contributionProofId = 'scenario-contribution-proof';
@@ -257,23 +259,28 @@ export function runScenario(
       left: { op: 'metric', metricId: 'scenario-contribution' },
       right: { op: 'metric', metricId: revenue.id },
     }, scenarioMargin, baseRefs, snapshot.normalizationRevision),
-    makeProof(deltaProofId, {
-      op: 'multiply',
-      left: {
-        op: 'subtract',
-        left: { op: 'metric', metricId: 'scenario-margin' },
-        right: { op: 'metric', metricId: baselineMarginMetricId(snapshot) },
-      },
-      right: { op: 'literal', value: '100' },
-    }, marginDelta, baseRefs, snapshot.normalizationRevision),
   ];
 
   const metrics: Metric[] = [
     makeMetric('scenario-cost', 'metric.operating_cost', scenarioCost, { ...cost.unit }, cost, costProofId),
     makeMetric('scenario-contribution', 'metric.contribution', scenarioContribution, { ...revenue.unit }, revenue, contributionProofId),
     makeMetric('scenario-margin', 'metric.margin', scenarioMargin, RATIO_UNIT, revenue, marginProofId),
-    makeMetric('scenario-margin-delta-pp', 'metric.marginDelta', marginDelta, PP_UNIT, revenue, deltaProofId),
   ];
+
+  if (baselineMarginId !== null) {
+    const baselineMargin = divideDecimal(subtractDecimal(revenueValue, costValue), revenueValue);
+    const marginDelta = multiplyDecimal(subtractDecimal(scenarioMargin, baselineMargin), '100');
+    proofs.push(makeProof(deltaProofId, {
+      op: 'multiply',
+      left: {
+        op: 'subtract',
+        left: { op: 'metric', metricId: 'scenario-margin' },
+        right: { op: 'metric', metricId: baselineMarginId },
+      },
+      right: { op: 'literal', value: '100' },
+    }, marginDelta, baseRefs, snapshot.normalizationRevision));
+    metrics.push(makeMetric('scenario-margin-delta-pp', 'metric.marginDelta', marginDelta, PP_UNIT, revenue, deltaProofId));
+  }
 
   return {
     id: scenarioId(snapshot.id, costChange),
@@ -288,15 +295,12 @@ export function runScenario(
   };
 }
 
-/** Baseline margin metric for the delta proof: the defined ratio metric whose scope equals the snapshot scope. */
-function baselineMarginMetricId(snapshot: AnalysisSnapshot): string {
+/** Baseline margin metric for the delta proof, if the snapshot defines one. */
+function baselineMarginMetricId(snapshot: AnalysisSnapshot): string | null {
   const direct = snapshot.metrics.find((m) =>
     m.status === 'defined' && m.unit.kind === 'ratio' && deepEqual(m.scope, snapshot.scope),
   );
-  if (direct === undefined) {
-    throw new ScenarioError('missing-metric', 'baseline snapshot has no defined margin metric for the delta proof');
-  }
-  return direct.id;
+  return direct?.id ?? null;
 }
 
 function unavailable(

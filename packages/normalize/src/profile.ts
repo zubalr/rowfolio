@@ -323,6 +323,17 @@ export function profileTable(raw: RawTable): ProfileResult {
             text, text, 'confirm-type', 'quality.proposed',
           ));
         }
+      } else if (
+        (column.type === 'decimal' || column.type === 'integer' || column.type === 'mixed') &&
+        cell?.type !== 'formula'
+      ) {
+        // Non-decimal text where the column leans numeric (including
+        // locale digits without a confirmed profile): trace it in the
+        // ledger as proposed, never silently absorb it into math.
+        issues.push(makeIssue(
+          `quality-malformed-${r}-c${column.sourceColumn}`, 'malformed', raw, r, column.id,
+          text, text, 'none', 'quality.proposed',
+        ));
       }
     }
   }
