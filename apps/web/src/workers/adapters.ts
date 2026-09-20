@@ -7,6 +7,7 @@
  * own chunk (landing entry stays free of engines).
  */
 export class AdapterUnavailableError extends Error {
+  readonly code = 'UNSUPPORTED';
   readonly packageName: string;
   constructor(packageName: string, missing: string) {
     super(`adapter ${packageName} missing required export ${missing}`);
