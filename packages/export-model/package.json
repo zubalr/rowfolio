@@ -1,0 +1,17 @@
+{
+  "name": "@rowfolio/export-model",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@rowfolio/contracts": "workspace:*",
+    "@rowfolio/i18n": "workspace:*",
+    "decimal.js": "10.6.0"
+  }
+}

@@ -1,0 +1,11 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "tooling/*"
+
+# Build scripts (postinstall) are allowed only for packages listed here.
+onlyBuiltDependencies:
+  - esbuild
+
+# The dependency freeze policy lives in DEPENDENCY_FREEZE.md. All versions in
+# package.json files are exact; ranges are resolved only through the lockfile.
