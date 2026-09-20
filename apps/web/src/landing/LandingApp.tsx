@@ -4,29 +4,27 @@
  * Rendered by both static entries (`/` English, `/ar/` Arabic); document
  * lang/dir are already correct per entry, and the i18n provider is pinned
  * to them. Composition: masthead → hero with a legible miniature finding →
- * the interactive prepared-sample preview (driven manually or by the
- * reusable DemoController) → how-it-works → footer.
+ * the interactive prepared-sample preview → how-it-works → footer.
+ *
+ * The whole demo payload — preview stage, fixture-derived truth and the
+ * DemoController wiring — sits behind the `PreviewLoader` lazy chunk so
+ * first paint only ships the shell; CTA clicks are forwarded as a one-shot
+ * `pendingAction` the loader honors even if it mounts after the click.
+ * The Motion overlay is a further nested lazy boundary inside the loader.
  *
  * No parser/export/chart library is reachable from this graph, and nothing
  * touches `window` at module scope, so the entry stays prerender-safe.
  */
-import { Suspense, lazy, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { Suspense, lazy, useRef, useState } from "react";
 import { Bidi, Button, Icon, SkipLink } from "@rowfolio/ui";
 import type { I18n } from "@rowfolio/i18n";
-import { DemoController, GuideBar, GUIDE_STEPS, type GuideState } from "../demo/index.ts";
-import { LANDING_TRUTH } from "./previewTruth.ts";
-import { PREVIEW_IDLE, previewReducer } from "./previewState.ts";
-import { PreviewDemoHost } from "./previewHost.ts";
-import { PreviewStage } from "./PreviewStage.tsx";
+import { MINI_TRUTH } from "./miniTruth.ts";
+import type { PendingDemoAction } from "./PreviewLoader.tsx";
 import { persistLocaleChoice } from "./i18n.ts";
-import { focusById, scrollToId, siblingLocaleHref, workspaceHref } from "./routes.ts";
+import { siblingLocaleHref, workspaceHref } from "./routes.ts";
 import { setWorkspaceIntent } from "./pendingUpload.ts";
-import { prefersReducedMotion, useReducedMotion } from "./useReducedMotion.ts";
 
-// Motion overlay is the single lazy boundary — it never lands in the entry
-// chunk (scripts/audit-static.ts), and is skipped outright under reduced
-// motion where the CSS `data-demo-active` outline is the instant fallback.
-const GuideHighlight = lazy(() => import("./GuideHighlight.tsx"));
+const PreviewLoader = lazy(() => import("./PreviewLoader.tsx"));
 
 const UPLOAD_ACCEPT = ".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
@@ -35,68 +33,16 @@ export interface LandingAppProps {
 }
 
 export function LandingApp({ i18n }: LandingAppProps) {
-  const truth = LANDING_TRUTH;
-  const [preview, dispatch] = useReducer(previewReducer, PREVIEW_IDLE);
-  const reducedMotion = useReducedMotion();
-
-  const { controller, host } = useMemo(() => {
-    const previewHost = new PreviewDemoHost(
-      dispatch,
-      () => scrollToId("demo"),
-      () => focusById("rf-preview-title"),
-    );
-    return {
-      host: previewHost,
-      controller: new DemoController({ host: previewHost, prefersReducedMotion }),
-    };
-  }, []);
-
-  const [guide, setGuide] = useState<GuideState>(controller.getState());
-  useEffect(() => controller.subscribe(setGuide), [controller]);
-  useEffect(() => () => controller.dispose(), [controller]);
-
-  // The host's readiness predicates track real preview state.
-  useEffect(() => {
-    host.publish(preview);
-  }, [host, preview]);
-
-  // Manual pointer/keyboard interaction outside the guide controls pauses
-  // the guide; Escape exits it; a hidden tab pauses without auto-resume.
-  useEffect(() => {
-    const isGuideControl = (target: EventTarget | null) =>
-      target instanceof Element && target.closest("[data-guide-controls]") !== null;
-    const onPointer = (event: Event) => {
-      if (!isGuideControl(event.target)) controller.notifyInteraction();
-    };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        controller.exit();
-        return;
-      }
-      if (!isGuideControl(event.target)) controller.notifyInteraction();
-    };
-    const onVisibility = () => controller.notifyVisibility(!document.hidden);
-    document.addEventListener("pointerdown", onPointer);
-    document.addEventListener("keydown", onKey);
-    document.addEventListener("visibilitychange", onVisibility);
-    return () => {
-      document.removeEventListener("pointerdown", onPointer);
-      document.removeEventListener("keydown", onKey);
-      document.removeEventListener("visibilitychange", onVisibility);
-    };
-  }, [controller]);
-
+  const [pendingDemo, setPendingDemo] = useState<PendingDemoAction | null>(null);
   const uploadInput = useRef<HTMLInputElement>(null);
 
   const exploreSample = () => {
     setWorkspaceIntent({ kind: "sample" });
-    dispatch({ type: "reveal" });
-    scrollToId("demo");
+    setPendingDemo("explore");
   };
   const startGuide = () => {
     setWorkspaceIntent({ kind: "guide" });
-    scrollToId("demo");
-    controller.start();
+    setPendingDemo("guide");
   };
   const pickUpload = () => uploadInput.current?.click();
   const onFileChosen = (file: File | undefined) => {
@@ -106,17 +52,6 @@ export function LandingApp({ i18n }: LandingAppProps) {
     setWorkspaceIntent({ kind: "upload", file });
     window.location.hash = workspaceHref();
   };
-  const replay = () => void controller.replay();
-  const manualInteraction = () => controller.notifyInteraction();
-
-  const guideRunning = guide.status === "running" || guide.status === "paused";
-  // The bar stays mounted through "complete"/"error" so its final caption and
-  // typed error remain visible; it unmounts only when the guide is idle.
-  const guideVisible = guide.status !== "idle";
-  const guideStepId =
-    guide.stepIndex >= 0 && guide.stepIndex < GUIDE_STEPS.length
-      ? GUIDE_STEPS[guide.stepIndex]?.id ?? null
-      : null;
 
   return (
     <>
@@ -185,7 +120,7 @@ export function LandingApp({ i18n }: LandingAppProps) {
             <span className="rf-mini__eyebrow">{i18n.t("common.prepared")}</span>
             <p className="rf-mini__figure">
               <Bidi dir="ltr" className="rf-numeric">
-                {i18n.formatInteger(truth.northJune.revenue)}
+                {i18n.formatInteger(MINI_TRUTH.revenue)}
               </Bidi>
               <span className="rf-mini__unit">
                 {" "}
@@ -194,7 +129,7 @@ export function LandingApp({ i18n }: LandingAppProps) {
             </p>
             <p className="rf-mini__delta">
               <Bidi dir="ltr" className="rf-numeric">
-                −{i18n.formatPercent(truth.northJune.targetGapRatio, {
+                −{i18n.formatPercent(MINI_TRUTH.targetGapRatio, {
                   minFractionDigits: 0,
                   maxFractionDigits: 1,
                 })}
@@ -204,24 +139,25 @@ export function LandingApp({ i18n }: LandingAppProps) {
           </div>
         </section>
 
-        <PreviewStage
-          truth={truth}
-          i18n={i18n}
-          state={preview}
-          dispatch={dispatch}
-          guideStep={guideRunning ? guideStepId : null}
-          guideVisible={guideVisible}
-          onManualInteraction={manualInteraction}
-          onReplay={replay}
+        <Suspense
+          fallback={
+            <section className="rf-preview" id="demo" aria-labelledby="rf-preview-title">
+              <header className="rf-preview__head">
+                <div>
+                  <h2 id="rf-preview-title" className="rf-preview__title">
+                    {i18n.t("workspace.findings")}
+                  </h2>
+                </div>
+              </header>
+            </section>
+          }
         >
-          <GuideBar controller={controller} i18n={i18n} />
-        </PreviewStage>
-
-        {!reducedMotion && guideVisible && guideStepId !== null ? (
-          <Suspense fallback={null}>
-            <GuideHighlight stepId={guideStepId} />
-          </Suspense>
-        ) : null}
+          <PreviewLoader
+            i18n={i18n}
+            pendingAction={pendingDemo}
+            onActionHandled={() => setPendingDemo(null)}
+          />
+        </Suspense>
 
         <section className="rf-how" id="how" aria-label={i18n.t("nav.how")}>
           <div className="rf-how__step">
