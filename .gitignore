@@ -1,0 +1,17 @@
+.DS_Store
+node_modules/
+dist/
+.vite/
+.turbo/
+coverage/
+test-results/
+playwright-report/
+__pycache__/
+*.pyc
+.venv/
+.env
+.env.*
+!.env.example
+.wrangler/
+*.local
+*.log
