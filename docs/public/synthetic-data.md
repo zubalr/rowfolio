@@ -17,10 +17,10 @@ Python verifier (`tooling/dataset/verify_sample.py`) recomputes the expected
 aggregates with exact decimal arithmetic from the CSV — the generator and the
 verifier are separate implementations, and neither is the production engine.
 
-The dataset ships with the application as a one-click demo so visitors can
-explore a full briefing without uploading anything. Because it is synthetic,
-it demonstrates the product's mechanics; it does not describe any real
-organization's performance.
+The dataset ships with the application as a one-click demo (the files under
+`apps/web/public/sample/`) so visitors can explore a full briefing without
+uploading anything. Because it is synthetic, it demonstrates the product's
+mechanics; it does not describe any real organization's performance.
 
 ## The hostile-input corpus
 

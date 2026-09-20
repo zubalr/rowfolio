@@ -7,11 +7,14 @@ editable Excel and PowerPoint exports, with complete English and Arabic
 interfaces. All processing runs locally in the browser: no account, no upload
 of spreadsheet contents, no server-side analysis.
 
-> **Status: under development.** This repository currently contains the
-> versioned contracts, sample and adversarial test fixtures, verification
-> tooling, and contract test suites described below. The application packages
-> (ingestion, analysis, exports, interface) are being implemented against
-> those contracts and are not ready for use.
+> **Status: under development.** The workspace already contains implemented
+> and tested core packages — bounded ingestion, normalization, deterministic
+> analysis with provenance, cost scenarios, native Excel/PowerPoint writers,
+> the English/Arabic language system, charts, a bilingual landing with a
+> guided demo, and the upload review and evidence surfaces — along with the
+> versioned contracts, fixtures and verification tooling described below.
+> There is no released version yet; release gates, deployment and
+> office-compatibility review are outstanding.
 
 ## Requirements
 
@@ -47,13 +50,15 @@ The corpus scripts need only the Python 3 standard library. See
 
 | Path | Contents |
 | --- | --- |
-| `apps/web/` | Web application shell (in development) |
+| `apps/web/` | Web application: bilingual landing with guided demo, upload review, workspace and evidence surfaces |
 | `packages/contracts/` | Sole wire-schema authority: JSON Schemas, generated TypeScript, policy, translation-key manifest |
-| `packages/*` | Ingestion, normalization, analysis, provenance, scenario, export, UI, i18n and chart packages (in development) |
+| `packages/ingest/ packages/normalize/ packages/analysis/ packages/provenance/ packages/scenario/` | Deterministic engine packages: bounded CSV/XLSX ingestion, normalization, metrics and findings, source provenance, cost scenario |
+| `packages/export-model/ packages/export-xlsx/ packages/export-pptx/` | Briefing model and native workbook/presentation writers |
+| `packages/i18n/ packages/charts/ packages/ui/` | English/Arabic catalogs, formatting and plural rules; evidence charts; shared UI |
 | `fixtures/sample/` | Deterministic synthetic sample dataset, independent expected aggregates, quality ledger |
 | `fixtures/hostile/generated/` | Bounded synthetic edge-case corpus with per-case expected outcomes and hashes |
 | `fixtures/golden/` | Independent oracle outputs binding artifacts to source hashes |
-| `tests/` | Contract suites; `unit/`, `integration/`, `e2e/` fill in as packages land |
+| `tests/` | Unit, contract, integration, e2e, accessibility, performance, privacy and visual suites |
 | `tooling/dataset/` | Sample generator, independent Decimal verifier, artifact binder |
 | `tooling/test/corpus/` | Hostile-corpus generator/validator and i18n catalog checkers |
 | `tooling/capture/` | Screenshot capture tooling for release-candidate media (private outputs) |
@@ -61,12 +66,13 @@ The corpus scripts need only the Python 3 standard library. See
 
 ## Supported input formats
 
-The specified input envelope for spreadsheet ingestion is UTF-8 CSV and
-unencrypted `.xlsx`, with guardrails of 10 MiB compressed file size, 50,000
-rows including header, 100 columns, 500,000 non-empty cells and 20 visible
-sheets per workbook. Ingestion enforces these bounds when implemented; see
+The application ingests UTF-8 CSV and unencrypted `.xlsx`, with guardrails of
+10 MiB compressed file size, 50,000 rows including header, 100 columns,
+500,000 non-empty cells and 20 visible sheets per workbook. The bounds come
+from the versioned contract policy and are enforced by the ingestion package
+(`packages/ingest`); see
 [docs/public/supported-formats.md](docs/public/supported-formats.md) for
-details and current implementation status.
+details.
 
 ## Privacy
 

@@ -1,9 +1,10 @@
 # Supported formats and input limits
 
-**Status: specification.** Ingestion is being implemented against the
-versioned contracts; the bounds below are enforced by the ingestion
-implementation once it lands, and hostile fixtures exercising them are
-already committed under `fixtures/hostile/generated/`.
+**Status: implemented and tested.** The ingestion package
+(`packages/ingest`) enforces the bounds below, taking its defaults from the
+versioned contract policy; unit and integration tests cover the limits, and
+the hostile fixtures under `fixtures/hostile/generated/` exercise the
+edge-case handling on real code.
 
 ## Input formats
 

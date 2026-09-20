@@ -1,8 +1,7 @@
 # Project status
 
 Honest accounting of what exists in this repository today and what is still
-in development. Last updated against the `hb/volume` branch bases; check the
-commit history for anything newer.
+outstanding. Check the commit history for anything newer.
 
 ## Present and verified
 
@@ -11,33 +10,39 @@ commit history for anything newer.
   generated TypeScript types; policy values (numeric rules, input guardrails,
   finding thresholds); and the English/Arabic translation-key manifest
   (201 keys, typed placeholders, Arabic plural groups).
-- **Sample data** (`fixtures/sample/`, `tooling/dataset/`): deterministic
-  synthetic dataset with an independent exact-decimal verifier and golden
-  bindings between artifacts and source hashes.
-- **Hostile-input corpus** (`fixtures/hostile/generated/`,
-  `tooling/test/corpus/`): bounded edge-case fixtures with per-case expected
-  outcomes, an independent validator, and a driver proving regeneration is
-  byte-identical and that mutations (changed values, missing rows, stale
-  hashes, over-bound files) are detected.
-- **Mechanical i18n checks** (`tests/unit/i18n/generated/`,
-  `tooling/test/corpus/i18n/`): key/placeholder/plural expectations generated
-  from the frozen manifest, plus catalog parity and mutation checks. Locale
-  catalogs themselves have not landed yet; until they do, those tests report
-  as explicitly pending.
-- **Contract test suites** (`tests/contract/`): schema validation, decimal
-  rules, envelope guards, oracle reconciliation.
+- **Deterministic engines** (`packages/normalize/`, `packages/analysis/`,
+  `packages/provenance/`, `packages/scenario/`, `packages/export-model/`):
+  normalization with explicit approvals, metrics and rule-based findings,
+  source-row provenance, the cost scenario, and the briefing model — covered
+  by unit suites, golden-snapshot parity and property tests.
+- **Bounded ingestion** (`packages/ingest/`): CSV and XLSX readers with
+  contract-policy limits, date/number profile handling and a parse watchdog,
+  exercised by the hostile fixtures and unit tests.
+- **Native export writers** (`packages/export-xlsx/`,
+  `packages/export-pptx/`): workbook and presentation generation from the
+  briefing model, with integration suites and visual baselines.
+- **Language system** (`packages/i18n/`): English/Arabic catalogs, typed
+  placeholder interpolation, Arabic plural rules, formatting and directional
+  isolation; mechanical catalog checks in `tests/unit/i18n/generated/`.
+- **Interface** (`apps/web/`): bilingual landing with a guided demo and lazy
+  preview, conservative upload review, workspace with findings, charts, and
+  the evidence dialog with an exact source-rows browser.
+- **Verification** (`tests/`, `tooling/`): unit, contract, integration, e2e,
+  accessibility, performance, privacy and visual suites; the deterministic
+  sample dataset with an independent Decimal verifier; the hostile-input
+  corpus with an independent validator; capture tooling for
+  release-candidate media.
 
 Run everything with the commands in the [README](../../README.md#quick-start).
 
-## In development
+## Outstanding before release
 
-- Ingestion, normalization, analysis, provenance, scenario and export
-  packages — being implemented against the contracts above.
-- The web interface (English/Arabic), including upload review, findings,
-  evidence and export dialogs.
-- End-to-end, accessibility and performance suites.
-- Office interoperability review of generated XLSX/PPTX in desktop
-  Excel/PowerPoint and LibreOffice.
+- Final release gates: full journey coverage in the mounted app,
+  accessibility and performance runs on the declared devices, deployed-site
+  privacy checks against the shipped candidate.
+- Office and LibreOffice interoperability review of generated XLSX/PPTX with
+  recorded versions and renders (native Arabic review included).
+- Deployment of the static build and post-deploy verification.
 
 ## Deliberately out of scope
 

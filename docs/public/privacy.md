@@ -1,9 +1,10 @@
 # Privacy
 
-**Status: specification and review posture.** The behaviors described here
-are contract and test targets for the implementation; the test suites in this
-repository (including the privacy gates run before any release) are what make
-them verifiable claims.
+**Status: implemented posture, release-verified.** The local-processing
+model below is enforced by the application's design and configuration
+(shipped content security policy, no network calls for user content), and
+the privacy suites under `tests/privacy/` verify the containment claims;
+final deployed-site verification runs against the shipped release candidate.
 
 ## The short version
 
@@ -42,8 +43,11 @@ contents.
 
 ## Technical enforcement
 
-The build enforces a strict content security policy (`default-src 'self'`,
-no remote code, no `unsafe-eval`, no third-party embeds). Automated browser
-tests intercept network traffic and assert that no request after load carries
-file contents, including same-origin requests; a canary value uploaded in a
-test must never appear in any URL, request body, storage or console output.
+The shipped deployment configuration sets a strict content security policy
+(`apps/web/public/_headers`: `default-src 'self'`, no remote code, no
+`unsafe-eval`, no third-party embeds, plus referrer and content-type
+protections). Browser tests intercept network traffic and assert that no
+request after load carries file contents, including same-origin requests; a
+canary value uploaded in a test must never appear in any URL, request body,
+storage or console output, and session cleanup tests verify that in-memory
+state is dropped.
