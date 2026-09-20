@@ -1,0 +1,712 @@
+/**
+ * Landing + guided-demo styles (A12). Token-driven:
+ * paper/ink/cobalt, divider-led hierarchy, one light theme with a scoped
+ * dark finding surface, logical properties throughout for RTL.
+ * Motion is restrained and explanatory; reduced-motion zeroes all of it.
+ */
+
+/* ---------- Masthead ---------- */
+.rf-masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 72px;
+  gap: var(--rf-space-4);
+  padding-inline: var(--rf-gutter);
+  border-block-end: 1px solid var(--rf-divider);
+  max-width: calc(var(--rf-max-width) + 2 * var(--rf-gutter));
+  margin-inline: auto;
+}
+.rf-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rf-space-3);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+html[lang="ar"] .rf-brand {
+  letter-spacing: normal;
+}
+.rf-brand__mark {
+  direction: ltr;
+  position: relative;
+  width: 26px;
+  height: 22px;
+  flex: none;
+}
+.rf-brand__mark i {
+  position: absolute;
+  inset-inline-start: 0;
+  height: 3px;
+  background: var(--rf-data);
+}
+.rf-brand__mark i:nth-child(1) {
+  top: 2px;
+  width: 14px;
+}
+.rf-brand__mark i:nth-child(2) {
+  top: 9px;
+  inset-inline-start: 4px;
+  width: 18px;
+}
+.rf-brand__mark i:nth-child(3) {
+  top: 16px;
+  inset-inline-start: 8px;
+  width: 20px;
+}
+.rf-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--rf-space-5);
+}
+.rf-nav a,
+.rf-nav__link {
+  background: none;
+  border: 0;
+  padding: var(--rf-space-2) 0;
+  color: var(--rf-text-muted);
+  font-size: 14px;
+  text-decoration: none;
+}
+html[lang="ar"] .rf-nav a,
+html[lang="ar"] .rf-nav__link {
+  font-size: 15px;
+}
+.rf-nav a:hover,
+.rf-nav__link:hover {
+  color: var(--rf-text);
+}
+.rf-nav .rf-lang {
+  border: 1px solid var(--rf-divider);
+  border-radius: var(--rf-radius-control);
+  background: var(--rf-bg-raised);
+  color: var(--rf-text);
+  padding: var(--rf-space-2) var(--rf-space-3);
+  min-width: 64px;
+  text-align: center;
+}
+
+/* ---------- Hero ---------- */
+.rf-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
+  gap: var(--rf-space-8);
+  align-items: center;
+  padding-block: var(--rf-space-8);
+  padding-inline: var(--rf-gutter);
+  max-width: calc(var(--rf-max-width) + 2 * var(--rf-gutter));
+  margin-inline: auto;
+}
+.rf-hero__eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rf-accent);
+}
+html[lang="ar"] .rf-hero__eyebrow {
+  letter-spacing: normal;
+  font-size: 14px;
+}
+.rf-hero__title {
+  font-size: 64px;
+  line-height: 1.0625; /* 64/68 */
+  letter-spacing: -0.035em;
+  font-weight: 500;
+  margin-block: var(--rf-space-4) var(--rf-space-5);
+  max-width: 14em;
+}
+html[lang="ar"] .rf-hero__title {
+  font-size: 54px;
+  line-height: 1.4;
+  letter-spacing: normal;
+}
+.rf-hero__body {
+  font-size: 18px;
+  color: var(--rf-text-muted);
+  max-width: 34em;
+}
+html[lang="ar"] .rf-hero__body {
+  font-size: 18px;
+}
+.rf-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rf-space-3);
+  margin-block-start: var(--rf-space-6);
+}
+.rf-hero__proof {
+  margin-block-start: var(--rf-space-4);
+  font-size: 13px;
+  color: var(--rf-text-muted);
+}
+html[lang="ar"] .rf-hero__proof {
+  font-size: 14px;
+}
+
+/* Miniature finding (dark ink surface, scoped) */
+.rf-mini {
+  background: var(--rf-ink);
+  color: var(--rf-ink-text);
+  border-radius: var(--rf-radius-panel);
+  padding: var(--rf-space-5) var(--rf-space-6);
+  max-width: 440px;
+  justify-self: end;
+  box-shadow: var(--rf-shadow-overlay);
+}
+.rf-mini__eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rf-ink-data);
+}
+html[lang="ar"] .rf-mini__eyebrow {
+  letter-spacing: normal;
+  font-size: 14px;
+}
+.rf-mini__figure {
+  font-size: 40px;
+  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-block-start: var(--rf-space-3);
+}
+.rf-mini__unit {
+  font-size: 13px;
+  color: var(--rf-ink-muted);
+  font-weight: 400;
+  letter-spacing: normal;
+}
+html[lang="ar"] .rf-mini__unit {
+  font-size: 14px;
+}
+.rf-mini__delta {
+  margin-block-start: var(--rf-space-2);
+  font-size: 14px;
+  color: var(--rf-ink-attention);
+}
+html[lang="ar"] .rf-mini__delta {
+  font-size: 15px;
+}
+
+/* ---------- Preview stage ---------- */
+.rf-preview {
+  padding-inline: var(--rf-gutter);
+  padding-block: var(--rf-space-7);
+  max-width: calc(var(--rf-max-width) + 2 * var(--rf-gutter));
+  margin-inline: auto;
+}
+.rf-preview__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--rf-space-4);
+  border-block-start: 1px solid var(--rf-divider);
+  padding-block-start: var(--rf-space-5);
+  margin-block-end: var(--rf-space-5);
+}
+.rf-preview__title {
+  font-size: 32px;
+  line-height: 1.25;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+html[lang="ar"] .rf-preview__title {
+  font-size: 30px;
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+.rf-preview__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rf-space-2);
+  margin-block-start: var(--rf-space-2);
+  font-size: 13px;
+  color: var(--rf-text-muted);
+}
+html[lang="ar"] .rf-preview__meta {
+  font-size: 14px;
+}
+.rf-chip {
+  border: 1px solid var(--rf-divider);
+  border-radius: var(--rf-radius-control);
+  padding: 2px var(--rf-space-2);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--rf-accent);
+  background: var(--rf-bg-raised);
+}
+html[lang="ar"] .rf-chip {
+  font-size: 13px;
+}
+.rf-chip--quiet {
+  color: var(--rf-text-muted);
+  font-weight: 500;
+}
+.rf-preview__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: var(--rf-space-6);
+  align-items: start;
+}
+/* Grid items carry an automatic min-content minimum that would otherwise let
+   the raw table (or wide Arabic figures) force a >viewport layout width; the
+   table region scrolls internally instead. */
+.rf-preview__grid > *,
+.rf-hero > * {
+  min-width: 0;
+}
+
+/* Reveal transition — 180ms opacity+translateY; reduced-motion makes it
+   instant via the global base.css reset. */
+[data-revealed] {
+  animation: rf-reveal 180ms var(--rf-ease) both;
+}
+@keyframes rf-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Guide ring targets — CSS outline is the reduced-motion fallback; the
+   animated overlay travels between targets when motion is allowed. */
+[data-demo-target] {
+  border-radius: var(--rf-radius-panel);
+  transition: outline-color var(--rf-state-ms) var(--rf-ease);
+  outline: 3px solid transparent;
+  outline-offset: 4px;
+}
+[data-demo-target][data-demo-active] {
+  outline-color: var(--rf-accent);
+}
+.rf-demo-ring {
+  position: fixed;
+  inset-inline-start: 0;
+  top: 0;
+  z-index: 60;
+  border: 3px solid var(--rf-accent);
+  border-radius: var(--rf-radius-panel);
+  pointer-events: none;
+  box-shadow: 0 0 0 4px #2855d91f;
+}
+
+/* Finding card — dark evidence-grade surface inside the light page. */
+.rf-finding {
+  background: var(--rf-ink);
+  color: var(--rf-ink-text);
+  border-radius: var(--rf-radius-panel);
+  padding: var(--rf-space-6);
+}
+.rf-finding__eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rf-ink-data);
+}
+html[lang="ar"] .rf-finding__eyebrow {
+  letter-spacing: normal;
+  font-size: 14px;
+}
+.rf-finding__title {
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 500;
+  margin-block: var(--rf-space-2) var(--rf-space-3);
+}
+html[lang="ar"] .rf-finding__title {
+  line-height: 1.6;
+}
+.rf-finding__body {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--rf-ink-muted);
+}
+html[lang="ar"] .rf-finding__body {
+  font-size: 16px;
+}
+.rf-finding__figure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--rf-space-2);
+  margin-block: var(--rf-space-4);
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+html[lang="ar"] .rf-finding__figure {
+  letter-spacing: normal;
+}
+.rf-finding__vs {
+  font-size: 16px;
+  color: var(--rf-ink-muted);
+}
+html[lang="ar"] .rf-finding__vs {
+  font-size: 17px;
+}
+.rf-finding__gap {
+  margin-inline-start: auto;
+  font-size: 20px;
+  color: var(--rf-ink-attention);
+}
+.rf-finding .rf-btn--secondary {
+  color: var(--rf-ink-text);
+}
+.rf-finding .rf-btn--secondary .rf-btn__label {
+  border-color: var(--rf-ink-muted);
+}
+
+/* Evidence expander inside the finding card */
+.rf-evidence {
+  margin-block-start: var(--rf-space-4);
+  border-block-start: 1px solid var(--rf-ink-rule);
+  padding-block-start: var(--rf-space-4);
+}
+.rf-evidence__rows {
+  display: grid;
+  gap: var(--rf-space-2);
+  margin: 0;
+}
+.rf-evidence__rows > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--rf-space-4);
+  padding-block: var(--rf-space-1);
+}
+.rf-evidence__rows dt {
+  color: var(--rf-ink-muted);
+  font-size: 13px;
+}
+html[lang="ar"] .rf-evidence__rows dt {
+  font-size: 14px;
+}
+.rf-evidence__rows dd {
+  margin: 0;
+  font-size: 14px;
+}
+html[lang="ar"] .rf-evidence__rows dd {
+  font-size: 15px;
+}
+.rf-evidence__note {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rf-space-2);
+  margin-block-start: var(--rf-space-3);
+  font-size: 12px;
+  color: var(--rf-ink-muted);
+}
+html[lang="ar"] .rf-evidence__note {
+  font-size: 13px;
+}
+.rf-evidence__note .rf-icon {
+  color: var(--rf-ink-positive);
+  flex: none;
+  align-self: center;
+}
+
+/* Scenario band */
+.rf-scenario {
+  border-block-start: 1px solid var(--rf-divider);
+  margin-block-start: var(--rf-space-6);
+  padding-block-start: var(--rf-space-5);
+}
+.rf-scenario__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--rf-space-4);
+}
+.rf-scenario__title {
+  font-size: 20px;
+  font-weight: 500;
+}
+html[lang="ar"] .rf-scenario__title {
+  font-size: 21px;
+}
+.rf-scenario__scope {
+  font-size: 13px;
+  color: var(--rf-text-muted);
+  margin-block-start: var(--rf-space-1);
+}
+html[lang="ar"] .rf-scenario__scope {
+  font-size: 14px;
+}
+.rf-scenario__value {
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--rf-scenario);
+}
+.rf-scenario__label {
+  display: block;
+  font-size: 13px;
+  color: var(--rf-text-muted);
+  margin-block: var(--rf-space-3) var(--rf-space-1);
+}
+html[lang="ar"] .rf-scenario__label {
+  font-size: 14px;
+}
+.rf-scenario__range {
+  width: 100%;
+  accent-color: var(--rf-scenario);
+}
+.rf-scenario__result {
+  margin-block-start: var(--rf-space-3);
+  font-size: 15px;
+}
+html[lang="ar"] .rf-scenario__result {
+  font-size: 16px;
+}
+.rf-scenario__note {
+  margin-block-start: var(--rf-space-1);
+  font-size: 13px;
+  color: var(--rf-text-muted);
+}
+html[lang="ar"] .rf-scenario__note {
+  font-size: 14px;
+}
+
+/* Briefing band */
+.rf-briefing {
+  border-block-start: 1px solid var(--rf-divider);
+  margin-block-start: var(--rf-space-6);
+  padding-block-start: var(--rf-space-5);
+}
+.rf-briefing__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--rf-space-4);
+}
+.rf-briefing__title {
+  font-size: 20px;
+  font-weight: 500;
+}
+html[lang="ar"] .rf-briefing__title {
+  font-size: 21px;
+}
+.rf-briefing__files {
+  list-style: none;
+  margin: var(--rf-space-3) 0 0;
+  padding: 0;
+}
+.rf-briefing__file {
+  display: flex;
+  align-items: center;
+  gap: var(--rf-space-3);
+  padding-block: var(--rf-space-3);
+  border-block-start: 1px solid var(--rf-divider);
+  color: var(--rf-text-muted);
+}
+.rf-briefing__file[data-ready] {
+  color: var(--rf-text);
+}
+.rf-briefing__file .rf-icon {
+  color: var(--rf-accent);
+}
+.rf-briefing__file[data-ready] .rf-icon {
+  color: var(--rf-positive);
+}
+.rf-briefing__state {
+  margin-inline-start: auto;
+  font-size: 13px;
+}
+html[lang="ar"] .rf-briefing__state {
+  font-size: 14px;
+}
+.rf-briefing__note {
+  margin-block-start: var(--rf-space-2);
+  font-size: 13px;
+  color: var(--rf-text-muted);
+}
+html[lang="ar"] .rf-briefing__note {
+  font-size: 14px;
+}
+
+/* Guide controls */
+.rf-preview__guide {
+  position: sticky;
+  inset-block-end: var(--rf-space-4);
+  margin-block-start: var(--rf-space-5);
+  z-index: 50;
+}
+.rf-guide {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rf-space-4);
+  background: var(--rf-ink);
+  color: var(--rf-ink-text);
+  border-radius: var(--rf-radius-panel);
+  padding: var(--rf-space-3) var(--rf-space-4);
+  box-shadow: var(--rf-shadow-overlay);
+}
+.rf-guide__caption {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rf-space-3);
+  font-size: 15px;
+  min-width: 0;
+}
+html[lang="ar"] .rf-guide__caption {
+  font-size: 16px;
+}
+.rf-guide__count {
+  color: var(--rf-ink-muted);
+  font-size: 13px;
+}
+.rf-guide__error {
+  color: var(--rf-ink-attention);
+}
+.rf-guide__controls {
+  display: flex;
+  gap: var(--rf-space-2);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.rf-guide .rf-btn--secondary {
+  color: var(--rf-ink-text);
+}
+.rf-guide .rf-btn--secondary:disabled {
+  color: var(--rf-ink-muted);
+  opacity: 0.6;
+}
+
+/* ---------- How it works ---------- */
+.rf-how {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--rf-space-6);
+  border-block-start: 1px solid var(--rf-divider);
+  padding-block: var(--rf-space-7);
+  padding-inline: var(--rf-gutter);
+  max-width: calc(var(--rf-max-width) + 2 * var(--rf-gutter));
+  margin-inline: auto;
+}
+.rf-how__num {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--rf-accent);
+  margin-block-end: var(--rf-space-2);
+}
+html[lang="ar"] .rf-how__num {
+  letter-spacing: normal;
+  font-size: 13px;
+}
+.rf-how__step h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin-block-end: var(--rf-space-2);
+}
+html[lang="ar"] .rf-how__step h3 {
+  font-size: 18px;
+}
+.rf-how__step p {
+  font-size: 14px;
+  color: var(--rf-text-muted);
+}
+html[lang="ar"] .rf-how__step p {
+  font-size: 15px;
+}
+
+/* ---------- Footer ---------- */
+.rf-footer {
+  border-block-start: 1px solid var(--rf-divider);
+  padding: var(--rf-space-6) var(--rf-gutter);
+  max-width: calc(var(--rf-max-width) + 2 * var(--rf-gutter));
+  margin-inline: auto;
+  font-size: 13px;
+  color: var(--rf-text-muted);
+  display: grid;
+  gap: var(--rf-space-2);
+}
+html[lang="ar"] .rf-footer {
+  font-size: 14px;
+}
+.rf-footer p {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rf-space-2);
+}
+.rf-footer .rf-icon {
+  color: var(--rf-positive);
+  flex: none;
+  align-self: center;
+}
+
+/* ---------- Responsive breakpoints ---------- */
+@media (max-width: 1199px) {
+  .rf-masthead,
+  .rf-hero,
+  .rf-preview,
+  .rf-how,
+  .rf-footer {
+    padding-inline: var(--rf-space-5);
+  }
+  .rf-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--rf-space-6);
+  }
+  .rf-mini {
+    justify-self: start;
+  }
+}
+@media (max-width: 767px) {
+  .rf-masthead {
+    min-height: 64px;
+    padding-inline: var(--rf-space-4);
+  }
+  .rf-hero,
+  .rf-preview,
+  .rf-how,
+  .rf-footer {
+    padding-inline: var(--rf-space-4);
+  }
+  .rf-hero__title {
+    font-size: 42px;
+    line-height: 1.095; /* 42/46 */
+  }
+  html[lang="ar"] .rf-hero__title {
+    font-size: 36px;
+    line-height: 1.5;
+  }
+  .rf-preview__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rf-how {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--rf-space-5);
+  }
+  .rf-guide {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .rf-guide__controls {
+    justify-content: stretch;
+  }
+  .rf-guide__controls .rf-btn {
+    flex: 1 1 auto;
+  }
+  .rf-nav {
+    gap: var(--rf-space-3);
+  }
+}
+@media (max-width: 479px) {
+  /* Narrow viewports keep only the outbound essentials in the masthead; the
+     in-page anchors duplicate the hero CTAs and would crowd the brand. */
+  .rf-nav a[href="#how"],
+  .rf-nav .rf-nav__link {
+    display: none;
+  }
+}
