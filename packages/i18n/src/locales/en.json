@@ -147,7 +147,7 @@
   "period.june2026": "June 2026",
   "period.march": "March",
   "period.may": "May",
-  "privacy.assets": "The host serves static app and sample assets and may receive ordinary request metadata.",
+  "privacy.assets": "The host serves static app and sample assets and may receive ordinary request metadata. Anonymous, aggregate page views are counted on the production site; file contents, filenames, rows, and session data are never collected.",
   "privacy.clear": "Clearing the session discards app-held data; it is not forensic memory erasure.",
   "privacy.short": "Your spreadsheet is processed in this browser. Rowfolio does not upload its contents.",
   "prototype.files": "View reference files",

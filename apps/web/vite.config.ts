@@ -34,6 +34,11 @@ function moduleMapPlugin(): Plugin {
 // or server-side rendering exists.
 export default defineConfig({
   appType: "mpa",
+  // Vercel sets VERCEL_ENV at build time (production|preview|development);
+  // expose it so analytics mounts only on production deployments.
+  define: {
+    "import.meta.env.VITE_VERCEL_ENV": JSON.stringify(process.env.VERCEL_ENV ?? ""),
+  },
   plugins: [react(), moduleMapPlugin()],
   build: {
     manifest: true,

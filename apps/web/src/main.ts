@@ -1,4 +1,4 @@
-import { createElement } from "react";
+import { createElement, Fragment, type ReactElement } from "react";
 import { createRoot } from "react-dom/client";
 // `./fonts` is a declared subpath export of @rowfolio/ui (see
 // packages/ui/package.json exports); the deep-path lint pattern cannot see
@@ -7,6 +7,7 @@ import { createRoot } from "react-dom/client";
 import "@rowfolio/ui/fonts";
 import { App } from "./app/App.tsx";
 import { createAppServices } from "./app/services.ts";
+import { analyticsBeforeSend } from "./app/analytics.ts";
 import "./app/app.css";
 
 // Composition root: i18n + session controller + Blob URL registry. The real
@@ -16,5 +17,14 @@ import "./app/app.css";
 // scripts/audit-static.ts and the bundle-budget audit.
 const host = document.getElementById("root");
 if (host) {
-  createRoot(host).render(createElement(App, { services: createAppServices() }));
+  const children: ReactElement[] = [
+    createElement(App, { services: createAppServices() }),
+  ];
+  if (import.meta.env.PROD && import.meta.env.VITE_VERCEL_ENV === "production") {
+    const { Analytics } = await import("@vercel/analytics/react");
+    children.push(
+      createElement(Analytics, { mode: "production", beforeSend: analyticsBeforeSend }),
+    );
+  }
+  createRoot(host).render(createElement(Fragment, null, ...children));
 }

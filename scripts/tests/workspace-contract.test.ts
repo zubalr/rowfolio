@@ -77,9 +77,15 @@ describe("workspace contract", () => {
   });
 
   it("no workspace manifest declares a server framework, auth, analytics or model SDK", () => {
-    const banned = /^(express|fastify|koa|hono|next|openai|aws-sdk|firebase|mixpanel|posthog-js|wrangler)$|^@(anthropic-ai|google-ai|sentry|aws-sdk|supabase|segment|amplitude|firebase|vercel)\//;
+    const banned = /^(express|fastify|koa|hono|next|openai|aws-sdk|firebase|mixpanel|posthog-js|wrangler)$|^@(anthropic-ai|google-ai|sentry|aws-sdk|supabase|segment|amplitude|firebase)\//;
+    // @vercel/analytics is the single sanctioned telemetry dep: pageviews
+    // only, production-gated, beforeSend-reduced to allowlisted route tokens.
+    const bannedVercel = /^@vercel\/(?!analytics$)/;
     for (const dep of declaredDependencies()) {
-      expect(banned.test(dep.name), `${dep.dir}: ${dep.name}`).toBe(false);
+      expect(
+        banned.test(dep.name) || bannedVercel.test(dep.name),
+        `${dep.dir}: ${dep.name}`,
+      ).toBe(false);
     }
   });
 });
