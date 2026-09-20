@@ -1,45 +1,55 @@
-import type { ComponentType } from 'react';
+import { lazy, type ComponentType } from 'react';
+import type { LandingAppProps } from '../landing/LandingApp.tsx';
+import type { UploadFlowProps } from '../upload/UploadFlow.tsx';
+import type { EvidenceDialogProps } from '../evidence/EvidenceDialog.tsx';
 
 /**
- * Feature-slot binding. A12 (landing), A17 (upload) and A13 (evidence) own
- * sibling directories under `apps/web/src/`. When their modules land they are
- * discovered here via `import.meta.glob` — no edits to this file or theirs.
+ * Feature slots — owner packages (landing A12, upload A17, evidence A13)
+ * are discovered by directory convention. Globs stay LAZY so their barrels
+ * never land in the entry chunk (landing budget is enforced); each slot
+ * renders inside <Suspense> at the call site.
  *
- * Contract: a feature module default-exports (or named-exports the canonical
- * component below) a React component accepting the slot props defined in
- * `slots.ts`. Missing slots fall back to the built-in minimal surfaces so the
- * composition always closes the loop.
+ * Slots are resolved once at module init — `import.meta.glob` is evaluated
+ * statically by Vite at build time.
  */
+const landingEntry = import.meta.glob<Record<string, unknown>>('../landing/index.{ts,tsx}');
+const uploadEntry = import.meta.glob<Record<string, unknown>>('../upload/index.{ts,tsx}');
+const evidenceEntry = import.meta.glob<Record<string, unknown>>('../evidence/index.{ts,tsx}');
+
+function slot<TProps>(
+  loaders: Record<string, () => Promise<Record<string, unknown>>>,
+  name: string,
+): ComponentType<TProps> | null {
+  const load = Object.values(loaders)[0];
+  if (!load) return null;
+  return lazy(async () => {
+    const mod = await load();
+    const component = mod[name];
+    if (typeof component !== 'function') {
+      throw new Error(`feature slot ${name} missing from resolved module`);
+    }
+    return { default: component as ComponentType<TProps> };
+  });
+}
+
 export interface FeatureSlots {
-  Landing: ComponentType<Record<string, unknown>> | null;
-  UploadZone: ComponentType<Record<string, unknown>> | null;
-  EvidenceView: ComponentType<Record<string, unknown>> | null;
+  /** Real landing surface — self-contained (intent + navigation internal). */
+  readonly LandingApp: ComponentType<LandingAppProps> | null;
+  /** Staged upload wizard (dropzone → configure → parse → review). */
+  readonly UploadFlow: ComponentType<UploadFlowProps> | null;
+  /** Dark evidence dialog bound to provenance services. */
+  readonly EvidenceDialog: ComponentType<EvidenceDialogProps> | null;
 }
 
-type ModuleRecord = Record<string, unknown>;
-
-function pick(mod: ModuleRecord | undefined, names: readonly string[]): ComponentType<Record<string, unknown>> | null {
-  if (!mod) return null;
-  for (const name of names) {
-    const candidate = mod[name];
-    if (typeof candidate === 'function') return candidate as ComponentType<Record<string, unknown>>;
-  }
-  return null;
-}
-
-const landingModules = import.meta.glob<ModuleRecord>('../landing/index.{ts,tsx}', { eager: true });
-const uploadModules = import.meta.glob<ModuleRecord>('../upload/index.{ts,tsx}', { eager: true });
-const evidenceModules = import.meta.glob<ModuleRecord>('../evidence/index.{ts,tsx}', { eager: true });
-
-function firstModule(modules: Record<string, ModuleRecord>): ModuleRecord | undefined {
-  const keys = Object.keys(modules);
-  return keys.length > 0 ? modules[keys[0]!] : undefined;
-}
+let resolved: FeatureSlots | null = null;
 
 export function resolveFeatures(): FeatureSlots {
-  return {
-    Landing: pick(firstModule(landingModules), ['Landing', 'LandingPage', 'default']),
-    UploadZone: pick(firstModule(uploadModules), ['UploadZone', 'UploadPanel', 'default']),
-    EvidenceView: pick(firstModule(evidenceModules), ['EvidenceView', 'EvidencePanel', 'default']),
-  };
+  if (!resolved) {
+    resolved = {
+      LandingApp: slot<LandingAppProps>(landingEntry, 'LandingApp'),
+      UploadFlow: slot<UploadFlowProps>(uploadEntry, 'UploadFlow'),
+      EvidenceDialog: slot<EvidenceDialogProps>(evidenceEntry, 'EvidenceDialog'),
+    };
+  }
+  return resolved;
 }

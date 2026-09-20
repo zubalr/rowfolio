@@ -1,6 +1,12 @@
-import { useRef, useState, type ChangeEvent } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { Button, Dialog, Status } from '@rowfolio/ui';
 import type { MessageKey } from '@rowfolio/i18n';
+import { inspectSource } from '@rowfolio/ingest';
+import { profileTable } from '@rowfolio/normalize';
+import { evaluateProof, readEvidencePage } from '@rowfolio/provenance';
+import type { NormalizedTable } from '@rowfolio/contracts';
+import { takeWorkspaceIntent } from '../landing/pendingUpload.ts';
+import type { UploadPorts, UploadOutcome } from '../upload/index.ts';
 import { useI18n, useServices, useSessionState } from '../app/context.tsx';
 import type { SessionState } from '../app/state.ts';
 import { resolveFeatures } from '../app/features.ts';
@@ -43,6 +49,30 @@ export function WorkspaceScreen({ navigateLanding }: { navigateLanding: () => vo
     await controller.selectSource(bytes, file.name, /\.xlsx$/i.test(file.name) ? 'xlsx' : 'csv');
   };
 
+  // Claim the landing's one-shot intent: sample/guide → prepared-sample
+  // pipeline; upload{file} → straight into the session (the file was already
+  // user-picked on the landing).
+  useEffect(() => {
+    const intent = takeWorkspaceIntent();
+    if (intent === null) return;
+    if (intent.kind === 'upload') void adoptFile(intent.file);
+    else void controller.useSample();
+    // Mount-once: consumes the one-shot landing intent.
+  }, []);
+
+  // UploadFlow ports: inspect + profile run in-process (bounded); parse is
+  // delegated to the analysis worker so the raw table it retains is the same
+  // one normalize resolves by id.
+  const uploadPorts: UploadPorts = useMemo(
+    () => ({
+      inspect: (bytes, name, options, progress) => inspectSource(bytes, name, options, progress),
+      parse: (bytes, name, options, progress, extras) =>
+        controller.parseViaWorker(bytes, name, options, progress, extras),
+      profile: (raw) => profileTable(raw),
+    }),
+    [controller],
+  );
+
   // A committed session is never silently replaced: with an active session
   // the picked file waits behind an explicit confirmation.
   const receiveFile = (file: File) => {
@@ -65,13 +95,24 @@ export function WorkspaceScreen({ navigateLanding }: { navigateLanding: () => vo
           {i18n.tSafe('brand.name' as MessageKey)}
         </button>
         <nav className="rf-mastnav">
-          {features.UploadZone ? (
-            <features.UploadZone onFile={receiveFile} />
-          ) : (
-            <Button variant="secondary" icon="upload" onClick={() => fileRef.current?.click()} disabled={busy}>
-              {i18n.tSafe('action.upload' as MessageKey)}
-            </Button>
-          )}
+          <Button
+            variant="secondary"
+            icon="upload"
+            onClick={() => {
+              if (state.phase === 'idle' && features.UploadFlow) {
+                // Focus the mounted upload surface rather than opening a
+                // parallel picker — one upload path, one review UX.
+                const drop = document.querySelector<HTMLElement>('[data-testid="upload-dropzone"] input[type="file"], .rf-upload input[type="file"]');
+                drop?.focus();
+                drop?.click();
+              } else {
+                fileRef.current?.click();
+              }
+            }}
+            disabled={busy}
+          >
+            {i18n.tSafe('action.upload' as MessageKey)}
+          </Button>
           {state.phase === 'ready' && (
             <>
               <Button
@@ -112,10 +153,10 @@ export function WorkspaceScreen({ navigateLanding }: { navigateLanding: () => vo
       <SessionBanner state={state} />
 
       <main className="rf-workspace-main">
-        <PhaseBody state={state} />
+        <PhaseBody state={state} uploadPorts={uploadPorts} />
       </main>
 
-      <EvidencePanel />
+      <EvidenceHost />
       <ExportDialog />
       <Dialog
         open={replaceCandidate !== null}
@@ -164,12 +205,60 @@ function SessionBanner({ state }: { state: SessionState }) {
   return null;
 }
 
-function PhaseBody({ state }: { state: SessionState }) {
+/** Evidence host — real EvidenceDialog when the evidence slot is present,
+ *  bound to the merged provenance services; built-in panel otherwise. */
+function EvidenceHost() {
+  const i18n = useI18n();
+  const { controller } = useServices();
+  const state = useSessionState();
+  const Slot = resolveFeatures().EvidenceDialog;
+  const active = state.active;
+  if (!Slot || !active || !state.evidenceFindingId) {
+    return <EvidencePanel />;
+  }
+  return (
+    <Suspense fallback={null}>
+      <Slot
+        open={state.evidenceOpen}
+        onClose={() => controller.closeEvidence()}
+        bundle={{
+          snapshot: active.snapshot,
+          table: active.table as NormalizedTable,
+          findingId: state.evidenceFindingId,
+        }}
+        services={{ evaluateProof, readEvidencePage }}
+        i18n={i18n}
+      />
+    </Suspense>
+  );
+}
+
+function PhaseBody({
+  state,
+  uploadPorts,
+}: {
+  state: SessionState;
+  uploadPorts: UploadPorts;
+}) {
   const i18n = useI18n();
   const { controller } = useServices();
 
   switch (state.phase) {
-    case 'idle':
+    case 'idle': {
+      const UploadFlow = resolveFeatures().UploadFlow;
+      if (UploadFlow) {
+        return (
+          <Suspense
+            fallback={<Status kind="loading" title={i18n.tSafe('a11y.processing' as MessageKey)} />}
+          >
+            <UploadFlow
+              i18n={i18n}
+              ports={uploadPorts}
+              onComplete={(outcome: UploadOutcome) => void controller.adoptUploadOutcome(outcome)}
+            />
+          </Suspense>
+        );
+      }
       return (
         <section className="rf-idle">
           <h1 className="rf-idle-title">{i18n.tSafe('workspace.title' as MessageKey)}</h1>
@@ -181,6 +270,7 @@ function PhaseBody({ state }: { state: SessionState }) {
           </div>
         </section>
       );
+    }
 
     case 'reading':
     case 'profiling':

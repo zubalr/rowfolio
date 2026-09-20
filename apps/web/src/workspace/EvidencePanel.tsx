@@ -13,7 +13,6 @@ import type { I18n, MessageKey } from '@rowfolio/i18n';
 import { useI18n, useServices, useSessionState } from '../app/context.tsx';
 import { AdapterUnavailableError, loadProvenance } from '../workers/adapters.ts';
 import { findingTitle } from './findingCopy.ts';
-import { resolveFeatures } from '../app/features.ts';
 
 const PAGE_SIZE = 50;
 
@@ -28,7 +27,6 @@ export function EvidencePanel() {
   const state = useSessionState();
   const findingId = state.evidenceFindingId;
   const active = state.active;
-  const features = useMemo(resolveFeatures, []);
 
   const finding = active?.snapshot.findings.find((f) => f.id === findingId) ?? null;
   const proofs = useMemo(() => {
@@ -49,11 +47,7 @@ export function EvidencePanel() {
       {finding && active && (
         <>
           <p className="rf-evidence-finding">{findingTitle(i18n, finding)}</p>
-          {features.EvidenceView ? (
-            <features.EvidenceView finding={finding} snapshot={active.snapshot} table={active.table} />
-          ) : (
-            <EvidenceBody i18n={i18n} proofs={proofs} table={active.table} sourceHash={active.source.hash} />
-          )}
+          <EvidenceBody i18n={i18n} proofs={proofs} table={active.table} sourceHash={active.source.hash} />
         </>
       )}
     </Dialog>

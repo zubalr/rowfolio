@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { WorkerSupervisor } from './supervisor.ts';
+import { AdapterUnavailableError, type NormalizeAdapter } from './adapters.ts';
 import { BOUND_SAMPLE_SHA256 } from './supervisor.ts';
 import type { WorkerRequest, WorkerResponse } from '@rowfolio/contracts';
 import type { BinarySlot } from './transport.ts';
@@ -79,7 +80,15 @@ describe('WorkerSupervisor', () => {
   });
 
   it('reports UNSUPPORTED when an engine adapter is a stub', async () => {
-    const { posted, send } = harness();
+    // Engine packages are real now; inject a stub-shaped module (missing
+    // exported surface) to prove the adapter-unavailable mapping.
+    const { posted, send } = harness({
+      adapters: {
+        loadNormalize: async (): Promise<NormalizeAdapter> => {
+          throw new AdapterUnavailableError('@rowfolio/normalize', 'normalizeTable');
+        },
+      },
+    });
     // normalize reaches the stubbed @rowfolio/normalize → AdapterUnavailableError → UNSUPPORTED
     const bytes = csvBytes('a,b\n1,2\n');
     await send(

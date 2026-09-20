@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useSyncExternalStore } from 'react';
 import { Status } from '@rowfolio/ui';
-import { LandingSlot } from './Landing.tsx';
+import { Landing } from './Landing.tsx';
+import { resolveFeatures } from './features.ts';
 import { ServicesProvider, useI18n, useSessionState, type AppServices } from './context.tsx';
 import { readRoute } from './router.ts';
 import type { MessageKey } from '@rowfolio/i18n';
@@ -58,7 +59,16 @@ function AppShell() {
   }, []);
 
   if (route === 'landing') {
-    return <LandingSlot onNavigateWorkspace={navigateWorkspace} />;
+    const LandingApp = resolveFeatures().LandingApp;
+    // The real landing owns its intent/navigation (`{i18n}` only); the
+    // built-in fallback covers environments where the slot is absent.
+    return LandingApp ? (
+      <Suspense fallback={<Status kind="loading" title={i18n.tSafe('a11y.processing' as MessageKey)} />}>
+        <LandingApp i18n={i18n} />
+      </Suspense>
+    ) : (
+      <Landing onNavigateWorkspace={navigateWorkspace} />
+    );
   }
   return (
     <Suspense fallback={<Status kind="loading" title={i18n.tSafe('a11y.processing' as MessageKey)} />}>

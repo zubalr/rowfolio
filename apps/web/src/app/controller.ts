@@ -8,6 +8,7 @@ import type {
   QualityIssue,
   RawTable,
   ScenarioResult,
+  Hash,
 } from '@rowfolio/contracts';
 import { OPERATING_COST_SCENARIO_V1 } from '@rowfolio/contracts';
 import { WorkerClient, WorkerRequestError, type StageProgress } from '../workers/client.ts';
@@ -84,6 +85,18 @@ const UPLOAD_SCOPE_BASE = {
   complete: false,
   coverageNoteKey: 'coverage.allSource',
 };
+
+/** Fixed-key-order, undefined-stripped parse options — worker identity key. */
+function canonicalParseOptions(options: IngestParseOptions): IngestParseOptions {
+  const out: IngestParseOptions = {};
+  if (options.allowHiddenSheet !== undefined) out.allowHiddenSheet = options.allowHiddenSheet;
+  if (options.selectedSheetId !== undefined) out.selectedSheetId = options.selectedSheetId;
+  if (options.headerRow !== undefined) out.headerRow = options.headerRow;
+  if (options.firstColumn !== undefined) out.firstColumn = options.firstColumn;
+  if (options.lastColumn !== undefined) out.lastColumn = options.lastColumn;
+  if (options.delimiter !== undefined) out.delimiter = options.delimiter;
+  return out;
+}
 
 async function defaultProfile(raw: RawTable): Promise<{ proposedColumns: Column[]; issues: QualityIssue[] }> {
   const mod = await loadNormalize();
@@ -162,7 +175,10 @@ export class SessionController {
   }
 
   private ensureAnalysis(parseOptions: IngestParseOptions | null): WorkerClient {
-    const same = JSON.stringify(this.analysisOptions) === JSON.stringify(parseOptions);
+    // Canonicalize first — caller key order / undefined fields must not
+    // churn the worker identity (a recreation drops retained raw tables).
+    const canonical = parseOptions === null ? null : canonicalParseOptions(parseOptions);
+    const same = JSON.stringify(this.analysisOptions) === JSON.stringify(canonical);
     if (!this.analysis || !same) {
       if (this.analysis) {
         void this.analysis.dispose();
@@ -170,13 +186,117 @@ export class SessionController {
       }
       const factory = this.deps.createAnalysisClient;
       this.analysis = factory
-        ? factory(parseOptions)
-        : new WorkerClient(createAnalysisWorkerFactory(parseOptions), {
+        ? factory(canonical)
+        : new WorkerClient(createAnalysisWorkerFactory(canonical), {
             onDiagnostic: this.deps.onDiagnostic,
           });
-      this.analysisOptions = parseOptions;
+      this.analysisOptions = canonical;
     }
     return this.analysis;
+  }
+
+  /**
+   * UploadFlow parse port — runs ingest inside the analysis worker so the
+   * worker retains the RawTable for the subsequent normalize request.
+   * ParseOptions travel on the worker `name` channel (v1 wire gap — the
+   * ingest op has no options field; flagged for contracts v1.1).
+   */
+  async parseViaWorker(
+    bytes: ArrayBuffer,
+    sourceName: string,
+    options: IngestParseOptions,
+    progress?: ((stage: string, fraction: number | null) => void) | undefined,
+    extras?: { delimiter?: ',' | '\t' | ';' } | undefined,
+  ): Promise<RawTable> {
+    const parseOptions: IngestParseOptions = {
+      ...options,
+      ...(extras?.delimiter !== undefined ? { delimiter: extras.delimiter } : {}),
+    };
+    const client = this.ensureAnalysis(parseOptions);
+    const rid = this.ids.request();
+    // Binary sniffing only — the worker re-detects authoritatively.
+    const head = new Uint8Array(bytes.slice(0, 4));
+    const format = head[0] === 0x50 && head[1] === 0x4b ? 'xlsx' : 'csv';
+    const res = await client.request(
+      {
+        protocolVersion: 1,
+        requestId: rid,
+        sessionId: this.state.sessionId,
+        revision: this.state.revision,
+        operation: 'ingest',
+        payload: { sourceName, format, byteLength: bytes.byteLength, binarySlot: 'source' },
+      },
+      [{ slot: 'source', buffer: bytes }] as BinarySlot[],
+      (p) => progress?.(p.stage, p.fraction),
+    );
+    return res.result as RawTable;
+  }
+
+  /**
+   * Adopt a committed UploadFlow outcome: the worker already parsed (and
+   * retained) the raw table and the user already approved the review plan,
+   * so the session skips straight to normalize → analyze on the live worker.
+   */
+  async adoptUploadOutcome(outcome: {
+    table: RawTable;
+    inspection: { format: 'xlsx' | 'csv'; sourceName: string; compressedBytes: number };
+    parseOptions: IngestParseOptions;
+    approvalPlan: {
+      issueIds: readonly string[];
+      columns: readonly Column[];
+      useUnverifiedFormulaCaches: readonly string[];
+    };
+    sourceHash: Hash;
+  }): Promise<void> {
+    this.cancelWork('new source');
+    this.deps.blobStore?.releaseAll();
+    this.dispatch({
+      type: 'source.begin',
+      kind: 'upload',
+      source: {
+        name: outcome.inspection.sourceName,
+        format: outcome.inspection.format,
+        byteLength: outcome.inspection.compressedBytes,
+        hash: null,
+      },
+    });
+    const rid = this.ids.request();
+    this.dispatch({ type: 'request.start', requestId: rid });
+    try {
+      // Hash binding still verified — the worker-derived sourceRef hash must
+      // equal the hash the upload flow computed where the bytes were read.
+      if (outcome.table.sourceRef.sourceHash !== outcome.sourceHash) {
+        throw { code: 'SCHEMA_MISMATCH', messageKey: 'error.SCHEMA_MISMATCH', recoverable: false } satisfies SessionError;
+      }
+      this.dispatch({
+        type: 'source.verified',
+        requestId: rid,
+        hash: outcome.sourceHash,
+        byteLength: outcome.inspection.compressedBytes,
+      });
+      this.dispatch({ type: 'ingest.done', requestId: rid, rawTable: outcome.table });
+      // Review already happened inside the flow — profile.done with no
+      // actionable remainder routes straight to analyzing.
+      this.dispatch({
+        type: 'profile.done',
+        requestId: rid,
+        columns: [...outcome.approvalPlan.columns],
+        issues: [],
+      });
+      const nr = this.ids.request();
+      this.dispatch({ type: 'request.start', requestId: nr });
+      await this.normalizeAndAnalyze(
+        nr,
+        outcome.table,
+        outcome.approvalPlan.issueIds,
+        [...outcome.approvalPlan.columns],
+        'upload',
+        null,
+        this.analysis ?? undefined,
+      );
+    } catch (error) {
+      this.fail(rid, error);
+    }
   }
 
   private ensureExport(): WorkerClient {

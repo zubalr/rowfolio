@@ -1,7 +1,6 @@
 import { useRef, type ChangeEvent } from 'react';
 import { Button } from '@rowfolio/ui';
 import { useI18n, useServices } from './context.tsx';
-import { resolveFeatures } from './features.ts';
 import type { MessageKey } from '@rowfolio/i18n';
 
 export interface LandingProps {
@@ -92,19 +91,4 @@ export function LanguageToggle() {
   );
 }
 
-/** Slot-resolved landing: feature module when present, built-in otherwise. */
-export function LandingSlot(props: LandingProps) {
-  const features = resolveFeatures();
-  const External = features.Landing;
-  if (External) {
-    return (
-      <External
-        onSample={() => {
-          props.onNavigateWorkspace();
-        }}
-        {...props}
-      />
-    );
-  }
-  return <Landing {...props} />;
-}
+
