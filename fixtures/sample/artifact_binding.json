@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0.0",
+  "sourceFile": "sample_operations.xlsx",
+  "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
+  "sourceCsvHash": "84c945daa1d4a452feb4167197e6246b2f14234f490a1ce0ac3b1bfb07e64eb5",
+  "normalizationRevision": "cee5cbcf84bc1459e0ac4e290a0080b4e38b8c1ca031a214edc9458f0ccca705",
+  "analysisId": "analysis-a645db6d54cee88e2aa3",
+  "status": "planning-reference",
+  "productionParserVerified": false,
+  "note": "Reference snapshot built from independently verified canonical CSV. Production must rebuild from actual XLSX through its parser/normalizer/analyzer before shipping."
+}

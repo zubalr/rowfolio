@@ -1,0 +1,60 @@
+{
+  "coordinateSystem": "one-based physical worksheet rows, sheet S0 (Operations)",
+  "eastAnomaly": {
+    "date": "2026-06-11",
+    "minutes": 210,
+    "sheet": "Operations",
+    "site": "EA-03",
+    "sourceRow": 2044
+  },
+  "northJuneRevenue": {
+    "expected": "881000",
+    "metric": "revenue",
+    "period": "2026-06",
+    "region": "North",
+    "spans": [
+      {
+        "end": 1901,
+        "start": 1802
+      }
+    ]
+  },
+  "northJuneTarget": {
+    "expected": "1000000",
+    "metric": "target_revenue",
+    "period": "2026-06",
+    "region": "North",
+    "spans": [
+      {
+        "end": 1901,
+        "start": 1802
+      }
+    ]
+  },
+  "northMayDowntime": {
+    "expected": "1194",
+    "metric": "downtime_minutes",
+    "period": "2026-05",
+    "region": "North",
+    "spans": [
+      {
+        "end": 1301,
+        "start": 1202
+      }
+    ]
+  },
+  "northMayOrders": {
+    "expected": "10000",
+    "metric": "order_volume",
+    "period": "2026-05",
+    "region": "North",
+    "spans": [
+      {
+        "end": 1301,
+        "start": 1202
+      }
+    ]
+  },
+  "schemaVersion": "1.0.0",
+  "sourceRefId": "source-operations"
+}
