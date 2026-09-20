@@ -1,0 +1,8 @@
+{
+  "brand.name": "روفوليو",
+  "greet.user": "مرحباً {name}",
+  "summary.rows.other": "تم الاحتفاظ بـ {count} صفاً",
+  "summary.rows.few": "تم الاحتفاظ بـ {count} صفوف",
+  "action.close": "إغلاق",
+  "ghost.key": "مفتاح غير موجود في المرجع"
+}

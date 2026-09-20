@@ -1,0 +1,8 @@
+{
+  "protocolVersion": 1,
+  "requestId": "req-current",
+  "sessionId": "sess-a",
+  "revision": 3,
+  "kind": "success",
+  "result": { "disposed": true }
+}
