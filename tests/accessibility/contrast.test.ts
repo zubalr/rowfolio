@@ -1,8 +1,8 @@
 /**
- * WCAG 2.2 AA Contrast & Palette Verification (A19)
+ * WCAG 2.2 AA Contrast & Palette Verification
  *
  * Mathematically verifies sRGB relative luminance and contrast ratios
- * for the Paper / Ink / Cobalt design token palette (contracts/design-tokens.json).
+ * for the Paper / Ink / Cobalt design token palette.
  *
  * Rules:
  * - Normal text WCAG AA: >= 4.5:1
@@ -11,7 +11,7 @@
  *   only permitted for large display numerals or nontext markers).
  */
 import { describe, expect, it } from "vitest";
-import designTokens from "../../packages/contracts/source/design-tokens.json";
+import { DESIGN_TOKENS } from "../../packages/contracts/src/index.ts";
 
 export interface RGB {
   r: number;
@@ -56,8 +56,8 @@ export function contrastRatio(rgb1: RGB, rgb2: RGB): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-describe("WCAG 2.2 AA token contrast ratios (A19)", () => {
-  const colors = designTokens.color;
+describe("WCAG 2.2 AA token contrast ratios", () => {
+  const colors = DESIGN_TOKENS.color;
 
   const colorRgb = {
     ink: hexToRgb(colors.ink),
@@ -114,9 +114,8 @@ describe("WCAG 2.2 AA token contrast ratios (A19)", () => {
 
   it("attention on paper passes large text/graphical object AA (>=3:1) but fails normal text (<4.5:1)", () => {
     const ratio = contrastRatio(colorRgb.attention, colorRgb.paper);
-    // Spec exact ratio ~ 4.24:1
     expect(ratio).toBeGreaterThanOrEqual(4.1);
-    expect(ratio).toBeLessThan(4.5); // Fails normal text AA!
-    expect(ratio).toBeGreaterThanOrEqual(3.0); // Passes large text / graphical object AA!
+    expect(ratio).toBeLessThan(4.5);
+    expect(ratio).toBeGreaterThanOrEqual(3.0);
   });
 });

@@ -1,37 +1,37 @@
 /**
- * Reduced Motion Contracts & Behavior (A19)
+ * Reduced Motion Contracts & Behavior
  *
- * Verifies reduced motion requirements from 16_ACCESSIBILITY_SPEC.md:
+ * Verifies reduced motion requirements:
  * 1. Design token contract: motion.reducedMs === 0.
  * 2. Disabled counting animations, staggers, and auto-advance under prefers-reduced-motion.
  * 3. State transitions remain immediate, functional, and comprehensible.
  */
 import { describe, expect, it } from "vitest";
-import designTokens from "../../packages/contracts/source/design-tokens.json";
+import { DESIGN_TOKENS } from "../../packages/contracts/src/index.ts";
 
 export function getEffectiveAnimationDuration(
   standardDurationMs: number,
   prefersReducedMotion: boolean,
 ): number {
   if (prefersReducedMotion) {
-    return designTokens.motion.reducedMs; // 0ms
+    return DESIGN_TOKENS.motion.reducedMs; // 0ms
   }
   return standardDurationMs;
 }
 
-describe("reduced motion contracts (A19)", () => {
+describe("reduced motion contracts", () => {
   it("defines reducedMs token strictly as 0ms", () => {
-    expect(designTokens.motion.reducedMs).toBe(0);
+    expect(DESIGN_TOKENS.motion.reducedMs).toBe(0);
   });
 
   it("collapses all transition durations to 0ms when reduced motion is preferred", () => {
     const transitions = [
-      designTokens.motion.hoverMs,
-      designTokens.motion.stateMs,
-      designTokens.motion.panelMs,
-      designTokens.motion.chartMs,
-      designTokens.motion.staggerMs,
-      designTokens.motion.numberMs,
+      DESIGN_TOKENS.motion.hoverMs,
+      DESIGN_TOKENS.motion.stateMs,
+      DESIGN_TOKENS.motion.panelMs,
+      DESIGN_TOKENS.motion.chartMs,
+      DESIGN_TOKENS.motion.staggerMs,
+      DESIGN_TOKENS.motion.numberMs,
     ];
 
     for (const duration of transitions) {

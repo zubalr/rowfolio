@@ -1,7 +1,7 @@
 /**
- * Automated Accessibility Rule & Structure Auditor (A19)
+ * Automated Accessibility Rule & Structure Auditor
  *
- * Verifies WCAG 2.2 AA rules using axe-core (16_ACCESSIBILITY_SPEC.md):
+ * Verifies WCAG 2.2 AA rules using axe-core:
  * 1. axe-core rule and standard configuration (WCAG 2.2 AA tag completeness).
  * 2. Semantic HTML structure validation:
  *    - Landmark elements: header, nav, main, footer.
@@ -72,7 +72,7 @@ export function auditHtmlStructure(html: string): HtmlSemanticAudit {
   };
 }
 
-describe("axe-core WCAG 2.2 AA rule auditor (A19)", () => {
+describe("axe-core WCAG 2.2 AA rule auditor", () => {
   it("axe-core provides standard WCAG 2.2 AA rule sets and tags", () => {
     // Check that axe contains rules for WCAG 2.2 / 2.1 / 2.0 AA
     const rules = axe.getRules();

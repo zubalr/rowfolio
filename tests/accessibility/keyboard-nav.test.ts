@@ -1,7 +1,7 @@
 /**
- * Keyboard Navigation & Focus Management Contracts (A19)
+ * Keyboard Navigation & Focus Management Contracts
  *
- * Verifies interactive keyboard navigation requirements from 16_ACCESSIBILITY_SPEC.md:
+ * Verifies interactive keyboard navigation requirements:
  * 1. Focus order sequence: header -> scope -> findings -> evidence -> scenario -> export -> table.
  * 2. Findings toggle pattern: buttons with aria-pressed attribute (not incomplete tablist).
  * 3. Modal dialog focus trapping:
@@ -95,7 +95,7 @@ export class ModalFocusTrapManager {
   }
 }
 
-describe("keyboard navigation & focus management (A19)", () => {
+describe("keyboard navigation & focus management", () => {
   it("enforces correct natural keyboard sequence", () => {
     const sequence: KeyboardSequenceNode[] = [
       { id: "skip-link", role: "link", tabIndex: 0 },
