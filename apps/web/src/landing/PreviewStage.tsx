@@ -503,7 +503,14 @@ export function PreviewStage({
               {
                 baseline: baselineMarginPct,
                 scenario: scenarioMarginPct,
-                delta: marginDeltaPp === null ? "—" : i18n.formatInteger(marginDeltaPp),
+                delta:
+                  marginDeltaPp === null
+                    ? "—"
+                    : i18n.formatNumber(marginDeltaPp, {
+                        minFractionDigits: 0,
+                        maxFractionDigits: 1,
+                        signDisplay: "exceptZero",
+                      }),
               },
               { isolateParams: "ltr" },
             )}
