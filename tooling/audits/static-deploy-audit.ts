@@ -1,5 +1,5 @@
 /**
- * Static Deployment & Privacy Architecture Auditor (A20)
+ * Static Deployment & Privacy Architecture Auditor
  *
  * Enforces production static guarantees:
  * 1. Positive static manifest verification (Cloudflare Pages compatible, no functions/workers).
@@ -7,6 +7,7 @@
  * 3. Zero-backend / zero-cost verification (no serverless bindings, no cloud storage).
  * 4. AST / source import scan: zero banned telemetry, zero model APIs, zero remote CDNs.
  * 5. Asset size constraints (<= 25 MiB Pages hard limit).
+ * 6. Browser storage scan: zero spreadsheet data persistence.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
@@ -276,6 +277,48 @@ export function scanSourceForBannedImports(rootDir: string): {
           const importRe = new RegExp(`from\\s+['"]${mod}(?:/.*)?['"]|import\\s*\\(['"]${mod}(?:/.*)?['"]\\)`, "g");
           if (importRe.test(content)) {
             violations.push({ file: path.relative(rootDir, full), module: mod });
+          }
+        }
+      }
+    }
+  };
+
+  for (const d of scanDirs) {
+    walk(path.join(rootDir, d));
+  }
+
+  return {
+    passed: violations.length === 0,
+    violations,
+  };
+}
+
+export function scanSourceForStorageViolations(rootDir: string): {
+  passed: boolean;
+  violations: Array<{ file: string; text: string }>;
+} {
+  const violations: Array<{ file: string; text: string }> = [];
+  const scanDirs = ["packages", "apps"];
+
+  const walk = (dir: string): void => {
+    if (!existsSync(dir)) return;
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name === "node_modules" || entry.name === "dist" || entry.name === ".vite") {
+          continue;
+        }
+        walk(full);
+      } else if (entry.isFile() && (entry.name.endsWith(".ts") || entry.name.endsWith(".tsx"))) {
+        const content = readFileSync(full, "utf8");
+        // Check for localStorage or sessionStorage usage that stores spreadsheet rows or cell content
+        if (/\b(?:localStorage|sessionStorage)\.setItem\s*\(/.test(content)) {
+          // Allow only known preference keys if any
+          const matches = content.match(/\b(?:localStorage|sessionStorage)\.setItem\s*\([^)]+\)/g) ?? [];
+          for (const m of matches) {
+            if (!m.includes("rowfolio:locale") && !m.includes("rowfolio:digitPreference")) {
+              violations.push({ file: path.relative(rootDir, full), text: m });
+            }
           }
         }
       }

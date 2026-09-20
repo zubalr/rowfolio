@@ -1,7 +1,7 @@
 /**
- * Bundle Size & Performance Budget Auditor (A20)
+ * Bundle Size & Performance Budget Auditor
  *
- * Enforces production performance budgets defined in 17_PERFORMANCE_SPEC.md:
+ * Enforces production performance budgets:
  * - Landing initial JS: <= 150 KiB gzip total eager JS
  * - Landing critical assets: <= 350 KiB transferred before LCP
  * - Sample snapshot: <= 80 KiB gzip target
