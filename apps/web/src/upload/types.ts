@@ -36,14 +36,17 @@ export type CsvDelimiter = "," | "\t" | ";";
 export type ProfileTable = (raw: RawTable) => {
   proposedColumns: Column[];
   issues: QualityIssue[];
-};
+} | Promise<{
+  proposedColumns: Column[];
+  issues: QualityIssue[];
+}>;
 
 /**
  * External capabilities the flow needs. `inspect`/`parse` are bound to the
  * real `@rowfolio/ingest` adapters by `ingestPorts()` in adapters.ts; a host
  * may substitute worker-transport equivalents with identical signatures.
- * `profile` has no default: it is the contract `profileTable` owned by A06 —
- * the composition root supplies it once packages/normalize lands.
+ * `profile` has no default: the composition root wires it to the worker
+ * (`profile` op) so profiling never blocks the main thread.
  */
 export interface UploadPorts {
   inspect(

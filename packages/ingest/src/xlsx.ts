@@ -170,6 +170,12 @@ export function emitCells(
   const cells: RawCell[] = [];
   let nonempty = 0;
 
+  // Selected-range volume cap: `nonemptyCells` bounds real content only —
+  // a mostly-empty range must be refused before per-position iteration.
+  if ((bounds.lastRow - bounds.firstRow + 1) * (bounds.lastColumn - bounds.firstColumn + 1) > limits.nonemptyCells) {
+    throw new IngestError('LIMIT_EXCEEDED', { detail: 'range-cells' });
+  }
+
   for (let r = bounds.firstRow; r <= bounds.lastRow; r += 1) {
     const row = data?.[r - 1];
     const inHeader = r === headerRow;
@@ -182,15 +188,14 @@ export function emitCells(
         continue;
       }
       const mapped = mapCell(cell, r, c, dateSystem, warnings, limits);
-      if (inHeader && mapped.type !== 'blank' && (mapped.raw === null || mapped.raw === '')) {
+      if (inHeader && (mapped.type === 'blank' || mapped.raw === null || mapped.raw === '')) {
         cells.push({ ...mapped, type: 'blank' });
         continue;
       }
-      if (mapped.type !== 'blank') {
-        nonempty += 1;
-        if (nonempty > limits.nonemptyCells) {
-          throw new IngestError('LIMIT_EXCEEDED', { detail: 'nonempty-cells' });
-        }
+      if (mapped.type === 'blank') continue;
+      nonempty += 1;
+      if (nonempty > limits.nonemptyCells) {
+        throw new IngestError('LIMIT_EXCEEDED', { detail: 'nonempty-cells' });
       }
       cells.push(mapped);
     }

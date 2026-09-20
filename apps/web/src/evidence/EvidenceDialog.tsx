@@ -12,6 +12,7 @@ import type { I18n } from "@rowfolio/i18n";
 import { Dialog } from "@rowfolio/ui";
 import { EvidencePanel } from "./EvidencePanel.tsx";
 import type { EvidenceBundle, EvidenceServices } from "./types.ts";
+import "./evidence.css";
 
 export interface EvidenceDialogProps {
   /** When `open` is false the bundle may still change; the panel stays mounted while open. */

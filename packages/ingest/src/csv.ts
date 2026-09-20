@@ -240,6 +240,13 @@ export async function parseCsv(
   const lastRecord = tableRecords[tableRecords.length - 1] as CsvRecord;
   const lastRow = lastRecord.endLine;
 
+  // Selected-range volume cap: `nonemptyCells` bounds real content only, so a
+  // mostly-empty range must be refused up front rather than materialize one
+  // object (and downstream one quality issue) per blank position.
+  if ((lastRow - firstRow + 1) * (lastColumn - firstColumn + 1) > limits.nonemptyCells) {
+    throw new IngestError('LIMIT_EXCEEDED', { detail: 'range-cells' });
+  }
+
   const cells: RawCell[] = [];
   let nonempty = 0;
   for (const [i, rec] of tableRecords.entries()) {
@@ -260,7 +267,13 @@ export async function parseCsv(
         throw new IngestError('LIMIT_EXCEEDED', { detail: 'cell.characters' });
       }
       if (value === '') {
-        cells.push({ row: rec.startLine, column: c, raw: null, type: 'blank', formula: null, cachedValue: null });
+        // Present-but-empty field: identical to an absent cell for every
+        // consumer (cellAt → null text), so only the header keeps the
+        // positional placeholder — sparse files must not materialize
+        // one object per blank field.
+        if (inHeader) {
+          cells.push({ row: rec.startLine, column: c, raw: null, type: 'blank', formula: null, cachedValue: null });
+        }
         continue;
       }
       nonempty += 1;

@@ -43,7 +43,7 @@ export class SampleError extends Error {
 
 type FetchLike = (url: string) => Promise<{ ok: boolean; status: number; arrayBuffer(): Promise<ArrayBuffer>; json(): Promise<unknown> }>;
 
-const SAMPLE_BASE = 'sample';
+const SAMPLE_BASE = `${import.meta.env.BASE_URL}sample`;
 
 async function fetchJson(fetchLike: FetchLike, url: string): Promise<unknown> {
   const res = await fetchLike(url);

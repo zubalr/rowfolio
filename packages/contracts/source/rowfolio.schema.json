@@ -1726,6 +1726,51 @@
               "minimum": 0
             },
             "operation": {
+              "const": "profile"
+            },
+            "payload": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "rawTableId": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "rawTableId"
+              ]
+            }
+          },
+          "required": [
+            "protocolVersion",
+            "requestId",
+            "sessionId",
+            "revision",
+            "operation",
+            "payload"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "protocolVersion": {
+              "const": 1
+            },
+            "requestId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sessionId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "operation": {
               "const": "analyze"
             },
             "payload": {
@@ -1992,6 +2037,28 @@
         "warnings"
       ]
     },
+    "ProfileResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "proposedColumns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Column"
+          }
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/QualityIssue"
+          }
+        }
+      },
+      "required": [
+        "proposedColumns",
+        "issues"
+      ]
+    },
     "WorkerResponse": {
       "oneOf": [
         {
@@ -2021,6 +2088,7 @@
               "enum": [
                 "preflight",
                 "parse",
+                "profile",
                 "normalize",
                 "analyze",
                 "model",
@@ -2086,6 +2154,9 @@
                 },
                 {
                   "$ref": "#/$defs/ExportArtifact"
+                },
+                {
+                  "$ref": "#/$defs/ProfileResult"
                 },
                 {
                   "type": "object",

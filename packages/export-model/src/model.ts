@@ -394,6 +394,7 @@ export function buildExportModel(
       // the slide stays a readable summary without a chart reference.
       chartIds: [],
       notes: [
+        ...(qualityFinding !== undefined ? [`finding:${qualityFinding.id}`] : []),
         `issues:${snapshot.qualitySummary.issueCount}`,
         `resolved:${snapshot.qualitySummary.resolved}`,
         `unresolved:${snapshot.qualitySummary.unresolved}`,

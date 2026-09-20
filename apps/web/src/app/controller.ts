@@ -5,6 +5,7 @@ import type {
   ExportModel,
   Locale,
   NormalizedTable,
+  ProfileResult,
   QualityIssue,
   RawTable,
   ScenarioResult,
@@ -14,6 +15,7 @@ import { OPERATING_COST_SCENARIO_V1 } from '@rowfolio/contracts';
 import { WorkerClient, WorkerRequestError, type StageProgress } from '../workers/client.ts';
 import { loadNormalize, loadExportModel } from '../workers/adapters.ts';
 import { createAnalysisWorkerFactory, createExportWorkerFactory, type IngestParseOptions } from '../workers/factory.ts';
+import { BOUND_SAMPLE_SHA256 } from '../workers/supervisor.ts';
 import type { BinarySlot } from '../workers/transport.ts';
 import { loadSampleAssets, SampleError, type SampleAssets } from './sample.ts';
 import { sessionReducer, type SessionAction } from './reducer.ts';
@@ -232,6 +234,28 @@ export class SessionController {
       (p) => progress?.(p.stage, p.fraction),
     );
     return res.result as RawTable;
+  }
+
+  /**
+   * Profile the raw table retained by the analysis worker — keeps the O(cells)
+   * profile off the main thread and against the same retained instance that
+   * normalize will resolve by id.
+   */
+  async profileViaWorker(rawTable: RawTable): Promise<ProfileResult> {
+    const client = this.analysis;
+    if (!client) throw new WorkerRequestError('INTERNAL', 'error.INTERNAL', false, 'analysis worker unavailable');
+    const res = await client.request(
+      {
+        protocolVersion: 1,
+        requestId: this.ids.request(),
+        sessionId: this.state.sessionId,
+        revision: this.state.revision,
+        operation: 'profile',
+        payload: { rawTableId: rawTable.id },
+      },
+      [],
+    );
+    return res.result as ProfileResult;
   }
 
   /**
@@ -555,7 +579,12 @@ export class SessionController {
         const ar = this.ids.request();
         active = ar;
         this.dispatch({ type: 'request.start', requestId: ar });
-        const scopeBase = kind === 'sample' ? SAMPLE_SCOPE_BASE : UPLOAD_SCOPE_BASE;
+        // The bound sample keeps its declared June-2026 scope even when it
+        // arrives via the upload path — the supervisor pins the same
+        // samplePolicyId from the hash, and sample-pack analysis requires a
+        // bounded period scope.
+        const boundSample = table.sourceRef.sourceHash === BOUND_SAMPLE_SHA256;
+        const scopeBase = kind === 'sample' || boundSample ? SAMPLE_SCOPE_BASE : UPLOAD_SCOPE_BASE;
         snapshot = (await client.request(
           {
             protocolVersion: 1,

@@ -173,7 +173,7 @@ export function createUploadController(
       if (job.id !== jobSeq || signal.aborted) return;
       let profiled: { proposedColumns: Column[]; issues: QualityIssue[] };
       try {
-        profiled = ports.profile(table);
+        profiled = await ports.profile(table);
       } catch (error) {
         emit({ stage: "error", file, prior, failure: toFailure(error), retryStep: "parse", inspection, selection });
         return;

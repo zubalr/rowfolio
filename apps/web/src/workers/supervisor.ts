@@ -5,6 +5,7 @@ import type {
   ExportArtifact,
   ExportModel,
   NormalizedTable,
+  ProfileResult,
   RawTable,
   ScenarioResult,
 } from '@rowfolio/contracts';
@@ -159,6 +160,8 @@ export class WorkerSupervisor {
     switch (request.operation) {
       case 'ingest':
         return { result: await this.handleIngest(request, binaries, progress), binaries: [] };
+      case 'profile':
+        return { result: await this.handleProfile(request, progress), binaries: [] };
       case 'normalize':
         return { result: await this.handleNormalize(request, progress), binaries: [] };
       case 'analyze':
@@ -192,6 +195,19 @@ export class WorkerSupervisor {
     )) as RawTable;
     this.rawTables.set(table.id, table);
     return table;
+  }
+
+  private async handleProfile(
+    request: Extract<WorkerRequest, { operation: 'profile' }>,
+    progress: ProgressFn,
+  ): Promise<ProfileResult> {
+    progress('profile', null);
+    const raw = this.rawTables.get(request.payload.rawTableId);
+    if (!raw) {
+      throw new SupervisorError('INTERNAL', 'error.INTERNAL', false, `unknown rawTableId ${request.payload.rawTableId}`);
+    }
+    const mod = await (this.hooks.adapters?.loadNormalize ?? loadNormalize)();
+    return mod.profileTable(raw) as ProfileResult;
   }
 
   private async handleNormalize(

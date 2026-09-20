@@ -167,6 +167,24 @@ describe('dates and precision', () => {
   });
 });
 
+describe('malformed numerics', () => {
+  it('traces non-decimal text in numeric-leaning columns without absorbing it', () => {
+    // 40 clean decimals vote the column numeric; the two corrupt cells are
+    // traced, not coerced and not fatal.
+    const values = [...Array<string>(40).fill('10.00'), 'abc', '١٢٣'];
+    const raw = rawTable(['amount'], values.map((v) => [v]));
+    const profile = profileTable(raw);
+    expect(profile.proposedColumns[0]?.type).toBe('decimal');
+    const malformed = profile.issues.filter((q) => q.kind === 'malformed');
+    expect(malformed.map((q) => q.id)).toEqual(['quality-malformed-42-c1', 'quality-malformed-43-c1']);
+    expect(malformed.every((q) => q.status === 'proposed' && q.action === 'none')).toBe(true);
+    // Values stay verbatim; aggregates exclude them with exact counts.
+    const table = normalizeTable(raw, EMPTY_PLAN);
+    expect(table.rows[40]?.values['amount']).toBe('abc');
+    expect(table.rows[41]?.values['amount']).toBe('١٢٣');
+  });
+});
+
 describe('formula caches and missingness', () => {
   it('excludes unverified formula caches by default and honors explicit opt-in', () => {
     const formula = rawTable(['revenue'], [['ignored']]);
