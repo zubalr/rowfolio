@@ -1,0 +1,55 @@
+{
+  "caseId": "xlsx-formula-like-strings",
+  "category": "ooxml_structure",
+  "description": "Inline string cells beginning with =, +, - and @ inside a workbook (no formula cells exist in this package).",
+  "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "expected": {
+    "sheets": [
+      {
+        "name": "Notes",
+        "headerPhysicalRow": 1,
+        "records": 4,
+        "header": [
+          "id",
+          "memo",
+          "value"
+        ],
+        "rows": [
+          [
+            "F-1",
+            "=SUM(B2:B3)",
+            "10"
+          ],
+          [
+            "F-2",
+            "+470011002233",
+            "20"
+          ],
+          [
+            "F-3",
+            "-status",
+            "30"
+          ],
+          [
+            "F-4",
+            "@risk_register",
+            "40"
+          ]
+        ]
+      }
+    ],
+    "requiredBehavior": [
+      "every memo cell is a string cell (inline string): type text, never type formula, formula null",
+      "values are never evaluated or interpolated into formula syntax; export writes them as OOXML string cells",
+      "the numeric column stays numeric and unaffected by the memo strings"
+    ]
+  },
+  "notes": [
+    "Complements csv-formula-like-strings on the spreadsheet side; inert data, no macros, no real formula parts."
+  ],
+  "artifact": "xlsx-formula-like-strings.xlsx",
+  "sha256": "66fc7985457c54a18f161935df55dd6576bfeccb9ee5eeff1207505d30e3fde8",
+  "bytes": 3779,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

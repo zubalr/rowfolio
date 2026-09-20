@@ -844,6 +844,47 @@ def case_xlsx_ragged_trailing_empty_cells() -> tuple[dict, bytes]:
     return manifest, _xlsx_bytes([("Ragged", _sheet_xml(rows))])
 
 
+def case_xlsx_formula_like_strings() -> tuple[dict, bytes]:
+    rows = [
+        [("s", "id"), ("s", "memo"), ("n", "value")],
+        [("s", "F-1"), ("s", "=SUM(B2:B3)"), ("n", "10")],
+        [("s", "F-2"), ("s", "+470011002233"), ("n", "20")],
+        [("s", "F-3"), ("s", "-status"), ("n", "30")],
+        [("s", "F-4"), ("s", "@risk_register"), ("n", "40")],
+    ]
+    manifest = {
+        "caseId": "xlsx-formula-like-strings",
+        "category": "ooxml_structure",
+        "description": "Inline string cells beginning with =, +, - and @ inside a workbook (no formula cells exist in this package).",
+        "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "expected": {
+            "sheets": [
+                {
+                    "name": "Notes",
+                    "headerPhysicalRow": 1,
+                    "records": 4,
+                    "header": ["id", "memo", "value"],
+                    "rows": [
+                        ["F-1", "=SUM(B2:B3)", "10"],
+                        ["F-2", "+470011002233", "20"],
+                        ["F-3", "-status", "30"],
+                        ["F-4", "@risk_register", "40"],
+                    ],
+                }
+            ],
+            "requiredBehavior": [
+                "every memo cell is a string cell (inline string): type text, never type formula, formula null",
+                "values are never evaluated or interpolated into formula syntax; export writes them as OOXML string cells",
+                "the numeric column stays numeric and unaffected by the memo strings",
+            ],
+        },
+        "notes": [
+            "Complements csv-formula-like-strings on the spreadsheet side; inert data, no macros, no real formula parts.",
+        ],
+    }
+    return manifest, _xlsx_bytes([("Notes", _sheet_xml(rows))])
+
+
 # ---------------------------------------------------------------------------
 # Corpus assembly
 # ---------------------------------------------------------------------------
@@ -875,6 +916,7 @@ XLSX_CASES = [
     case_xlsx_header_on_row_2,
     case_xlsx_duplicate_sheet_names,
     case_xlsx_ragged_trailing_empty_cells,
+    case_xlsx_formula_like_strings,
 ]
 
 
