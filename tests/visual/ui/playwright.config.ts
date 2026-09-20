@@ -63,7 +63,7 @@ export default defineConfig({
   webServer: {
     command:
       "node_modules/.bin/vite build --config gallery/vite.config.ts && node_modules/.bin/vite preview --config gallery/vite.config.ts --host 127.0.0.1 --port 4531 --strictPort",
-    cwd: "../../packages/ui",
+    cwd: "../../../packages/ui",
     url: "http://127.0.0.1:4531/",
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
