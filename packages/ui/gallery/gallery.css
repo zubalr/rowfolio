@@ -1,0 +1,134 @@
+/* Gallery chrome only — the design system itself lives in src/styles/. */
+
+.gallery__masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  padding-inline: var(--rf-gutter);
+  border-block-end: 1px solid var(--rf-divider);
+}
+
+.gallery__brand {
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+html[lang="ar"] .gallery__brand {
+  letter-spacing: normal;
+}
+
+.gallery__masthead nav {
+  display: flex;
+  gap: var(--rf-space-4);
+}
+
+.gallery__masthead nav a {
+  color: var(--rf-text-muted);
+  text-decoration: none;
+  font-size: 14px;
+}
+.gallery__masthead nav a[data-active] {
+  color: var(--rf-text);
+  font-weight: 600;
+}
+
+.gallery__wrap {
+  max-width: var(--rf-max-width);
+  margin-inline: auto;
+  padding-inline: var(--rf-gutter);
+  padding-block-end: var(--rf-space-8);
+}
+
+.gallery__eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--rf-accent);
+  margin-block: var(--rf-space-6) var(--rf-space-2);
+}
+html[lang="ar"] .gallery__eyebrow {
+  font-size: 13px;
+  letter-spacing: normal;
+}
+
+.gallery__title {
+  font-size: 42px;
+  line-height: 1.15;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+html[lang="ar"] .gallery__title {
+  font-size: 36px;
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+
+.gallery__intro {
+  font-size: 17px;
+  color: var(--rf-text-muted);
+  max-width: 56ch;
+  margin-block-start: var(--rf-space-3);
+}
+html[lang="ar"] .gallery__intro {
+  font-size: 17px;
+}
+
+.gallery__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rf-space-3);
+  align-items: center;
+}
+
+.gallery__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--rf-space-5);
+  align-items: end;
+}
+
+.gallery__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-5);
+}
+
+.gallery__note {
+  margin-block-start: var(--rf-space-3);
+  font-size: 13px;
+  color: var(--rf-text-muted);
+}
+html[lang="ar"] .gallery__note {
+  font-size: 14px;
+}
+
+.gallery__evidence {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-3);
+}
+
+.gallery__evidence-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rf-ink-data);
+  margin-block-start: var(--rf-space-3);
+}
+html[lang="ar"] .gallery__evidence-label {
+  font-size: 13px;
+  letter-spacing: normal;
+}
+
+.gallery__formula {
+  font-size: 15px;
+  color: var(--rf-ink-text);
+}
+
+.gallery__hash {
+  font-size: 12px;
+  word-break: break-all;
+}
