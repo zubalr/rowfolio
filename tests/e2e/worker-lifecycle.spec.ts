@@ -230,4 +230,73 @@ test.describe("Web Worker Lifecycle & Boundary Guarantees", () => {
       .poll(() => page.workers().length, { timeout: 10_000 })
       .toBe(0);
   });
+
+  test("Cancel during export preparation recovers and re-prepare succeeds", async ({
+    page,
+  }) => {
+    const spawnedWorkers: PlaywrightWorker[] = [];
+    const pageErrors: Error[] = [];
+
+    page.on("worker", (worker) => {
+      spawnedWorkers.push(worker);
+    });
+    page.on("pageerror", (error) => {
+      pageErrors.push(error);
+    });
+
+    await page.goto("/");
+    const uploadInput = page.locator('input[type="file"]').first();
+    await expect(uploadInput).toBeAttached({ timeout: 10_000 });
+    await uploadInput.setInputFiles(path.resolve(repoRoot, "fixtures/sample/sample_operations.csv"));
+    await expect(page).toHaveURL(/#\/workspace/, { timeout: 20_000 });
+    const applyBtn = page.locator('button:has-text("Apply approved changes")');
+    await expect(applyBtn).toBeVisible({ timeout: 15_000 });
+    await applyBtn.click();
+    await expect(page.locator("text=The briefing starts here")).toBeVisible({ timeout: 15_000 });
+
+    // Open export preparation: the footer offers Cancel while building.
+    const prepareBtn = page.locator('[data-testid="export-prepare-btn"]');
+    await expect(prepareBtn).toBeVisible();
+    await prepareBtn.click();
+    const dialog = page.locator("dialog[open]");
+    await expect(dialog).toBeVisible({ timeout: 10_000 });
+    const cancelBtn = dialog.locator('button:has-text("Cancel")');
+    await expect(cancelBtn).toBeVisible({ timeout: 15_000 });
+    await cancelBtn.click();
+
+    // Recovery: close whatever state cancel left, then a fresh prepare
+    // must complete both artifacts — cancel must not corrupt the session.
+    await page.waitForTimeout(1000);
+    const closeAfterCancel = page.locator("dialog[open] .rf-dialog__close");
+    if (await closeAfterCancel.isVisible()) {
+      await closeAfterCancel.click();
+      await expect(page.locator("dialog[open]")).toHaveCount(0);
+    }
+    await expect(prepareBtn).toBeVisible();
+    await prepareBtn.click();
+    await expect(page.locator("dialog[open]")).toBeVisible({ timeout: 10_000 });
+    const downloadLinks = page.locator(".rf-export-links a.rf-download");
+    await expect(downloadLinks.first()).toBeVisible({ timeout: 30_000 });
+    expect(await downloadLinks.count()).toBe(2);
+
+    // Workers stay bounded through cancel and rebuild.
+    expect(page.workers().length).toBeLessThanOrEqual(2);
+
+    // Clean teardown.
+    const closeBtn = page.locator("dialog[open] .rf-dialog__close");
+    if (await closeBtn.isVisible()) {
+      await closeBtn.click();
+      await expect(page.locator("dialog[open]")).toHaveCount(0);
+    }
+    const clearBtn = page.locator('[data-testid="clear-session-btn"]');
+    await expect(clearBtn).toBeVisible();
+    await clearBtn.click();
+    await expect(page.locator("h1")).toBeVisible({ timeout: 10_000 });
+    await expect
+      .poll(() => page.workers().length, { timeout: 10_000 })
+      .toBe(0);
+
+    // No uncaught exceptions anywhere in the cancel/rebuild path.
+    expect(pageErrors).toEqual([]);
+  });
 });
