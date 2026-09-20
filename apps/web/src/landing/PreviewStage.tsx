@@ -20,6 +20,7 @@ import { Button, Bidi, DataTable, Icon } from "@rowfolio/ui";
 import type { I18n } from "@rowfolio/i18n";
 import { compareDecimal, divideDecimal, subtractDecimal } from "@rowfolio/contracts";
 import type { Decimal } from "@rowfolio/contracts";
+import { landingCopy } from "./copy.ts";
 import type { LandingPreviewTruth } from "./previewTruth.ts";
 import type { PreviewAction, PreviewState } from "./previewState.ts";
 
@@ -99,14 +100,14 @@ function RegionChart({
   return (
     <figure className="rf-compare" dir="ltr" data-testid="preview-compare">
       <figcaption className="rf-compare__head">
-        <span className="rf-compare__title">{i18n.t("landing.chart.title")}</span>
-        <span className="rf-compare__summary">{i18n.t("landing.chart.summary")}</span>
+        <span className="rf-compare__title">{landingCopy(i18n.locale, "landing.chart.title")}</span>
+        <span className="rf-compare__summary">{landingCopy(i18n.locale, "landing.chart.summary")}</span>
       </figcaption>
       <svg
         className="rf-compare__svg"
         viewBox={`0 0 ${width} ${height}`}
         role="img"
-        aria-label={i18n.t("landing.chart.summary")}
+        aria-label={landingCopy(i18n.locale, "landing.chart.summary")}
       >
         {regions.map((r, i) => {
           const y = i * rowH + 14;
@@ -168,7 +169,7 @@ function RegionChart({
         <table>
           <thead>
             <tr>
-              <th scope="col">{i18n.t("common.region")}</th>
+              <th scope="col">{landingCopy(i18n.locale, "common.region")}</th>
               <th scope="col">{i18n.t("common.actual")}</th>
               <th scope="col">{i18n.t("common.target")}</th>
               <th scope="col">{i18n.t("metric.targetGap")}</th>
@@ -394,9 +395,9 @@ export function PreviewStage({
                   </dd>
                 </div>
                 <div>
-                  <dt>{i18n.t("evidence.scope")}</dt>
+                  <dt>{landingCopy(i18n.locale, "evidence.scope")}</dt>
                   <dd>
-                    {i18n.t("common.scopeValue", {
+                    {landingCopy(i18n.locale, "common.scopeValue", {
                       region: i18n.t("region.North"),
                       period: i18n.t("period.june2026"),
                       sheet: dataset.sheetName,
@@ -472,10 +473,10 @@ export function PreviewStage({
           {/* Paired bars on a fixed scale: observed baseline (cobalt, solid)
               vs assumption layer (amber, dashed outline). */}
           <div className="rf-scenario__bars" dir="ltr" role="img"
-            aria-label={`${i18n.t("scenario.contributionLabel")}: ${i18n.formatInteger(june.baselineContribution)} → ${i18n.formatInteger(scenario.contribution)}`}
+            aria-label={`${landingCopy(i18n.locale, "scenario.contributionLabel")}: ${i18n.formatInteger(june.baselineContribution)} → ${i18n.formatInteger(scenario.contribution)}`}
           >
             <div className="rf-scenario__bar-row">
-              <span className="rf-scenario__bar-label">{i18n.t("scenario.observed")}</span>
+              <span className="rf-scenario__bar-label">{landingCopy(i18n.locale, "scenario.observed")}</span>
               <span className="rf-scenario__track">
                 <span className="rf-scenario__bar rf-scenario__bar--baseline" style={{ inlineSize: `${basePct}%` }} />
               </span>
@@ -484,7 +485,7 @@ export function PreviewStage({
               </span>
             </div>
             <div className="rf-scenario__bar-row">
-              <span className="rf-scenario__bar-label">{i18n.t("scenario.assumed")}</span>
+              <span className="rf-scenario__bar-label">{landingCopy(i18n.locale, "scenario.assumed")}</span>
               <span className="rf-scenario__track">
                 <span
                   className="rf-scenario__bar rf-scenario__bar--scenario"
@@ -533,9 +534,9 @@ export function PreviewStage({
             {([1, 2, 3, 4, 5, 6] as const).map((n) => (
               <li key={n} className="rf-briefing__slide" data-ready={state.briefingReady || undefined}>
                 <span className="rf-briefing__slide-num rf-numeric" dir="ltr">
-                  {i18n.t("export.deckSlides", { n })}
+                  {landingCopy(i18n.locale, "export.deckSlides", { n })}
                 </span>
-                <span className="rf-briefing__slide-title">{i18n.t(`export.slide.${n}`)}</span>
+                <span className="rf-briefing__slide-title">{landingCopy(i18n.locale, `export.slide.${n}`)}</span>
                 <span className="rf-briefing__state">
                   {state.briefingReady ? <Icon name="check" size={16} /> : "—"}
                 </span>
@@ -544,15 +545,15 @@ export function PreviewStage({
           </ol>
           <p className="rf-briefing__workbook" data-ready={state.briefingReady || undefined}>
             <Icon name="file" size={16} />
-            {i18n.t("export.workbookSummary")}
+            {landingCopy(i18n.locale, "export.workbookSummary")}
             <span className="rf-briefing__state">
               {state.briefingReady ? <Icon name="check" size={16} /> : "—"}
             </span>
           </p>
-          <p className="rf-briefing__note">{i18n.t("export.previewNote")} {i18n.t("export.realDownloads")}</p>
+          <p className="rf-briefing__note">{i18n.t("export.previewNote")} {landingCopy(i18n.locale, "export.realDownloads")}</p>
           {state.briefingReady ? (
             <Button variant="primary" iconEnd="arrow-end" onClick={onOpenWorkspace}>
-              {i18n.t("action.openWorkspace")}
+              {landingCopy(i18n.locale, "action.openWorkspace")}
             </Button>
           ) : null}
         </div>

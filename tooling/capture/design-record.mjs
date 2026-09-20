@@ -6,13 +6,14 @@
  */
 /* global window */
 import { createRequire } from 'node:module';
+import path from 'node:path';
 import { mkdirSync } from 'node:fs';
 const REPO_ROOT = new URL('../..', import.meta.url).pathname;
 const require = createRequire(`${REPO_ROOT}/package.json`);
 const { chromium } = require('@playwright/test');
-const REPO = process.env.REPO ?? REPO_ROOT;
-const CSV = `${REPO}/fixtures/sample/sample_operations.csv`;
-const OUT = process.env.OUT ?? `${REPO}tooling/capture/captures/design`;
+const REPO = path.resolve(process.env.REPO ?? REPO_ROOT);
+const CSV = path.join(REPO, 'fixtures/sample/sample_operations.csv');
+const OUT = path.resolve(process.env.OUT ?? path.join(REPO, 'tooling/capture/captures/design'));
 const BASE = process.env.BASE ?? 'http://localhost:5173';
 mkdirSync(`${OUT}/video-final-en`, { recursive: true });
 mkdirSync(`${OUT}/video-final-ar`, { recursive: true });

@@ -17,20 +17,21 @@
 
 import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import fs from 'node:fs';
 const { mkdirSync, writeFileSync } = fs;
 
 const REPO_ROOT = new URL('../..', import.meta.url).pathname;
-const require = createRequire(`${REPO_ROOT}/package.json`);
+const require = createRequire(path.join(REPO_ROOT, 'package.json'));
 const { chromium } = require('@playwright/test');
 
 const BASE = process.env.BASE ?? 'http://localhost:5173';
-const REPO = process.env.REPO ?? REPO_ROOT;
-const OUT = process.env.OUT ?? `${REPO}tooling/capture/captures/design`;
-const SAMPLE_XLSX = `${REPO}/apps/web/public/sample/sample_operations.xlsx`;
-const COMMIT = execSync(`git -C ${REPO} rev-parse HEAD`).toString().trim();
+const REPO = path.resolve(process.env.REPO ?? REPO_ROOT);
+const OUT = path.resolve(process.env.OUT ?? path.join(REPO, 'tooling/capture/captures/design'));
+const SAMPLE_XLSX = path.join(REPO, 'apps/web/public/sample/sample_operations.xlsx');
+// argv form — never interpolate env-derived paths into a shell string.
+const COMMIT = execFileSync('git', ['-C', REPO, 'rev-parse', 'HEAD']).toString().trim();
 mkdirSync(OUT, { recursive: true });
 
 const VIEWPORTS = [

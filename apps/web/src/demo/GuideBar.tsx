@@ -20,9 +20,11 @@ export interface GuideBarProps {
   readonly i18n: I18n;
   /** "Skip — open the workspace": exit the tour into the real product. */
   readonly onOpenWorkspace?: () => void;
+  /** Label for the skip control — supplied by the surface that owns the copy. */
+  readonly skipLabel?: string;
 }
 
-export function GuideBar({ controller, i18n, onOpenWorkspace }: GuideBarProps) {
+export function GuideBar({ controller, i18n, onOpenWorkspace, skipLabel }: GuideBarProps) {
   const [state, setState] = useState<GuideState>(controller.getState());
 
   useEffect(() => controller.subscribe(setState), [controller]);
@@ -97,7 +99,7 @@ export function GuideBar({ controller, i18n, onOpenWorkspace }: GuideBarProps) {
         </Button>
         {onOpenWorkspace !== undefined ? (
           <Button variant="secondary" onClick={onOpenWorkspace}>
-            {i18n.tSafe("action.skipGuide")}
+            {skipLabel ?? i18n.tSafe("action.stop")}
           </Button>
         ) : (
           <Button variant="secondary" onClick={() => controller.exit()}>

@@ -13,6 +13,7 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useReducer, useRef, us
 import { LazyMotion, MotionConfig, domAnimation } from "motion/react";
 import type { I18n } from "@rowfolio/i18n";
 import { DemoController, GuideBar, GUIDE_STEPS, type GuideState } from "../demo/index.ts";
+import { landingCopy } from "./copy.ts";
 import { LANDING_TRUTH } from "./previewTruth.ts";
 import { PREVIEW_IDLE, previewReducer } from "./previewState.ts";
 import { PreviewDemoHost } from "./previewHost.ts";
@@ -157,7 +158,12 @@ export default function PreviewLoader({
           onReplay={replay}
           onOpenWorkspace={openWorkspace}
         >
-          <GuideBar controller={controller} i18n={i18n} onOpenWorkspace={openWorkspace} />
+          <GuideBar
+            controller={controller}
+            i18n={i18n}
+            onOpenWorkspace={openWorkspace}
+            skipLabel={landingCopy(i18n.locale, "action.skipGuide")}
+          />
         </PreviewStage>
 
         {!reducedMotion && guideVisible && guideStepId !== null ? (

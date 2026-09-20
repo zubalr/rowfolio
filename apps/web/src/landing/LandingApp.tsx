@@ -17,6 +17,7 @@
 import { Suspense, lazy, useRef, useState } from "react";
 import { Button, Icon, SkipLink } from "@rowfolio/ui";
 import type { I18n } from "@rowfolio/i18n";
+import { landingCopy } from "./copy.ts";
 import type { PendingDemoAction } from "./PreviewLoader.tsx";
 import { persistLocaleChoice } from "./i18n.ts";
 import { scrollToId, siblingLocaleHref, workspaceHref } from "./routes.ts";
@@ -83,7 +84,7 @@ export function LandingApp({ i18n }: LandingAppProps) {
         <nav className="rf-nav" aria-label="Rowfolio">
           <a href="#demo">{i18n.t("nav.demo")}</a>
           <button type="button" className="rf-nav__link" onClick={openWorkspace}>
-            {i18n.t("action.openWorkspace")}
+            {landingCopy(i18n.locale, "action.openWorkspace")}
           </button>
           <a href="https://github.com/zubalr/rowfolio" rel="noopener noreferrer">
             {i18n.t("nav.github")}
@@ -103,9 +104,9 @@ export function LandingApp({ i18n }: LandingAppProps) {
         <section className="rf-hero" aria-labelledby="rf-hero-title">
           <span className="rf-hero__eyebrow">{i18n.t("common.local")}</span>
           <h1 id="rf-hero-title" className="rf-hero__title">
-            {i18n.t("hero.title")}
+            {landingCopy(i18n.locale, "hero.title")}
           </h1>
-          <p className="rf-hero__body">{i18n.t("hero.body")}</p>
+          <p className="rf-hero__body">{landingCopy(i18n.locale, "hero.body")}</p>
           <div className="rf-hero__actions">
             <Button variant="primary" iconEnd="arrow-end" onClick={exploreSample} data-testid="cta-demo">
               {i18n.t("action.tryDemo")}
@@ -152,7 +153,7 @@ export function LandingApp({ i18n }: LandingAppProps) {
         {/* Staged demonstration — each beat is one sentence and one action. */}
         <section className="rf-steps" aria-labelledby="rf-steps-title">
           <h2 id="rf-steps-title" className="rf-steps__title">
-            {i18n.t("demo.band.title")}
+            {landingCopy(i18n.locale, "demo.band.title")}
           </h2>
           <ol className="rf-steps__list">
             {STEPS.map((step, i) => (
@@ -160,14 +161,14 @@ export function LandingApp({ i18n }: LandingAppProps) {
                 <span className="rf-steps__num" aria-hidden="true">
                   {`0${i + 1}`}
                 </span>
-                <h3 className="rf-steps__name">{i18n.t(`demo.step.${step.key}.title`)}</h3>
-                <p className="rf-steps__body">{i18n.t(`demo.step.${step.key}.body`)}</p>
+                <h3 className="rf-steps__name">{landingCopy(i18n.locale, `demo.step.${step.key}.title`)}</h3>
+                <p className="rf-steps__body">{landingCopy(i18n.locale, `demo.step.${step.key}.body`)}</p>
                 <Button
                   variant="secondary"
                   iconEnd="arrow-end"
                   onClick={() => requestDemo(step.action)}
                 >
-                  {i18n.t(`demo.step.${step.key}.action`)}
+                  {landingCopy(i18n.locale, `demo.step.${step.key}.action`)}
                 </Button>
               </li>
             ))}
@@ -176,8 +177,8 @@ export function LandingApp({ i18n }: LandingAppProps) {
 
         {/* Closing — privacy note and the return to product. */}
         <section className="rf-close" aria-labelledby="rf-close-title">
-          <h2 id="rf-close-title">{i18n.t("landing.close.title")}</h2>
-          <p className="rf-close__body">{i18n.t("landing.close.body")}</p>
+          <h2 id="rf-close-title">{landingCopy(i18n.locale, "landing.close.title")}</h2>
+          <p className="rf-close__body">{landingCopy(i18n.locale, "landing.close.body")}</p>
           <div className="rf-close__actions">
             <Button variant="primary" iconEnd="arrow-end" onClick={exploreSample}>
               {i18n.t("action.tryDemo")}

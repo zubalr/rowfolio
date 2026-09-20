@@ -9,20 +9,21 @@
  */
 /* global document, getComputedStyle */
 import { createRequire } from 'node:module';
+import path from 'node:path';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 const REPO_ROOT = new URL('../..', import.meta.url).pathname;
 const require = createRequire(`${REPO_ROOT}/package.json`);
 const { chromium } = require('@playwright/test');
 
-const REPO = process.env.REPO ?? REPO_ROOT;
-const OUT = process.env.OUT ?? `${REPO}tooling/capture/captures/design`;
+const REPO = path.resolve(process.env.REPO ?? REPO_ROOT);
+const OUT = path.resolve(process.env.OUT ?? path.join(REPO, 'tooling/capture/captures/design'));
 const BASE = process.env.BASE ?? 'http://localhost:5173';
 
 
 
-const CSV = `${REPO}/fixtures/sample/sample_operations.csv`;
-const landingCss = readFileSync(`${REPO}/apps/web/src/landing/landing.css`, 'utf8');
-const evidenceCss = readFileSync(`${REPO}/apps/web/src/evidence/evidence.css`, 'utf8');
+const CSV = path.join(REPO, 'fixtures/sample/sample_operations.csv');
+const landingCss = readFileSync(path.join(REPO, 'apps/web/src/landing/landing.css'), 'utf8');
+const evidenceCss = readFileSync(path.join(REPO, 'apps/web/src/evidence/evidence.css'), 'utf8');
 const results = {};
 mkdirSync(OUT, { recursive: true });
 
