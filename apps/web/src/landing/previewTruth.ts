@@ -60,6 +60,18 @@ const northMay = monthly("North", "2026-05");
 const northJune = monthly("North", "2026-06");
 const juneRevenue = sumField("2026-06", (r) => r.revenue);
 const juneCost = sumField("2026-06", (r) => r.operating_cost);
+const regionsJune = sampleManifest.regions.map((region) => {
+  const r = monthly(region, "2026-06");
+  return {
+    region,
+    revenue: r.revenue as Decimal,
+    targetRevenue: r.target_revenue as Decimal,
+    targetGapRatio: divideDecimal(
+      subtractDecimal(r.target_revenue, r.revenue),
+      r.target_revenue,
+    ),
+  };
+});
 
 export interface PreviewScenarioResult {
   readonly costChangeRatio: Decimal;
@@ -100,6 +112,13 @@ export interface LandingPreviewTruth {
     readonly baselineContribution: Decimal;
     readonly baselineMargin: Decimal;
   };
+  /** All six regions' June revenue/target — feeds the specimen's comparison. */
+  readonly regionsJune: readonly {
+    readonly region: string;
+    readonly revenue: Decimal;
+    readonly targetRevenue: Decimal;
+    readonly targetGapRatio: Decimal;
+  }[];
   /** Bounds from the scenario contract: fraction ∈ [−0.20, +0.30], step 0.001. */
   readonly scenario: {
     readonly minRatio: Decimal;
@@ -148,6 +167,7 @@ export const LANDING_TRUTH: LandingPreviewTruth = {
     baselineContribution: subtractDecimal(juneRevenue, juneCost),
     baselineMargin: divideDecimal(subtractDecimal(juneRevenue, juneCost), juneRevenue),
   },
+  regionsJune,
   scenario: { minRatio: "-0.2", maxRatio: "0.3", stepRatio: "0.001" },
   computeScenario(costChangeRatio: Decimal): PreviewScenarioResult {
     const scenarioCost = multiplyDecimal(juneCost, addDecimal("1", costChangeRatio));

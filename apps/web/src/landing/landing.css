@@ -1,8 +1,9 @@
 /**
- * Landing + guided-demo styles (A12). Token-driven:
- * paper/ink/cobalt, divider-led hierarchy, one light theme with a scoped
- * dark finding surface, logical properties throughout for RTL.
- * Motion is restrained and explanatory; reduced-motion zeroes all of it.
+ * Landing composition — "editorial operations studio" (A12).
+ * Warm ivory reading surface, divider-led hierarchy, deep-ink evidence
+ * stage, cobalt actuals, amber assumption layer, vermilion for the active
+ * exception only. Token-driven, logical properties throughout for RTL.
+ * Reduced-motion zeroes every transition via the :root token reset.
  */
 
 /* ---------- Masthead ---------- */
@@ -10,7 +11,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 72px;
+  min-height: 64px;
   gap: var(--rf-space-4);
   padding-inline: var(--rf-gutter);
   border-block-end: 1px solid var(--rf-divider);
@@ -25,6 +26,7 @@
   font-weight: 600;
   letter-spacing: -0.02em;
   text-decoration: none;
+  flex: none;
 }
 html[lang="ar"] .rf-brand {
   letter-spacing: normal;
@@ -42,20 +44,9 @@ html[lang="ar"] .rf-brand {
   height: 3px;
   background: var(--rf-data);
 }
-.rf-brand__mark i:nth-child(1) {
-  top: 2px;
-  width: 14px;
-}
-.rf-brand__mark i:nth-child(2) {
-  top: 9px;
-  inset-inline-start: 4px;
-  width: 18px;
-}
-.rf-brand__mark i:nth-child(3) {
-  top: 16px;
-  inset-inline-start: 8px;
-  width: 20px;
-}
+.rf-brand__mark i:nth-child(1) { top: 2px; width: 14px; }
+.rf-brand__mark i:nth-child(2) { top: 9px; inset-inline-start: 4px; width: 18px; }
+.rf-brand__mark i:nth-child(3) { top: 16px; inset-inline-start: 8px; width: 20px; }
 .rf-nav {
   display: flex;
   align-items: center;
@@ -69,6 +60,7 @@ html[lang="ar"] .rf-brand {
   color: var(--rf-text-muted);
   font-size: 14px;
   text-decoration: none;
+  white-space: nowrap;
 }
 html[lang="ar"] .rf-nav a,
 html[lang="ar"] .rf-nav__link {
@@ -78,6 +70,8 @@ html[lang="ar"] .rf-nav__link {
 .rf-nav__link:hover {
   color: var(--rf-text);
 }
+/* The locale switcher is a bordered control; keep it visibly separate from
+   the plain-text links around it. */
 .rf-nav .rf-lang {
   border: 1px solid var(--rf-divider);
   border-radius: var(--rf-radius-control);
@@ -86,15 +80,12 @@ html[lang="ar"] .rf-nav__link {
   padding: var(--rf-space-2) var(--rf-space-3);
   min-width: 64px;
   text-align: center;
+  margin-inline-start: var(--rf-space-2);
 }
 
-/* ---------- Hero ---------- */
+/* ---------- Hero: headline over the working specimen ---------- */
 .rf-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
-  gap: var(--rf-space-8);
-  align-items: center;
-  padding-block: var(--rf-space-8);
+  padding-block: var(--rf-space-7) var(--rf-space-6);
   padding-inline: var(--rf-gutter);
   max-width: calc(var(--rf-max-width) + 2 * var(--rf-gutter));
   margin-inline: auto;
@@ -116,7 +107,7 @@ html[lang="ar"] .rf-hero__eyebrow {
   letter-spacing: -0.035em;
   font-weight: 500;
   margin-block: var(--rf-space-4) var(--rf-space-5);
-  max-width: 14em;
+  max-width: 16em;
 }
 html[lang="ar"] .rf-hero__title {
   font-size: 54px;
@@ -126,7 +117,7 @@ html[lang="ar"] .rf-hero__title {
 .rf-hero__body {
   font-size: 18px;
   color: var(--rf-text-muted);
-  max-width: 34em;
+  max-width: 40em;
 }
 html[lang="ar"] .rf-hero__body {
   font-size: 18px;
@@ -146,60 +137,14 @@ html[lang="ar"] .rf-hero__proof {
   font-size: 14px;
 }
 
-/* Miniature finding (dark ink surface, scoped) */
-.rf-mini {
-  background: var(--rf-ink);
-  color: var(--rf-ink-text);
-  border-radius: var(--rf-radius-panel);
-  padding: var(--rf-space-5) var(--rf-space-6);
-  max-width: 440px;
-  justify-self: end;
-  box-shadow: var(--rf-shadow-overlay);
-}
-.rf-mini__eyebrow {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--rf-ink-data);
-}
-html[lang="ar"] .rf-mini__eyebrow {
-  letter-spacing: normal;
-  font-size: 14px;
-}
-.rf-mini__figure {
-  font-size: 40px;
-  line-height: 1.1;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  margin-block-start: var(--rf-space-3);
-}
-.rf-mini__unit {
-  font-size: 13px;
-  color: var(--rf-ink-muted);
-  font-weight: 400;
-  letter-spacing: normal;
-}
-html[lang="ar"] .rf-mini__unit {
-  font-size: 14px;
-}
-.rf-mini__delta {
-  margin-block-start: var(--rf-space-2);
-  font-size: 14px;
-  color: var(--rf-ink-attention);
-}
-html[lang="ar"] .rf-mini__delta {
-  font-size: 15px;
-}
-
-/* ---------- Preview stage ---------- */
-.rf-preview {
+/* ---------- The specimen stage ---------- */
+.rf-stage {
   padding-inline: var(--rf-gutter);
-  padding-block: var(--rf-space-7);
+  padding-block-end: var(--rf-space-8);
   max-width: calc(var(--rf-max-width) + 2 * var(--rf-gutter));
   margin-inline: auto;
 }
-.rf-preview__head {
+.rf-stage__head {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -208,18 +153,24 @@ html[lang="ar"] .rf-mini__delta {
   padding-block-start: var(--rf-space-5);
   margin-block-end: var(--rf-space-5);
 }
-.rf-preview__title {
+.rf-stage__title {
   font-size: 32px;
   line-height: 1.25;
   font-weight: 500;
   letter-spacing: -0.02em;
 }
-html[lang="ar"] .rf-preview__title {
+html[lang="ar"] .rf-stage__title {
   font-size: 30px;
   line-height: 1.5;
   letter-spacing: normal;
 }
-.rf-preview__meta {
+.rf-stage__note {
+  margin: var(--rf-space-4) 0 0;
+  color: var(--rf-text-muted);
+  font-size: 13px;
+  max-width: 62ch;
+}
+.rf-stage__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -228,7 +179,7 @@ html[lang="ar"] .rf-preview__title {
   font-size: 13px;
   color: var(--rf-text-muted);
 }
-html[lang="ar"] .rf-preview__meta {
+html[lang="ar"] .rf-stage__meta {
   font-size: 14px;
 }
 .rf-chip {
@@ -247,126 +198,211 @@ html[lang="ar"] .rf-chip {
   color: var(--rf-text-muted);
   font-weight: 500;
 }
-.rf-preview__grid {
+
+/* Mechanism: source rows beside the regional comparison. */
+.rf-stage__mechanism {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   gap: var(--rf-space-6);
   align-items: start;
 }
-/* Grid items carry an automatic min-content minimum that would otherwise let
-   the raw table (or wide Arabic figures) force a >viewport layout width; the
-   table region scrolls internally instead. */
-.rf-preview__grid > *,
-.rf-hero > * {
-  min-width: 0;
-}
-
-/* Reveal transition — 180ms opacity+translateY; reduced-motion makes it
-   instant via the global base.css reset. */
-[data-revealed] {
-  animation: rf-reveal 180ms var(--rf-ease) both;
-}
-@keyframes rf-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-/* Guide ring targets — CSS outline is the reduced-motion fallback; the
-   animated overlay travels between targets when motion is allowed. */
-[data-demo-target] {
+.rf-stage__raw .rf-table-wrap {
+  border: 1px solid var(--rf-divider);
   border-radius: var(--rf-radius-panel);
-  transition: outline-color var(--rf-state-ms) var(--rf-ease);
-  outline: 3px solid transparent;
-  outline-offset: 4px;
+  background: var(--rf-bg-raised);
+  overflow: hidden;
 }
-[data-demo-target][data-demo-active] {
-  outline-color: var(--rf-accent);
+.rf-stage__raw .rf-table {
+  font-size: 12.5px;
 }
-.rf-demo-ring {
-  position: fixed;
-  inset-inline-start: 0;
-  top: 0;
-  z-index: 60;
-  border: 3px solid var(--rf-accent);
-  border-radius: var(--rf-radius-panel);
-  pointer-events: none;
-  box-shadow: 0 0 0 4px #2855d91f;
+/* Opening the evidence highlights the excerpted source rows behind it. */
+.rf-stage__raw[data-evidence-open] .rf-table tbody tr {
+  background: color-mix(in srgb, var(--rf-data) 8%, var(--rf-bg-raised));
 }
 
-/* Finding card — dark evidence-grade surface inside the light page. */
-.rf-finding {
+/* ---------- Regional comparison (bullet bars, zero baseline) ---------- */
+.rf-compare {
+  margin: 0;
+}
+.rf-compare__head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-block-end: var(--rf-space-3);
+}
+.rf-compare__title {
+  font-size: 15px;
+  font-weight: 600;
+}
+html[lang="ar"] .rf-compare__title {
+  font-size: 16px;
+}
+.rf-compare__summary {
+  font-size: 13px;
+  color: var(--rf-text-muted);
+  max-width: 52em;
+}
+html[lang="ar"] .rf-compare__summary {
+  font-size: 14px;
+}
+.rf-compare__svg {
+  inline-size: 100%;
+  block-size: auto;
+}
+.rf-compare__label {
+  font-size: 11.5px;
+  fill: var(--rf-text-muted);
+}
+html[lang="ar"] .rf-compare__label {
+  font-size: 12px;
+}
+.rf-compare__label--selected {
+  fill: var(--rf-text);
+  font-weight: 600;
+}
+.rf-compare__bar {
+  fill: color-mix(in srgb, var(--rf-data) 34%, var(--rf-bg-raised));
+}
+.rf-compare__bar--selected {
+  fill: var(--rf-data);
+}
+.rf-compare__target {
+  stroke: var(--rf-ink);
+  stroke-width: 2;
+}
+.rf-compare__gap {
+  font-size: 11.5px;
+  font-weight: 600;
+  fill: var(--rf-negative);
+}
+html[lang="ar"] .rf-compare__gap {
+  font-size: 12px;
+}
+.rf-compare__axis {
+  font-size: 10.5px;
+  fill: var(--rf-text-muted);
+}
+.rf-compare__values {
+  margin-block-start: var(--rf-space-2);
+  font-size: 13px;
+}
+html[lang="ar"] .rf-compare__values {
+  font-size: 14px;
+}
+.rf-compare__values summary {
+  cursor: pointer;
+  color: var(--rf-text-muted);
+}
+.rf-compare__values table {
+  margin-block-start: var(--rf-space-2);
+  border-collapse: collapse;
+  inline-size: 100%;
+  font-size: 13px;
+}
+html[lang="ar"] .rf-compare__values table {
+  font-size: 14px;
+}
+.rf-compare__values th,
+.rf-compare__values td {
+  text-align: start;
+  padding: var(--rf-space-1) var(--rf-space-2);
+  border-block-start: 1px solid var(--rf-divider);
+  font-weight: 400;
+}
+.rf-compare__values th {
+  border-block-start: 0;
+  color: var(--rf-text-muted);
+  font-weight: 600;
+  font-size: 12px;
+}
+.rf-compare__values td[class*="rf-numeric"],
+.rf-compare__values td:nth-child(n + 2) {
+  text-align: end;
+}
+
+/* ---------- Finding card — the deep-ink stage ---------- */
+.rf-finding-card {
   background: var(--rf-ink);
   color: var(--rf-ink-text);
   border-radius: var(--rf-radius-panel);
   padding: var(--rf-space-6);
+  margin-block-start: var(--rf-space-6);
 }
-.rf-finding__eyebrow {
+.rf-finding-card__eyebrow {
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--rf-ink-data);
 }
-html[lang="ar"] .rf-finding__eyebrow {
+html[lang="ar"] .rf-finding-card__eyebrow {
   letter-spacing: normal;
   font-size: 14px;
 }
-.rf-finding__title {
-  font-size: 24px;
-  line-height: 1.3;
+.rf-finding-card__title {
+  font-size: 26px;
+  line-height: 1.25;
   font-weight: 500;
-  margin-block: var(--rf-space-2) var(--rf-space-3);
+  letter-spacing: -0.015em;
+  margin-block-start: var(--rf-space-3);
 }
-html[lang="ar"] .rf-finding__title {
-  line-height: 1.6;
+html[lang="ar"] .rf-finding-card__title {
+  font-size: 24px;
+  letter-spacing: normal;
 }
-.rf-finding__body {
-  font-size: 15px;
-  line-height: 1.6;
+.rf-finding-card__body {
+  margin-block-start: var(--rf-space-2);
   color: var(--rf-ink-muted);
+  font-size: 15px;
+  max-width: 58em;
 }
-html[lang="ar"] .rf-finding__body {
+html[lang="ar"] .rf-finding-card__body {
   font-size: 16px;
 }
-.rf-finding__figure {
+/* The figure row wraps: value, comparison and delta stack at narrow widths
+   rather than pushing the page sideways. */
+.rf-finding-card__figure {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--rf-space-2);
-  margin-block: var(--rf-space-4);
+  gap: var(--rf-space-2) var(--rf-space-3);
+  margin-block-start: var(--rf-space-4);
   font-size: 34px;
   font-weight: 500;
   letter-spacing: -0.02em;
 }
-html[lang="ar"] .rf-finding__figure {
-  letter-spacing: normal;
+html[lang="ar"] .rf-finding-card__figure {
+  font-size: 32px;
 }
-.rf-finding__vs {
-  font-size: 16px;
-  color: var(--rf-ink-muted);
-}
-html[lang="ar"] .rf-finding__vs {
+.rf-finding-card__vs {
   font-size: 17px;
+  color: var(--rf-ink-muted);
+  font-weight: 400;
 }
-.rf-finding__gap {
-  margin-inline-start: auto;
-  font-size: 20px;
+html[lang="ar"] .rf-finding-card__vs {
+  font-size: 18px;
+}
+.rf-finding-card__gap {
+  font-size: 18px;
+  font-weight: 600;
   color: var(--rf-ink-attention);
+  margin-inline-start: auto;
 }
-.rf-finding .rf-btn--secondary {
+html[lang="ar"] .rf-finding-card__gap {
+  font-size: 19px;
+}
+.rf-finding-card .rf-btn--secondary {
   color: var(--rf-ink-text);
+  margin-block-start: var(--rf-space-4);
 }
-.rf-finding .rf-btn--secondary .rf-btn__label {
+.rf-finding-card .rf-btn--secondary:hover {
   border-color: var(--rf-ink-muted);
 }
+.rf-finding-card .rf-btn--secondary .rf-btn__label {
+  color: inherit;
+}
 
-/* Evidence expander inside the finding card */
+/* Evidence chapter inside the card — exact arithmetic + scope + rows. */
 .rf-evidence {
   margin-block-start: var(--rf-space-4);
   border-block-start: 1px solid var(--rf-ink-rule);
@@ -378,17 +414,21 @@ html[lang="ar"] .rf-finding__vs {
   margin: 0;
 }
 .rf-evidence__rows > div {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--rf-space-4);
-  padding-block: var(--rf-space-1);
+  display: grid;
+  grid-template-columns: minmax(110px, 0.4fr) minmax(0, 1fr);
+  gap: var(--rf-space-3);
+  align-items: baseline;
 }
 .rf-evidence__rows dt {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--rf-ink-muted);
-  font-size: 13px;
 }
 html[lang="ar"] .rf-evidence__rows dt {
-  font-size: 14px;
+  letter-spacing: normal;
+  font-size: 13px;
 }
 .rf-evidence__rows dd {
   margin: 0;
@@ -401,23 +441,23 @@ html[lang="ar"] .rf-evidence__rows dd {
   display: flex;
   align-items: baseline;
   gap: var(--rf-space-2);
-  margin-block-start: var(--rf-space-3);
-  font-size: 12px;
+  margin-block-start: var(--rf-space-4);
+  font-size: 13px;
   color: var(--rf-ink-muted);
 }
 html[lang="ar"] .rf-evidence__note {
-  font-size: 13px;
+  font-size: 14px;
 }
 .rf-evidence__note .rf-icon {
   color: var(--rf-ink-positive);
-  flex: none;
   align-self: center;
+  flex: none;
 }
 
-/* Scenario band */
+/* ---------- Scenario chapter — amber assumption over observed baseline ---------- */
 .rf-scenario {
   border-block-start: 1px solid var(--rf-divider);
-  margin-block-start: var(--rf-space-6);
+  margin-block-start: var(--rf-space-7);
   padding-block-start: var(--rf-space-5);
 }
 .rf-scenario__head {
@@ -436,7 +476,7 @@ html[lang="ar"] .rf-scenario__title {
 .rf-scenario__scope {
   font-size: 13px;
   color: var(--rf-text-muted);
-  margin-block-start: var(--rf-space-1);
+  margin-block-start: 2px;
 }
 html[lang="ar"] .rf-scenario__scope {
   font-size: 14px;
@@ -446,39 +486,88 @@ html[lang="ar"] .rf-scenario__scope {
   font-weight: 500;
   color: var(--rf-scenario);
 }
+html[lang="ar"] .rf-scenario__value {
+  font-size: 26px;
+}
 .rf-scenario__label {
   display: block;
   font-size: 13px;
   color: var(--rf-text-muted);
-  margin-block: var(--rf-space-3) var(--rf-space-1);
+  margin-block-start: var(--rf-space-4);
 }
 html[lang="ar"] .rf-scenario__label {
   font-size: 14px;
 }
 .rf-scenario__range {
-  width: 100%;
+  inline-size: 100%;
+  margin-block-start: var(--rf-space-2);
   accent-color: var(--rf-scenario);
 }
+/* Paired bars on a fixed scale: solid cobalt baseline, dashed amber layer. */
+.rf-scenario__bars {
+  display: grid;
+  gap: var(--rf-space-2);
+  margin-block-start: var(--rf-space-4);
+  max-width: 620px;
+}
+.rf-scenario__bar-row {
+  display: grid;
+  grid-template-columns: minmax(0, 9em) minmax(0, 1fr) auto;
+  gap: var(--rf-space-3);
+  align-items: center;
+  font-size: 12.5px;
+}
+html[lang="ar"] .rf-scenario__bar-row {
+  font-size: 13.5px;
+}
+.rf-scenario__bar-label {
+  color: var(--rf-text-muted);
+}
+.rf-scenario__track {
+  display: block;
+  block-size: 14px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--rf-divider) 55%, transparent);
+}
+.rf-scenario__bar {
+  display: block;
+  block-size: 100%;
+  border-radius: 3px;
+  transition: inline-size var(--rf-panel-ms) var(--rf-ease);
+}
+.rf-scenario__bar--baseline {
+  background: var(--rf-data);
+}
+.rf-scenario__bar--scenario {
+  background: color-mix(in srgb, var(--rf-scenario) 24%, transparent);
+  outline: 1.5px dashed var(--rf-scenario);
+  outline-offset: -1.5px;
+}
+.rf-scenario__bar-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--rf-text);
+}
 .rf-scenario__result {
-  margin-block-start: var(--rf-space-3);
+  margin-block-start: var(--rf-space-4);
   font-size: 15px;
 }
 html[lang="ar"] .rf-scenario__result {
   font-size: 16px;
 }
 .rf-scenario__note {
-  margin-block-start: var(--rf-space-1);
+  margin-block-start: var(--rf-space-2);
   font-size: 13px;
   color: var(--rf-text-muted);
+  max-width: 62em;
 }
 html[lang="ar"] .rf-scenario__note {
   font-size: 14px;
 }
 
-/* Briefing band */
+/* ---------- Export chapter — six authored compositions + workbook ---------- */
 .rf-briefing {
   border-block-start: 1px solid var(--rf-divider);
-  margin-block-start: var(--rf-space-6);
+  margin-block-start: var(--rf-space-7);
   padding-block-start: var(--rf-space-5);
 }
 .rf-briefing__head {
@@ -494,42 +583,79 @@ html[lang="ar"] .rf-scenario__note {
 html[lang="ar"] .rf-briefing__title {
   font-size: 21px;
 }
-.rf-briefing__files {
+.rf-briefing__slides {
   list-style: none;
-  margin: var(--rf-space-3) 0 0;
+  margin: var(--rf-space-4) 0 0;
   padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: var(--rf-space-6);
 }
-.rf-briefing__file {
+.rf-briefing__slide {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: var(--rf-space-3);
-  padding-block: var(--rf-space-3);
+  padding-block: var(--rf-space-2);
   border-block-start: 1px solid var(--rf-divider);
   color: var(--rf-text-muted);
 }
-.rf-briefing__file[data-ready] {
+.rf-briefing__slide[data-ready] {
   color: var(--rf-text);
 }
-.rf-briefing__file .rf-icon {
-  color: var(--rf-accent);
+.rf-briefing__slide-num {
+  font-size: 12px;
+  color: var(--rf-text-muted);
+  min-inline-size: 5.5em;
 }
-.rf-briefing__file[data-ready] .rf-icon {
-  color: var(--rf-positive);
+html[lang="ar"] .rf-briefing__slide-num {
+  font-size: 13px;
+}
+.rf-briefing__slide-title {
+  font-size: 14px;
+}
+html[lang="ar"] .rf-briefing__slide-title {
+  font-size: 15px;
+}
+.rf-briefing__slide[data-ready] .rf-briefing__slide-title {
+  font-weight: 500;
 }
 .rf-briefing__state {
   margin-inline-start: auto;
   font-size: 13px;
+  color: var(--rf-positive);
 }
-html[lang="ar"] .rf-briefing__state {
+.rf-briefing__workbook {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rf-space-3);
+  padding-block: var(--rf-space-3);
+  border-block-start: 1px solid var(--rf-divider);
+  margin-block-start: var(--rf-space-3);
   font-size: 14px;
+  color: var(--rf-text-muted);
+}
+html[lang="ar"] .rf-briefing__workbook {
+  font-size: 15px;
+}
+.rf-briefing__workbook[data-ready] {
+  color: var(--rf-text);
+}
+.rf-briefing__workbook .rf-icon {
+  color: var(--rf-accent);
+  align-self: center;
+  flex: none;
 }
 .rf-briefing__note {
   margin-block-start: var(--rf-space-2);
   font-size: 13px;
   color: var(--rf-text-muted);
+  max-width: 62em;
 }
 html[lang="ar"] .rf-briefing__note {
   font-size: 14px;
+}
+.rf-briefing > .rf-btn {
+  margin-block-start: var(--rf-space-4);
 }
 
 /* Guide controls */
@@ -581,43 +707,104 @@ html[lang="ar"] .rf-guide__caption {
   opacity: 0.6;
 }
 
-/* ---------- How it works ---------- */
-.rf-how {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--rf-space-6);
+/* ---------- Staged demonstration — four beats ---------- */
+.rf-steps {
   border-block-start: 1px solid var(--rf-divider);
   padding-block: var(--rf-space-7);
   padding-inline: var(--rf-gutter);
   max-width: calc(var(--rf-max-width) + 2 * var(--rf-gutter));
   margin-inline: auto;
 }
-.rf-how__num {
-  display: block;
+.rf-steps__title {
+  font-size: 32px;
+  line-height: 1.25;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  max-width: 24em;
+}
+html[lang="ar"] .rf-steps__title {
+  font-size: 30px;
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+.rf-steps__list {
+  list-style: none;
+  margin: var(--rf-space-6) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--rf-space-6);
+}
+.rf-steps__step {
+  border-block-start: 1px solid var(--rf-divider);
+  padding-block-start: var(--rf-space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--rf-space-2);
+}
+.rf-steps__num {
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
   color: var(--rf-accent);
-  margin-block-end: var(--rf-space-2);
+  font-variant-numeric: tabular-nums;
 }
-html[lang="ar"] .rf-how__num {
+html[lang="ar"] .rf-steps__num {
   letter-spacing: normal;
   font-size: 13px;
 }
-.rf-how__step h3 {
+.rf-steps__name {
   font-size: 17px;
   font-weight: 600;
-  margin-block-end: var(--rf-space-2);
 }
-html[lang="ar"] .rf-how__step h3 {
+html[lang="ar"] .rf-steps__name {
   font-size: 18px;
 }
-.rf-how__step p {
+.rf-steps__body {
   font-size: 14px;
   color: var(--rf-text-muted);
+  flex: 1;
 }
-html[lang="ar"] .rf-how__step p {
+html[lang="ar"] .rf-steps__body {
   font-size: 15px;
+}
+.rf-steps__step .rf-btn {
+  margin-block-start: var(--rf-space-2);
+}
+
+/* ---------- Close ---------- */
+.rf-close {
+  border-block-start: 1px solid var(--rf-divider);
+  padding-block: var(--rf-space-7);
+  padding-inline: var(--rf-gutter);
+  max-width: calc(var(--rf-max-width) + 2 * var(--rf-gutter));
+  margin-inline: auto;
+}
+.rf-close h2 {
+  font-size: 32px;
+  line-height: 1.25;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+html[lang="ar"] .rf-close h2 {
+  font-size: 30px;
+  letter-spacing: normal;
+}
+.rf-close__body {
+  margin-block-start: var(--rf-space-3);
+  font-size: 15px;
+  color: var(--rf-text-muted);
+  max-width: 56em;
+}
+html[lang="ar"] .rf-close__body {
+  font-size: 16px;
+}
+.rf-close__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rf-space-3);
+  margin-block-start: var(--rf-space-5);
 }
 
 /* ---------- Footer ---------- */
@@ -645,21 +832,41 @@ html[lang="ar"] .rf-footer {
   align-self: center;
 }
 
-/* ---------- Responsive breakpoints ---------- */
+/* ---------- Guide highlight ring ---------- */
+.rf-demo-ring {
+  position: fixed;
+  inset-inline-start: 0;
+  inset-block-start: 0;
+  pointer-events: none;
+  border: 2px solid var(--rf-attention);
+  border-radius: var(--rf-radius-control);
+  z-index: 60;
+  transform-origin: 0 0;
+}
+
+/* Demo target emphasis (instant fallback for reduced motion too) */
+[data-demo-active] {
+  outline: 2px solid var(--rf-attention);
+  outline-offset: 4px;
+  border-radius: var(--rf-radius-control);
+}
+
+/* ---------- Responsive ---------- */
 @media (max-width: 1199px) {
   .rf-masthead,
   .rf-hero,
-  .rf-preview,
-  .rf-how,
+  .rf-stage,
+  .rf-steps,
+  .rf-close,
   .rf-footer {
     padding-inline: var(--rf-space-5);
   }
-  .rf-hero {
+  .rf-stage__mechanism {
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--rf-space-6);
+    gap: var(--rf-space-5);
   }
-  .rf-mini {
-    justify-self: start;
+  .rf-steps__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (max-width: 767px) {
@@ -668,8 +875,9 @@ html[lang="ar"] .rf-footer {
     padding-inline: var(--rf-space-4);
   }
   .rf-hero,
-  .rf-preview,
-  .rf-how,
+  .rf-stage,
+  .rf-steps,
+  .rf-close,
   .rf-footer {
     padding-inline: var(--rf-space-4);
   }
@@ -681,10 +889,19 @@ html[lang="ar"] .rf-footer {
     font-size: 36px;
     line-height: 1.5;
   }
-  .rf-preview__grid {
+  .rf-finding-card {
+    padding: var(--rf-space-5);
+  }
+  .rf-finding-card__figure {
+    font-size: 30px;
+  }
+  html[lang="ar"] .rf-finding-card__figure {
+    font-size: 28px;
+  }
+  .rf-briefing__slides {
     grid-template-columns: minmax(0, 1fr);
   }
-  .rf-how {
+  .rf-steps__list {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--rf-space-5);
   }
@@ -705,8 +922,11 @@ html[lang="ar"] .rf-footer {
 @media (max-width: 479px) {
   /* Narrow viewports keep only the outbound essentials in the masthead; the
      in-page anchors duplicate the hero CTAs and would crowd the brand. */
-  .rf-nav a[href="#how"],
+  .rf-nav a[href="#demo"],
   .rf-nav .rf-nav__link {
     display: none;
+  }
+  .rf-nav .rf-lang {
+    margin-inline-start: 0;
   }
 }
