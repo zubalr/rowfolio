@@ -16,8 +16,8 @@
  * CLI: node tooling/test/corpus/i18n/check-catalog.ts [--manifest PATH] [--dir CATALOG_DIR]
  * Prints a JSON report; exit 1 when issues are found. Without --dir the
  * catalog directory is resolved from $ROWFOLIO_I18N_CATALOG_DIR, then
- * packages/i18n/catalogs, packages/i18n/src/catalogs, then
- * packages/contracts/source/locales.
+ * packages/i18n/catalogs, packages/i18n/src/catalogs,
+ * packages/i18n/src/locales, then packages/contracts/source/locales.
  */
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
@@ -32,6 +32,7 @@ export const DEFAULT_MANIFEST_PATH = resolve(repoRoot, 'packages/contracts/sourc
 export const CANDIDATE_CATALOG_DIRS: readonly string[] = [
   'packages/i18n/catalogs',
   'packages/i18n/src/catalogs',
+  'packages/i18n/src/locales',
   'packages/contracts/source/locales',
 ];
 
