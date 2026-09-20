@@ -142,12 +142,13 @@ export function LinePlot({ ctx }: { ctx: PlotContext }) {
               key={path.seriesId}
               d={path.d}
               fill="none"
-              stroke={path.paint.stroke}
+              style={{ stroke: path.paint.stroke }}
               strokeWidth={2}
               strokeDasharray={path.paint.dashed ? "6 4" : undefined}
+              pathLength={path.paint.dashed ? undefined : 1}
               strokeLinejoin="round"
               strokeLinecap="round"
-              className="rf-chart-line"
+              className={`rf-chart-line${path.paint.dashed ? "" : " rf-chart-line--draw"}`}
             />
           ))}
           {model.points.map((p) => (
@@ -175,15 +176,26 @@ export function LinePlot({ ctx }: { ctx: PlotContext }) {
                   );
                 }
                 const paint = paintFor(s.semantic);
+                const emphasized = p.key === ctx.emphasisKey;
                 return (
                   <g key={s.id}>
+                    {emphasized ? (
+                      <circle
+                        cx={layout.cx[p.key]!}
+                        cy={yy}
+                        r={9}
+                        className="rf-chart-ring"
+                      />
+                    ) : null}
                     <circle
                       cx={layout.cx[p.key]!}
                       cy={yy}
-                      r={ctx.activeKey === p.key ? 5 : 4}
-                      fill={s.semantic === "observed" ? paint.stroke : "#FFFEFA"}
-                      stroke={paint.stroke}
-                      strokeWidth={2}
+                      r={ctx.activeKey === p.key || emphasized ? 5.5 : 4}
+                      style={{
+                        fill: s.semantic === "observed" ? paint.stroke : "var(--rf-c-surface)",
+                        stroke: paint.stroke,
+                      }}
+                      strokeWidth={emphasized ? 2.5 : 2}
                       className="rf-chart-point"
                     />
                     {labeled.has(p.key) && si === 0 ? (
@@ -206,7 +218,7 @@ export function LinePlot({ ctx }: { ctx: PlotContext }) {
               })}
             </g>
           ))}
-          <CategoryAxis keys={model.points.map((p) => p.key)} xOf={(k) => layout.cx[k] ?? 0} y={layout.height - 8} labels={labels} maxWidth={Math.max(layout.step - 6, 40)} />
+          <CategoryAxis keys={model.points.map((p) => p.key)} xOf={(k) => layout.cx[k] ?? 0} y={layout.height - 8} labels={labels} maxWidth={Math.max(layout.step - 6, 40)} emphasisKey={ctx.emphasisKey} />
         </g>
       </svg>
       {model.series.length > 1 ? (

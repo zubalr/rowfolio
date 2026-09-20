@@ -11,7 +11,6 @@ import { formatUnitValue } from "../localization.ts";
 import { subtractCanonical, multiplyCanonical } from "../localization.ts";
 import { valueScale } from "../scales.ts";
 import {
-  CHART_COLORS,
   ChartTooltip,
   HitTarget,
   TooltipBody,
@@ -111,7 +110,14 @@ export function ScenarioBarsPlot({ ctx }: { ctx: PlotContext }) {
             patternTransform="rotate(45)"
             patternUnits="userSpaceOnUse"
           >
-            <line x1="0" y1="0" x2="0" y2="6" stroke={CHART_COLORS.scenario} strokeWidth="1" />
+            <line
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="6"
+              strokeWidth="1"
+              style={{ stroke: "var(--rf-c-scenario)" }}
+            />
           </pattern>
         </defs>
         <g transform={`translate(${MARGIN.start},0)`}>
@@ -145,10 +151,14 @@ export function ScenarioBarsPlot({ ctx }: { ctx: PlotContext }) {
                       width={layout.barW}
                       height={Math.max(Math.abs(layout.zeroY - vy), 1)}
                       rx={2}
-                      fill={baseline ? CHART_COLORS.data : `url(#${hatchId})`}
-                      stroke={baseline ? "none" : CHART_COLORS.scenario}
+                      style={{
+                        fill: baseline ? "var(--rf-c-data)" : `url(#${hatchId})`,
+                        ...(baseline ? {} : { stroke: "var(--rf-c-scenario)" }),
+                      }}
+                      stroke={baseline ? "none" : undefined}
                       strokeWidth={baseline ? 0 : 1.5}
                       strokeDasharray={baseline ? undefined : "5 3"}
+                      data-neg={((v?.coordinate ?? 0) < 0) || undefined}
                       className="rf-chart-bar"
                     />
                     <text

@@ -32,7 +32,7 @@ export function formatInteger(i18n: I18n, value: number | Decimal): string {
 }
 
 export function formatPercentAbs(i18n: I18n, value: Decimal): string {
-  return i18n.formatPercent(stripSign(value));
+  return i18n.formatPercent(stripSign(value), { maxFractionDigits: 1 });
 }
 
 function stripSign(value: Decimal): Decimal {

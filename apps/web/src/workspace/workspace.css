@@ -1,0 +1,186 @@
+/**
+ * Workspace craft layer — scoped to .rf-workspace; nothing here reaches the
+ * landing or upload surfaces. The stage palette comes from
+ * `[data-rf-surface="ink"]` on the stage panel: it remaps the semantic tokens
+ * (and, via .rf-chart's own remap, every chart paint) so marks keep their
+ * roles on the dark stage without any per-element overrides.
+ */
+
+.rf-stage {
+  display: grid;
+  gap: var(--rf-space-5);
+}
+
+/* The hero stage — one expansive chart on ink. */
+.rf-stage-panel {
+  background: var(--rf-ink);
+  color: var(--rf-ink-text);
+  border-radius: var(--rf-radius-panel);
+  padding: var(--rf-space-5) var(--rf-space-5) var(--rf-space-4);
+}
+
+.rf-stage-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--rf-space-4);
+  margin-block-end: var(--rf-space-4);
+}
+
+.rf-stage-titles {
+  min-width: 0;
+}
+
+.rf-stage-eyebrow {
+  margin: 0 0 var(--rf-space-1);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rf-ink-muted);
+}
+
+html[lang='ar'] .rf-stage-eyebrow {
+  font-size: 12px;
+  letter-spacing: normal;
+}
+
+.rf-stage-title {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+html[lang='ar'] .rf-stage-title {
+  font-size: 20px;
+  letter-spacing: normal;
+}
+
+.rf-stage-scope {
+  margin: var(--rf-space-1) 0 0;
+  font-size: 12px;
+  color: var(--rf-ink-muted);
+}
+
+html[lang='ar'] .rf-stage-scope {
+  font-size: 13px;
+}
+
+/* Chart title/summary inside the stage stay quiet — the stage head names
+   the finding; the chart block only needs its axes and marks. */
+.rf-stage-panel .rf-chart__title {
+  font-size: 14px;
+  color: var(--rf-ink-muted);
+  font-weight: 500;
+  letter-spacing: normal;
+}
+
+.rf-stage-panel .rf-chart__summary {
+  color: var(--rf-ink-muted);
+}
+
+/* When the hero chart left the grid, the remaining pair sit side by side —
+   the app stylesheet only promotes a lone first chart to full width. */
+.rf-stage .rf-charts--paired > *:first-child {
+  grid-column: auto;
+}
+
+/* Evidence chip — the badge on the stage that morphs into the drawer badge.
+   Pill on the ink stage; shares its shape when it arrives in the panel. */
+.rf-ev-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 var(--rf-space-4);
+  border: 1px solid var(--rf-ink-rule);
+  border-radius: 999px;
+  background: var(--rf-ink-surface);
+  color: var(--rf-ink-text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex: none;
+  transition: background-color 120ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.rf-ev-chip:hover {
+  background: var(--rf-ink-rule);
+}
+
+.rf-ev-chip:focus-visible {
+  outline: 3px solid var(--rf-ink-data);
+  outline-offset: 2px;
+}
+
+.rf-ev-chip:active {
+  transform: scale(0.98);
+}
+
+/* Inside the evidence panel the badge is content, not a control. */
+.rf-ev-chip--badge {
+  cursor: default;
+  background: transparent;
+  border-color: var(--rf-ink-rule);
+  font-size: 12px;
+  min-height: 28px;
+  padding: 0 10px;
+  margin-block-end: var(--rf-space-2);
+}
+
+/* The header metadata row names the full analysis scope. */
+.rf-workspace-scope {
+  margin-block-start: 2px;
+}
+
+/* KPI denominators — "97 / 100 records" under each headline number. */
+.rf-metric-scope {
+  font-size: 12px;
+  color: var(--rf-text-muted, #53636a);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Selected finding gets a named marker, not just tinted text. */
+.rf-workspace .rf-finding.is-selected .rf-finding-title {
+  text-decoration: underline;
+  text-decoration-color: var(--rf-accent, #2855d9);
+  text-underline-offset: 4px;
+  text-decoration-thickness: 2px;
+}
+
+/* Finding cards ride the ink surface — the landing's dark card rules reach
+   them via the shared .rf-finding class; the surface attribute keeps
+   contrast correct rather than fighting those rules selector-by-selector. */
+@media (max-width: 640px) {
+  .rf-stage-panel {
+    padding: var(--rf-space-4) var(--rf-space-3);
+  }
+
+  .rf-stage-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .rf-ev-chip {
+    align-self: flex-start;
+  }
+
+  .rf-workspace .rf-finding {
+    flex-direction: column;
+    gap: var(--rf-space-3);
+  }
+
+  .rf-workspace .rf-finding .rf-btn {
+    align-self: flex-start;
+  }
+}
+
+/* Small screens: the stage may horizontally overflow before the chart
+   measure loop settles — clip rather than push the page. */
+.rf-stage-panel .rf-chart-plot {
+  overflow-x: clip;
+}

@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { Button, Field, Section } from '@rowfolio/ui';
+import { ChartFigure } from '@rowfolio/charts';
 import type { I18n, MessageKey } from '@rowfolio/i18n';
 import { useI18n, useServices, useSessionState } from '../app/context.tsx';
 import { formatDecimal } from './format.ts';
+import { chartLocalization } from './chartLocalization.ts';
+import { scenarioChartSpec } from './stageModel.ts';
 
 /**
  * Scenario panel — "What if operating costs change?" The typed value is a
@@ -31,6 +34,10 @@ export function ScenarioPanel() {
   const contributionMetric = scenario?.metrics.find((m) => m.labelKey === 'metric.contribution');
   // Baseline margin lives in the committed analysis snapshot, not the result.
   const baselineMargin = state.active?.snapshot.metrics.find((m) => m.labelKey === 'metric.margin') ?? null;
+  const scenarioChart =
+    scenario !== null && state.active !== null
+      ? scenarioChartSpec(state.active.snapshot, scenario)
+      : null;
 
   return (
     <Section title={i18n.tSafe('scenario.title' as MessageKey)}>
@@ -60,7 +67,7 @@ export function ScenarioPanel() {
       </div>
       {scenario && (
         <div className="rf-scenario-result" data-testid="scenario-result">
-          <p>
+          <p data-testid="scenario-value">
             {i18n.tSafe('scenario.result' as MessageKey, {
               baseline:
                 baselineMargin?.value != null
@@ -73,6 +80,13 @@ export function ScenarioPanel() {
               delta: marginDelta(i18n, scenario),
             })}
           </p>
+          {scenarioChart !== null ? (
+            <ChartFigure
+              spec={scenarioChart}
+              localization={chartLocalization(i18n)}
+              emphasisKey="scenario"
+            />
+          ) : null}
           {contributionMetric?.value != null && (
             <p className="rf-quiet">
               {i18n.tSafe('metric.contribution' as MessageKey)}:{' '}

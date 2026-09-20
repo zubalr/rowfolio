@@ -40,6 +40,7 @@ import {
   type EvidenceCaveat,
 } from "./model.ts";
 import { SourceRowsTable } from "./SourceRowsTable.tsx";
+import { EvidenceBadge } from "./EvidenceBadge.tsx";
 import {
   EVIDENCE_PAGE_SIZE,
   type EvidenceBundle,
@@ -253,17 +254,19 @@ export function EvidencePanel({
   );
   const caveats = subjectCaveats(subject);
   const sourceRef = bundle.table.sourceRef;
+  // Sections that would render a bare heading (descriptive findings carry no
+  // proofs, no operand metrics, no transforms) are omitted entirely — the
+  // panel shows only what there is to see.
+  const hasInputs = subject.proofs.some((proof) =>
+    expressionOperands(proof.expression).metricIds.some((id) => ctx.metricsById.has(id)),
+  );
 
   return (
     <div className="rf-evidence" data-testid="evidence-panel">
       <header className="rf-evidence__header">
+        <EvidenceBadge findingId={subject.finding.id} label={sourceRef.sheetName} />
         <p className="rf-evidence__finding">{i18n.t(subject.finding.titleKey as MessageKey)}</p>
-        <p className="rf-evidence__scope">
-          {formatScope(i18n, subject.finding.scope)}
-          <Bidi dir="ltr" className="rf-evidence__sheet">
-            {sourceRef.sheetName}
-          </Bidi>
-        </p>
+        <p className="rf-evidence__scope">{formatScope(i18n, subject.finding.scope)}</p>
         {caveats.length > 0 ? (
           <div className="rf-evidence__caveats" role="note">
             {caveats.map((c) => (
@@ -273,43 +276,55 @@ export function EvidencePanel({
         ) : null}
       </header>
 
-      <Section title={i18n.t("evidence.calculation")} headingLevel={3} className="rf-evidence__section">
-        {subject.proofs.map((proof) => {
+      {subject.proofs.length > 0 ? (
+        <Section
+          title={i18n.t("evidence.calculation")}
+          headingLevel={3}
+          className="rf-evidence__section"
+        >
+          {subject.proofs.map((proof) => {
           const metric = metricForProof(subject.metrics, proof.id);
-          return (
-            <article className="rf-evidence__proof" key={proof.id}>
-              {metric !== undefined ? (
-                <header className="rf-evidence__proof-head">
-                  <h4 className="rf-evidence__proof-title">
-                    {i18n.has(metric.labelKey as MessageKey)
-                      ? i18n.t(metric.labelKey as MessageKey)
-                      : metric.labelKey}
-                  </h4>
-                </header>
-              ) : null}
-              <ExpressionTrace expression={proof.expression} ctx={ctx} />
-              <ResultLine
-                proof={proof}
-                services={services}
-                table={bundle.table}
-                metrics={bundle.snapshot.metrics}
-                contextProofs={subject.proofs}
-                i18n={i18n}
-              />
-              <p className="rf-evidence__method">
-                {i18n.t("common.method")}:{" "}
-                <Bidi dir="ltr" className="rf-evidence__id">
-                  {proof.precision}-digit · {proof.rounding} · policy {proof.policyVersion}
-                </Bidi>
-              </p>
-            </article>
-          );
-        })}
-      </Section>
+            return (
+              <article className="rf-evidence__proof" key={proof.id}>
+                {metric !== undefined ? (
+                  <header className="rf-evidence__proof-head">
+                    <h4 className="rf-evidence__proof-title">
+                      {i18n.has(metric.labelKey as MessageKey)
+                        ? i18n.t(metric.labelKey as MessageKey)
+                        : metric.labelKey}
+                    </h4>
+                  </header>
+                ) : null}
+                <ExpressionTrace expression={proof.expression} ctx={ctx} />
+                <ResultLine
+                  proof={proof}
+                  services={services}
+                  table={bundle.table}
+                  metrics={bundle.snapshot.metrics}
+                  contextProofs={subject.proofs}
+                  i18n={i18n}
+                />
+                <p className="rf-evidence__method">
+                  {i18n.t("common.method")}:{" "}
+                  <Bidi dir="ltr" className="rf-evidence__id">
+                    {proof.precision}-digit · {proof.rounding} · policy {proof.policyVersion}
+                  </Bidi>
+                </p>
+              </article>
+            );
+          })}
+        </Section>
+      ) : null}
 
-      <Section title={i18n.t("evidence.inputs")} headingLevel={3} className="rf-evidence__section">
-        <InputsList proofs={subject.proofs} ctx={ctx} />
-      </Section>
+      {hasInputs ? (
+        <Section
+          title={i18n.t("evidence.inputs")}
+          headingLevel={3}
+          className="rf-evidence__section"
+        >
+          <InputsList proofs={subject.proofs} ctx={ctx} />
+        </Section>
+      ) : null}
 
       {selections.map((selection) => (
         <Section
@@ -350,12 +365,15 @@ export function EvidencePanel({
         </Section>
       ))}
 
-      <Section title={i18n.t("evidence.transformations")} headingLevel={3} className="rf-evidence__section">
-        <TransformList issues={transformIssues} i18n={i18n} />
-        {transformIssues.length === 0 ? (
-          <p className="rf-evidence__empty">{i18n.t("common.notAvailable")}</p>
-        ) : null}
-      </Section>
+      {transformIssues.length > 0 ? (
+        <Section
+          title={i18n.t("evidence.transformations")}
+          headingLevel={3}
+          className="rf-evidence__section"
+        >
+          <TransformList issues={transformIssues} i18n={i18n} />
+        </Section>
+      ) : null}
 
       <footer className="rf-evidence__fingerprint">
         <h4 className="rf-evidence__fingerprint-title">{i18n.t("evidence.hash")}</h4>

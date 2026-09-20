@@ -11,12 +11,12 @@ import { formatUnitValue } from "../localization.ts";
 import { relativeVariance } from "../model.ts";
 import { valueScale } from "../scales.ts";
 import {
-  CHART_COLORS,
   ChartTooltip,
   HitTarget,
   TooltipBody,
   formatAxisTick,
   tooltipRows,
+  unitAxisLabel,
   type DatumAnchor,
 } from "./shared.tsx";
 
@@ -101,7 +101,8 @@ function RowContent({ ctx, row, rowY }: { ctx: PlotContext; row: TargetRow; rowY
           height={BAR_H}
           rx={2}
           className="rf-chart-bar"
-          fill={CHART_COLORS.data}
+          data-neg={(row.actual !== null && row.actual.startsWith("-")) || undefined}
+          style={{ fill: "var(--rf-c-data)" }}
         />
       ) : (
         <text x={row.zeroX + 4} y={barCy} dy="0.32em" className="rf-chart-missing">
@@ -115,10 +116,10 @@ function RowContent({ ctx, row, rowY }: { ctx: PlotContext; row: TargetRow; rowY
             x2={row.targetX}
             y1={barCy - BAR_H / 2 - 6}
             y2={barCy + BAR_H / 2 + 6}
-            stroke={CHART_COLORS.ink}
             strokeWidth={2}
             strokeDasharray="4 3"
             className="rf-chart-target"
+            style={{ stroke: "var(--rf-c-ink)" }}
           />
           <title>{t("common.target")}</title>
         </g>
@@ -180,15 +181,26 @@ export function TargetBarsPlot({ ctx }: { ctx: PlotContext }) {
         </div>
       ) : null}
       <div className="rf-chart-hgrid" style={{ gridTemplateColumns: `${labelCol}px minmax(0, 1fr)` }}>
-        <div className="rf-chart-hlabels" aria-hidden="true">
+        <div className="rf-chart-hlabels" aria-hidden="true" style={{ height }}>
           {keys.map((key) => {
             const p = model.points.find((pp) => pp.key === key)!;
             return (
-              <div key={key} className="rf-chart-hlabel" style={{ height: ROW_H }} dir="auto">
+              <div
+                key={key}
+                className="rf-chart-hlabel"
+                data-emphasis={key === ctx.emphasisKey || undefined}
+                style={{ height: ROW_H }}
+                dir="auto"
+              >
                 {t(p.labelKey)}
               </div>
             );
           })}
+          {unitAxisLabel(model.spec.unit) !== null ? (
+            <div className="rf-chart-hunit" dir="ltr">
+              {unitAxisLabel(model.spec.unit)}
+            </div>
+          ) : null}
         </div>
         <svg
           role="presentation"

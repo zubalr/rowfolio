@@ -16,9 +16,28 @@
   --rf-c-negative: #a33224;
   --rf-c-positive: #116b63;
   --rf-c-scenario: #946000;
+  /* mark motion: geometry transitions land on settled values (never animated
+     numbers); entrance grows marks from their true baseline once. */
+  --rf-chart-ms: 240ms;
+  --rf-chart-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   margin: 0;
   color: var(--rf-c-ink);
   font-family: "IBM Plex Sans", "IBM Plex Sans Arabic", Arial, sans-serif;
+}
+
+/* Ink stage — a chart mounted on a dark surface adopts the ink palette.
+   Every mark paint is a var() so the whole plot remaps here. */
+[data-rf-surface="ink"] .rf-chart {
+  --rf-c-ink: #fffefa;
+  --rf-c-paper: #172b35;
+  --rf-c-surface: #1f3947;
+  --rf-c-muted: #aec2cb;
+  --rf-c-rule: #3a4a53;
+  --rf-c-data: #9db4f5;
+  --rf-c-attention: #e8907c;
+  --rf-c-negative: #e8907c;
+  --rf-c-positive: #7fc4bb;
+  --rf-c-scenario: #e0b878;
 }
 
 .rf-chart__caption {
@@ -156,11 +175,69 @@ html[lang="ar"] .rf-chart-hlabel {
 }
 
 .rf-chart-bar {
-  transition: opacity 160ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* Settled marks always land on actual values: geometry props transition
+     (interruptibly) between known values; the grow keyframe only plays once
+     at mount, from the bar's true baseline edge (flip side when negative). */
+  transition:
+    x var(--rf-chart-ms) var(--rf-chart-ease),
+    y var(--rf-chart-ms) var(--rf-chart-ease),
+    width var(--rf-chart-ms) var(--rf-chart-ease),
+    height var(--rf-chart-ms) var(--rf-chart-ease),
+    opacity 160ms var(--rf-chart-ease);
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: rf-bar-grow-y var(--rf-chart-ms) var(--rf-chart-ease);
+}
+
+.rf-chart-bar[data-neg] {
+  transform-origin: 50% 0;
+}
+
+.rf-chart-plot--rows .rf-chart-bar {
+  transform-origin: 0 50%;
+  animation-name: rf-bar-grow-x;
+}
+
+.rf-chart-plot--rows .rf-chart-bar[data-neg] {
+  transform-origin: 100% 50%;
+}
+
+@keyframes rf-bar-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes rf-bar-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.rf-chart-line--draw {
+  stroke-dasharray: 1;
+  animation: rf-line-draw 300ms var(--rf-chart-ease);
+}
+
+@keyframes rf-line-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
 }
 
 .rf-chart-point {
-  transition: r 160ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition:
+    cx var(--rf-chart-ms) var(--rf-chart-ease),
+    cy var(--rf-chart-ms) var(--rf-chart-ease),
+    r 160ms var(--rf-chart-ease);
+}
+
+.rf-chart-target {
+  transition:
+    x1 var(--rf-chart-ms) var(--rf-chart-ease),
+    x2 var(--rf-chart-ms) var(--rf-chart-ease),
+    y1 var(--rf-chart-ms) var(--rf-chart-ease),
+    y2 var(--rf-chart-ms) var(--rf-chart-ease);
 }
 
 [data-active="true"] .rf-chart-bar {
@@ -168,9 +245,65 @@ html[lang="ar"] .rf-chart-hlabel {
   stroke-width: 1.5;
 }
 
+/* The selected datum reads differently: heavier ink ring, a notch cut into
+   the bar top, its value on an ink chip, and a bold axis label. */
 [data-emphasis="true"] .rf-chart-bar {
   stroke: var(--rf-c-ink);
-  stroke-width: 1.5;
+  stroke-width: 2.25;
+}
+
+.rf-chart-mark {
+  fill: var(--rf-c-paper);
+}
+
+.rf-chart-ring {
+  fill: none;
+  stroke: var(--rf-c-data);
+  stroke-width: 2;
+}
+
+.rf-chart-valuechip {
+  fill: var(--rf-c-ink);
+}
+
+.rf-chart-value--chip {
+  fill: var(--rf-c-paper);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rf-chart-cat[data-emphasis] {
+  font-weight: 700;
+}
+
+.rf-chart-hlabel[data-emphasis] {
+  font-weight: 700;
+}
+
+/* Unit caption at the head of the value axis / the end of the label column. */
+.rf-chart-unit {
+  font-size: 11px;
+  fill: var(--rf-c-muted);
+  letter-spacing: 0.05em;
+}
+
+html[lang="ar"] .rf-chart-unit {
+  font-size: 12px;
+}
+
+.rf-chart-hunit {
+  margin-block-start: auto;
+  padding-block-end: 2px;
+  font-size: 11px;
+  color: var(--rf-c-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+html[lang="ar"] .rf-chart-hunit {
+  font-size: 12px;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 /* ---------- horizontal label column ---------- */
@@ -182,6 +315,8 @@ html[lang="ar"] .rf-chart-hlabel {
 
 .rf-chart-hlabels {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .rf-chart-hlabel {
@@ -393,7 +528,13 @@ html[dir="rtl"] .rf-chart-tip,
 @media (prefers-reduced-motion: reduce) {
   .rf-chart .rf-chart-bar,
   .rf-chart .rf-chart-point,
+  .rf-chart .rf-chart-line,
+  .rf-chart .rf-chart-target,
+  .rf-chart .rf-chart-mark,
+  .rf-chart .rf-chart-ring,
+  .rf-chart .rf-chart-chip,
   .rf-chart .rf-chart-toggle {
     transition: none;
+    animation: none;
   }
 }
