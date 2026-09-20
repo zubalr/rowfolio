@@ -35,7 +35,7 @@ function sheetTexts(files: Map<string, Uint8Array>): { name: string; xml: string
 /* ------------------------------------------------------------------ */
 
 describe('formula injection and integrity', () => {
-  it.fails('a region containing a double quote must not corrupt the SUMIFS criteria', async () => {
+  it('a region containing a double quote must not corrupt the SUMIFS criteria', async () => {
     // Craft a model whose metric scope carries a hostile region name. Metric
     // ids 'north-june-*' are the sample-pack ids the template-formula writer
     // recognizes; the region string is attacker data when reached via a
@@ -53,11 +53,11 @@ describe('formula injection and integrity', () => {
     const xml = sheetTexts(files).map((s) => s.xml).join('\n');
     const formulas = xml.match(/<f>[^<]*SUMIFS[^<]*<\/f>/g) ?? [];
     expect(formulas.length).toBeGreaterThan(0);
-    // Correct behavior: the region must be Excel-escaped ("" doubling) so the
-    // criteria literal terminates where intended — or the value must never
-    // be interpolated. Today the raw string lands inside "...": `"x","1")…`
-    // breaks the string literal and injects formula text.
-    expect(formulas.every((f) => f.includes(`"${hostile.replaceAll('"', '""')}"`))).toBe(true);
+    // Sheet XML carries `"` as `&quot;`; the hostile region must appear
+    // quote-DOUBLED inside its criterion literal — `&quot;x&quot;&quot;,`
+    // — and never as the unescaped break-out `&quot;x&quot;,&quot;1&quot;)…`.
+    expect(formulas.some((f) => f.includes('&quot;x&quot;&quot;,'))).toBe(true);
+    expect(formulas.every((f) => !f.includes('&quot;x&quot;,&quot;1&quot;)+999'))).toBe(true);
   });
 
   it('all user-sourced cell text lands as shared strings, never as <f> formulas', async () => {

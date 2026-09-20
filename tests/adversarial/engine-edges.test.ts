@@ -18,7 +18,7 @@ import type { Decimal, NormalizedTable, Scope } from '../../packages/contracts/s
 import { quantizeMoney, runScenario } from '../../packages/scenario/src/index.ts';
 import { normalizeTable, profileTable } from '../../packages/normalize/src/index.ts';
 import { analyze } from '../../packages/analysis/src/index.ts';
-import { expandSpans, readEvidencePage, MAX_EVIDENCE_PAGE, ProofError } from '../../packages/provenance/src/index.ts';
+import { expandSpans, readEvidencePage, MAX_EVIDENCE_PAGE, ProofError, SpanError } from '../../packages/provenance/src/index.ts';
 import { scopeRows, findDateColumn } from '../../packages/analysis/src/index.ts';
 import { rawTable } from './helpers.ts';
 import snapshotFixture from '../contract/fixtures/analysis-snapshot.example.json';
@@ -50,7 +50,7 @@ describe('decimal edges', () => {
     expect(isDecimal('-0.00')).toBe(false);
   });
 
-  it.fails('quantizeMoney never emits negative zero (canonical-form violation)', () => {
+  it('quantizeMoney never emits negative zero (canonical-form violation)', () => {
     // DEFECT: values like '-0.004' with places=2 produce '-0.00',
     // which violates the canonical-decimal rule (isDecimal('-0.00') ===
     // false). Latent: runScenario's call graph currently only feeds inputs
@@ -156,7 +156,7 @@ describe('scenario edges', () => {
 /* ------------------------------------------------------------------ */
 
 describe('scope attacks', () => {
-  it.fails('confirmedScope.regions must not silently pass all rows when no region column exists', () => {
+  it('confirmedScope.regions must not silently pass all rows when no region column exists', () => {
     const raw = rawTable(['date', 'amount'], [['2026-06-01', '10'], ['2026-06-02', '20']]);
     const table = normalizedOf(raw);
     const dateCol = findDateColumn(table);
@@ -175,17 +175,17 @@ describe('scope attacks', () => {
 /* ------------------------------------------------------------------ */
 
 describe('provenance span attacks', () => {
-  it.fails('expandSpans must refuse oversize spans, not materialize millions of ids', () => {
-    // expandSpans pushes one number per row with no bound: [{start:1,
-    // end:2^31-1}] crashes the process at ~16GB heap (verified out-of-band —
-    // fatal V8 OOM, not a catchable error). Correct contract: a typed
-    // ProofError-style refusal once the expanded row count exceeds the
-    // evidence/source bound. Demonstrated at 20M (still seconds + ~160MB).
-    const start = performance.now();
-    const rows = expandSpans([{ start: 1, end: 20_000_000 }]);
-    const ms = performance.now() - start;
-    console.log(`expanded ${rows.length} ids in ${ms.toFixed(0)}ms`);
-    expect(rows.length).toBeLessThanOrEqual(MAX_EVIDENCE_PAGE);
+  it('expandSpans refuses oversize spans with a typed error, never materializing ids', () => {
+    // [{start:1, end:2^31-1}] used to crash the process at ~16GB heap
+    // (fatal V8 OOM, not catchable). Now: bounds are validated before any
+    // allocation — a span past the source envelope is a typed refusal, and
+    // cumulative cardinality over the cap is refused too.
+    expect(() => expandSpans([{ start: 1, end: 20_000_000 }])).toThrowError(SpanError);
+    expect(() => expandSpans([{ start: 1, end: 2_147_483_647 }])).toThrowError(SpanError);
+    expect(() => expandSpans([{ start: 1, end: 30_000 }, { start: 20_001, end: 50_000 }])).toThrowError(
+      /more than 50000 rows/,
+    );
+    expect(expandSpans([{ start: 1, end: 3 }])).toEqual([1, 2, 3]);
   });
 
   it('readEvidencePage caps page size at MAX_EVIDENCE_PAGE', () => {
