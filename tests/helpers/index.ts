@@ -1,5 +1,5 @@
 /**
- * A18 test-infrastructure barrel. Import from here in new suites:
+ * Test-infrastructure barrel. Import from here in new suites:
  *   import { assertProperty, arbUnsafeCellText, expectFreshnessAgree } from '../helpers/index.ts';
  * See docs/qa/test-harness.md for the full command reference.
  */

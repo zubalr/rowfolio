@@ -1,4 +1,4 @@
-# Test harness — A18
+# Test harness
 
 Reusable testing and evidence utilities for Rowfolio: deterministic
 Vitest/fast-check helpers, independent native-file inspectors, bounded
