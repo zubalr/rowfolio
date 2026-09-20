@@ -15,6 +15,7 @@ import type { Expression, Metric, NormalizedTable, RowSelection } from "@rowfoli
 import type { I18n, MessageKey } from "@rowfolio/i18n";
 import { Bidi, cx, Icon } from "@rowfolio/ui";
 import { formatDecimalForUnit, spanTokens } from "./model.ts";
+import { metricUnitLabel } from "../workspace/format.ts";
 
 export interface TraceContext {
   i18n: I18n;
@@ -70,9 +71,9 @@ function MetricOperand({ metricId, ctx }: { metricId: string; ctx: TraceContext 
           —
         </span>
       )}
-      {metric.unit.label ? (
+      {metricUnitLabel(metric.unit) !== null ? (
         <Bidi dir="ltr" className="rf-evidence__unit">
-          {metric.unit.label}
+          {metricUnitLabel(metric.unit)}
         </Bidi>
       ) : null}
     </span>
