@@ -5,7 +5,10 @@ import { createRoot } from "react-dom/client";
 // export maps. Lease + rule narrowing requested in the PR body.
 // eslint-disable-next-line no-restricted-imports
 import "@rowfolio/ui/fonts";
-import { LandingApp, createLandingI18n } from "./landing/index.ts";
+// Deep imports (not the barrel) so the lazy preview payload stays out of
+// the entry chunk — index.ts re-exports preview modules with top-level work.
+import { LandingApp } from "./landing/LandingApp.tsx";
+import { createLandingI18n } from "./landing/i18n.ts";
 import "./landing/landing.css";
 
 // App entry: mounts the bilingual landing on both static locale entries

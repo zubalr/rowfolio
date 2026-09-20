@@ -13,6 +13,7 @@ import oracleJson from "../../../../fixtures/golden/oracle_report.json";
 import spansJson from "../../../../fixtures/golden/expected_source_spans.json";
 import csv from "../../../../fixtures/sample/sample_operations.csv?raw";
 import { LANDING_TRUTH } from "./previewTruth.ts";
+import { MINI_TRUTH } from "./miniTruth.ts";
 
 const oracle = oracleJson as Record<string, unknown>;
 const spans = spansJson as { northJuneRevenue: { spans: { start: number; end: number }[] } };
@@ -58,6 +59,11 @@ describe("LANDING_TRUTH", () => {
       expect(line).toBeDefined();
       expect(line?.startsWith(cells.join(","))).toBe(true);
     });
+  });
+
+  it("keeps the eager hero figures reconciled with the derived truth", () => {
+    eq(MINI_TRUTH.revenue, LANDING_TRUTH.northJune.revenue);
+    eq(MINI_TRUTH.targetGapRatio, LANDING_TRUTH.northJune.targetGapRatio);
   });
 
   it("honours the scenario contract bounds", () => {
