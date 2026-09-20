@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
+    "types": ["node"],
+    "paths": {
+      "exceljs": ["./packages/export-xlsx/node_modules/exceljs"],
+      "pptxgenjs": ["./packages/export-pptx/node_modules/pptxgenjs"]
+    }
+  },
+  "include": ["vitest.config.ts", "playwright.config.ts", "scripts/**/*.ts", "scripts/**/*.d.ts"]
+}
