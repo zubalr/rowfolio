@@ -19,8 +19,14 @@ export function createAppServices(options?: {
   fetchSample?: (url: string) => Promise<Response>;
   onDiagnostic?: (msg: string) => void;
 }): AppServices {
+  // The MPA entry's <html lang> declares the boot locale; hosts that
+  // SPA-fallback /ar/ to the EN shell are caught by the path check too.
   const bootLocale =
-    typeof document !== 'undefined' && document.documentElement.lang === 'ar' ? 'ar' : undefined;
+    typeof document !== 'undefined' &&
+      (document.documentElement.lang === 'ar' ||
+        window.location.pathname.startsWith('/ar'))
+      ? 'ar'
+      : undefined;
   const storage = options?.storage ?? (typeof localStorage !== 'undefined' ? localStorage : null);
   const blobStore = new BlobUrlStore();
 
