@@ -53,12 +53,15 @@ cases. Highlights:
 
 ## Outputs
 
-The planned briefing outputs are a native `.xlsx` workbook (summary, cleaned
-data with source row references, data quality, KPI analysis, methodology) and
-a native, editable `.pptx` deck, in English or Arabic. Export packages are
-being implemented; numeric cells stay numeric, values are decimal strings
-until the export boundary, and formulas are never generated from your cell
-text. The application does not modify your original file.
+"Prepare briefing" opens a dialog that generates two files in your browser:
+a native `.xlsx` workbook (summary, cleaned data with source row references,
+data quality, KPI analysis, methodology) and a native, editable `.pptx`
+deck, in the session language. Each file is listed with its size and a
+SHA-256 prefix before you save it, and the dialog states plainly that the
+preview describes the briefing model, not a pixel-exact PowerPoint render.
+Numeric cells stay numeric, values are decimal strings until the export
+boundary, and formulas are never generated from your cell text. The
+application does not modify your original file.
 
 ## Known limitations (by design)
 
