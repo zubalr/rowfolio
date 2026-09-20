@@ -17,6 +17,7 @@ import {
   significantDigits,
 } from '@rowfolio/contracts';
 import type { ExportArtifact, ExportModel } from '@rowfolio/contracts';
+import { exportUnitLabel, localizeDigits } from '@rowfolio/export-model';
 import { hasSheetLabel, sheetLabel } from './labels.ts';
 
 /**
@@ -91,10 +92,29 @@ function toCellValue(value: string | boolean | null): string | number | boolean 
   return value;
 }
 
-/** Unit codes never reach visible copy raw: fractions display as `%`. */
-function displayUnit(kind: string | undefined, labelText: string): string {
-  if (kind === 'ratio') return '%';
-  return labelText;
+/**
+ * Metric value for a summary/KPI cell. Decimals always become numeric cells —
+ * even beyond 15 significant digits, where the exact canonical decimal is
+ * additionally parked in a cell note (`metricNoteText`). Non-decimal text
+ * falls back to the string-preserving path.
+ */
+function toMetricCellValue(value: string): string | number {
+  if (isDecimal(value)) {
+    const num = Number(value);
+    if (Number.isFinite(num)) return num;
+  }
+  const cell = toCellValue(value);
+  return typeof cell === 'boolean' || cell === null ? value : cell;
+}
+
+/** True when the canonical decimal cannot round-trip through float64. */
+function needsExactNote(value: string): boolean {
+  return isDecimal(value) && significantDigits(value) > 15;
+}
+
+/** Exact-value note parked on a precision-bounded numeric cell. */
+function metricNoteText(value: string): string {
+  return `exact stored value: ${value}`;
 }
 
 const GROUP_COUNT = new Intl.NumberFormat('en-US', { useGrouping: true });
@@ -261,13 +281,16 @@ export const buildWorkbook = async (
     } else {
       row.getCell(1).value = labelText;
     }
-    const raw = metric.value !== null ? toCellValue(metric.value) : null;
+    const raw = metric.value !== null ? toMetricCellValue(metric.value) : null;
     const cell = row.getCell(2);
     if (typeof raw === 'number') {
       cell.value = raw;
       cell.numFmt = numFmtFor(metric.unit.kind);
       if (metric.unit.kind === 'ratio' && raw < 0) {
         cell.font = { color: { argb: ADVERSE_ARGB }, bold: true };
+      }
+      if (metric.value !== null && needsExactNote(metric.value)) {
+        cell.note = metricNoteText(metric.value);
       }
     } else {
       cell.value = raw;
@@ -329,11 +352,13 @@ export const buildWorkbook = async (
 
   // ---- KPI Analysis (cached template formulas) ------------------------------
   const kpis = get('kpis');
+  const kpiHeaders = ['table.metric', 'table.value', 'table.unit', 'table.coverage']
+    .map((key) => sheetLabel(locale, key));
   kpis.columns = [
-    { header: 'Metric', key: 'metric', width: 26 },
-    { header: 'Value', key: 'value', width: 20 },
-    { header: 'Unit', key: 'unit', width: 16 },
-    { header: 'Coverage', key: 'coverage', width: 30 },
+    { header: kpiHeaders[0] as string, key: 'metric', width: 26 },
+    { header: kpiHeaders[1] as string, key: 'value', width: 20 },
+    { header: kpiHeaders[2] as string, key: 'unit', width: 16 },
+    { header: kpiHeaders[3] as string, key: 'coverage', width: 30 },
   ];
   const placements = new Map<string, KpiPlacement>();
   const lastCleanRow = model.table.rows.length + 1;
@@ -369,7 +394,7 @@ export const buildWorkbook = async (
       row.getCell(1).value = labelText;
     }
     const valueCell = row.getCell(2);
-    const numeric = metric.value !== null ? toCellValue(metric.value) : null;
+    const numeric = metric.value !== null ? toMetricCellValue(metric.value) : null;
     placements.set(metric.id, { row: rowIndex, valueAddress: `$B$${rowIndex}` });
     valueCell.value = numeric;
     if (typeof numeric === 'number') {
@@ -377,12 +402,20 @@ export const buildWorkbook = async (
       if (metric.unit.kind === 'ratio' && numeric < 0) {
         valueCell.font = { color: { argb: ADVERSE_ARGB }, bold: true };
       }
+      if (metric.value !== null && needsExactNote(metric.value)) {
+        valueCell.note = metricNoteText(metric.value);
+      }
     }
-    row.getCell(3).value = displayUnit(metric.unit.kind, metric.unit.label);
+    row.getCell(3).value = exportUnitLabel(metric.unit);
     const coverageKey = metric.scope.coverageNoteKey;
-    row.getCell(4).value = `eligible ${metric.eligibleRows}/${metric.totalRows}; ${
-      hasSheetLabel(coverageKey) ? sheetLabel(locale, coverageKey) : coverageKey
-    }`;
+    row.getCell(4).value = localizeDigits(
+      `${sheetLabel(locale, 'coverage.eligible')
+        .replace('{eligible}', String(metric.eligibleRows))
+        .replace('{total}', String(metric.totalRows))}; ${
+        hasSheetLabel(coverageKey) ? sheetLabel(locale, coverageKey) : coverageKey
+      }`,
+      model.numberingSystem,
+    );
   }
   // Second pass: constant template formulas with the model's cached results.
   // Placements are complete, so cross-metric references always resolve.
@@ -390,7 +423,7 @@ export const buildWorkbook = async (
     if (metric.id.startsWith('quality-')) continue;
     const placement = placements.get(metric.id);
     if (placement === undefined) continue;
-    const numeric = metric.value !== null ? toCellValue(metric.value) : null;
+    const numeric = metric.value !== null ? toMetricCellValue(metric.value) : null;
     if (typeof numeric !== 'number') continue;
     const formula = formulaForMetric(
       metric.id,
@@ -408,7 +441,7 @@ export const buildWorkbook = async (
     headerRow: true,
     totalsRow: false,
     style: { theme: 'TableStyleMedium2', showRowStripes: true },
-    columns: ['Metric', 'Value', 'Unit', 'Coverage'].map((name) => ({ name, filterButton: true })),
+    columns: kpiHeaders.map((name) => ({ name, filterButton: true })),
     rows: [],
   });
   kpis.autoFilter = { from: 'A1', to: `D${kpis.rowCount}` };

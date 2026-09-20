@@ -7,6 +7,8 @@
  * composition). Charts and notes always carry the exact values.
  */
 import { isDecimal } from '@rowfolio/contracts';
+import { exportUnitLabel } from '@rowfolio/export-model';
+import type { Unit } from '@rowfolio/contracts';
 
 const GROUP = new Intl.NumberFormat('en-US', { useGrouping: true });
 
@@ -96,9 +98,10 @@ export function formatPp(value: string): string {
 }
 
 /** Unit-aware display for a metric value. Null stays explicitly unavailable. */
-export function formatMetricValue(value: string | null, unitKind: string, unitLabel: string): string {
+export function formatMetricValue(value: string | null, unit: Unit): string {
   if (value === null) return '—';
-  switch (unitKind) {
+  const unitLabel = exportUnitLabel(unit);
+  switch (unit.kind) {
     case 'currency':
       return `${unitLabel} ${formatFull(value)}`.trim();
     case 'ratio':
