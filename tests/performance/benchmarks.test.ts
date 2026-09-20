@@ -95,9 +95,8 @@ describe("statistical calculation performance benchmarks", () => {
 
     expect(stats.iterations).toBe(20);
     expect(stats.sampleRowCount).toBe(rowCount);
-    // ≤50ms dedicated worker math target; ≤100ms perceived response limit under host runner concurrency
-    expect(stats.medianMs).toBeLessThan(100);
-    expect(stats.p95Ms).toBeLessThan(150);
+    expect(stats.medianMs).toBeLessThan(50);
+    expect(stats.p95Ms).toBeLessThan(100);
   });
 
   it("full table measure aggregations meet high-throughput performance expectations", () => {
