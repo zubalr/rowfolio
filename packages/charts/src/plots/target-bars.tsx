@@ -1,0 +1,239 @@
+/**
+ * Target-bars — horizontal bullet-style actual/target rows by category
+ * (region). Actual is a solid cobalt bar, target an ink tick marker, and a
+ * signed variance annotation sits at the row end. At narrow widths the plot
+ * keeps the selected datum plus a compact category selector instead of
+ * squeezing six labels in.
+ */
+import { useMemo, useState } from "react";
+import type { PlotContext } from "../frame.tsx";
+import { formatUnitValue } from "../localization.ts";
+import { relativeVariance } from "../model.ts";
+import { valueScale } from "../scales.ts";
+import {
+  CHART_COLORS,
+  ChartTooltip,
+  HitTarget,
+  TooltipBody,
+  formatAxisTick,
+  tooltipRows,
+  type DatumAnchor,
+} from "./shared.tsx";
+
+const ROW_H = 56;
+const BAR_H = 22;
+const LABEL_COL = 148;
+const VALUE_W = 96;
+const NARROW_SINGLE = 560;
+
+interface TargetRow {
+  key: string;
+  actualX: number;
+  actualW: number;
+  targetX: number | null;
+  zeroX: number;
+  actual: string | null;
+  target: string | null;
+  anchor: DatumAnchor;
+}
+
+interface TargetLayout {
+  rows: TargetRow[];
+  anchors: Record<string, DatumAnchor>;
+  plotWidth: number;
+  tickXs: { tick: number; x: number }[];
+  xOf: (v: number) => number;
+}
+
+export function layoutTarget(ctx: PlotContext, keys: string[], labelCol: number): TargetLayout {
+  const { model } = ctx;
+  const plotWidth = Math.max(ctx.width - labelCol - VALUE_W, 60);
+  const x = valueScale(model.domain, [0, plotWidth]);
+  const zeroX = x(0);
+  const barSeries = model.series.filter((s) => s.semantic !== "target");
+  const markerSeries = model.series.filter((s) => s.semantic === "target");
+  const primary = barSeries[0];
+  const marker = markerSeries[0];
+  const rows: TargetRow[] = [];
+  const anchors: Record<string, DatumAnchor> = {};
+  model.points.forEach((p) => {
+    if (!keys.includes(p.key)) return;
+    const a = primary ? (p.values.find((v) => v.seriesId === primary.id) ?? null) : null;
+    const b = marker ? (p.values.find((v) => v.seriesId === marker.id) ?? null) : null;
+    const ax = a?.coordinate != null ? x(a.coordinate) : null;
+    const bx = b?.coordinate != null ? x(b.coordinate) : null;
+    const row: TargetRow = {
+      key: p.key,
+      actualX: ax !== null ? Math.min(zeroX, ax) : zeroX,
+      actualW: ax !== null ? Math.abs(ax - zeroX) : 0,
+      targetX: bx,
+      zeroX,
+      actual: a?.value ?? null,
+      target: b?.value ?? null,
+      anchor: { x: ax ?? zeroX, y: rows.length * ROW_H + ROW_H / 2 },
+    };
+    anchors[p.key] = { x: labelCol + row.anchor.x, y: row.anchor.y };
+    rows.push(row);
+  });
+  return {
+    rows,
+    anchors,
+    plotWidth,
+    tickXs: model.ticks.map((tick) => ({ tick, x: x(tick) })),
+    xOf: x,
+  };
+}
+
+function RowContent({ ctx, row, rowY }: { ctx: PlotContext; row: TargetRow; rowY: number }) {
+  const { model } = ctx;
+  const t = ctx.strings.t;
+  const barCy = ROW_H / 2;
+  const rel =
+    row.actual !== null && row.target !== null ? relativeVariance(row.actual, row.target) : null;
+  const relNeg = rel !== null && rel.startsWith("-");
+  return (
+    <g transform={`translate(0,${rowY})`}>
+      {row.actual !== null ? (
+        <rect
+          x={row.actualX}
+          y={barCy - BAR_H / 2}
+          width={row.actualW}
+          height={BAR_H}
+          rx={2}
+          className="rf-chart-bar"
+          fill={CHART_COLORS.data}
+        />
+      ) : (
+        <text x={row.zeroX + 4} y={barCy} dy="0.32em" className="rf-chart-missing">
+          —
+        </text>
+      )}
+      {row.targetX !== null ? (
+        <g aria-hidden="true">
+          <line
+            x1={row.targetX}
+            x2={row.targetX}
+            y1={barCy - BAR_H / 2 - 6}
+            y2={barCy + BAR_H / 2 + 6}
+            stroke={CHART_COLORS.ink}
+            strokeWidth={2}
+            strokeDasharray="4 3"
+            className="rf-chart-target"
+          />
+          <title>{t("common.target")}</title>
+        </g>
+      ) : null}
+      {row.actual !== null ? (
+        <text
+          x={row.actualX + row.actualW + 6}
+          y={barCy}
+          dy="0.32em"
+          className="rf-chart-value rf-chart-value--end"
+          direction="ltr" unicodeBidi="isolate"
+        >
+          {formatUnitValue(row.actual, model.spec.unit, ctx.formatters, { compact: true })}
+        </text>
+      ) : null}
+      {rel !== null ? (
+        <text
+          x={row.actualX + row.actualW + 6}
+          y={barCy + 14}
+          dy="0.32em"
+          className={`rf-chart-delta${relNeg ? " rf-chart-delta--neg" : " rf-chart-delta--pos"}`}
+          direction="ltr" unicodeBidi="isolate"
+        >
+          {ctx.formatters.formatPercent(rel, { signDisplay: "exceptZero", maxFractionDigits: 1 })}
+        </text>
+      ) : null}
+    </g>
+  );
+}
+
+export function TargetBarsPlot({ ctx }: { ctx: PlotContext }) {
+  const { model, strings } = ctx;
+  const t = strings.t;
+  const allKeys = useMemo(() => model.points.map((p) => p.key), [model]);
+  const narrow = ctx.width < NARROW_SINGLE && model.points.length > 2;
+  const [picked, setPicked] = useState<string | null>(null);
+  const selectedKey = narrow ? (picked ?? ctx.emphasisKey ?? allKeys[0] ?? null) : null;
+  const keys = narrow && selectedKey !== null ? [selectedKey] : allKeys;
+  const labelCol = ctx.width < NARROW_SINGLE ? 96 : LABEL_COL;
+  const layout = useMemo(() => layoutTarget(ctx, keys, labelCol), [ctx, keys, labelCol]);
+  const height = keys.length * ROW_H + 26;
+  const active = ctx.activeKey ? model.points.find((p) => p.key === ctx.activeKey) : null;
+
+  return (
+    <div className="rf-chart-plot rf-chart-plot--rows" {...ctx.explorerProps()}>
+      {narrow ? (
+        <div className="rf-chart-chips" role="group" aria-label={t("workspace.scope")}>
+          {model.points.map((p) => (
+            <button
+              key={p.key}
+              type="button"
+              className="rf-chart-chip"
+              aria-pressed={p.key === selectedKey}
+              onClick={() => setPicked(p.key)}
+            >
+              {t(p.labelKey)}
+            </button>
+          ))}
+        </div>
+      ) : null}
+      <div className="rf-chart-hgrid" style={{ gridTemplateColumns: `${labelCol}px minmax(0, 1fr)` }}>
+        <div className="rf-chart-hlabels" aria-hidden="true">
+          {keys.map((key) => {
+            const p = model.points.find((pp) => pp.key === key)!;
+            return (
+              <div key={key} className="rf-chart-hlabel" style={{ height: ROW_H }} dir="auto">
+                {t(p.labelKey)}
+              </div>
+            );
+          })}
+        </div>
+        <svg
+          role="presentation"
+          className="rf-chart-svg"
+          width={ctx.width - labelCol}
+          height={height}
+          viewBox={`0 0 ${ctx.width - labelCol} ${height}`}
+          direction="ltr" unicodeBidi="isolate"
+        >
+          <g aria-hidden="true">
+            {layout.tickXs.map(({ tick, x }) => (
+              <g key={tick}>
+                <line
+                  x1={x}
+                  x2={x}
+                  y1={0}
+                  y2={height - 22}
+                  className="rf-chart-grid__line"
+                />
+                <text x={x} y={height - 4} textAnchor="middle" className="rf-chart-tick" direction="ltr" unicodeBidi="isolate">
+                  {formatAxisTick(tick, model.spec.unit, ctx.formatters)}
+                </text>
+              </g>
+            ))}
+            <line
+              x1={layout.xOf(0)}
+              x2={layout.xOf(0)}
+              y1={0}
+              y2={height - 22}
+              className="rf-chart-zero"
+            />
+          </g>
+          {layout.rows.map((row, i) => (
+            <g key={row.key} {...ctx.datumProps(row.key)}>
+              <HitTarget x={0} y={i * ROW_H} width={layout.plotWidth} height={ROW_H} />
+              <RowContent ctx={ctx} row={row} rowY={i * ROW_H} />
+            </g>
+          ))}
+        </svg>
+      </div>
+      {active && layout.anchors[active.key] ? (
+        <ChartTooltip anchor={layout.anchors[active.key]!} stageWidth={ctx.width}>
+          <TooltipBody {...tooltipRows(active, model.series, ctx)} />
+        </ChartTooltip>
+      ) : null}
+    </div>
+  );
+}

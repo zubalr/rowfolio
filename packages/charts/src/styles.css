@@ -1,0 +1,399 @@
+/**
+ * Scoped chart styles — divider-led, paper/ink/cobalt per the design tokens
+ * contract. Everything hangs off `.rf-chart` so nothing leaks outside the
+ * component. All geometry values in px are computed layout; text sizing
+ * follows the fixed type ramp (never below 12px labels).
+ */
+
+.rf-chart {
+  --rf-c-ink: #172b35;
+  --rf-c-paper: #f7f4ec;
+  --rf-c-surface: #fffefa;
+  --rf-c-muted: #53636a;
+  --rf-c-rule: #d7dcd8;
+  --rf-c-data: #2855d9;
+  --rf-c-attention: #c84b31;
+  --rf-c-negative: #a33224;
+  --rf-c-positive: #116b63;
+  --rf-c-scenario: #946000;
+  margin: 0;
+  color: var(--rf-c-ink);
+  font-family: "IBM Plex Sans", "IBM Plex Sans Arabic", Arial, sans-serif;
+}
+
+.rf-chart__caption {
+  padding: 0;
+}
+
+.rf-chart__title {
+  margin: 0 0 4px;
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.rf-chart__summary {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--rf-c-muted);
+  max-width: 64ch;
+}
+
+html[lang="ar"] .rf-chart__summary {
+  font-size: 14px;
+}
+
+.rf-chart__toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding-block: 8px;
+}
+
+.rf-chart__toggle {
+  min-height: 44px;
+  padding-inline: 16px;
+  border: 1px solid var(--rf-c-rule);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--rf-c-ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 120ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.rf-chart__toggle:hover {
+  background: var(--rf-c-paper);
+}
+
+.rf-chart__toggle[aria-expanded="true"] {
+  background: var(--rf-c-ink);
+  color: var(--rf-c-surface);
+  border-color: var(--rf-c-ink);
+}
+
+/* ---------- plot ---------- */
+
+.rf-chart-plot {
+  position: relative;
+  outline: none;
+}
+
+.rf-chart-plot:focus-visible {
+  outline: 3px solid var(--rf-c-data);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.rf-chart-svg {
+  display: block;
+  max-width: 100%;
+}
+
+.rf-chart-grid__line {
+  stroke: var(--rf-c-rule);
+  stroke-width: 1;
+}
+
+.rf-chart-zero {
+  stroke: var(--rf-c-muted);
+  stroke-width: 1;
+}
+
+.rf-chart-tick {
+  font-size: 12px;
+  fill: var(--rf-c-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-chart-cat {
+  font-size: 12px;
+  fill: var(--rf-c-ink);
+}
+
+html[lang="ar"] .rf-chart-cat,
+html[lang="ar"] .rf-chart-hlabel {
+  font-size: 14px;
+}
+
+.rf-chart-value {
+  font-size: 13px;
+  font-weight: 600;
+  fill: var(--rf-c-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-chart-missing {
+  font-size: 13px;
+  fill: var(--rf-c-muted);
+}
+
+.rf-chart-delta {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-chart-delta--neg {
+  fill: var(--rf-c-negative);
+}
+
+.rf-chart-delta--pos {
+  fill: var(--rf-c-positive);
+}
+
+.rf-chart-delta--big {
+  font-size: 15px;
+}
+
+.rf-chart-hypo {
+  font-size: 11px;
+  fill: var(--rf-c-scenario);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.rf-chart-bar {
+  transition: opacity 160ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.rf-chart-point {
+  transition: r 160ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+[data-active="true"] .rf-chart-bar {
+  stroke: var(--rf-c-ink);
+  stroke-width: 1.5;
+}
+
+[data-emphasis="true"] .rf-chart-bar {
+  stroke: var(--rf-c-ink);
+  stroke-width: 1.5;
+}
+
+/* ---------- horizontal label column ---------- */
+
+.rf-chart-hgrid {
+  display: grid;
+  align-items: start;
+}
+
+.rf-chart-hlabels {
+  min-width: 0;
+}
+
+.rf-chart-hlabel {
+  font-size: 13px;
+  color: var(--rf-c-ink);
+  padding-inline-end: 10px;
+  text-align: end;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-box-pack: center;
+  -webkit-line-clamp: 2;
+}
+
+/* ---------- compact category chips (narrow target-bars) ---------- */
+
+.rf-chart-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-block: 4px 10px;
+  scrollbar-width: thin;
+}
+
+.rf-chart-chip {
+  flex: none;
+  min-height: 36px;
+  padding-inline: 12px;
+  border: 1px solid var(--rf-c-rule);
+  border-radius: 8px;
+  background: var(--rf-c-surface);
+  color: var(--rf-c-muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.rf-chart-chip[aria-pressed="true"] {
+  border-color: var(--rf-c-ink);
+  color: var(--rf-c-ink);
+  font-weight: 600;
+}
+
+/* ---------- legend ---------- */
+
+.rf-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 8px 0 0;
+  border-block-start: 1px solid var(--rf-c-rule);
+  font-size: 12px;
+  color: var(--rf-c-muted);
+}
+
+.rf-chart-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rf-chart-legend__swatch {
+  inline-size: 18px;
+  block-size: 3px;
+  border-radius: 2px;
+  background: var(--rf-c-data);
+}
+
+.rf-chart-legend__swatch[data-semantic="target"] {
+  background: repeating-linear-gradient(90deg, var(--rf-c-ink) 0 4px, transparent 4px 7px);
+}
+
+.rf-chart-legend__swatch[data-semantic="scenario"] {
+  background: repeating-linear-gradient(90deg, var(--rf-c-scenario) 0 4px, transparent 4px 7px);
+}
+
+.rf-chart-legend__swatch[data-semantic="attention"] {
+  background: var(--rf-c-attention);
+}
+
+/* ---------- tooltip ---------- */
+
+.rf-chart-tip {
+  position: absolute;
+  transform: translateX(-50%);
+  min-width: 120px;
+  max-width: 220px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--rf-c-ink);
+  color: var(--rf-c-surface);
+  font-size: 12px;
+  line-height: 1.45;
+  pointer-events: none;
+  box-shadow: 0 20px 70px rgba(23, 43, 53, 0.12);
+  z-index: 2;
+}
+
+html[dir="rtl"] .rf-chart-tip,
+[dir="rtl"] .rf-chart-tip {
+  transform: translateX(50%);
+}
+
+.rf-chart-tip__label {
+  font-weight: 600;
+  margin-block-end: 4px;
+}
+
+.rf-chart-tip__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rf-chart-tip__value {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- evidence table ---------- */
+
+.rf-chart__values {
+  margin-block-start: 12px;
+}
+
+.rf-chart-table {
+  overflow-x: auto;
+  border-block-start: 1px solid var(--rf-c-rule);
+}
+
+.rf-chart-table:focus-visible {
+  outline: 3px solid var(--rf-c-data);
+  outline-offset: 3px;
+}
+
+.rf-chart-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.rf-chart-table caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.rf-chart-table th,
+.rf-chart-table td {
+  padding: 8px 10px;
+  border-block-end: 1px solid var(--rf-c-rule);
+  text-align: start;
+  vertical-align: top;
+}
+
+.rf-chart-table thead th {
+  color: var(--rf-c-muted);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rf-chart-table [data-align="end"] {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-chart-table__mono {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--rf-c-muted);
+}
+
+.rf-chart-table__provenance {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--rf-c-muted);
+}
+
+.rf-chart-table__provenance bdi {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+}
+
+/* ---------- notes / helpers ---------- */
+
+.rf-chart-note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--rf-c-scenario);
+}
+
+.rf-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-chart .rf-chart-bar,
+  .rf-chart .rf-chart-point,
+  .rf-chart .rf-chart-toggle {
+    transition: none;
+  }
+}
