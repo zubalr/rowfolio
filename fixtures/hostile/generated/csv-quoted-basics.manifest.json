@@ -1,0 +1,62 @@
+{
+  "caseId": "csv-quoted-basics",
+  "category": "csv_quoting_newlines",
+  "description": "RFC 4180 quoting: embedded comma, escaped double quote, embedded LF inside a quoted cell.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 4,
+      "headerColumns": 4,
+      "perRecordFieldCounts": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "parsedRows": [
+      [
+        "id",
+        "note",
+        "amount_usd",
+        "day"
+      ],
+      [
+        "T-1",
+        "Plain note",
+        "10.50",
+        "2026-01-05"
+      ],
+      [
+        "T-2",
+        "Comma, quote \" and newline\nsecond line",
+        "12.00",
+        "2026-01-06"
+      ],
+      [
+        "T-3",
+        "Trailing comma,",
+        "9.75",
+        "2026-01-07"
+      ],
+      [
+        "T-4",
+        "Unquoted simple",
+        "0.00",
+        "2026-01-08"
+      ]
+    ],
+    "requiredBehavior": [
+      "record T-2 spans two physical lines; logical record count is 4",
+      "physical line count (5) exceeds logical record count (4); provenance must record both"
+    ]
+  },
+  "notes": [
+    "Synthetic values; no real entity."
+  ],
+  "artifact": "csv-quoted-basics.csv",
+  "sha256": "08378d9ae5335927e72a19ab757286a9326d4702cc784bd09ebdfbb9db486bdf",
+  "bytes": 192,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

@@ -1,0 +1,27 @@
+{
+  "caseId": "csv-ragged-long-row",
+  "category": "csv_ragged",
+  "description": "One record carries two fields beyond the header count.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 3,
+      "headerColumns": 3,
+      "perRecordFieldCounts": [
+        3,
+        3,
+        5
+      ]
+    },
+    "requiredBehavior": [
+      "record 3 exceeds the header width and must not be silently truncated to 3 fields",
+      "mapping review surfaces the extra fields before any analysis uses the table"
+    ]
+  },
+  "notes": [],
+  "artifact": "csv-ragged-long-row.csv",
+  "sha256": "b89d4195d419c887e9dce708964cca7a3b173bb8487e383d74f798b94ec2a63a",
+  "bytes": 30,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

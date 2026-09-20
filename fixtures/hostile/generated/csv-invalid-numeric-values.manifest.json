@@ -1,0 +1,48 @@
+{
+  "caseId": "csv-invalid-numeric-values",
+  "category": "csv_invalid_values",
+  "description": "Non-numeric text, a doubly-dotted number and an out-of-range exponent in one numeric candidate column.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 5,
+      "headerColumns": 2,
+      "perRecordFieldCounts": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "invalidNumericCells": [
+      {
+        "row": 2,
+        "column": "value",
+        "raw": "abc"
+      },
+      {
+        "row": 3,
+        "column": "value",
+        "raw": "12.34.56"
+      },
+      {
+        "row": 4,
+        "column": "value",
+        "raw": "1e999"
+      }
+    ],
+    "requiredBehavior": [
+      "every failed cell is listed with coordinates; column inference succeeds for 2/5 = 0.40 < 0.95 so the column is not confidently numeric",
+      "'1e999' is non-finite/out-of-range and is rejected, never converted to a float"
+    ]
+  },
+  "notes": [
+    "Tiny strings only; no resource-exhaustion payloads."
+  ],
+  "artifact": "csv-invalid-numeric-values.csv",
+  "sha256": "c80623a5150ef7559a749e6c02efac92cde6e9d5f949274de02b6546edb1dee4",
+  "bytes": 56,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

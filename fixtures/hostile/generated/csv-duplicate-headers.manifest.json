@@ -1,0 +1,36 @@
+{
+  "caseId": "csv-duplicate-headers",
+  "category": "csv_headers",
+  "description": "Two columns share the header name 'revenue' with different data.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 3,
+      "headerColumns": 4,
+      "perRecordFieldCounts": [
+        4,
+        4,
+        4
+      ]
+    },
+    "duplicateHeaderNames": [
+      {
+        "name": "revenue",
+        "positions": [
+          3,
+          4
+        ]
+      }
+    ],
+    "requiredBehavior": [
+      "duplicate headers receive stable ordinal IDs and visible disambiguated labels; object keys are never overwritten",
+      "column 3 sums to 300.00 and column 4 to 350.00; a consumer must never combine them"
+    ]
+  },
+  "notes": [],
+  "artifact": "csv-duplicate-headers.csv",
+  "sha256": "9e49a6c4c3638c89bce3ad4cb1b3229d50d02a9d62d3f67108ce62df434d8fbd",
+  "bytes": 118,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

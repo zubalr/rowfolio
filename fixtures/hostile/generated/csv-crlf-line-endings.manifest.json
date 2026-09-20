@@ -1,0 +1,49 @@
+{
+  "caseId": "csv-crlf-line-endings",
+  "category": "csv_quoting_newlines",
+  "description": "CRLF record separators including an embedded CRLF inside a quoted cell.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 3,
+      "headerColumns": 3,
+      "perRecordFieldCounts": [
+        3,
+        3,
+        3
+      ]
+    },
+    "parsedRows": [
+      [
+        "id",
+        "label",
+        "value"
+      ],
+      [
+        "C-1",
+        "Line one\r\nLine two",
+        "5"
+      ],
+      [
+        "C-2",
+        "a\"b",
+        "7"
+      ],
+      [
+        "C-3",
+        "c,d",
+        "11"
+      ]
+    ],
+    "requiredBehavior": [
+      "CRLF between records and inside quoted cells both preserved as authored",
+      "embedded newline must not terminate the logical record"
+    ]
+  },
+  "notes": [],
+  "artifact": "csv-crlf-line-endings.csv",
+  "sha256": "82b81bc51518c802d8745b6e0377df51db14ac89bf00951730a64a398e3e5706",
+  "bytes": 72,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

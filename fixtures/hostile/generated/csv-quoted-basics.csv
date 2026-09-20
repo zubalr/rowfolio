@@ -1,0 +1,6 @@
+id,note,amount_usd,day
+T-1,Plain note,10.50,2026-01-05
+T-2,"Comma, quote "" and newline
+second line",12.00,2026-01-06
+T-3,"Trailing comma,",9.75,2026-01-07
+T-4,Unquoted simple,0.00,2026-01-08

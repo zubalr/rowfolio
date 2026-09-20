@@ -1,0 +1,42 @@
+{
+  "caseId": "xlsx-minimal-valid",
+  "category": "ooxml_structure",
+  "description": "Minimal valid single-sheet workbook with inline strings and two numeric cells.",
+  "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "expected": {
+    "sheets": [
+      {
+        "name": "Operations",
+        "headerPhysicalRow": 1,
+        "records": 2,
+        "header": [
+          "operation_id",
+          "day",
+          "amount_eur"
+        ],
+        "rows": [
+          [
+            "OP-1",
+            "2026-01-05",
+            "10.5"
+          ],
+          [
+            "OP-2",
+            "2026-01-06",
+            "7.25"
+          ]
+        ]
+      }
+    ],
+    "requiredBehavior": [
+      "dates here are authored strings; no workbook date-system conversion applies to them",
+      "numbers are numeric cells; strings are inline strings, never formulas"
+    ]
+  },
+  "notes": [],
+  "artifact": "xlsx-minimal-valid.xlsx",
+  "sha256": "bd341c942b60bafc95a75da449e9fdf1f48b82b7b472cf5f90858f194bc3035d",
+  "bytes": 3457,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

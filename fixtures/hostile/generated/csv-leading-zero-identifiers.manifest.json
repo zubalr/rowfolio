@@ -1,0 +1,27 @@
+{
+  "caseId": "csv-leading-zero-identifiers",
+  "category": "csv_numeric_date_ambiguity",
+  "description": "Numeric-looking identifiers with significant leading zeros.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 3,
+      "headerColumns": 2,
+      "perRecordFieldCounts": [
+        2,
+        2,
+        2
+      ]
+    },
+    "requiredBehavior": [
+      "identifiers stay text; '00123' is never coerced to 123",
+      "text identifiers sort and compare lexicographically; provenance keeps raw strings"
+    ]
+  },
+  "notes": [],
+  "artifact": "csv-leading-zero-identifiers.csv",
+  "sha256": "028889aa88174afa9d991f85761789fa7010b1d85166ac5ab093102db8747205",
+  "bytes": 42,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}
