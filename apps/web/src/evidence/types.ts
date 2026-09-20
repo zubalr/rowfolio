@@ -4,20 +4,21 @@
  * The evidence surface renders ONLY Provenance-service output: proofs, their
  * resolved metrics/selections/issues and paged source rows. No arithmetic is
  * duplicated here — `evaluateProof` / `readEvidencePage` are injected with the
- * signatures INTERFACES.md v1.0.0 assigns to packages/provenance (mirrored
- * verbatim — ESLint forbids deep `@rowfolio/*` subpath imports in app source,
- * so the component stays on the injected-services seam the app shell wires to
- * the real package).
+ * exact signatures @rowfolio/provenance exports (the service types below are
+ * `typeof` the real functions, so the package's own implementations assign
+ * directly to the seam).
  */
 import type {
+  EvidencePage as ProvenanceEvidencePage,
+  evaluateProof as provenanceEvaluateProof,
+  readEvidencePage as provenanceReadEvidencePage,
+} from "@rowfolio/provenance";
+import type {
   AnalysisSnapshot,
-  Decimal,
   Finding,
   Metric,
-  NormalizedRow,
   NormalizedTable,
   Provenance,
-  RowSelection,
 } from "@rowfolio/contracts";
 
 /** Contract version this UI binds to. */
@@ -27,30 +28,15 @@ export const EVIDENCE_CONTRACT_VERSION = "1.0.0" as const;
 export const EVIDENCE_PAGE_SIZE = 50;
 
 /**
- * packages/provenance — INTERFACES.md §"Package entry points". `contextProofs`
+ * @rowfolio/provenance — INTERFACES.md §"Package entry points". `contextProofs`
  * carries the finding's sibling proofs so composite expressions (e.g. a gap
  * metric referencing other proofs) resolve instead of reporting `proof.missing`.
  */
-export type EvaluateProof = (
-  proof: Provenance,
-  table: NormalizedTable,
-  metrics: readonly Metric[],
-  contextProofs?: readonly Provenance[],
-) => { value: Decimal | null; reasonKey: string | null };
+export type EvaluateProof = typeof provenanceEvaluateProof;
 
-export interface EvidencePage {
-  rows: readonly NormalizedRow[];
-  offset: number;
-  total: number;
-  nextOffset: number | null;
-}
+export type EvidencePage = ProvenanceEvidencePage;
 
-export type ReadEvidencePage = (
-  table: NormalizedTable,
-  selection: RowSelection,
-  offset: number,
-  pageSize: number,
-) => EvidencePage;
+export type ReadEvidencePage = typeof provenanceReadEvidencePage;
 
 /** Injected provenance service — the sole numeric truth for this surface. */
 export interface EvidenceServices {
