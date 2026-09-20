@@ -5,7 +5,12 @@ import type { SessionState } from './state.ts';
 import type { BlobUrlStore } from './blobUrls.ts';
 
 export interface AppServices {
-  controller: SessionController;
+  /** The session controller — resolved once `controllerReady` settles; the
+   *  getter throws before that, so consumers must sit behind the workspace
+   *  gate (see App.tsx) instead of a mock. */
+  readonly controller: SessionController;
+  /** Resolves with the lazily-imported session controller. */
+  readonly controllerReady: Promise<SessionController>;
   i18n: I18n;
   blobStore: BlobUrlStore;
 }

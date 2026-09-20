@@ -1,8 +1,8 @@
-import { lazy, Suspense, useCallback, useEffect, useSyncExternalStore } from 'react';
+import { lazy, Suspense, use, useCallback, useEffect, useSyncExternalStore, type ReactNode } from 'react';
 import { Status } from '@rowfolio/ui';
 import { Landing } from './Landing.tsx';
 import { resolveFeatures } from './features.ts';
-import { ServicesProvider, useI18n, useSessionState, type AppServices } from './context.tsx';
+import { ServicesProvider, useI18n, useServices, type AppServices } from './context.tsx';
 import { readRoute } from './router.ts';
 import type { MessageKey } from '@rowfolio/i18n';
 
@@ -31,7 +31,6 @@ function AppShell() {
     () => i18n.getState(),
     () => i18n.getState(),
   );
-  useSessionState(); // subscribe so diagnostics-free rerenders stay fresh
 
   // Document lang/dir follow the provider (RTL correctness on both entries).
   useEffect(() => {
@@ -72,9 +71,19 @@ function AppShell() {
   }
   return (
     <Suspense fallback={<Status kind="loading" title={i18n.tSafe('a11y.processing' as MessageKey)} />}>
-      <WorkspaceScreen navigateLanding={navigateLanding} />
+      <ControllerGate>
+        <WorkspaceScreen navigateLanding={navigateLanding} />
+      </ControllerGate>
     </Suspense>
   );
+}
+
+/** Suspends until the lazily-created session controller resolves, so every
+ *  workspace consumer can read `services.controller` synchronously. */
+function ControllerGate({ children }: { children: ReactNode }) {
+  const { controllerReady } = useServices();
+  use(controllerReady);
+  return children;
 }
 
 export function App({ services }: { services: AppServices }) {
