@@ -137,14 +137,14 @@ export function PreviewStage({
 
         <Target step="evidence" active={guideStep}>
           <div
-            className="rf-finding"
+            className="rf-finding-card"
             data-rf-surface="ink"
             data-testid="preview-finding"
             data-revealed={state.revealed ? "" : undefined}
           >
-            <span className="rf-finding__eyebrow">{i18n.t("workspace.findings")}</span>
-            <h3 className="rf-finding__title">{i18n.t("finding.north.title")}</h3>
-            <p className="rf-finding__body">
+            <span className="rf-finding-card__eyebrow">{i18n.t("workspace.findings")}</span>
+            <h3 className="rf-finding-card__title">{i18n.t("finding.north.title")}</h3>
+            <p className="rf-finding-card__body">
               {i18n.t(
                 "finding.north.body",
                 {
@@ -154,18 +154,18 @@ export function PreviewStage({
                 { isolateParams: "ltr" },
               )}
             </p>
-            <p className="rf-finding__figure">
+            <p className="rf-finding-card__figure">
               <Bidi dir="ltr" className="rf-numeric">
                 {i18n.formatCurrency(northJune.revenue, "USD", { maxFractionDigits: 0 })}
               </Bidi>
-              <span className="rf-finding__vs">
+              <span className="rf-finding-card__vs">
                 {" "}
                 /{" "}
                 <Bidi dir="ltr" className="rf-numeric">
                   {i18n.formatCurrency(northJune.targetRevenue, "USD", { maxFractionDigits: 0 })}
                 </Bidi>
               </span>
-              <span className="rf-finding__gap">
+              <span className="rf-finding-card__gap">
                 <Bidi dir="ltr" className="rf-numeric">
                   −{i18n.formatPercent(northJune.targetGapRatio, PCT_UNSIGNED)}
                 </Bidi>

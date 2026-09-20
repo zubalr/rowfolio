@@ -39,8 +39,8 @@ export function findingBody(i18n: I18n, snapshot: AnalysisSnapshot, finding: Fin
       if (!metric || metric.value === null) continue;
       if (!finding.metricIds.includes(metricId)) continue; // honesty: only claimed metrics
       params[param] =
-        format === 'percent' ? i18n.formatPercent(metric.value)
-        : format === 'percent-abs' ? formatPercentAbs(i18n, metric.value)
+        format === 'percent' ? i18n.formatPercent(metric.value, { maxFractionDigits: 1 })
+        : format === 'percent-abs' ? formatPercentAbs(i18n, metric.value, { maxFractionDigits: 1 })
         : formatDecimal(i18n, metric.value, metric.unit);
     }
   }

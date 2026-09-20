@@ -22,7 +22,7 @@ export function KpiStrip({ snapshot }: { snapshot: AnalysisSnapshot }) {
           key={metric.id}
           label={i18n.tSafe(metric.labelKey as MessageKey)}
           value={formatMetricValue(i18n, metric)}
-          unit={metric.unit}
+          unit={metric.unit.kind === 'unknown' ? undefined : metric.unit}
           status={metric.status}
           reasonLabel={metric.reasonKey ? i18n.tSafe(metric.reasonKey as MessageKey) : undefined}
         />

@@ -300,41 +300,41 @@ html[lang="ar"] .rf-chip {
 }
 
 /* Finding card — dark evidence-grade surface inside the light page. */
-.rf-finding {
+.rf-finding-card {
   background: var(--rf-ink);
   color: var(--rf-ink-text);
   border-radius: var(--rf-radius-panel);
   padding: var(--rf-space-6);
 }
-.rf-finding__eyebrow {
+.rf-finding-card__eyebrow {
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--rf-ink-data);
 }
-html[lang="ar"] .rf-finding__eyebrow {
+html[lang="ar"] .rf-finding-card__eyebrow {
   letter-spacing: normal;
   font-size: 14px;
 }
-.rf-finding__title {
+.rf-finding-card__title {
   font-size: 24px;
   line-height: 1.3;
   font-weight: 500;
   margin-block: var(--rf-space-2) var(--rf-space-3);
 }
-html[lang="ar"] .rf-finding__title {
+html[lang="ar"] .rf-finding-card__title {
   line-height: 1.6;
 }
-.rf-finding__body {
+.rf-finding-card__body {
   font-size: 15px;
   line-height: 1.6;
   color: var(--rf-ink-muted);
 }
-html[lang="ar"] .rf-finding__body {
+html[lang="ar"] .rf-finding-card__body {
   font-size: 16px;
 }
-.rf-finding__figure {
+.rf-finding-card__figure {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -344,25 +344,25 @@ html[lang="ar"] .rf-finding__body {
   font-weight: 500;
   letter-spacing: -0.02em;
 }
-html[lang="ar"] .rf-finding__figure {
+html[lang="ar"] .rf-finding-card__figure {
   letter-spacing: normal;
 }
-.rf-finding__vs {
+.rf-finding-card__vs {
   font-size: 16px;
   color: var(--rf-ink-muted);
 }
-html[lang="ar"] .rf-finding__vs {
+html[lang="ar"] .rf-finding-card__vs {
   font-size: 17px;
 }
-.rf-finding__gap {
+.rf-finding-card__gap {
   margin-inline-start: auto;
   font-size: 20px;
   color: var(--rf-ink-attention);
 }
-.rf-finding .rf-btn--secondary {
+.rf-finding-card .rf-btn--secondary {
   color: var(--rf-ink-text);
 }
-.rf-finding .rf-btn--secondary .rf-btn__label {
+.rf-finding-card .rf-btn--secondary .rf-btn__label {
   border-color: var(--rf-ink-muted);
 }
 
