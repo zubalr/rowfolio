@@ -7,6 +7,9 @@ import {
   HEAVY_PARSER_EXPORT_MODULES,
 } from "../../tooling/audits/bundle-budget-audit.ts";
 
+import { execFileSync } from "node:child_process";
+import { existsSync, readdirSync, rmSync } from "node:fs";
+
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 describe("bundle budget auditor", () => {
@@ -38,13 +41,39 @@ describe("bundle budget auditor", () => {
 
   it("audits dist directory budgets when apps/web/dist is built", () => {
     const distDir = path.resolve(repoRoot, "apps/web/dist");
-    const result = auditBundleBudgets(distDir);
-    expect(result.heavyModulesInLanding).toEqual([]);
-    if (Object.keys(result.measurements).length > 0) {
-      expect(result.passed).toBe(true);
-      for (const b of result.budgets) {
-        expect(b.actualGzipBytes).toBeLessThanOrEqual(b.limitGzipBytes);
+    const assetsDir = path.join(distDir, "assets");
+    const hasDevRuntime =
+      existsSync(assetsDir) &&
+      readdirSync(assetsDir).some((f) => f.includes("jsx-dev-runtime"));
+
+    let auditTargetDir = distDir;
+    if (!existsSync(path.join(distDir, "index.html")) || hasDevRuntime) {
+      const budgetOutDir = path.resolve(repoRoot, "apps/web/dist-budget");
+      execFileSync(
+        "pnpm",
+        ["--filter", "@rowfolio/web", "exec", "vite", "build", "--outDir", "dist-budget"],
+        {
+          cwd: repoRoot,
+          env: { ...process.env, NODE_ENV: "production" },
+          stdio: "ignore",
+        },
+      );
+      auditTargetDir = budgetOutDir;
+    }
+
+    try {
+      const result = auditBundleBudgets(auditTargetDir);
+      expect(result.heavyModulesInLanding).toEqual([]);
+      if (Object.keys(result.measurements).length > 0) {
+        expect(result.passed).toBe(true);
+        for (const b of result.budgets) {
+          expect(b.actualGzipBytes).toBeLessThanOrEqual(b.limitGzipBytes);
+        }
+      }
+    } finally {
+      if (auditTargetDir !== distDir && existsSync(auditTargetDir)) {
+        rmSync(auditTargetDir, { recursive: true, force: true });
       }
     }
-  });
+  }, 120_000);
 });
