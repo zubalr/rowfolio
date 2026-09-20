@@ -55,11 +55,17 @@ test.describe("Full User Journeys", () => {
     await scenarioRange.first().fill("8");
     await expect(page.locator(".rf-scenario__value, [data-testid='scenario-value']").first()).toBeVisible();
 
-    // 5. Prepare native exports / briefing
+    // 5. Prepare the briefing specimen: the six slide outlines and the
+    // workbook summary flip to data-ready (the demo path previews
+    // readiness here; real downloads happen in the workspace flow and
+    // are covered by Journey 5).
     const prepareBtn = page.locator('[data-testid="preview-briefing"] button, button:has-text("Prepare briefing"), [data-testid="export-prepare-btn"]');
     await expect(prepareBtn.first()).toBeVisible();
     await prepareBtn.first().click();
-    await expect(page.locator('.rf-briefing__file[data-ready="true"], [data-testid="export-ready"]').first()).toBeVisible();
+    const readySlides = page.locator('.rf-briefing__slide[data-ready="true"]');
+    await expect(readySlides.first()).toBeVisible({ timeout: 30_000 });
+    expect(await readySlides.count()).toBe(6);
+    await expect(page.locator('.rf-briefing__workbook[data-ready="true"]')).toBeVisible({ timeout: 30_000 });
 
     // 6. Reset / clear demo session
     const resetBtn = page.locator('button:has-text("Replay demo"), button:has-text("Replay"), [data-testid="clear-session-btn"]');
