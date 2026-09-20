@@ -11,7 +11,12 @@ import type { ResolvedPoint, ResolvedSeries } from "../model.ts";
 
 export const CHART_COLORS = DESIGN_TOKENS.color;
 
-/** Series paint by declared semantic — the deliberate hierarchy. */
+/**
+ * Series paint by declared semantic — the deliberate hierarchy. Paints are
+ * CSS custom properties (applied through `style`, not paint attributes) so a
+ * chart mounted on `[data-rf-surface="ink"]` adopts the ink palette through
+ * the scoped `--rf-c-*` remap without a second code path.
+ */
 export function paintFor(semantic: ResolvedSeries["semantic"]): {
   fill: string;
   stroke: string;
@@ -19,13 +24,29 @@ export function paintFor(semantic: ResolvedSeries["semantic"]): {
 } {
   switch (semantic) {
     case "observed":
-      return { fill: CHART_COLORS.data, stroke: CHART_COLORS.data, dashed: false };
+      return { fill: "var(--rf-c-data)", stroke: "var(--rf-c-data)", dashed: false };
     case "target":
-      return { fill: CHART_COLORS.ink, stroke: CHART_COLORS.ink, dashed: true };
+      return { fill: "var(--rf-c-ink)", stroke: "var(--rf-c-ink)", dashed: true };
     case "scenario":
-      return { fill: "none", stroke: CHART_COLORS.scenario, dashed: true };
+      return { fill: "none", stroke: "var(--rf-c-scenario)", dashed: true };
     case "attention":
-      return { fill: CHART_COLORS.attention, stroke: CHART_COLORS.attention, dashed: false };
+      return { fill: "var(--rf-c-attention)", stroke: "var(--rf-c-attention)", dashed: false };
+  }
+}
+
+/** Short axis caption for the declared unit; null when the unit is opaque. */
+export function unitAxisLabel(unit: Unit): string | null {
+  switch (unit.kind) {
+    case "currency":
+      return unit.currency;
+    case "ratio":
+      return "%";
+    case "percentage-point":
+      return "pp";
+    case "unknown":
+      return null;
+    default:
+      return unit.label;
   }
 }
 
@@ -68,6 +89,11 @@ export function ValueGrid(props: {
           </g>
         );
       })}
+      {unitAxisLabel(unit) !== null ? (
+        <text x={x0 - 8} y={12} textAnchor="end" className="rf-chart-unit">
+          {unitAxisLabel(unit)}
+        </text>
+      ) : null}
     </g>
   );
 }
@@ -126,8 +152,10 @@ export function CategoryAxis(props: {
   labels: Record<string, string>;
   /** Per-category pixel budget (band or step width) used to wrap labels. */
   maxWidth: number;
+  /** Datum key to bold (the emphasized selection), if any. */
+  emphasisKey?: string | null;
 }) {
-  const { keys, xOf, y, labels, maxWidth } = props;
+  const { keys, xOf, y, labels, maxWidth, emphasisKey } = props;
   return (
     <g className="rf-chart-cats" aria-hidden="true">
       {keys.map((key) => {
@@ -140,6 +168,7 @@ export function CategoryAxis(props: {
             y={firstY}
             textAnchor="middle"
             className="rf-chart-cat"
+            data-emphasis={key === emphasisKey ? true : undefined}
             direction="auto"
           >
             {lines.map((line, i) => (

@@ -17,6 +17,9 @@ import { ScenarioPanel } from './ScenarioPanel.tsx';
 import { EvidencePanel } from './EvidencePanel.tsx';
 import { ReviewPanel } from './ReviewPanel.tsx';
 import { ExportDialog } from '../briefing/ExportDialog.tsx';
+import { LazyMotion, MotionConfig, domAnimation } from 'motion/react';
+import { formatScope } from '../evidence/model.ts';
+import './workspace.css';
 
 const STAGE_IDS = ['preflight', 'parse', 'normalize', 'analyze'] as const;
 const STAGE_LABELS: Record<(typeof STAGE_IDS)[number], MessageKey> = {
@@ -89,7 +92,9 @@ export function WorkspaceScreen({ navigateLanding }: { navigateLanding: () => vo
   const busy = state.phase === 'reading' || state.phase === 'profiling' || state.phase === 'analyzing' || state.phase === 'exporting';
 
   return (
-    <div className="rf-workspace">
+    <LazyMotion features={domAnimation}>
+      <MotionConfig reducedMotion="user">
+        <div className="rf-workspace">
       <header className="rf-masthead">
         <button type="button" className="rf-brand rf-brand-btn" onClick={navigateLanding}>
           {i18n.tSafe('brand.name' as MessageKey)}
@@ -185,7 +190,9 @@ export function WorkspaceScreen({ navigateLanding }: { navigateLanding: () => vo
       >
         <p>{i18n.tSafe('upload.previousRetained' as MessageKey)}</p>
       </Dialog>
-    </div>
+        </div>
+      </MotionConfig>
+    </LazyMotion>
   );
 }
 
@@ -307,6 +314,9 @@ function PhaseBody({
               })}
               {' · '}
               <span dir="ltr">{active.source.name}</span>
+            </p>
+            <p className="rf-quiet rf-workspace-scope">
+              {formatScope(i18n, active.snapshot.scope)}
             </p>
           </header>
           <KpiStrip snapshot={active.snapshot} />

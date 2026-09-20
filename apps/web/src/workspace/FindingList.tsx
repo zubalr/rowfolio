@@ -48,6 +48,7 @@ function FindingCard({
   return (
     <li
       className={`rf-finding${selected ? ' is-selected' : ''} rf-severity-${finding.severity}`}
+      data-rf-surface="ink"
       data-testid={findingTestId(finding)}
     >
       <button

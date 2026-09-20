@@ -10,7 +10,6 @@ import { formatUnitValue } from "../localization.ts";
 import { categoryScale, valueScale } from "../scales.ts";
 import {
   CategoryAxis,
-  CHART_COLORS,
   ChartTooltip,
   HitTarget,
   TooltipBody,
@@ -32,6 +31,7 @@ interface BarMark {
   height: number;
   valueY: number;
   value: string | null;
+  negative: boolean;
   paint: { fill: string; stroke: string; dashed: boolean };
 }
 
@@ -52,7 +52,7 @@ function fillFor(ctx: PlotContext, variant: BarsVariant, seriesIdx: number, poin
     // Chronological comparison hierarchy: the latest period is cobalt;
     // earlier periods step back to muted ink rather than competing hues.
     const emphasize = ctx.emphasisKey ? pointKey === ctx.emphasisKey : isLast;
-    return { fill: emphasize ? CHART_COLORS.data : CHART_COLORS.muted, stroke: "none", dashed: false };
+    return { fill: emphasize ? "var(--rf-c-data)" : "var(--rf-c-muted)", stroke: "none", dashed: false };
   }
   return paintFor(series.semantic);
 }
@@ -86,6 +86,7 @@ export function layoutBars(ctx: PlotContext, variant: BarsVariant): BarsLayout {
           height: 0,
           valueY: zeroY - 6,
           value: null,
+          negative: false,
           paint: fillFor(ctx, variant, si, p.key, p.key === keys[keys.length - 1]),
         });
         return;
@@ -101,6 +102,7 @@ export function layoutBars(ctx: PlotContext, variant: BarsVariant): BarsLayout {
         height: h,
         valueY: top - 6,
         value: resolved!.value,
+        negative: v < 0,
         paint: fillFor(ctx, variant, si, p.key, p.key === keys[keys.length - 1]),
       });
     });
@@ -119,6 +121,10 @@ export function BarsPlot({ ctx, variant }: { ctx: PlotContext; variant: BarsVari
     return out;
   }, [model, strings]);
   const active = ctx.activeKey ? model.points.find((p) => p.key === ctx.activeKey) : null;
+  // Direct value labels collide only when each series slot is narrower than
+  // the label — then the emphasized datum keeps its label and the rest defer
+  // to the tooltip and the values table rather than overlapping.
+  const dense = layout.bandWidth / Math.max(1, model.series.length) < 30;
 
   return (
     <div className="rf-chart-plot" {...ctx.explorerProps()}>
@@ -172,28 +178,50 @@ export function BarsPlot({ ctx, variant }: { ctx: PlotContext; variant: BarsVari
                       y={m.y}
                       width={m.width}
                       height={m.height}
-                      fill={m.paint.fill}
-                      stroke={m.paint.dashed ? m.paint.stroke : "none"}
+                      style={{
+                        fill: m.paint.fill,
+                        ...(m.paint.dashed ? { stroke: m.paint.stroke } : {}),
+                      }}
+                      stroke={m.paint.dashed ? undefined : "none"}
                       strokeDasharray={m.paint.dashed ? "5 3" : undefined}
                       strokeWidth={m.paint.dashed ? 1.5 : 0}
+                      data-neg={m.negative || undefined}
                       rx={2}
                       className="rf-chart-bar"
                     />
-                    <text
-                      x={m.x + m.width / 2}
-                      y={m.valueY}
-                      textAnchor="middle"
-                      className="rf-chart-value"
-                      direction="ltr" unicodeBidi="isolate"
-                    >
-                      {formatUnitValue(m.value, model.spec.unit, ctx.formatters, { compact: ctx.width < 480 })}
-                    </text>
+                    {p.key === ctx.emphasisKey && m.height >= 20 ? (
+                      <path
+                        className="rf-chart-mark"
+                        transform={`translate(${m.x + m.width / 2}, ${m.y + 3})`}
+                        d="M -4 0 L 0 6 L 4 0 Z"
+                      />
+                    ) : null}
+                    {dense && p.key !== ctx.emphasisKey && p.key !== ctx.activeKey ? null : p.key ===
+                      ctx.emphasisKey ? (
+                      <EmphasisValueLabel
+                        x={m.x + m.width / 2}
+                        y={m.valueY}
+                        text={formatUnitValue(m.value, model.spec.unit, ctx.formatters, {
+                          compact: ctx.width < 480,
+                        })}
+                      />
+                    ) : (
+                      <text
+                        x={m.x + m.width / 2}
+                        y={m.valueY}
+                        textAnchor="middle"
+                        className="rf-chart-value"
+                        direction="ltr" unicodeBidi="isolate"
+                      >
+                        {formatUnitValue(m.value, model.spec.unit, ctx.formatters, { compact: ctx.width < 480 })}
+                      </text>
+                    )}
                   </g>
                 ),
               )}
             </g>
           ))}
-          <CategoryAxis keys={model.points.map((p) => p.key)} xOf={(k) => layout.catX[k] ?? 0} y={layout.svgHeight - 8} labels={labels} maxWidth={layout.bandWidth + 12} />
+          <CategoryAxis keys={model.points.map((p) => p.key)} xOf={(k) => layout.catX[k] ?? 0} y={layout.svgHeight - 8} labels={labels} maxWidth={layout.bandWidth + 12} emphasisKey={ctx.emphasisKey} />
         </g>
       </svg>
       {active && layout.anchors[active.key] ? (
@@ -202,5 +230,31 @@ export function BarsPlot({ ctx, variant }: { ctx: PlotContext; variant: BarsVari
         </ChartTooltip>
       ) : null}
     </div>
+  );
+}
+
+/** The selected datum's value label: an ink chip so it reads first, on any bar color. */
+function EmphasisValueLabel({ x, y, text }: { x: number; y: number; text: string }) {
+  const chipW = Math.max(30, text.length * 7.4 + 14);
+  return (
+    <g className="rf-chart-emph-label">
+      <rect
+        className="rf-chart-valuechip"
+        x={x - chipW / 2}
+        y={y - 13.5}
+        width={chipW}
+        height={17}
+        rx={5}
+      />
+      <text
+        x={x}
+        y={y}
+        textAnchor="middle"
+        className="rf-chart-value rf-chart-value--chip"
+        direction="ltr" unicodeBidi="isolate"
+      >
+        {text}
+      </text>
+    </g>
   );
 }

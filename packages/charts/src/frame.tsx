@@ -38,7 +38,7 @@ export interface ChartFigureProps {
   /** Localization seam — @rowfolio/i18n's provider satisfies this structurally. */
   localization: ChartLocalization;
   /** Datum key to emphasize (the active finding's datum), if any. */
-  emphasisKey?: string;
+  emphasisKey?: string | undefined;
   /** Fallback width before the container is measured. */
   fallbackWidth?: number;
   /** Heading level for the chart title (default 3). */
