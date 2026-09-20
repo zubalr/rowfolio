@@ -1,0 +1,170 @@
+{
+  "generatedBy": "fixtures/ingest/generate.mjs",
+  "files": {
+    "types-and-formulas.xlsx": {
+      "sha256": "7f8f8e7e9fe1c6d575774b586e57a84f5baaa4dc8f3ea3b880092cdcd92b6ea0",
+      "bytes": 2465,
+      "note": "mixed types: text, number, boolean, formula with and without cached value, error cell, empty cell"
+    },
+    "multi-sheet-hidden.xlsx": {
+      "sha256": "5fdd9431959eb05a043f54a089774804c94ae6a2d5d0d245c71a27eb1ae6365b",
+      "bytes": 3047,
+      "note": "3 sheets: first visible (small), second hidden (table), third veryHidden; non-first-sheet + hidden opt-in"
+    },
+    "non-row1-header.xlsx": {
+      "sha256": "cf9be657636445d55c4a7af3c575f6be503d6efc7b68ee720a8e51f31b70cd47",
+      "bytes": 2467,
+      "note": "title + note rows above the real header at row 4; data 5..8"
+    },
+    "dates-1900.xlsx": {
+      "sha256": "56170bbec188eac30aa926ba2b555d544abc08ebd1155608e21d40e4db69f4a7",
+      "bytes": 2411,
+      "note": "1900 date system: valid serials plus serial 60 (the fake 1900-02-29) and serial 0"
+    },
+    "dates-1904.xlsx": {
+      "sha256": "920ac735ea5e32acbe3bc5d10d4504b5481ff711e759fabf28d818120179dd28",
+      "bytes": 2352,
+      "note": "1904 date system flag; serial 60 is a real date here, serial 0 is valid epoch"
+    },
+    "merged-and-hidden.xlsx": {
+      "sha256": "49d79c1398fc573e2021457b224870781e58542b9810e364585a94c0efed1bf7",
+      "bytes": 2459,
+      "note": "merged A2:B2 inside table, hidden row 5, hidden column 3"
+    },
+    "external-refs.xlsx": {
+      "sha256": "d06a415e807f7db314f7e5bb291829da4afbcc91c0c294798cb1d75db5920488",
+      "bytes": 3009,
+      "note": "externalLink part + TargetMode=External rel — disclosed, never resolved"
+    },
+    "dup-headers.xlsx": {
+      "sha256": "048f31aeb45dc9914445f65a7bd68984c91c48289cf06bc1abf7a6c95298e5bb",
+      "bytes": 2383,
+      "note": "duplicate and blank header cells"
+    },
+    "ole2-xls.xlsx": {
+      "sha256": "3d33ec9057830739bb01ca3cd5c3d49bc60978c890d65f960dcac8ec2a8ae577",
+      "bytes": 72,
+      "note": "OLE2 compound magic (real .xls bytes renamed .xlsx) → UNSUPPORTED ole2-container"
+    },
+    "macro-xlsm.xlsx": {
+      "sha256": "c6f42e6046b7d9d30bdb266e1315453c499e2c6892f07288ee92ed46526aa476",
+      "bytes": 2425,
+      "note": "macroEnabled content type + vbaProject.bin → UNSUPPORTED macro-enabled"
+    },
+    "not-a-workbook.xlsx": {
+      "sha256": "36abbc5f35cf43dc4739c5f69aac5de996202850a12275a7f335bf764098fbf8",
+      "bytes": 128,
+      "note": "valid zip, no content types / no workbook part → UNSUPPORTED not-a-workbook"
+    },
+    "ods-masquerade.xlsx": {
+      "sha256": "9218040d4c36bfb10ddb4db91b871085a12df0361d90999e208f2eef9539dd61",
+      "bytes": 405,
+      "note": "mimetype says opendocument → UNSUPPORTED ods-masquerade"
+    },
+    "encrypted-entries.xlsx": {
+      "sha256": "0490ac9b8adbf9dd3f0741a1743f208d20bd10f1cb1e4053043798f39a2849dd",
+      "bytes": 146,
+      "note": "central-directory encryption flag forged on entries → UNSUPPORTED encrypted-entry"
+    },
+    "path-traversal.xlsx": {
+      "sha256": "e1dab21b05fbbc9ca8ed15f3658c3d346b04e4d598fdd4d0098a1b7622f5d388",
+      "bytes": 247,
+      "note": "entry name ../evil.xml → INVALID path-traversal"
+    },
+    "dup-entry.xlsx": {
+      "sha256": "2b414382173144f39924d9b5b161876ca0e6c3b1e971494118b98bc1d3508fb9",
+      "bytes": 246,
+      "note": "duplicate normalized entry names → INVALID duplicate-entry"
+    },
+    "bomb.xlsx": {
+      "sha256": "4466b337a5e3faf6b9d9c056c22d320c06a2354effd7011bcd9a8e491ae4a47e",
+      "bytes": 81809,
+      "note": "deflate bomb: ~80MiB of zeros, tiny compressed → LIMIT_EXCEEDED (expanded/entry)"
+    },
+    "declared-lie.xlsx": {
+      "sha256": "1edc533400038c9f965fcf009adf310af7656efb8bfd90b31b1b9270eb988d51",
+      "bytes": 81741,
+      "note": "CD declared uncompressed size lies (4 bytes) while entry inflates 80MiB → LIMIT on actual bytes"
+    },
+    "too-many-entries.xlsx": {
+      "sha256": "b93e91769e244941613de80b4694567932469327bb528491edeed232c3698016",
+      "bytes": 192023,
+      "note": "2001 entries → LIMIT_EXCEEDED zip.entries"
+    },
+    "truncated-zip.xlsx": {
+      "sha256": "222de40a1777e758696db505a7ce65a5f58626eb90188c107d011b0ac2c1f21b",
+      "bytes": 101,
+      "note": "EOCD present but central directory truncated → INVALID"
+    },
+    "garbage-pk.xlsx": {
+      "sha256": "c5324ecc61ecb33cd3bdf0c1e210b6fa04536f92effc34d716a11c1fac571f19",
+      "bytes": 36,
+      "note": "PK magic then garbage, no EOCD → INVALID eocd-missing"
+    },
+    "malformed-xml.xlsx": {
+      "sha256": "90144e94384ef7cf64d71c3a6e8c83ce7f46552483064fc53aaedae5ddf3a3a9",
+      "bytes": 1286,
+      "note": "workbook.xml is not XML → INVALID (SheetJS parse fails)"
+    },
+    "quoted-newlines.csv": {
+      "sha256": "b4eb1c39bc2a2c6060af0649d73370a46eb946eca16780df254288fa3eed3e1e",
+      "bytes": 103,
+      "note": "quoted cells containing newlines and delimiters; sparse physical rows"
+    },
+    "semicolon.csv": {
+      "sha256": "715914c0413e39ff50a4d19575ed35bab95f500724700afeaf7217882a3d0b6d",
+      "bytes": 18,
+      "note": "consistent semicolon delimiter"
+    },
+    "ambiguous.csv": {
+      "sha256": "430bf308320e60cd4cf2231928b466f0dc75bd9b1867dd4178f77d923a10e668",
+      "bytes": 18,
+      "note": "rows consistent under BOTH comma and semicolon → AMBIGUOUS_INPUT"
+    },
+    "invalid-utf8.csv": {
+      "sha256": "a3795358f8f1accabdfbca9b6694cee5f28bf97769b536a19d232572cb990e5b",
+      "bytes": 8,
+      "note": "raw 0xFF byte → INVALID csv.invalid-utf8"
+    },
+    "leading-zeros.csv": {
+      "sha256": "980e1b0d7113c05c5c817eb1cc81f693f57db1592d320b270eeb35f91b398ae5",
+      "bytes": 58,
+      "note": "identifiers that must stay text (\"007\", \"01\", \"+1\", \"1e3\")"
+    },
+    "ragged.csv": {
+      "sha256": "50e133e1d159ae1d91ebd88ae61742f1e6ecb370b02d7d02109b47a01b3c7a50",
+      "bytes": 35,
+      "note": "rows with fewer/more fields than the header + blank lines skipped"
+    },
+    "title-rows.csv": {
+      "sha256": "79ffadca3e2d10593a79c8436630a2cdfaa9e4543266706efacdd649c84061f4",
+      "bytes": 55,
+      "note": "comment lines above the real header at physical line 3"
+    },
+    "empty.csv": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "note": "zero bytes → INVALID csv.empty / empty-input"
+    },
+    "whitespace.csv": {
+      "sha256": "78418719c551314c4117464502da70bdb237d18711653938c5238760eded6c17",
+      "bytes": 6,
+      "note": "only whitespace → INVALID csv.empty"
+    },
+    "bom.csv": {
+      "sha256": "4baf8d035fbc583379d998ac9ed3d18276d308ee43cf945ee88d0c54cca33992",
+      "bytes": 11,
+      "note": "UTF-8 BOM stripped before parsing"
+    },
+    "wide-101.xlsx": {
+      "sha256": "cd73bfe99dd6b2a0cd52183396eb6a2f53d6a050d20f457b3d566de835cfd97f",
+      "bytes": 3279,
+      "note": "101 columns → LIMIT_EXCEEDED columns"
+    },
+    "many-rows.xlsx": {
+      "sha256": "f5f90762f3b90cf509d098c00dc712360767d5556690cf52c7fd9987958f3133",
+      "bytes": 801564,
+      "note": "50001 data rows → LIMIT_EXCEEDED rows-including-header (generated, compresses well)"
+    }
+  }
+}
