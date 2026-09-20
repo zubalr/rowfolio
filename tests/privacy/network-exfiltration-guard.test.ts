@@ -1,5 +1,5 @@
 /**
- * Network Exfiltration & Hostile Formula Injection Guard Tests (A20)
+ * Network Exfiltration & Hostile Formula Injection Guard Tests
  *
  * Verifies defenses against:
  * 1. Spreadsheet formula injection (CSV/XLSX DDE, HYPERLINK, external links, command triggers).
@@ -21,7 +21,7 @@ export const HOSTILE_FORMULA_STRINGS = [
 
 /**
  * Sanitizes or neutralizes cell string before export or display.
- * In Rowfolio exports, user strings must never be interpreted as executable formulas.
+ * User strings must never be interpreted as executable formulas.
  */
 export function sanitizeCellStringForExport(value: string): string {
   if (!value) return value;
@@ -37,7 +37,7 @@ export function isSafeStaticRequestMethod(method: string): boolean {
   return method.toUpperCase() === "GET" || method.toUpperCase() === "HEAD";
 }
 
-describe("network exfiltration & hostile injection defense (A20)", () => {
+describe("network exfiltration and hostile injection defense", () => {
   it("neutralizes formula injection characters for cell exports", () => {
     for (const hostile of HOSTILE_FORMULA_STRINGS) {
       const sanitized = sanitizeCellStringForExport(hostile);

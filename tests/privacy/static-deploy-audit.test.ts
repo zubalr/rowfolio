@@ -4,16 +4,23 @@ import { fileURLToPath } from "node:url";
 import {
   auditStaticDirectory,
   scanSourceForBannedImports,
+  scanSourceForStorageViolations,
   ALLOWED_STATIC_EXTENSIONS,
   ALLOWED_BARE_FILES,
   FORBIDDEN_NAMES,
-} from "../../tooling/audits/static-deploy-audit.js";
+} from "../../tooling/audits/static-deploy-audit.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
-describe("static deploy auditor (A20)", () => {
+describe("static deploy auditor", () => {
   it("passes banned imports scan across all packages and apps", () => {
     const result = scanSourceForBannedImports(repoRoot);
+    expect(result.violations).toEqual([]);
+    expect(result.passed).toBe(true);
+  });
+
+  it("passes source storage scan proving zero spreadsheet data persistence", () => {
+    const result = scanSourceForStorageViolations(repoRoot);
     expect(result.violations).toEqual([]);
     expect(result.passed).toBe(true);
   });

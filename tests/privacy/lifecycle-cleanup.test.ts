@@ -1,148 +1,95 @@
 /**
- * Session Lifecycle Cleanup & Resource Disposal Tests (A20)
+ * Session Lifecycle & Worker Transport Cleanup Tests
  *
- * Verifies resource disposal rules from 15_UPLOAD_AND_PRIVACY_SPEC.md:
- * 1. Clear session drops in-memory references and revokes all generated Blob/Object URLs.
- * 2. Failed upload isolation: a failed or corrupt upload attempt preserves the previous
- *    valid session without silent replacement or data loss.
- * 3. Stale worker termination upon session reset.
+ * Verifies production contracts for worker communication and session lifecycle:
+ * 1. Worker transport envelope validation (checkWorkerEnvelope, packEnvelope).
+ * 2. Binary isolation: binary buffers never ride inside JSON messages (zero base64/ArrayBuffer serialization).
+ * 3. Stale worker response classification (classifyWorkerResponse).
+ * 4. Live browser Object URL revocation is marked PENDING until UI is integrated.
  */
 import { describe, expect, it } from "vitest";
+import {
+  checkWorkerEnvelope,
+  packEnvelope,
+  classifyWorkerResponse,
+  PROTOCOL_VERSION,
+} from "../../packages/contracts/src/index.ts";
+import type { WorkerRequest } from "../../packages/contracts/src/index.ts";
 
-interface SessionState {
-  activeFile: string | null;
-  tableData: unknown | null;
-  objectUrls: Set<string>;
-  activeWorker: { terminate: () => void; isTerminated: boolean } | null;
-}
-
-class SessionLifecycleManager {
-  private state: SessionState = {
-    activeFile: null,
-    tableData: null,
-    objectUrls: new Set(),
-    activeWorker: null,
-  };
-
-  public get currentState(): Readonly<SessionState> {
-    return this.state;
-  }
-
-  public initialize(fileName: string, data: unknown): void {
-    this.state.activeFile = fileName;
-    this.state.tableData = data;
-  }
-
-  public registerObjectUrl(url: string): void {
-    this.state.objectUrls.add(url);
-  }
-
-  public attachWorker(worker: { terminate: () => void; isTerminated: boolean }): void {
-    this.state.activeWorker = worker;
-  }
-
-  /**
-   * Clears the current session, revoking all tracked Blob URLs and terminating workers.
-   */
-  public clearSession(revokeUrlFn: (url: string) => void): void {
-    for (const url of this.state.objectUrls) {
-      revokeUrlFn(url);
-    }
-    this.state.objectUrls.clear();
-
-    if (this.state.activeWorker && !this.state.activeWorker.isTerminated) {
-      this.state.activeWorker.terminate();
-      this.state.activeWorker = null;
-    }
-
-    this.state.activeFile = null;
-    this.state.tableData = null;
-  }
-
-  /**
-   * Handles attempted new file upload with failure isolation.
-   * If the parse or validation fails, previous session remains intact.
-   */
-  public attemptUpload(
-    newFileName: string,
-    parserFn: () => unknown,
-  ): { success: boolean; error?: string } {
-    try {
-      const parsedData = parserFn();
-      this.state.activeFile = newFileName;
-      this.state.tableData = parsedData;
-      return { success: true };
-    } catch (err) {
-      // Retain previous state untouched on error
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : String(err),
-      };
-    }
-  }
-}
-
-describe("session lifecycle & disposal (A20)", () => {
-  it("revokes all object URLs and clears in-memory state on clear session", () => {
-    const revokedUrls: string[] = [];
-    const mockRevokeObjectURL = (url: string) => {
-      revokedUrls.push(url);
-    };
-
-    const manager = new SessionLifecycleManager();
-    manager.initialize("test.xlsx", { rows: 2400 });
-    manager.registerObjectUrl("blob:http://localhost/mock-export-xlsx-uuid");
-    manager.registerObjectUrl("blob:http://localhost/mock-export-pptx-uuid");
-
-    expect(manager.currentState.activeFile).toBe("test.xlsx");
-    expect(manager.currentState.objectUrls.size).toBe(2);
-
-    manager.clearSession(mockRevokeObjectURL);
-
-    expect(manager.currentState.activeFile).toBeNull();
-    expect(manager.currentState.tableData).toBeNull();
-    expect(manager.currentState.objectUrls.size).toBe(0);
-    expect(revokedUrls).toEqual([
-      "blob:http://localhost/mock-export-xlsx-uuid",
-      "blob:http://localhost/mock-export-pptx-uuid",
-    ]);
-  });
-
-  it("terminates active workers on session clear", () => {
-    const manager = new SessionLifecycleManager();
-    let terminated = false;
-    const workerMock = {
-      terminate: () => {
-        terminated = true;
-      },
-      get isTerminated() {
-        return terminated;
+describe("session lifecycle and worker transport contracts", () => {
+  it("validates compliant worker request envelope with detached binary slot", () => {
+    const rawBuffer = new Uint8Array([0x50, 0x4b, 0x03, 0x04]).buffer; // PK zip header
+    const request: WorkerRequest = {
+      protocolVersion: PROTOCOL_VERSION,
+      requestId: "req-001",
+      sessionId: "sess-001",
+      revision: 1,
+      operation: "ingest",
+      payload: {
+        sourceName: "sample_operations.xlsx",
+        format: "xlsx",
+        byteLength: rawBuffer.byteLength,
+        binarySlot: "source",
       },
     };
 
-    manager.initialize("large_data.csv", { rows: 5000 });
-    manager.attachWorker(workerMock);
+    const { envelope, transfer } = packEnvelope(request, [{ slot: "source", buffer: rawBuffer }]);
+    const issues = checkWorkerEnvelope(envelope);
 
-    expect(workerMock.isTerminated).toBe(false);
-    manager.clearSession(() => {});
-    expect(workerMock.isTerminated).toBe(true);
-    expect(manager.currentState.activeWorker).toBeNull();
+    expect(issues).toEqual([]);
+    expect(envelope.binaries.length).toBe(1);
+    expect(envelope.binaries[0]?.slot).toBe("source");
+    expect(transfer.length).toBe(1);
   });
 
-  it("preserves previous valid session when a new upload fails", () => {
-    const manager = new SessionLifecycleManager();
-    manager.initialize("valid_quarter1.xlsx", { period: "Q1", total: "1000000" });
+  it("rejects worker envelope when binary data is missing from transferable slots", () => {
+    const malformedEnvelope = {
+      message: {
+        protocolVersion: PROTOCOL_VERSION,
+        requestId: "req-002",
+        sessionId: "sess-001",
+        revision: 1,
+        operation: "ingest",
+        payload: {
+          sourceName: "sample_operations.xlsx",
+          format: "xlsx",
+          byteLength: 4,
+          binarySlot: "source",
+        },
+      },
+      binaries: "invalid-binaries-not-array",
+    };
 
-    // Attempt invalid upload that throws
-    const result = manager.attemptUpload("corrupt_file.xlsx", () => {
-      throw new Error("Invalid central directory header");
-    });
-
-    expect(result.success).toBe(false);
-    expect(result.error).toContain("Invalid central directory header");
-
-    // Previous session MUST remain completely intact
-    expect(manager.currentState.activeFile).toBe("valid_quarter1.xlsx");
-    expect(manager.currentState.tableData).toEqual({ period: "Q1", total: "1000000" });
+    const issues = checkWorkerEnvelope(malformedEnvelope as unknown as Parameters<typeof checkWorkerEnvelope>[0]);
+    expect(issues.length).toBeGreaterThan(0);
+    expect(issues.some((i) => i.rule === "envelope.binaries")).toBe(true);
   });
+
+  it("detects and flags stale worker responses across session revisions", () => {
+    const staleResponse = {
+      protocolVersion: PROTOCOL_VERSION,
+      requestId: "req-stale",
+      sessionId: "sess-001",
+      revision: 1, // Stale revision
+      kind: "progress" as const,
+      stage: "parse" as const,
+      fraction: 0.5,
+    };
+
+    const expectedContext = {
+      requestId: "req-stale",
+      sessionId: "sess-001",
+      revision: 2, // Active revision advanced
+    };
+
+    const freshness = classifyWorkerResponse(staleResponse, expectedContext);
+    expect(freshness).toBe("stale");
+  });
+
+  it.skip(
+    "PENDING: Live browser Object URL revocation and worker pool teardown requires application UI integration",
+    () => {
+      // Integration check: will run in Playwright once application app shell is integrated.
+    },
+  );
 });
