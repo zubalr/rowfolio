@@ -730,6 +730,12 @@ export class SessionController {
 
   /** Hard-cancel in-flight analysis work (watchdog-equivalent manual path). */
   cancelWork(reason?: string): void {
+    // Cancel the live request at the reducer first: a worker-side rejection
+    // may never arrive (nothing in-flight, or the rid already rotated), and
+    // a missing dispatch leaves the pending phase stuck with a dead Cancel.
+    if (this.state.requestId) {
+      this.dispatch({ type: 'request.cancelled', requestId: this.state.requestId });
+    }
     this.analysis?.cancel(reason);
     if (this.state.scenarioRequestId) {
       this.dispatch({ type: 'scenario.failed', requestId: this.state.scenarioRequestId, error: { code: 'CANCELLED', messageKey: 'error.CANCELLED', recoverable: true } });

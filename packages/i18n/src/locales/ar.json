@@ -77,7 +77,7 @@
   "error.AMBIGUOUS_INPUT": "أكّد تفسير البيانات المحدد قبل المتابعة.",
   "error.CANCELLED": "أُلغيت العملية.",
   "error.EXPORT_FAILED": "تعذّر تجهيز الإحاطة. لم يتغيّر تحليلك.",
-  "error.INTERNAL": "حدث خطأ. لم يُرسَل محتوى الملف.",
+  "error.INTERNAL": "حدث خطأ ما.",
   "error.INVALID_FILE": "تعذّرت قراءة هذا الملف بأمان.",
   "error.LIMIT_EXCEEDED": "يتجاوز هذا الملف الحدود المدعومة.",
   "error.SCHEMA_MISMATCH": "لا يتوافق إصدار النتيجة مع هذه الجلسة.",

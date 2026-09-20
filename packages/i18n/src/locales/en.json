@@ -77,7 +77,7 @@
   "error.AMBIGUOUS_INPUT": "Confirm the highlighted interpretation before continuing.",
   "error.CANCELLED": "The operation was cancelled.",
   "error.EXPORT_FAILED": "The briefing could not be prepared. Your analysis is unchanged.",
-  "error.INTERNAL": "Something went wrong. No file contents were sent.",
+  "error.INTERNAL": "Something went wrong.",
   "error.INVALID_FILE": "This file could not be read safely.",
   "error.LIMIT_EXCEEDED": "This file exceeds the supported limits.",
   "error.SCHEMA_MISMATCH": "The result version does not match this session.",

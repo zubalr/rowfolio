@@ -8,9 +8,12 @@ export function formatDecimal(i18n: I18n, value: Decimal, unit: Unit): string {
       return unit.currency ? i18n.formatCurrency(value, unit.currency) : i18n.formatNumber(value);
     case 'ratio':
       return i18n.formatPercent(value);
+    case 'percentage-point':
+      // Deltas are frequently fractional (e.g. -3.75 pp) — integer formatting
+      // would throw; canonical decimals render exactly via formatNumber.
+      return i18n.formatNumber(value);
     case 'count':
     case 'minutes':
-    case 'percentage-point':
     case 'score':
       return i18n.formatInteger(value);
     default:
