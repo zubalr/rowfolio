@@ -170,6 +170,9 @@ html[lang="ar"] .rf-upload__note {
 
 .rf-upload__preview {
   max-block-size: 320px;
+  /* The scroll child (.rf-table-scroll, 480px cap) must clip to this cap —
+     unchecked overflow paints over the header select and Apply/Cancel. */
+  overflow: clip;
 }
 
 /* --- warnings / disclosures ------------------------------------------------ */
