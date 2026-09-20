@@ -185,8 +185,7 @@ describe('deck structure', () => {
     }
   });
 
-  it('fails visibly invalid models instead of clipping', async () => {
-    const model = buildExportModel(snapshot, table, scenario, 'en', 'latn', CREATED);
+  it('fails visibly invalid models instead of clipping', async () => {    const model = buildExportModel(snapshot, table, scenario, 'en', 'latn', CREATED);
     // Nine metrics on one finding slide exceeds the body fit budget.
     const extra = Array.from({ length: 9 }, (_, i) => ({
       ...(model.metrics[0] as ExportModel['metrics'][number]),
@@ -207,5 +206,55 @@ describe('deck structure', () => {
       ),
     };
     await expect(buildPresentation(crowded, () => undefined)).rejects.toThrow(ExportPptxError);
+  });
+
+  it('renders localized human labels, never raw IDs, in visible text', async () => {
+    for (const locale of ['en', 'ar'] as const) {
+      const { bytes } = await buildDeck(locale);
+      const entries = unzip(bytes);
+      for (let i = 1; i <= 6; i += 1) {
+        const xml = textOf(entries, `ppt/slides/slide${i}.xml`);
+        const runs = [...xml.matchAll(/<a:t>(.*?)<\/a:t>/g)].map((m) => m[1]);
+        for (const run of runs) {
+          expect(run, `slide${i} ${locale}`).not.toMatch(
+            /(north-june|north-may|june-|scenario-|quality-|finding-|chart-|slide-)[a-z-]*/,
+          );
+        }
+      }
+      const slide2 = textOf(entries, 'ppt/slides/slide2.xml');
+      if (locale === 'en') {
+        expect(slide2).toContain('USD 6.00m');
+        expect(slide2).toContain('Revenue');
+      } else {
+        expect(slide2).toContain('6.00m');
+      }
+    }
+  });
+
+  it('keeps chart axes above every datum', async () => {
+    const { bytes, model } = await buildDeck('en');
+    const entries = unzip(bytes);
+    const charts = [...entries.keys()].filter((n) => /^ppt\/charts\/chart\d+\.xml$/.test(n));
+    expect(charts.length).toBeGreaterThan(0);
+    for (const name of charts) {
+      const xml = textOf(entries, name);
+      const max = xml.match(/<c:valAx>.*?<c:max val="([^"]+)"\/>.*?<\/c:valAx>/s)?.[1];
+      expect(max, `${name} axis max`).toBeDefined();
+      const data = [...xml.matchAll(/<c:numCache>.*?<\/c:numCache>/gs)]
+        .flatMap((block) => [...block[0].matchAll(/<c:v>(-?[0-9.]+)<\/c:v>/g)].map((m) => Number(m[1])));
+      expect(data.length, `${name} data`).toBeGreaterThan(0);
+      for (const datum of data) {
+        expect(datum, `${name} datum ${datum} within axis`).toBeLessThanOrEqual(Number(max));
+      }
+    }
+    void model;
+  });
+
+  it('draws labeled quality bars as native shapes', async () => {
+    const { bytes } = await buildDeck('en');
+    const entries = unzip(bytes);
+    const xml = textOf(entries, 'ppt/slides/slide5.xml');
+    expect(xml).toContain('Duplicate rows');
+    expect((xml.match(/<a:prstGeom prst="rect">/g) ?? []).length).toBeGreaterThanOrEqual(3);
   });
 });

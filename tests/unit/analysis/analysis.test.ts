@@ -199,10 +199,24 @@ describe('mechanics', () => {
   });
 
   it('bounds chart domains above the data at two significant figures', () => {
-    expect(domainMax(['881000.00', '1000000.00'])).toBe('1100000');
+    // Strictly above max × 1.1: exact hits still get visible headroom, and
+    // negative-exponent scaling keeps small magnitudes on-scale (a 0.23
+    // bound for data 1,1,2 flattened every bar to the same top).
+    expect(domainMax(['881000.00', '1000000.00'])).toBe('1200000');
     expect(domainMax(['1194', '1565'])).toBe('1800');
     expect(domainMax(['0'])).toBe('10');
+    expect(domainMax(['1', '1', '2'])).toBe('2.3');
+    expect(domainMax(['0.1', '0.2'])).toBe('0.23');
     expect(absDecimal('-0.119')).toBe('0.119');
+  });
+
+  it('keeps domain bounds sane for signed zero and extremes', () => {
+    expect(domainMax(['-0.00', '0'])).toBe('10');
+    expect(domainMax(['-5', '-3'])).toBe('5.6');
+    expect(domainMax(['0.000000000000000001', '0.000000000000000002'])).toBe('0.0000000000000000023');
+    expect(domainMax(['999999999999999999999999999999.99'])).toBe('1100000000000000000000000000000');
+    expect(domainMax(['17', '7', '5'])).toBe('19');
+    expect(domainMax(['0.25', '0.19'])).toBe('0.28');
   });
 
   it('derives the previous calendar month with year wrap', () => {

@@ -85,13 +85,15 @@ describe('golden parity', () => {
 });
 
 describe('fallbacks and validation', () => {
-  it('falls back without a scenario: descriptive slide, no scenario chart', () => {
+  it('falls back without a scenario: scenario slide in unavailable state', () => {
     const model = buildExportModel(snapshot, table, null, 'en', 'latn', CREATED);
     expect(model.scenario).toBeNull();
     expect(model.exportId).toBe(`export-${snapshot.id}-en-baseline`);
     expect(model.charts.some((c) => c.id === 'chart-scenario')).toBe(false);
+    // Slide four keeps its scenario identity; the unavailable state is a
+    // designed limitations rendering, not a different slide kind.
     const slide4 = model.slides[3];
-    expect(slide4?.kind).toBe('descriptive');
+    expect(slide4?.kind).toBe('scenario');
     expect(slide4?.chartIds).toEqual([]);
     expect(checkExportModel(model, { snapshot, table, sourceHash: snapshot.sourceHash })).toEqual([]);
   });

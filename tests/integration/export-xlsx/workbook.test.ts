@@ -77,6 +77,30 @@ function unzip(bytes: Uint8Array): Map<string, Uint8Array> {
 const textOf = (entries: Map<string, Uint8Array>, name: string): string =>
   Buffer.from(entries.get(name) as Uint8Array).toString('utf8');
 
+/**
+ * Relationship safety: every hyperlink target must be an in-workbook
+ * `#fragment` (ExcelJS marks even those `TargetMode="External"`, which is
+ * OOXML-correct for hyperlink rels); any other external mode or target
+ * scheme fails. Unsafe part names fail too.
+ */
+function assertInternalLinksOnly(entries: Map<string, Uint8Array>): void {
+  for (const [name, data] of entries) {
+    const lower = name.toLowerCase();
+    expect(lower.includes('vbaproject') || lower.includes('externallink') || lower.includes('oleobject')).toBe(false);
+    if (!name.endsWith('.rels')) continue;
+    const xml = Buffer.from(data).toString('utf8');
+    for (const match of xml.matchAll(/<Relationship [^>]*>/g)) {
+      const tag = match[0];
+      const target = tag.match(/Target="([^"]*)"/)?.[1] ?? '';
+      const isHyperlink = tag.includes('/hyperlink');
+      expect(/^(https?:|mailto:|file:|ftp:)/i.test(target), `external target ${target}`).toBe(false);
+      if (tag.includes('TargetMode="External"')) {
+        expect(isHyperlink && target.startsWith('#'), `non-fragment external rel ${tag.slice(0, 120)}`).toBe(true);
+      }
+    }
+  }
+}
+
 /** Decode the XML entities ExcelJS emits inside formula text. */
 function decodeXmlEntities(text: string): string {
   return text
@@ -128,13 +152,51 @@ describe('workbook structure', () => {
   it('carries no external or unsafe references', async () => {
     const { bytes } = await buildEn();
     const entries = unzip(bytes);
-    for (const [name, data] of entries) {
-      const lower = name.toLowerCase();
-      expect(lower.includes('vbaproject') || lower.includes('externallink') || lower.includes('oleobject')).toBe(false);
-      if (name.endsWith('.rels')) {
-        expect(Buffer.from(data).toString('utf8')).not.toContain('TargetMode="External"');
+    assertInternalLinksOnly(entries);
+  });
+
+  it('links KPI labels to their methodology proofs', async () => {
+    const { bytes } = await buildEn();
+    const entries = unzip(bytes);
+    const rels = [...entries.keys()]
+      .filter((n) => n.startsWith('xl/worksheets/_rels/'))
+      .map((n) => textOf(entries, n))
+      .join('\n');
+    // Local provenance links navigate inside the workbook, never outward.
+    expect(rels).toContain('Target="#');
+    expect(rels).toContain('Methodology');
+  });
+
+  it('writes a localized summary with assumptions separate from facts', async () => {
+    for (const locale of ['en', 'ar'] as const) {
+      const model = buildExportModel(snapshot, table, scenario, locale, 'latn', CREATED);
+      const artifact = await buildWorkbook(model, () => undefined);
+      const entries = unzip(new Uint8Array(artifact.bytes));
+      const strings = textOf(entries, 'xl/sharedStrings.xml');
+      if (locale === 'en') {
+        expect(strings).toContain('A briefing you can take with you.');
+        expect(strings).toContain('Revenue');
+        expect(strings).toContain('Test one assumption.');
+        expect(strings).toContain('Includes the committed 8% operating-cost scenario.');
+      } else {
+        expect(strings).toContain('إحاطة يمكنك الاحتفاظ بها.');
+        expect(strings).toContain('الإيرادات');
       }
+      // Print areas keep every sheet self-contained on paper.
+      const workbook = textOf(entries, 'xl/workbook.xml');
+      expect(workbook.match(/_xlnm\.Print_Area/g)?.length ?? 0).toBe(5);
     }
+  });
+
+  it('marks unresolved quality rows with restrained emphasis', async () => {
+    const { bytes } = await buildEn();
+    const entries = unzip(bytes);
+    // Cell fills live in styles.xml; the sheet carries style indices.
+    const styles = textOf(entries, 'xl/styles.xml');
+    expect(styles).toContain('FFB91C1C');
+    const quality = textOf(entries, 'xl/worksheets/sheet3.xml');
+    // Exactly the five unresolved status cells carry the adverse style.
+    expect(quality.match(/<c r="G\d+" s="\d+"/g)?.length ?? 0).toBe(5);
   });
 
   it('keeps clean-data rows and source coordinates in parity with the model', async () => {

@@ -122,30 +122,39 @@ export function absDecimal(value: string): string {
 }
 
 /**
- * Chart domain ceiling: `max × 1.1` raised to the smallest two-significant-
- * figure bound above it, so axes always clear the data with a stable bound.
+ * Chart domain ceiling: the smallest two-significant-figure bound
+ * strictly above `max × 1.1`, so axes always clear the data with visible
+ * headroom. Strictness matters: a bound merely equal to the stretched
+ * maximum collapses headroom on exact hits, and mis-scaled rendering
+ * (e.g. 0.23 for data 1,1,2) flattens every bar to the same top.
  */
 export function domainMax(values: readonly string[]): string {
   let max = '0';
   for (const v of values) {
-    if (compareDecimal(v, max) > 0) max = v;
+    const abs = v.startsWith('-') ? v.slice(1) : v;
+    if (compareDecimal(abs, max) > 0) max = abs;
   }
-  const stretched = multiplyDecimal(absDecimal(max), '1.1');
+  const stretched = multiplyDecimal(max, '1.1');
   if (compareDecimal(stretched, '0') === 0) return '10';
   const dot = stretched.indexOf('.');
   const intDigits = (dot === -1 ? stretched : stretched.slice(0, dot)).replace(/^0+/, '');
   const fracDigits = dot === -1 ? '' : stretched.slice(dot + 1);
+  // Power of ten of the first significant digit, counting through
+  // leading fractional zeros for sub-one magnitudes.
+  const leadingFracZeros = intDigits.length > 0 ? 0 : (fracDigits.match(/^0*/) as RegExpMatchArray)[0].length;
+  const k = intDigits.length > 0 ? intDigits.length - 1 : -(leadingFracZeros + 1);
   const sig = `${intDigits}${fracDigits}`.replace(/^0+/, '');
-  const k = intDigits.length - 1;
   let t = Number(sig.slice(0, 2).padEnd(2, '0'));
   let order = k - 1;
   const render = (digits: number, power: number): string => {
     const d = String(digits);
     if (power >= 0) return `${d}${'0'.repeat(power)}`;
-    return `0.${'0'.repeat(-power - 1)}${d}`;
+    const right = -power;
+    if (d.length > right) return `${d.slice(0, d.length - right)}.${d.slice(d.length - right)}`;
+    return `0.${'0'.repeat(right - d.length)}${d}`;
   };
   let candidate = render(t, order);
-  if (compareDecimal(candidate, stretched) < 0) {
+  if (compareDecimal(candidate, stretched) <= 0) {
     t += 1;
     if (t === 100) {
       t = 10;

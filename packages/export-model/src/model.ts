@@ -244,7 +244,11 @@ function scenarioChart(
   };
 }
 
-/** Smallest two-significant-figure bound above `max × 1.1` (local rule). */
+/**
+ * Smallest two-significant-figure bound strictly above `max × 1.1`.
+ * Local mirror of the analysis bound rule (packages cannot share
+ * implementations across boundaries); see `domainMax` for rationale.
+ */
 function domainCeil(values: readonly string[]): string {
   let max = '0';
   for (const v of values) {
@@ -256,17 +260,20 @@ function domainCeil(values: readonly string[]): string {
   const dot = scaled.indexOf('.');
   const intDigits = (dot === -1 ? scaled : scaled.slice(0, dot)).replace(/^0+/, '');
   const fracDigits = dot === -1 ? '' : scaled.slice(dot + 1);
-  const sig = `${intDigits}${fracDigits}`.replace(/^0+/, '') || '0';
-  const k = intDigits.length - 1;
+  const leadingFracZeros = intDigits.length > 0 ? 0 : (fracDigits.match(/^0*/) as RegExpMatchArray)[0].length;
+  const k = intDigits.length > 0 ? intDigits.length - 1 : -(leadingFracZeros + 1);
+  const sig = `${intDigits}${fracDigits}`.replace(/^0+/, '');
   let t = Number(sig.slice(0, 2).padEnd(2, '0'));
   let order = k - 1;
   const render = (digits: number, power: number): string => {
     const d = String(digits);
     if (power >= 0) return `${d}${'0'.repeat(power)}`;
-    return `0.${'0'.repeat(-power - 1)}${d}`;
+    const right = -power;
+    if (d.length > right) return `${d.slice(0, d.length - right)}.${d.slice(d.length - right)}`;
+    return `0.${'0'.repeat(right - d.length)}${d}`;
   };
   let candidate = render(t, order);
-  if (compareDecimal(candidate, scaled) < 0) {
+  if (compareDecimal(candidate, scaled) <= 0) {
     t += 1;
     if (t === 100) {
       t = 10;
@@ -322,13 +329,6 @@ export function buildExportModel(
     : null;
   const charts = chart === null ? [...snapshot.charts] : [...snapshot.charts, chart];
 
-  const kindFor = (index: number, fallback: SlideModel['kind']): SlideModel['kind'] => {
-    if (isSample) return (['summary', 'kpis', 'finding', 'scenario', 'quality', 'methodology'] as const)[index] as SlideModel['kind'];
-    return index === 3 && (scenario === null || scenario.status !== 'defined' || chart === null)
-      ? 'descriptive'
-      : fallback;
-  };
-
   const firstFinding = snapshot.findings[0];
   const qualityFinding = snapshot.findings.find((f) => f.kind === 'quality');
   const leadFinding = snapshot.findings.find((f) => f.kind !== 'quality' && f.kind !== 'descriptive')
@@ -353,14 +353,14 @@ export function buildExportModel(
     notes: string[];
   }> = [
     {
-      kind: kindFor(0, 'summary'),
+      kind: 'summary',
       metricIds: [],
       findingIds: leadFinding !== undefined ? [leadFinding.id] : [],
       chartIds: [],
       notes: [`scope:${scopeText}`, recordsNote, isSample ? 'synthetic reference' : 'user upload'],
     },
     {
-      kind: kindFor(1, 'kpis'),
+      kind: 'kpis',
       metricIds: isSample
         ? ['june-revenue', 'june-operating-cost', 'june-contribution', 'june-margin']
         : mergedMetrics.filter((m) => m.status === 'defined' && m.unit.kind !== 'ratio').slice(0, 4).map((m) => m.id),
@@ -369,7 +369,7 @@ export function buildExportModel(
       notes: [`scope:${scopeText}`],
     },
     {
-      kind: kindFor(2, 'finding'),
+      kind: 'finding',
       metricIds: leadFinding !== undefined ? [...leadFinding.metricIds] : [],
       findingIds: leadFinding !== undefined ? [leadFinding.id] : [],
       chartIds: leadFinding?.chartId != null ? [leadFinding.chartId] : [],
@@ -378,7 +378,7 @@ export function buildExportModel(
         : ['no eligible findings'],
     },
     {
-      kind: kindFor(3, 'scenario'),
+      kind: 'scenario',
       metricIds: isSample ? ['june-margin', 'scenario-margin', 'scenario-contribution'] : scenarioMetricIds,
       findingIds: [],
       chartIds: chart !== null ? [chart.id] : [],
@@ -387,7 +387,7 @@ export function buildExportModel(
         : [`scenario unavailable: ${scenario?.reasonKey ?? 'no scenario'}`],
     },
     {
-      kind: kindFor(4, 'quality'),
+      kind: 'quality',
       metricIds: [],
       findingIds: qualityFinding !== undefined ? [qualityFinding.id] : [],
       // Quality evidence lives in the workbook and the finding's ledger;
@@ -401,7 +401,7 @@ export function buildExportModel(
       ],
     },
     {
-      kind: kindFor(5, 'methodology'),
+      kind: 'methodology',
       metricIds: [],
       findingIds: [],
       chartIds: [],

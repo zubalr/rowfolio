@@ -153,7 +153,7 @@ describe('export continuity and artifacts', () => {
       for (const match of xml.matchAll(/<f>(.*?)<\/f>/g)) {
         if ((match[1] as string).includes('SUM(A1:A2)')) formulaLeak = true;
       }
-      if (name.endsWith('.rels') && xml.includes('TargetMode="External"')) formulaLeak = true;
+      if (name.endsWith('.rels') && hasExternalTarget(xml)) formulaLeak = true;
     }
     check('xlsx-no-leak', !formulaLeak, 'no user text in formulas or external rels');
 
@@ -165,7 +165,7 @@ describe('export continuity and artifacts', () => {
     check('pptx-notes', notes.includes('finding:finding-quality'), 'lead finding id in notes');
     let external = false;
     for (const [name, data] of pptx) {
-      if (name.endsWith('.rels') && Buffer.from(data).toString('utf8').includes('TargetMode="External"')) external = true;
+      if (name.endsWith('.rels') && hasExternalTarget(Buffer.from(data).toString('utf8'))) external = true;
     }
     check('pptx-no-external', !external, 'no external relationships');
   });
@@ -228,6 +228,19 @@ describe('pipeline report', () => {
  * are asserted separately against the model — so embeddings are excluded
  * while everything else must be identical across repeat builds.
  */
+function hasExternalTarget(xml: string): boolean {
+  for (const match of xml.matchAll(/<Relationship [^>]*>/g)) {
+    const tag = match[0];
+    const target = tag.match(/Target="([^"]*)"/)?.[1] ?? '';
+    if (/^(https?:|mailto:|file:|ftp:)/i.test(target)) return true;
+    if (tag.includes('TargetMode="External"')) {
+      const isFragmentLink = tag.includes('/hyperlink') && target.startsWith('#');
+      if (!isFragmentLink) return true;
+    }
+  }
+  return false;
+}
+
 function normalizeChartParts(entries: Map<string, Uint8Array>): Map<string, Uint8Array> {
   const scrub = (text: string): string => text
     .replace(/chart\d+/g, 'chart#')
