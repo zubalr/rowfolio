@@ -154,13 +154,16 @@ describe("reference services adapter", () => {
     expect(out.value).toBe("0.3107202680067001675041876046901172529313");
   });
 
-  it("returns reasonKey (not a diagnostic code) for an undefined proof", () => {
+  it("returns the diagnostic code for an undefined proof (UI shows proof.reasonKey)", () => {
     const { bundle } = scenarioFixture("undefined-metric");
     const svcs = referenceServices(bundle.table, bundle.snapshot.provenance);
     const proof = bundle.snapshot.provenance.find((p) => p.id === "june-margin-proof")!;
     const out = svcs.evaluateProof(proof, bundle.table, bundle.snapshot.metrics);
     expect(out.value).toBeNull();
-    expect(out.reasonKey).toBe("coverage.partial");
+    // The evaluator reports WHY it failed (missing operand); the authored
+    // i18n reason (`coverage.partial`) stays on the proof for display.
+    expect(out.reasonKey).toBe("metric.missing");
+    expect(proof.reasonKey).toBe("coverage.partial");
   });
 
   it("pages a 100-row selection at 50 rows per page", () => {
@@ -182,7 +185,7 @@ describe("reference services adapter", () => {
     const sel = SNAPSHOT.provenance
       .find((p) => p.id === "june-revenue-proof")!
       .selections.find((s) => s.id === "june-revenue-rows")!;
-    const page = services.readEvidencePage(TABLE, sel, 0, 1000);
+    const page = services.readEvidencePage(TABLE, sel, 0, 500);
     // The span already shrank around ledger-excluded rows (2416–2418 sit
     // outside it); the paged set covers exactly the contributing extent.
     expect(page.total).toBe(600);

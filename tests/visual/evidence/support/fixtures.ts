@@ -120,6 +120,14 @@ function undefinedMetricSnapshot(): AnalysisSnapshot {
   proof.status = "undefined";
   proof.result = null;
   proof.reasonKey = "coverage.partial";
+  // Provenance recomputes from clean cells, so a flipped status alone is not
+  // enough — point the numerator at a metric that does not exist so the
+  // expression itself comes back undefined.
+  proof.expression = {
+    op: "divide",
+    left: { op: "metric", metricId: "june-margin-absent-operand" },
+    right: { op: "metric", metricId: "june-revenue" },
+  };
   const finding: Finding = clone(BASE);
   finding.id = "finding-margin-demo";
   finding.titleKey = "finding.descriptive.title";

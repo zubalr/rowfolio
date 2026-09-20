@@ -72,18 +72,22 @@ function ResultLine({
   services,
   table,
   metrics,
+  contextProofs,
   i18n,
 }: {
   proof: Provenance;
   services: EvidenceServices;
   table: NormalizedTable;
   metrics: readonly Metric[];
+  contextProofs: readonly Provenance[];
   i18n: I18n;
 }) {
-  const evaluated = services.evaluateProof(proof, table, metrics);
+  const evaluated = services.evaluateProof(proof, table, metrics, contextProofs);
   const formatted = formatProofResult(i18n, proof, metrics);
   if (evaluated.value === null || evaluated.reasonKey !== null) {
-    const reason = evaluated.reasonKey ?? proof.reasonKey;
+    // Prefer the proof's authored reason key (localized copy); fall back to the
+    // evaluator's diagnostic code when the proof carries none.
+    const reason = proof.reasonKey ?? evaluated.reasonKey;
     return (
       <div className="rf-evidence__result">
         <span className="rf-evidence__equals" aria-hidden="true">
@@ -289,6 +293,7 @@ export function EvidencePanel({
                 services={services}
                 table={bundle.table}
                 metrics={bundle.snapshot.metrics}
+                contextProofs={subject.proofs}
                 i18n={i18n}
               />
               <p className="rf-evidence__method">
