@@ -23,6 +23,7 @@ import type {
   Metric,
   SlideModel,
 } from '@rowfolio/contracts';
+import { exportUnitLabel } from '@rowfolio/export-model';
 import { ExportPptxError } from './presentation.ts';
 import { hasLabel, label } from './labels.ts';
 import {
@@ -101,7 +102,7 @@ function fitGuard(slideId: string, box: string, text: string, fontPt: number, wi
 
 function metricLine(ctx: LayoutContext, metric: Metric): string {
   const name = hasLabel(metric.labelKey) ? label(ctx.locale, metric.labelKey) : metric.id;
-  return `${name}: ${formatMetricValue(metric.value, metric.unit.kind, metric.unit.label)}`;
+  return `${name}: ${formatMetricValue(metric.value, metric.unit)}`;
 }
 
 function chrome(ctx: LayoutContext): void {
@@ -301,11 +302,7 @@ function coverageLine(ctx: LayoutContext): string | null {
   return hasLabel(key) ? label(ctx.locale, key) : null;
 }
 
-/** Visible unit code: stored fractions display under `%`, never `fraction`. */
-function displayUnit(unitKind: string, unitLabel: string): string {
-  if (unitKind === 'ratio') return '%';
-  return unitLabel;
-}
+
 
 /* ------------------------------------------------------------------ */
 /* Slide 1 — From rows to a decision                                   */
@@ -379,8 +376,8 @@ function layoutKpis(ctx: LayoutContext): void {
     const negative = metric.value !== null && metric.value.startsWith('-');
     const color = metric.unit.kind === 'ratio' && negative ? RED : INK;
     const big = metric.unit.kind === 'currency' && metric.value !== null
-      ? `${metric.unit.label} ${formatCompact(metric.value)}`
-      : formatMetricValue(metric.value, metric.unit.kind, metric.unit.label);
+      ? `${exportUnitLabel(metric.unit)} ${formatCompact(metric.value)}`.trim()
+      : formatMetricValue(metric.value, metric.unit);
     const name = hasLabel(metric.labelKey) ? label(locale, metric.labelKey) : metric.id;
     textBox(ctx, `kpi-${i}`, [
       { text: big, options: { breakLine: true } },
@@ -392,8 +389,8 @@ function layoutKpis(ctx: LayoutContext): void {
   // Native data panel: exact values beside the headlines.
   const rows = metrics.map((metric) => [
     { text: hasLabel(metric.labelKey) ? label(locale, metric.labelKey) : metric.id, options: {} },
-    { text: formatMetricValue(metric.value, metric.unit.kind, metric.unit.label), options: {} },
-    { text: displayUnit(metric.unit.kind, metric.unit.label), options: {} },
+    { text: formatMetricValue(metric.value, metric.unit), options: {} },
+    { text: exportUnitLabel(metric.unit), options: {} },
   ]);
   fitGuard(slide.id, 'table', JSON.stringify(rows), SMALL_SIZE, 12.23, 1.9);
   ctx.deck.addTable(rows, {
@@ -477,7 +474,6 @@ function layoutScenario(ctx: LayoutContext): void {
     textBox(ctx, 'body', [
       { text: label(locale, 'scenario.question'), options: { bold: true, fontSize: 20 } },
       { text: reason },
-      { text: label(locale, 'empty.noData'), options: { fontSize: SMALL_SIZE, color: GRAY } },
     ].map((line) => ({ ...line, options: { ...(line.options ?? {}), breakLine: true } })), {
       x: LEFT_X, y: BODY_Y, w: 12.23, h: BODY_H, fontSize: BODY_SIZE, color: INK,
     });
@@ -490,12 +486,12 @@ function layoutScenario(ctx: LayoutContext): void {
   const lines: Array<{ text: string; options?: Record<string, unknown> }> = [
     { text: label(locale, 'scenario.question'), options: { bold: true, fontSize: 20 } },
   ];
-  if (cost !== undefined) lines.push({ text: `${label(locale, 'scenario.costChange')}: ${formatMetricValue(cost.value, cost.unit.kind, cost.unit.label)}`, options: { color: AMBER } });
+  if (cost !== undefined) lines.push({ text: `${label(locale, 'scenario.costChange')}: ${formatMetricValue(cost.value, cost.unit)}`, options: { color: AMBER } });
   if (contribution !== undefined) {
-    lines.push({ text: `${label(locale, 'metric.contribution')}: ${formatMetricValue(contribution.value, contribution.unit.kind, contribution.unit.label)}`, options: { color: AMBER } });
+    lines.push({ text: `${label(locale, 'metric.contribution')}: ${formatMetricValue(contribution.value, contribution.unit)}`, options: { color: AMBER } });
   }
   if (margin !== undefined) {
-    lines.push({ text: `${label(locale, 'metric.margin')}: ${formatMetricValue(margin.value, margin.unit.kind, margin.unit.label)}`, options: { color: AMBER } });
+    lines.push({ text: `${label(locale, 'metric.margin')}: ${formatMetricValue(margin.value, margin.unit)}`, options: { color: AMBER } });
   }
   lines.push({ text: label(locale, 'limitations.noForecast'), options: { fontSize: SMALL_SIZE, color: GRAY } });
   if (scenario.definitionId === 'operating-cost-v1') {
@@ -586,7 +582,7 @@ function layoutMethodology(ctx: LayoutContext): void {
       ? label(locale, metric.labelKey)
       : label(locale, 'evidence.calculation');
     const shown = metric !== undefined && metric.value !== null
-      ? formatMetricValue(metric.value, metric.unit.kind, metric.unit.label)
+      ? formatMetricValue(metric.value, metric.unit)
       : (proof.result ?? '');
     return { text: `${name} = ${shown}`, options: { breakLine: true } };
   });

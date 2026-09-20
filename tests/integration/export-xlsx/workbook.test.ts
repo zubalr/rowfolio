@@ -294,6 +294,77 @@ describe('workbook structure', () => {
     await expect(buildWorkbook(big, () => undefined)).rejects.toThrow(ExportXlsxError);
   });
 
+  it('keeps >15-digit metric decimals numeric with the exact value in a note', async () => {
+    const { bytes } = await buildEn();
+    const entries = unzip(bytes);
+    const kpi = textOf(entries, 'xl/worksheets/sheet4.xml');
+    const exact = '0.3107202680067001675041876046901172529313';
+    // Numeric formula cell with the model's cached float result — not a
+    // bare string and not silently skipped by the formula pass.
+    const idx = kpi.indexOf(`<v>${Number(exact)}</v>`);
+    expect(idx, 'numeric downtime-change result').toBeGreaterThan(-1);
+    const rowXml = kpi.slice(kpi.lastIndexOf('<row', idx), kpi.indexOf('</row>', idx));
+    expect(rowXml).toContain('<f>');
+    expect(rowXml).toContain('IF(');
+    // The canonical decimal survives verbatim in the cell's comment part
+    // (and in the Methodology proof row, which is the provenance surface).
+    const comments = [...entries.keys()]
+      .filter((n) => n.startsWith('xl/comments'))
+      .map((n) => textOf(entries, n))
+      .join('\n');
+    expect(comments).toContain(exact);
+  });
+
+  it('suppresses placeholder unit labels and falls back to ISO codes', async () => {
+    const model = buildExportModel(snapshot, table, scenario, 'en', 'latn', CREATED);
+    const mutated: ExportModel = {
+      ...model,
+      metrics: model.metrics.map((m) =>
+        m.id === 'north-june-revenue' || m.id === 'north-june-orders'
+          ? { ...m, unit: { ...m.unit, label: 'unit' } }
+          : m,
+      ),
+    };
+    const artifact = await buildWorkbook(mutated, () => undefined);
+    const entries = unzip(new Uint8Array(artifact.bytes));
+    const strings = textOf(entries, 'xl/sharedStrings.xml');
+    // Placeholders never reach a cell; real labels and ISO codes do.
+    expect(strings).not.toContain('<t>unit</t>');
+    expect(strings).not.toContain('<t>fraction</t>');
+    expect(strings).toContain('<t>USD</t>');
+    expect(strings).toContain('<t>%</t>');
+    expect(strings).toContain('<t>minutes</t>');
+  });
+
+  it('localizes KPI headers and coverage counts in Arabic', async () => {
+    for (const locale of ['en', 'ar'] as const) {
+      const numbering = locale === 'ar' ? 'arab' : 'latn';
+      const model = buildExportModel(snapshot, table, scenario, locale, numbering, CREATED);
+      const artifact = await buildWorkbook(model, () => undefined);
+      const entries = unzip(new Uint8Array(artifact.bytes));
+      const strings = textOf(entries, 'xl/sharedStrings.xml');
+      const tables = [...entries.keys()]
+        .filter((n) => n.startsWith('xl/tables/'))
+        .map((n) => textOf(entries, n))
+        .join('\n');
+      if (locale === 'en') {
+        expect(strings).toContain('<t>Metric</t>');
+        expect(strings).toContain('eligible ');
+        expect(tables).toContain('name="Metric"');
+      } else {
+        expect(strings).toContain('المؤشر');
+        expect(strings).toContain('الوحدة');
+        expect(strings).toContain('التغطية');
+        expect(strings).not.toContain('<t>Metric</t>');
+        expect(strings).not.toContain('eligible ');
+        // Coverage counts honor the Arabic numbering system.
+        expect(strings).toMatch(/مؤهلة [٠-٩]+\/[٠-٩]+/);
+        expect(tables).toContain('name="المؤشر"');
+        expect(tables).not.toContain('name="Metric"');
+      }
+    }
+  });
+
   it('escapes quotes in SUMIFS region criteria so hostile text stays one literal', async () => {
     expect(escapeFormulaStringLiteral('North')).toBe('North');
     expect(escapeFormulaStringLiteral('say "hi"')).toBe('say ""hi""');

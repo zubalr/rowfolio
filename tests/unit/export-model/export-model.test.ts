@@ -19,6 +19,7 @@ import type { AnalysisOptions } from '../../../packages/contracts/interfaces.ts'
 import {
   baselineMarginOf,
   buildExportModel,
+  exportUnitLabel,
   ExportModelError,
   isSampleModel,
   localizeDigits,
@@ -150,6 +151,18 @@ describe('helpers', () => {
     expect(periodLabel(null, null, 'en', 'latn')).toBe('All periods');
     expect(localizeDigits('2026', 'arab')).toBe('٢٠٢٦');
     expect(localizeDigits('2026', 'latn')).toBe('2026');
+  });
+
+  it('suppresses engine placeholder units and falls back to ISO codes', () => {
+    expect(exportUnitLabel({ kind: 'currency', label: 'unit', currency: 'USD' })).toBe('USD');
+    expect(exportUnitLabel({ kind: 'currency', label: '', currency: 'EUR' })).toBe('EUR');
+    expect(exportUnitLabel({ kind: 'currency', label: 'USD', currency: 'USD' })).toBe('USD');
+    expect(exportUnitLabel({ kind: 'ratio', label: 'fraction', currency: null })).toBe('%');
+    expect(exportUnitLabel({ kind: 'count', label: 'unit', currency: null })).toBe('');
+    expect(exportUnitLabel({ kind: 'minutes', label: 'fraction', currency: null })).toBe('');
+    expect(exportUnitLabel({ kind: 'score', label: '  ', currency: null })).toBe('');
+    expect(exportUnitLabel({ kind: 'count', label: 'orders', currency: null })).toBe('orders');
+    expect(exportUnitLabel({ kind: 'unknown', label: 'unit', currency: null })).toBe('');
   });
 
   it('carries method notes with source identity on the methodology slide', () => {

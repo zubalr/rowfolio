@@ -26,6 +26,7 @@ import type {
   ScenarioResult,
   SheetModel,
   SlideModel,
+  Unit,
 } from '@rowfolio/contracts';
 
 export class ExportModelError extends Error {
@@ -71,6 +72,27 @@ export function periodLabel(start: string | null, end: string | null, locale: Lo
   const year = start.slice(0, 4);
   const name = (locale === 'ar' ? AR_MONTHS : EN_MONTHS)[month - 1] as string;
   return localizeDigits(`${name} ${year}`, numbering);
+}
+
+/**
+ * Display unit for a metric in export artifacts. Engines emit placeholder
+ * labels ("unit", "fraction") that must never reach visible copy: ratios
+ * display as `%`, currencies fall back to their ISO code, and other
+ * placeholders suppress to empty. Real labels pass through trimmed.
+ * Mirrors the workspace badge rule (`metricUnitLabel`) with a populated
+ * unit column: suppression returns `''` where the app hides the badge.
+ */
+export function exportUnitLabel(unit: Unit): string {
+  switch (unit.kind) {
+    case 'currency':
+      return unit.label === 'unit' || unit.label === '' ? (unit.currency ?? '') : unit.label;
+    case 'ratio':
+      return '%';
+    default: {
+      const label = unit.label.trim();
+      return label === 'unit' || label === 'fraction' ? '' : label;
+    }
+  }
 }
 
 /** Required sample metric ids that unlock the pre-authored narrative. */

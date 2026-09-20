@@ -4,8 +4,9 @@
  *
  * Source: the planning locale reference behind the in-repo
  * translation-key manifest; canonical home is the owned locale
- * catalog (Cloud/i18n lane). Structural ledger headers stay in
- * stable technical English pending catalog keys (see receipt).
+ * catalog (Cloud/i18n lane). Raw-data ledger headers (cleaned rows,
+ * issue columns, methodology items) stay in stable technical English
+ * pending catalog keys (see receipt).
  */
 import type { Locale } from '@rowfolio/contracts';
 
@@ -43,6 +44,11 @@ const STRINGS: Record<Locale, Record<string, string>> = {
     "scenario.assumption.revenueFixed": "Revenue stays fixed.",
     "scenario.costChange": "Operating cost change",
     "scenario.assumption.mechanical": "Only selected operating costs change; this is not a forecast.",
+    "table.metric": "Metric",
+    "table.value": "Value",
+    "table.unit": "Unit",
+    "table.coverage": "Coverage",
+    "coverage.eligible": "eligible {eligible}/{total}",
   },
   ar: {
     "metric.revenue": "الإيرادات",
@@ -77,6 +83,11 @@ const STRINGS: Record<Locale, Record<string, string>> = {
     "scenario.assumption.revenueFixed": "تبقى الإيرادات ثابتة.",
     "scenario.costChange": "التغيّر في تكاليف التشغيل",
     "scenario.assumption.mechanical": "تتغيّر تكاليف التشغيل المحددة فقط؛ وهذا ليس توقعاً.",
+    "table.metric": "المؤشر",
+    "table.value": "القيمة",
+    "table.unit": "الوحدة",
+    "table.coverage": "التغطية",
+    "coverage.eligible": "مؤهلة {eligible}/{total}",
   },
 };
 

@@ -251,6 +251,42 @@ describe('deck structure', () => {
     void model;
   });
 
+  it('suppresses engine placeholder units in the KPI table and headlines', async () => {
+    const model = buildExportModel(snapshot, table, scenario, 'en', 'latn', CREATED);
+    const mutated: ExportModel = {
+      ...model,
+      metrics: model.metrics.map((m) =>
+        m.id === 'june-revenue' || m.id === 'june-operating-cost'
+          ? { ...m, unit: { ...m.unit, label: 'unit' } }
+          : m,
+      ),
+    };
+    const artifact = await buildPresentation(mutated, () => undefined);
+    const entries = unzip(new Uint8Array(artifact.bytes));
+    const slide2 = textOf(entries, 'ppt/slides/slide2.xml');
+    // Currency placeholders resolve to the ISO code; none print raw.
+    expect(slide2).not.toContain('<a:t>unit</a:t>');
+    expect(slide2).not.toContain('<a:t>fraction</a:t>');
+    expect(slide2).toContain('USD 6.00m');
+  });
+
+  it('renders an honest empty state when no scenario is defined', async () => {
+    for (const locale of ['en', 'ar'] as const) {
+      const model = buildExportModel(snapshot, table, null, locale, 'latn', CREATED);
+      const artifact = await buildPresentation(model, () => undefined);
+      const entries = unzip(new Uint8Array(artifact.bytes));
+      const slide4 = textOf(entries, 'ppt/slides/slide4.xml');
+      // The unavailable reason still explains; the data table has 2,400
+      // usable rows, so the no-data line must not appear.
+      if (locale === 'en') {
+        expect(slide4).toContain('Confirm compatible revenue and operating-cost columns');
+        expect(slide4).not.toContain('No usable rows');
+      } else {
+        expect(slide4).not.toContain('قابلة للاستخدام');
+      }
+    }
+  });
+
   it('draws labeled quality bars as native shapes', async () => {
     const { bytes } = await buildDeck('en');
     const entries = unzip(bytes);
