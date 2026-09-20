@@ -42,6 +42,17 @@ export function ExportDialog() {
           {i18n.tSafe(ex.failure.messageKey as MessageKey)}
         </div>
       )}
+      {/*
+        A model-build failure lands on `state.error` (request.failed) before
+        `export.begin` — the session banner renders it behind this modal, so
+        the dialog would otherwise look silently empty. While the requestId
+        is held the build is still running and a stale error stays hidden.
+      */}
+      {!ex.building && state.requestId === null && state.error !== null && (
+        <div className="rf-banner rf-banner-error" role="alert">
+          {i18n.tSafe(state.error.messageKey as MessageKey)}
+        </div>
+      )}
       {!ex.building && (ex.artifacts.xlsx || ex.artifacts.pptx) && (
         <div className="rf-export-links">
           <p>{i18n.tSafe('export.ready' as MessageKey)}</p>
