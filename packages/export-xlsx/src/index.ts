@@ -6,16 +6,11 @@
  * the ExcelJS dependency never leaks across the boundary (bytes travel
  * out of band with explicit metadata).
  */
-import type { BuildWorkbook } from '@rowfolio/contracts/interfaces';
-import { buildWorkbook as buildWorkbookImpl } from './workbook.ts';
-
-export type { BuildWorkbook };
 export {
   assertSafeSheetName,
   buildWorkbook,
   ExportXlsxError,
   validateModelLimits,
 } from './workbook.ts';
+export type { BuiltArtifact, Progress } from './workbook.ts';
 export { MAX_CELL_CHARACTERS, MAX_EXPORT_DATA_ROWS } from './workbook.ts';
-
-export const buildWorkbookApi: BuildWorkbook = buildWorkbookImpl;

@@ -7,14 +7,8 @@
  * testability; engine internals stay module-private.
  */
 import type { RawTable } from '@rowfolio/contracts';
-import type {
-  ApprovalPlan,
-  NormalizeTable,
-  ProfileTable,
-} from '@rowfolio/contracts/interfaces';
 
-export type { ApprovalPlan, RawTable };
-export type { NormalizeTable, ProfileTable };
+export type { RawTable };
 export { profileTable } from './profile.ts';
 export type { CellIndex, ProfileResult } from './profile.ts';
 export {
@@ -26,6 +20,6 @@ export {
   slugColumnId,
 } from './profile.ts';
 export { normalizeTable, normalizationRevisionOf, originalValue } from './normalize.ts';
-export type { RevisionPayload } from './normalize.ts';
+export type { ApprovalPlan, RevisionPayload } from './normalize.ts';
 export { NormalizeError } from './normalize.ts';
 export { sha256HexBytes, sha256HexUtf8 } from './sha256.ts';

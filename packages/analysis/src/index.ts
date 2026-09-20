@@ -5,13 +5,10 @@
  * boundary. Scope mechanics, comparison rules and the sample pack are
  * exported for testability; arithmetic stays in contracts.
  */
-import type { Analyze } from '@rowfolio/contracts/interfaces';
-import { analyze as analyzeImpl } from './analyze.ts';
-
-export type { Analyze };
 export { analyze, qualitySummaryOf, snapshotId, topFindings } from './analyze.ts';
 export { compareFindings } from './analyze.ts';
 export { AnalysisError } from './analyze.ts';
+export type { AnalysisOptions } from './analyze.ts';
 export {
   buildSamplePack,
   evaluateOutliers,
@@ -40,5 +37,3 @@ export {
   relativeChange,
   trendDirection,
 } from './mechanics.ts';
-
-export const analyzeApi: Analyze = analyzeImpl;

@@ -16,8 +16,8 @@ import type {
   Metric,
   NormalizedTable,
   Provenance,
+  Scope,
 } from '@rowfolio/contracts';
-import type { AnalysisOptions } from '@rowfolio/contracts/interfaces';
 import { domainMax } from './mechanics.ts';
 import { formatScale } from './sample.ts';
 import {
@@ -40,6 +40,16 @@ export class AnalysisError extends Error {
     this.name = 'AnalysisError';
     this.code = code;
   }
+}
+
+/**
+ * Analysis options. Structural mirror of the contract `AnalysisOptions`
+ * interface (deep workspace imports are forbidden by repo convention).
+ */
+export interface AnalysisOptions {
+  readonly version: '1.0.0';
+  readonly confirmedScope: Scope;
+  readonly samplePolicyId: string | null;
 }
 
 /** Rank key: class priority, then coverage and magnitude (descending), then stable id. */

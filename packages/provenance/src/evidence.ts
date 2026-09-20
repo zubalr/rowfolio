@@ -14,7 +14,17 @@ import type {
   QualityIssue,
   RowSelection,
 } from '@rowfolio/contracts';
-import type { EvidencePage } from '@rowfolio/contracts/interfaces';
+
+/**
+ * Bounded evidence page. Structural mirror of the contract `EvidencePage`
+ * interface (deep workspace imports are forbidden by repo convention).
+ */
+export interface EvidencePage {
+  readonly rows: readonly NormalizedRow[];
+  readonly offset: number;
+  readonly total: number;
+  readonly nextOffset: number | null;
+}
 import { ProofError } from './proof.ts';
 import { expandSpans } from './spans.ts';
 

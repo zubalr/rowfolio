@@ -92,7 +92,7 @@ describe('proof evaluation', () => {
   });
 
   it('rejects proof metric cycles without hanging', () => {
-    const mk = (id: string, ref: string): Metric => ({
+    const mk = (id: string): Metric => ({
       ...(snapshot.metrics[0] as Metric),
       id,
       value: '1',
@@ -119,7 +119,7 @@ describe('proof evaluation', () => {
     const cyclic = evaluateProof(
       { ...proofA, expression: { op: 'metric', metricId: 'cycle-a' } },
       table,
-      [mk('cycle-a', 'cycle-b'), mk('cycle-b', 'cycle-a'), ...snapshot.metrics],
+      [mk('cycle-a'), mk('cycle-b'), ...snapshot.metrics],
     );
     void proofB;
     expect(cyclic.value).toBeNull();

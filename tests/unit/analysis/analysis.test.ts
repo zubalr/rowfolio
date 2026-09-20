@@ -70,9 +70,16 @@ describe('golden snapshot parity', () => {
     expect(result.charts.map((c) => c.id)).toEqual(golden.charts.map((c) => c.id));
     for (const chart of result.charts) {
       const expected = golden.charts.find((c) => c.id === chart.id);
-      const { domain: _d1, ...rest } = chart;
-      const { domain: _d2, ...restExpected } = expected as typeof chart;
-      expect(rest).toEqual(restExpected);
+      expect(chart.id).toBe(expected?.id);
+      expect(chart.kind).toBe(expected?.kind);
+      expect(chart.titleKey).toBe(expected?.titleKey);
+      expect(chart.summaryKey).toBe(expected?.summaryKey);
+      expect(chart.unit).toEqual(expected?.unit);
+      expect(chart.series).toEqual(expected?.series);
+      expect(chart.points).toEqual(expected?.points);
+      expect(chart.chronology).toBe(expected?.chronology);
+      expect(chart.scope).toEqual(expected?.scope);
+      expect(chart.provenanceIds).toEqual(expected?.provenanceIds);
       expect(chart.domain.min).toBe('0');
       for (const point of chart.points) {
         for (const value of Object.values(point.values)) {

@@ -5,10 +5,6 @@
  * package boundary. Copy tables, parity checks and id helpers are
  * exported for testability; writers consume the model read-only.
  */
-import type { BuildExportModel } from '@rowfolio/contracts/interfaces';
-import { buildExportModel as buildExportModelImpl } from './model.ts';
-
-export type { BuildExportModel };
 export {
   baselineMarginOf,
   buildExportModel,
@@ -19,5 +15,3 @@ export {
 } from './model.ts';
 export { ExportModelError } from './model.ts';
 export { TEMPLATE_VERSION } from './model.ts';
-
-export const buildExportModelApi: BuildExportModel = buildExportModelImpl;

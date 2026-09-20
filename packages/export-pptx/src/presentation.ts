@@ -11,12 +11,19 @@
  */
 import PptxGenJS from 'pptxgenjs';
 import { assertExportModel, isDecimal, sha256Hex } from '@rowfolio/contracts';
-import type { ExportModel } from '@rowfolio/contracts';
-import type {
-  BuiltArtifact,
-  BuildPresentation,
-  Progress,
-} from '@rowfolio/contracts/interfaces';
+import type { ExportArtifact, ExportModel } from '@rowfolio/contracts';
+
+/**
+ * Build progress callback. Structural mirror of the contract `Progress`
+ * type (deep workspace imports are forbidden by repo convention).
+ */
+export type Progress = (stage: string, fraction: number | null) => void;
+
+/** Native build output: metadata plus out-of-band bytes. */
+export interface BuiltArtifact {
+  readonly metadata: ExportArtifact;
+  readonly bytes: ArrayBuffer;
+}
 
 export class ExportPptxError extends Error {
   readonly code: 'layout-overflow' | 'invalid-model' | 'unsupported-chart';
@@ -84,7 +91,7 @@ function bulletColor(kind: string): string {
   }
 }
 
-export const buildPresentation: BuildPresentation = async (
+export const buildPresentation = async (
   model: ExportModel,
   progress: Progress,
 ): Promise<BuiltArtifact> => {

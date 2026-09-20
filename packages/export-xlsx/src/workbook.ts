@@ -16,12 +16,20 @@ import {
   sha256Hex,
   significantDigits,
 } from '@rowfolio/contracts';
-import type { ExportModel } from '@rowfolio/contracts';
-import type {
-  BuiltArtifact,
-  BuildWorkbook,
-  Progress,
-} from '@rowfolio/contracts/interfaces';
+import type { ExportArtifact, ExportModel } from '@rowfolio/contracts';
+
+/**
+ * Build progress callback. Structural mirror of the contract `Progress`
+ * type: stage names are writer-defined, fractions are monotonic within a
+ * stage and null when the work can't be measured.
+ */
+export type Progress = (stage: string, fraction: number | null) => void;
+
+/** Native build output: metadata plus out-of-band bytes. */
+export interface BuiltArtifact {
+  readonly metadata: ExportArtifact;
+  readonly bytes: ArrayBuffer;
+}
 
 export class ExportXlsxError extends Error {
   readonly code: 'limit-exceeded' | 'unsafe-name' | 'invalid-model';
@@ -113,7 +121,7 @@ interface KpiPlacement {
   readonly valueAddress: string;
 }
 
-export const buildWorkbook: BuildWorkbook = async (
+export const buildWorkbook = async (
   model: ExportModel,
   progress: Progress,
 ): Promise<BuiltArtifact> => {

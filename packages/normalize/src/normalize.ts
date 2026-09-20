@@ -18,9 +18,20 @@ import type {
   QualityIssue,
   RawTable,
 } from '@rowfolio/contracts';
-import type { ApprovalPlan } from '@rowfolio/contracts/interfaces';
 import { cellAt, cellText, dataRows, indexCells, profileTable } from './profile.ts';
 import { sha256HexUtf8 } from './sha256.ts';
+
+/**
+ * Explicit approval plan driving the transform ledger. Structural mirror
+ * of the contract `ApprovalPlan` interface: this package only imports the
+ * `@rowfolio/contracts` entry point (deep workspace imports are forbidden
+ * by repo convention), so the three approval fields are spelled out here.
+ */
+export interface ApprovalPlan {
+  readonly issueIds: readonly string[];
+  readonly columns: readonly Column[];
+  readonly useUnverifiedFormulaCaches: readonly string[];
+}
 
 export class NormalizeError extends Error {
   readonly code: 'unknown-issue' | 'unknown-column' | 'empty-columns';
