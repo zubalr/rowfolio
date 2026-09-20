@@ -1,9 +1,8 @@
 /**
- * Worker Watchdog & Input Bounding Guard Tests (A20)
+ * Worker Watchdog & Input Bounding Guard Tests
  *
- * Verifies resource exhaustion defenses and timeout constraints from 15_UPLOAD_AND_PRIVACY_SPEC.md:
- * 1. Worker watchdog: warns at 5 seconds, terminates at 15 seconds.
- * 2. Preflight bounds enforcement:
+ * Verifies resource exhaustion defenses and timeout constraints:
+ * 1. Preflight bounds enforcement against authoritative POLICY.limits:
  *    - Compressed file cap: 10 MiB
  *    - Max rows: 50,000
  *    - Max columns: 100
@@ -12,23 +11,12 @@
  *    - Cumulative decompressed bytes: 100 MiB
  *    - Per-entry decompressed bytes: 32 MiB
  *    - Max expansion ratio: 200:1
- *    - CSV max text cell: 32,000 characters
+ *    - Max cell characters: 32,000
+ *    - Watchdog timeout: 15,000 ms
+ * 2. Active worker thread termination is marked PENDING until worker runtime is merged.
  */
 import { describe, expect, it } from "vitest";
-
-export const INPUT_LIMITS = {
-  maxCompressedFileBytes: 10 * 1024 * 1024, // 10 MiB
-  maxTableRows: 50_000,
-  maxTableColumns: 100,
-  maxNonEmptyCells: 500_000,
-  maxZipEntries: 2_000,
-  maxCumulativeDecompressedBytes: 100 * 1024 * 1024, // 100 MiB
-  maxPerEntryDecompressedBytes: 32 * 1024 * 1024, // 32 MiB
-  maxExpansionRatio: 200,
-  maxCsvCellCharacters: 32_000,
-  watchdogWarningMs: 5_000,
-  watchdogTimeoutMs: 15_000,
-};
+import { POLICY } from "../../packages/contracts/src/index.ts";
 
 export interface PreflightCheckResult {
   accepted: boolean;
@@ -45,58 +33,60 @@ export function validateInputPreflight(input: {
   perEntryDecompressedBytes?: number;
   csvCellLength?: number;
 }): PreflightCheckResult {
-  if (input.compressedBytes && input.compressedBytes > INPUT_LIMITS.maxCompressedFileBytes) {
+  const limits = POLICY.limits;
+
+  if (input.compressedBytes && input.compressedBytes > limits.compressedBytes) {
     return {
       accepted: false,
-      violation: `File size ${input.compressedBytes} bytes exceeds 10 MiB cap`,
+      violation: `File size ${input.compressedBytes} bytes exceeds compressed cap (${limits.compressedBytes} bytes)`,
     };
   }
 
-  if (input.rows && input.rows > INPUT_LIMITS.maxTableRows) {
+  if (input.rows && input.rows > limits.rowsIncludingHeader) {
     return {
       accepted: false,
-      violation: `Row count ${input.rows} exceeds maximum 50,000 rows`,
+      violation: `Row count ${input.rows} exceeds maximum ${limits.rowsIncludingHeader} rows`,
     };
   }
 
-  if (input.cols && input.cols > INPUT_LIMITS.maxTableColumns) {
+  if (input.cols && input.cols > limits.columns) {
     return {
       accepted: false,
-      violation: `Column count ${input.cols} exceeds maximum 100 columns`,
+      violation: `Column count ${input.cols} exceeds maximum ${limits.columns} columns`,
     };
   }
 
-  if (input.nonEmptyCells && input.nonEmptyCells > INPUT_LIMITS.maxNonEmptyCells) {
+  if (input.nonEmptyCells && input.nonEmptyCells > limits.nonemptyCells) {
     return {
       accepted: false,
-      violation: `Cell count ${input.nonEmptyCells} exceeds maximum 500,000 nonempty cells`,
+      violation: `Cell count ${input.nonEmptyCells} exceeds maximum ${limits.nonemptyCells} nonempty cells`,
     };
   }
 
-  if (input.zipEntries && input.zipEntries > INPUT_LIMITS.maxZipEntries) {
+  if (input.zipEntries && input.zipEntries > limits.entries) {
     return {
       accepted: false,
-      violation: `ZIP entry count ${input.zipEntries} exceeds maximum 2,000 entries`,
+      violation: `ZIP entry count ${input.zipEntries} exceeds maximum ${limits.entries} entries`,
     };
   }
 
   if (
     input.cumulativeDecompressedBytes &&
-    input.cumulativeDecompressedBytes > INPUT_LIMITS.maxCumulativeDecompressedBytes
+    input.cumulativeDecompressedBytes > limits.expandedBytes
   ) {
     return {
       accepted: false,
-      violation: `Cumulative decompressed size exceeds 100 MiB cap`,
+      violation: `Cumulative decompressed size exceeds expanded cap (${limits.expandedBytes} bytes)`,
     };
   }
 
   if (
     input.perEntryDecompressedBytes &&
-    input.perEntryDecompressedBytes > INPUT_LIMITS.maxPerEntryDecompressedBytes
+    input.perEntryDecompressedBytes > limits.entryBytes
   ) {
     return {
       accepted: false,
-      violation: `Single entry decompressed size exceeds 32 MiB cap`,
+      violation: `Single entry decompressed size exceeds entry cap (${limits.entryBytes} bytes)`,
     };
   }
 
@@ -106,31 +96,39 @@ export function validateInputPreflight(input: {
     input.compressedBytes > 0
   ) {
     const ratio = input.cumulativeDecompressedBytes / input.compressedBytes;
-    if (ratio > INPUT_LIMITS.maxExpansionRatio) {
+    if (ratio > limits.expansionRatio) {
       return {
         accepted: false,
-        violation: `Expansion ratio ${ratio.toFixed(1)}:1 exceeds 200:1 limit (suspicious compression)`,
+        violation: `Expansion ratio ${ratio.toFixed(1)}:1 exceeds limit (${limits.expansionRatio}:1)`,
       };
     }
   }
 
-  if (input.csvCellLength && input.csvCellLength > INPUT_LIMITS.maxCsvCellCharacters) {
+  if (input.csvCellLength && input.csvCellLength > limits.cellCharacters) {
     return {
       accepted: false,
-      violation: `CSV cell length ${input.csvCellLength} chars exceeds 32,000 character limit`,
+      violation: `CSV cell length ${input.csvCellLength} chars exceeds character limit (${limits.cellCharacters})`,
     };
   }
 
   return { accepted: true };
 }
 
-describe("worker watchdog & preflight bounds (A20)", () => {
-  it("defines exact watchdog timeout and warning thresholds", () => {
-    expect(INPUT_LIMITS.watchdogWarningMs).toBe(5000);
-    expect(INPUT_LIMITS.watchdogTimeoutMs).toBe(15000);
+describe("worker watchdog and preflight bounds", () => {
+  it("verifies policy limits match production contract authority", () => {
+    expect(POLICY.limits.watchdogMs).toBe(15000);
+    expect(POLICY.limits.compressedBytes).toBe(10 * 1024 * 1024);
+    expect(POLICY.limits.expandedBytes).toBe(100 * 1024 * 1024);
+    expect(POLICY.limits.entryBytes).toBe(32 * 1024 * 1024);
+    expect(POLICY.limits.entries).toBe(2000);
+    expect(POLICY.limits.expansionRatio).toBe(200);
+    expect(POLICY.limits.rowsIncludingHeader).toBe(50000);
+    expect(POLICY.limits.columns).toBe(100);
+    expect(POLICY.limits.nonemptyCells).toBe(500000);
+    expect(POLICY.limits.cellCharacters).toBe(32000);
   });
 
-  it("accepts inputs within all bounded limits", () => {
+  it("accepts inputs within all bounded policy limits", () => {
     const result = validateInputPreflight({
       compressedBytes: 2 * 1024 * 1024,
       rows: 2400,
@@ -145,58 +143,65 @@ describe("worker watchdog & preflight bounds (A20)", () => {
     expect(result.violation).toBeUndefined();
   });
 
-  it("rejects files exceeding 10 MiB compressed cap", () => {
+  it("rejects files exceeding compressed cap", () => {
     const result = validateInputPreflight({
       compressedBytes: 11 * 1024 * 1024,
     });
     expect(result.accepted).toBe(false);
-    expect(result.violation).toContain("exceeds 10 MiB cap");
+    expect(result.violation).toContain("exceeds compressed cap");
   });
 
-  it("rejects table exceeding 50,000 rows limit", () => {
+  it("rejects table exceeding rows limit", () => {
     const result = validateInputPreflight({ rows: 50_001 });
     expect(result.accepted).toBe(false);
-    expect(result.violation).toContain("exceeds maximum 50,000 rows");
+    expect(result.violation).toContain("exceeds maximum 50000 rows");
   });
 
-  it("rejects table exceeding 100 columns limit", () => {
+  it("rejects table exceeding columns limit", () => {
     const result = validateInputPreflight({ cols: 101 });
     expect(result.accepted).toBe(false);
     expect(result.violation).toContain("exceeds maximum 100 columns");
   });
 
-  it("rejects table exceeding 500,000 nonempty cells limit", () => {
+  it("rejects table exceeding nonempty cells limit", () => {
     const result = validateInputPreflight({ nonEmptyCells: 500_001 });
     expect(result.accepted).toBe(false);
-    expect(result.violation).toContain("exceeds maximum 500,000 nonempty cells");
+    expect(result.violation).toContain("exceeds maximum 500000 nonempty cells");
   });
 
-  it("rejects ZIP archives exceeding 2,000 entries limit", () => {
+  it("rejects ZIP archives exceeding entries limit", () => {
     const result = validateInputPreflight({ zipEntries: 2_001 });
     expect(result.accepted).toBe(false);
-    expect(result.violation).toContain("exceeds maximum 2,000 entries");
+    expect(result.violation).toContain("exceeds maximum 2000 entries");
   });
 
-  it("rejects cumulative decompressed bytes exceeding 100 MiB", () => {
+  it("rejects cumulative decompressed bytes exceeding cap", () => {
     const result = validateInputPreflight({
       cumulativeDecompressedBytes: 101 * 1024 * 1024,
     });
     expect(result.accepted).toBe(false);
-    expect(result.violation).toContain("exceeds 100 MiB cap");
+    expect(result.violation).toContain("exceeds expanded cap");
   });
 
-  it("rejects archives with suspicious expansion ratios > 200:1 (decompression bomb protection)", () => {
+  it("rejects archives with suspicious expansion ratios > 200:1", () => {
     const result = validateInputPreflight({
       compressedBytes: 100 * 1024, // 100 KiB compressed
       cumulativeDecompressedBytes: 25 * 1024 * 1024, // 25 MiB expanded => ratio 256:1
     });
     expect(result.accepted).toBe(false);
-    expect(result.violation).toContain("exceeds 200:1 limit");
+    expect(result.violation).toContain("exceeds limit (200:1)");
   });
 
-  it("rejects CSV cells exceeding 32,000 characters cap", () => {
+  it("rejects CSV cells exceeding character limit", () => {
     const result = validateInputPreflight({ csvCellLength: 32_001 });
     expect(result.accepted).toBe(false);
-    expect(result.violation).toContain("exceeds 32,000 character limit");
+    expect(result.violation).toContain("exceeds character limit (32000)");
   });
+
+  it.skip(
+    "PENDING: Active worker process watchdog termination requires ingestion worker thread implementation",
+    () => {
+      // Integration check: will run once worker thread runtime is integrated.
+    },
+  );
 });

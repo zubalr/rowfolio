@@ -5,12 +5,12 @@ import {
   auditBundleBudgets,
   PERFORMANCE_BUDGETS,
   HEAVY_PARSER_EXPORT_MODULES,
-} from "../../tooling/audits/bundle-budget-audit.js";
+} from "../../tooling/audits/bundle-budget-audit.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
-describe("bundle budget auditor (A20)", () => {
-  it("defines strict performance budget limits from spec", () => {
+describe("bundle budget auditor", () => {
+  it("defines strict performance budget limits", () => {
     expect(PERFORMANCE_BUDGETS.landingInitialJs.maxGzipBytes).toBe(150 * 1024);
     expect(PERFORMANCE_BUDGETS.landingCriticalAssets.maxGzipBytes).toBe(350 * 1024);
     expect(PERFORMANCE_BUDGETS.sampleSnapshot.maxGzipBytes).toBe(80 * 1024);

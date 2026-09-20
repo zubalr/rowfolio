@@ -1,70 +1,49 @@
 /**
- * Memory Retention & Lifecycle Bound Tests (A20)
+ * Memory Retention & Lifecycle Bound Tests
  *
- * Verifies memory and retention invariants from 17_PERFORMANCE_SPEC.md:
- * - Retained private state after clear: No app-owned arrays/blobs remain reachable.
- * - Single source upload retention: Previous workbook graphs discarded upon new load.
- * - Reference containment: Objects are dereferenced completely.
+ * Verifies memory and retention invariants:
+ * - Contract validation of large normalized tables leaves fixture objects immutable.
+ * - Repeated evaluation passes execute without object graph mutation or accumulator leaks.
+ * - Live browser heap inspection across sessions is marked PENDING until UI integration.
  */
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import {
+  checkNormalizedTable,
+  canonicalize,
+  sha256Hex,
+} from "../../packages/contracts/src/index.ts";
+import type { NormalizedTable } from "../../packages/contracts/src/index.ts";
 
-describe("memory retention and heap release invariants (A20)", () => {
-  it("clears large table buffers and dereferences arrays upon session reset", () => {
-    // Simulate generation and cleanup of 50,000 cells
-    let sessionBuffer: Float64Array | null = new Float64Array(50_000);
-    sessionBuffer.fill(42.5);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
-    let sessionRowMap: Map<number, string[]> | null = new Map();
-    for (let i = 0; i < 1000; i++) {
-      sessionRowMap.set(i, [`val_${i}_a`, `val_${i}_b`, `val_${i}_c`]);
+describe("memory retention and contract lifecycle invariants", () => {
+  const fixturePath = path.join(repoRoot, "tests/contract/fixtures/normalized-table.example.json");
+  const tableData: NormalizedTable = JSON.parse(readFileSync(fixturePath, "utf8"));
+
+  it("validates that repeated contract checks preserve object immutability without mutation", async () => {
+    // Initial canonical fingerprint
+    const initialCanonical = canonicalize(tableData);
+    const initialHash = await sha256Hex(new TextEncoder().encode(initialCanonical));
+
+    // Run multiple validation passes
+    for (let i = 0; i < 5; i++) {
+      const issues = checkNormalizedTable(tableData);
+      expect(issues).toEqual([]);
     }
 
-    expect(sessionBuffer.length).toBe(50_000);
-    expect(sessionRowMap.size).toBe(1000);
-
-    // Perform session reset
-    sessionBuffer = null;
-    sessionRowMap.clear();
-    sessionRowMap = null;
-
-    expect(sessionBuffer).toBeNull();
-    expect(sessionRowMap).toBeNull();
+    // Verify post-validation canonical fingerprint is 100% identical (no internal accumulation or mutation)
+    const postCanonical = canonicalize(tableData);
+    const postHash = await sha256Hex(new TextEncoder().encode(postCanonical));
+    expect(postHash).toBe(initialHash);
   });
 
-  it("does not accumulate multiple uncollected workbook graphs across consecutive loads", () => {
-    // Simulates an application store that holds at most ONE active workbook
-    class ActiveWorkbookStore {
-      private currentGraph: { id: string; rows: number } | null = null;
-      private historyCount = 0;
-
-      public load(id: string, rows: number): void {
-        // Discard previous graph
-        this.currentGraph = null;
-        this.currentGraph = { id, rows };
-        this.historyCount++;
-      }
-
-      public get activeGraph(): { id: string; rows: number } | null {
-        return this.currentGraph;
-      }
-
-      public get totalLoads(): number {
-        return this.historyCount;
-      }
-
-      public clear(): void {
-        this.currentGraph = null;
-      }
-    }
-
-    const store = new ActiveWorkbookStore();
-    for (let i = 1; i <= 5; i++) {
-      store.load(`wb_${i}`, 2400);
-      expect(store.activeGraph?.id).toBe(`wb_${i}`);
-    }
-
-    expect(store.totalLoads).toBe(5);
-    store.clear();
-    expect(store.activeGraph).toBeNull();
-  });
+  it.skip(
+    "PENDING: Real browser heap snapshot inspection across upload/clear cycles requires full web runtime and frontend integration",
+    () => {
+      // Integration gate: requires browser DevTools heap snapshot protocol against running web app.
+    },
+  );
 });
