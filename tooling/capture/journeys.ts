@@ -208,7 +208,12 @@ export async function runJourney(browser: Browser, options: JourneyOptions): Pro
     );
     results.push(
       await step(page, options, '05-briefing', timeout, async () => {
-        await page.getByRole('button', { name: /Prepare briefing|جهّز الإحاطة/ }).click({ timeout });
+        // the redesigned landing repeats CTA copy in a chapters section;
+        // the interactive control lives inside the preview stage
+        await page
+          .getByTestId('preview-stage')
+          .getByRole('button', { name: /Prepare briefing|جهّز الإحاطة/ })
+          .click({ timeout });
         await waitTestId(page, 'preview-briefing', timeout);
         await page.waitForTimeout(600);
       }),
