@@ -1,0 +1,407 @@
+/* App shell layout — tokens come from @rowfolio/ui (imported by components). */
+
+.rf-landing {
+  max-width: 720px;
+  margin-inline: auto;
+  padding: var(--rf-space-7) var(--rf-space-5);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.rf-masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rf-space-4);
+  padding-block: var(--rf-space-4);
+  border-block-end: 1px solid var(--rf-divider);
+}
+
+.rf-brand {
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.01em;
+}
+
+.rf-brand-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  color: var(--rf-text);
+}
+
+.rf-mastnav {
+  display: flex;
+  align-items: center;
+  gap: var(--rf-space-2);
+  flex-wrap: wrap;
+}
+
+.rf-hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: var(--rf-space-8);
+}
+
+.rf-hero-title {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 1.08;
+  margin-block-end: var(--rf-space-4);
+  font-weight: 700;
+}
+
+.rf-hero-brand {
+  display: block;
+  font-size: 0.4em;
+  font-weight: 600;
+  color: var(--rf-accent);
+  letter-spacing: 0.08em;
+  margin-block-end: var(--rf-space-3);
+}
+
+.rf-hero-body {
+  font-size: 1.15rem;
+  color: var(--rf-text-muted);
+  max-width: 46ch;
+  margin-block-end: var(--rf-space-6);
+}
+
+.rf-hero-actions {
+  display: flex;
+  gap: var(--rf-space-3);
+  flex-wrap: wrap;
+}
+
+.rf-hero-note {
+  margin-block-start: var(--rf-space-3);
+  font-size: 0.85rem;
+  color: var(--rf-text-muted);
+}
+
+.rf-landing-foot {
+  border-block-start: 1px solid var(--rf-divider);
+  padding-block-start: var(--rf-space-4);
+  font-size: 0.85rem;
+  color: var(--rf-text-muted);
+}
+
+.rf-quiet {
+  color: var(--rf-text-muted);
+  font-size: 0.9rem;
+}
+
+.rf-banner {
+  padding: var(--rf-space-3) var(--rf-space-5);
+  background: var(--rf-bg-raised);
+  border-block-end: 1px solid var(--rf-divider);
+  font-size: 0.9rem;
+}
+
+.rf-banner-error {
+  color: var(--rf-danger-text);
+  border-inline-start: 3px solid var(--rf-danger-text);
+}
+
+.rf-workspace {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.rf-workspace-main {
+  flex: 1;
+  max-width: var(--rf-max-width);
+  width: 100%;
+  margin-inline: auto;
+  padding: var(--rf-space-5) var(--rf-space-5) var(--rf-space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-7);
+}
+
+.rf-workspace-head {
+  border-block-end: 1px solid var(--rf-divider);
+  padding-block-end: var(--rf-space-4);
+}
+
+.rf-workspace-title {
+  font-size: 1.6rem;
+  margin-block-end: var(--rf-space-1);
+}
+
+.rf-idle {
+  padding-block: var(--rf-space-8);
+  max-width: 52ch;
+}
+
+.rf-idle-title {
+  font-size: 2rem;
+  margin-block-end: var(--rf-space-3);
+}
+
+.rf-idle-actions {
+  margin-block-start: var(--rf-space-5);
+}
+
+.rf-findings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-3);
+}
+
+.rf-finding {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--rf-space-4);
+  border-block-start: 1px solid var(--rf-divider);
+  padding-block-start: var(--rf-space-3);
+}
+
+.rf-finding.is-selected .rf-finding-title {
+  color: var(--rf-accent);
+}
+
+.rf-finding-main {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: start;
+  cursor: pointer;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-1);
+  font: inherit;
+  color: var(--rf-text);
+}
+
+.rf-finding-title {
+  font-weight: 650;
+  font-size: 1.05rem;
+}
+
+.rf-finding-body {
+  color: var(--rf-text-muted);
+}
+
+.rf-finding-limits {
+  display: flex;
+  gap: var(--rf-space-2);
+  flex-wrap: wrap;
+  margin-block-start: var(--rf-space-1);
+}
+
+.rf-limitation {
+  font-size: 0.78rem;
+  color: var(--rf-text-muted);
+  border: 1px solid var(--rf-divider);
+  border-radius: var(--rf-radius-control);
+  padding: 1px var(--rf-space-2);
+}
+
+.rf-severity-attention .rf-finding-title::before {
+  content: '';
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background: var(--rf-attention);
+  margin-inline-end: var(--rf-space-2);
+}
+
+.rf-charts {
+  display: grid;
+  gap: var(--rf-space-6);
+}
+
+@media (min-width: 900px) {
+  .rf-charts {
+    grid-template-columns: 1fr 1fr;
+  }
+  .rf-charts > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+.rf-scenario-row {
+  display: flex;
+  gap: var(--rf-space-3);
+  align-items: end;
+  flex-wrap: wrap;
+  margin-block-start: var(--rf-space-3);
+}
+
+.rf-scenario-row > :first-child {
+  max-width: 220px;
+}
+
+.rf-scenario-result {
+  margin-block-start: var(--rf-space-4);
+  border-block-start: 1px solid var(--rf-divider);
+  padding-block-start: var(--rf-space-3);
+}
+
+/* Evidence drawer content (ink surface) */
+.rf-evidence {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-5);
+}
+
+.rf-evidence-finding {
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.rf-evidence-label {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin-block-end: var(--rf-space-2);
+}
+
+.rf-hash {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 0.8rem;
+  word-break: break-all;
+  display: block;
+  margin-block-end: var(--rf-space-1);
+}
+
+.rf-expression {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 0.82rem;
+  display: block;
+  padding: var(--rf-space-2);
+  border: 1px solid var(--rf-ink-rule, #3a4a53);
+  border-radius: var(--rf-radius-control);
+  margin-block-end: var(--rf-space-3);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.rf-proof-head {
+  margin-block-end: var(--rf-space-3);
+}
+
+.rf-proof-result {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 1.1rem;
+  margin-block-start: var(--rf-space-2);
+}
+
+.rf-evidence-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.rf-evidence-table th,
+.rf-evidence-table td {
+  text-align: start;
+  padding: var(--rf-space-1) var(--rf-space-2);
+  border-block-end: 1px solid var(--rf-ink-rule, #3a4a53);
+}
+
+.rf-src-row {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  white-space: nowrap;
+}
+
+.rf-src-val {
+  margin-inline-end: var(--rf-space-3);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 0.78rem;
+}
+
+/* Review list */
+.rf-review-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-2);
+  margin-block: var(--rf-space-4);
+  max-height: 50vh;
+  overflow: auto;
+}
+
+.rf-review-label {
+  display: flex;
+  gap: var(--rf-space-2);
+  align-items: baseline;
+  cursor: pointer;
+}
+
+.rf-review-kind {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.rf-review-actions {
+  display: flex;
+  gap: var(--rf-space-3);
+  margin-block-start: var(--rf-space-4);
+}
+
+/* Export dialog */
+.rf-export-preview {
+  margin-block-end: var(--rf-space-5);
+}
+
+.rf-export-outline {
+  margin-block: var(--rf-space-3);
+  padding-inline-start: var(--rf-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-1);
+  font-size: 0.9rem;
+}
+
+.rf-slide-kind {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rf-text-muted);
+  margin-inline-end: var(--rf-space-2);
+}
+
+.rf-export-links {
+  margin-block-start: var(--rf-space-5);
+  border-block-start: 1px solid var(--rf-divider);
+  padding-block-start: var(--rf-space-4);
+}
+
+.rf-export-link {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--rf-space-4);
+  padding-block: var(--rf-space-2);
+}
+
+.rf-download {
+  font-weight: 650;
+  color: var(--rf-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-workspace *, .rf-landing * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
