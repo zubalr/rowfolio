@@ -175,9 +175,19 @@ export function createUploadController(
       try {
         profiled = await ports.profile(table);
       } catch (error) {
-        emit({ stage: "error", file, prior, failure: toFailure(error), retryStep: "parse", inspection, selection });
+        // Same staleness/cancel contract as the parse await below — a
+        // superseded job must never emit, and a worker-side CANCELLED is a
+        // quiet exit to source selection, not an error.
+        if (job.id !== jobSeq || signal.aborted) return;
+        const failure = toFailure(error);
+        if (failure.code === "CANCELLED") {
+          emit({ stage: "idle", prior });
+          return;
+        }
+        emit({ stage: "error", file, prior, failure, retryStep: "parse", inspection, selection });
         return;
       }
+      if (job.id !== jobSeq || signal.aborted) return;
       emit({
         stage: "review",
         file,

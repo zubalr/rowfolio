@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { AnalysisSnapshot, ExportModel, NormalizedTable } from '@rowfolio/contracts';
+import type { AnalysisSnapshot, ExportModel, NormalizedTable, QualityIssue } from '@rowfolio/contracts';
 import { SessionController } from './controller.ts';
 import { BlobUrlStore } from './blobUrls.ts';
 import { WorkerClient } from '../workers/client.ts';
@@ -78,6 +78,8 @@ function makeController(opts: {
   mainAdapters?: Record<string, unknown>;
   fetchSample?: (url: string) => Promise<Response>;
   blobStore?: BlobUrlStore;
+  watchdogMs?: number;
+  onDiagnostic?: (msg: string) => void;
 } = {}) {
   const spawned: InProcessWorker[] = [];
   const requests: WorkerRequest[][] = [];
@@ -86,34 +88,41 @@ function makeController(opts: {
     createObjectURL: () => `blob:mock-${blobs.urls.push(`u${blobs.urls.length}`)}`,
     revokeObjectURL: (u) => { blobs.revoked.push(u); },
   });
+  // A fresh worker per spawn — cancel()/watchdog terminates the current one;
+  // the next request must land on a live instance (mirrors the real factory).
+  const spawn = () => {
+    const worker = new InProcessWorker({ adapters: opts.adapters ?? fixtureAdapters() });
+    spawned.push(worker);
+    requests.push(worker.received);
+    return worker;
+  };
   const controller = new SessionController({
     fetchSample: opts.fetchSample ?? (diskFetch() as never),
     // Main-thread pure adapters — contract-fixture stand-ins while engines
     // ship on hb/* (production path resolves the real packages at merge).
     adapters: {
-      profileTable: () => ({ proposedColumns: [], issues: [] }),
       buildExportModel: () => EXPORT_MODEL,
       ...opts.mainAdapters,
     },
     blobStore,
     ids: (() => { let n = 0; return { request: () => `r${++n}`, session: () => 'test-session' }; })(),
-    createAnalysisClient: () => {
-      const worker = new InProcessWorker({ adapters: opts.adapters ?? fixtureAdapters() });
-      spawned.push(worker);
-      requests.push(worker.received);
-      return new WorkerClient(() => worker);
-    },
-    createExportClient: () => {
-      const worker = new InProcessWorker({ adapters: opts.adapters ?? fixtureAdapters() });
-      spawned.push(worker);
-      requests.push(worker.received);
-      return new WorkerClient(() => worker);
-    },
+    ...(opts.onDiagnostic ? { onDiagnostic: opts.onDiagnostic } : {}),
+    createAnalysisClient: () => new WorkerClient(spawn, { watchdogMs: opts.watchdogMs }),
+    createExportClient: () => new WorkerClient(spawn, { watchdogMs: opts.watchdogMs }),
   });
   return { controller, spawned, requests, blobStore, blobs };
 }
 
 const waitTick = () => new Promise((r) => setTimeout(r, 0));
+
+/** Poll a predicate up to ~3s (10ms interval). Throws on timeout. */
+async function waitFor(pred: () => boolean, timeoutMs = 3000): Promise<void> {
+  const start = Date.now();
+  while (!pred()) {
+    if (Date.now() - start > timeoutMs) throw new Error('waitFor timed out');
+    await new Promise((r) => setTimeout(r, 10));
+  }
+}
 
 describe('SessionController', () => {
   it('completes the prepared-sample path end-to-end over the wire protocol', async () => {
@@ -123,9 +132,9 @@ describe('SessionController', () => {
     expect(s.phase).toBe('ready');
     expect(s.active?.snapshot.id).toBe(SNAPSHOT.id);
     expect(s.active?.source.hash).toBe('f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e');
-    // Wire order: ingest → normalize → analyze on the analysis worker.
+    // Wire order: ingest → profile → normalize → analyze on the analysis worker.
     const ops = requests[0]!.map((r) => r.operation);
-    expect(ops).toEqual(['ingest', 'normalize', 'analyze']);
+    expect(ops).toEqual(['ingest', 'profile', 'normalize', 'analyze']);
     await controller.dispose();
   });
 
@@ -255,7 +264,7 @@ describe('SessionController', () => {
     expect(s.scenario?.costChange).toBe('0.08');
     // Exactly the expected requests ran — no re-ingest.
     const ops = requests[0]!.map((r) => r.operation);
-    expect(ops).toEqual(['ingest', 'normalize', 'analyze', 'scenario']);
+    expect(ops).toEqual(['ingest', 'profile', 'normalize', 'analyze', 'scenario']);
     await controller.dispose();
   });
 
@@ -307,7 +316,6 @@ describe('SessionController', () => {
       ids: (() => { let n = 0; return { request: () => `r${++n}`, session: () => 's' }; })(),
       fetchSample: diskFetch() as never,
       adapters: {
-        profileTable: () => ({ proposedColumns: [], issues: [] }),
         buildExportModel: () => EXPORT_MODEL,
       },
       createAnalysisClient: () => new WorkerClient(inProcessFactory({ adapters: fixtureAdapters() })),
@@ -335,7 +343,6 @@ describe('SessionController', () => {
       ids: (() => { let n = 0; return { request: () => `r${++n}`, session: () => 's' }; })(),
       fetchSample: diskFetch() as never,
       adapters: {
-        profileTable: () => ({ proposedColumns: [], issues: [] }),
         buildExportModel: () => EXPORT_MODEL,
       },
       createAnalysisClient: () => new WorkerClient(inProcessFactory({ adapters: fixtureAdapters() })),
@@ -349,5 +356,163 @@ describe('SessionController', () => {
     expect(s.export.failure).toBeNull();
     await controller.dispose();
     await retry.dispose();
+  });
+});
+
+describe('upload reliability (W-UPLOAD)', () => {
+  const CSV = new TextEncoder().encode('a,b\n1,2\n').buffer as ArrayBuffer;
+  const REVIEW_ISSUE: QualityIssue = {
+    id: 'i1',
+    kind: 'duplicate',
+    sourceRefId: 'raw',
+    sourceRow: 2,
+    fieldId: null,
+    original: 'x',
+    normalized: null,
+    status: 'proposed',
+    action: 'exclude-row',
+    approval: 'none',
+    canonicalSourceRow: 1,
+    messageKey: 'quality.duplicate',
+  };
+
+  it('a stuck profile surfaces TIMEOUT on the live request — no silent profiling stall', async () => {
+    const hanging: SupervisorHooks['adapters'] = {
+      ...fixtureAdapters(),
+      loadNormalize: async () => ({
+        profileTable: () => new Promise<never>(() => {}),
+        normalizeTable: () => TABLE as never,
+      }),
+    };
+    const { controller, requests } = makeController({
+      adapters: hanging,
+      watchdogMs: 60,
+      // The pre-fix path profiles on the main thread; the fix runs the
+      // 'profile' worker op — the hanging adapter must stall either way.
+      mainAdapters: { profileTable: () => new Promise<never>(() => {}) },
+    });
+    const done = controller.selectSource(CSV, 'tiny.csv', 'csv');
+    await waitFor(() => controller.getState().phase === 'idle' && controller.getState().error !== null);
+    await done;
+    expect(controller.getState().error?.code).toBe('TIMEOUT');
+    expect(controller.getState().active).toBeNull();
+    // Profiling must run as a watchdogged worker op — the only reason the
+    // watchdog could fire on a stuck profile at all.
+    expect(requests.flat().some((r) => r.operation === 'profile')).toBe(true);
+    await controller.dispose();
+  });
+
+  it('superseding during profile cannot hijack the new source’s request lifecycle', async () => {
+    let releaseProfile!: () => void;
+    const gate = new Promise<void>((r) => { releaseProfile = r; });
+    const gated: SupervisorHooks['adapters'] = {
+      ...fixtureAdapters(),
+      loadNormalize: async () => ({
+        profileTable: async () => { await gate; return { proposedColumns: [], issues: [] }; },
+        normalizeTable: () => TABLE as never,
+      }),
+    };
+    const diags: string[] = [];
+    const { controller } = makeController({
+      adapters: gated,
+      mainAdapters: { profileTable: async () => { await gate; return { proposedColumns: [], issues: [] }; } },
+      onDiagnostic: (m) => diags.push(m),
+    });
+    const first = controller.selectSource(CSV, 'a.csv', 'csv');
+    // A is parked inside its profile step once ingest.done flips the phase.
+    await waitFor(() => controller.getState().phase === 'profiling');
+    const second = controller.selectSource(CSV, 'b.csv', 'csv');
+    releaseProfile();
+    await Promise.allSettled([first, second]);
+    const s = controller.getState();
+    expect(s.error).toBeNull();
+    expect(s.phase).toBe('ready');
+    expect(s.active?.source.name).toBe('b.csv');
+    // The superseded coroutine's terminal event must not vanish silently.
+    expect(diags.length).toBeGreaterThan(0);
+    await controller.dispose();
+  });
+
+  it('cancel exits needsReview and a late approveReview cannot restart the pipeline', async () => {
+    const flagged: SupervisorHooks['adapters'] = {
+      ...fixtureAdapters(),
+      loadNormalize: async () => ({
+        profileTable: () => ({ proposedColumns: [], issues: [REVIEW_ISSUE] }),
+        normalizeTable: () => TABLE as never,
+      }),
+    };
+    const { controller, requests } = makeController({
+      adapters: flagged,
+      mainAdapters: { profileTable: () => ({ proposedColumns: [], issues: [REVIEW_ISSUE] }) },
+    });
+    const done = controller.selectSource(CSV, 'dup.csv', 'csv');
+    await waitFor(() => controller.getState().phase === 'needsReview');
+    await done;
+    controller.cancelWork('user');
+    expect(controller.getState().phase).toBe('idle');
+    await controller.approveReview([REVIEW_ISSUE.id], []);
+    expect(controller.getState().phase).toBe('idle');
+    expect(controller.getState().pending).toBeNull();
+    // No normalize request may follow a cancelled review.
+    expect(requests.flat().some((r) => r.operation === 'normalize')).toBe(false);
+    await controller.dispose();
+  });
+
+  it('cancel during the analyze sub-request exits pending on the rotated rid', async () => {
+    let releaseAnalyze!: () => void;
+    const gate = new Promise<void>((r) => { releaseAnalyze = r; });
+    const gated: SupervisorHooks['adapters'] = {
+      ...fixtureAdapters(),
+      loadAnalysis: async () => ({
+        analyze: async () => { await gate; return SNAPSHOT as never; },
+      }),
+    };
+    const { controller, requests } = makeController({ adapters: gated });
+    const done = controller.selectSource(CSV, 'a.csv', 'csv');
+    // 'analyze' runs under a rotated rid — cancel must still exit pending.
+    await waitFor(() => requests.flat().some((r) => r.operation === 'analyze'));
+    controller.cancelWork('user');
+    releaseAnalyze();
+    await done;
+    const s = controller.getState();
+    expect(s.phase).toBe('idle');
+    expect(s.pending).toBeNull();
+    expect(s.error).toBeNull();
+    await controller.dispose();
+  });
+
+  it('a model-build failure surfaces a typed error instead of an unhandled rejection', async () => {
+    const { controller } = makeController({
+      mainAdapters: { buildExportModel: () => { throw new Error('model-boom'); } },
+    });
+    await controller.useSample();
+    controller.openExport();
+    await controller.prepareExport();
+    const s = controller.getState();
+    expect(s.phase).toBe('ready');
+    expect(s.error?.code).toBeDefined();
+    expect(s.export.building).toBe(false);
+    await controller.dispose();
+  });
+
+  it('cancel during the export model build aborts before export.begin', async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((r) => { release = r; });
+    const { controller } = makeController({
+      mainAdapters: { buildExportModel: async () => { await gate; return EXPORT_MODEL; } },
+    });
+    await controller.useSample();
+    controller.openExport();
+    const pending = controller.prepareExport();
+    await waitTick();
+    controller.cancelExport();
+    release();
+    await pending;
+    const s = controller.getState();
+    expect(s.phase).toBe('ready');
+    expect(s.export.building).toBe(false);
+    expect(s.export.model).toBeNull();
+    expect(s.export.artifacts.xlsx).toBeUndefined();
+    await controller.dispose();
   });
 });

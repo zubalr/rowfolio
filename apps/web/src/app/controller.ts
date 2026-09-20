@@ -6,14 +6,13 @@ import type {
   Locale,
   NormalizedTable,
   ProfileResult,
-  QualityIssue,
   RawTable,
   ScenarioResult,
   Hash,
 } from '@rowfolio/contracts';
 import { OPERATING_COST_SCENARIO_V1 } from '@rowfolio/contracts';
 import { WorkerClient, WorkerRequestError, type StageProgress } from '../workers/client.ts';
-import { loadNormalize, loadExportModel } from '../workers/adapters.ts';
+import { loadExportModel } from '../workers/adapters.ts';
 import { createAnalysisWorkerFactory, createExportWorkerFactory, type IngestParseOptions } from '../workers/factory.ts';
 import { BOUND_SAMPLE_SHA256 } from '../workers/supervisor.ts';
 import type { BinarySlot } from '../workers/transport.ts';
@@ -29,7 +28,6 @@ import type { BlobUrlStore } from './blobUrls.ts';
 
 /** Structural twins for the pure main-thread adapters (deep imports banned). */
 export interface MainThreadAdapters {
-  profileTable(raw: RawTable): { proposedColumns: Column[]; issues: QualityIssue[] };
   inspectSource(
     bytes: ArrayBuffer,
     sourceName: string,
@@ -98,11 +96,6 @@ function canonicalParseOptions(options: IngestParseOptions): IngestParseOptions 
   if (options.lastColumn !== undefined) out.lastColumn = options.lastColumn;
   if (options.delimiter !== undefined) out.delimiter = options.delimiter;
   return out;
-}
-
-async function defaultProfile(raw: RawTable): Promise<{ proposedColumns: Column[]; issues: QualityIssue[] }> {
-  const mod = await loadNormalize();
-  return mod.profileTable(raw as never) as { proposedColumns: Column[]; issues: QualityIssue[] };
 }
 
 async function defaultInspect(
@@ -244,6 +237,11 @@ export class SessionController {
   async profileViaWorker(rawTable: RawTable): Promise<ProfileResult> {
     const client = this.analysis;
     if (!client) throw new WorkerRequestError('INTERNAL', 'error.INTERNAL', false, 'analysis worker unavailable');
+    return this.profileOn(client, rawTable);
+  }
+
+  /** Profile op on a specific client — always the worker that ingested the table. */
+  private async profileOn(client: WorkerClient, rawTable: RawTable): Promise<ProfileResult> {
     const res = await client.request(
       {
         protocolVersion: 1,
@@ -340,11 +338,6 @@ export class SessionController {
     return this.exportClient;
   }
 
-  private async profile(raw: RawTable): Promise<{ proposedColumns: Column[]; issues: QualityIssue[] }> {
-    const fn = this.deps.adapters?.profileTable ?? defaultProfile;
-    return fn(raw);
-  }
-
   private async inspect(bytes: ArrayBuffer, name: string, options?: Record<string, unknown>) {
     const fn = this.deps.adapters?.inspectSource ?? defaultInspect;
     return fn(bytes, name, options);
@@ -376,11 +369,18 @@ export class SessionController {
   }
 
   private fail(rid: string, error: unknown): void {
-    if (error instanceof WorkerRequestError && error.code === 'CANCELLED') {
+    const mapped = this.toSessionError(error);
+    if (this.state.requestId !== rid) {
+      // The reducer would ignore the dispatch anyway — but a terminal event
+      // for a rotated-away request must still reach the diagnostic channel.
+      this.diagnostic(`late ${mapped.code === 'CANCELLED' ? 'cancel' : 'failure'} on superseded request (${mapped.code})`);
+      return;
+    }
+    if (mapped.code === 'CANCELLED') {
       this.dispatch({ type: 'request.cancelled', requestId: rid });
       return;
     }
-    this.dispatch({ type: 'request.failed', requestId: rid, error: this.toSessionError(error) });
+    this.dispatch({ type: 'request.failed', requestId: rid, error: mapped });
   }
 
   private progressFor(rid: string) {
@@ -503,6 +503,13 @@ export class SessionController {
       this.progressFor(rid),
     )).result as RawTable;
 
+    // A superseding source may have rotated the live requestId while this
+    // request was in flight — resume only if still current.
+    if (this.state.requestId !== rid) {
+      this.diagnostic('ingest resolved for a superseded request — dropping result');
+      return;
+    }
+
     // Source-hash verification: the hash derived inside the worker from the
     // transferred bytes must equal the hash computed where the bytes were
     // read (manifest for the sample, local inspection for uploads).
@@ -512,7 +519,14 @@ export class SessionController {
     }
     this.dispatch({ type: 'ingest.done', requestId: rid, rawTable });
 
-    const profile = await this.profile(rawTable);
+    // Profile runs as a watchdogged worker op against the retained raw table —
+    // a main-thread profile await has no watchdog and a stuck adapter used to
+    // leave the session parked at 'profiling' forever.
+    const profile = await this.profileOn(client, rawTable);
+    if (this.state.requestId !== rid) {
+      this.diagnostic('profile resolved for a superseded request — dropping result');
+      return;
+    }
     this.dispatch({ type: 'profile.done', requestId: rid, columns: profile.proposedColumns, issues: profile.issues });
 
     if (this.state.phase === 'needsReview') return; // waits for approveReview
@@ -570,6 +584,13 @@ export class SessionController {
         this.progressFor(rid),
       )).result as NormalizedTable;
 
+      // `request.start` is unguarded in the reducer — a superseded coroutine
+      // must never stamp a fresh requestId over the live pipeline.
+      if (this.state.requestId !== active) {
+        this.diagnostic('normalize resolved for a superseded request — dropping result');
+        return;
+      }
+
       let snapshot: AnalysisSnapshot;
       if (prepared && prepared.tableId === table.id && prepared.normalizationRevision === table.normalizationRevision) {
         // Validated fast path: the shipped snapshot already binds these bytes.
@@ -597,6 +618,10 @@ export class SessionController {
           [],
           this.progressFor(ar),
         )).result as AnalysisSnapshot;
+        if (this.state.requestId !== active) {
+          this.diagnostic('analyze resolved for a superseded request — dropping result');
+          return;
+        }
       }
       rid = active;
       this.dispatch({
@@ -658,6 +683,10 @@ export class SessionController {
       )).result as ScenarioResult;
       this.dispatch({ type: 'scenario.done', requestId: rid, costChange, result });
     } catch (error) {
+      if (this.state.scenarioRequestId !== rid) {
+        this.diagnostic('late scenario failure on a superseded request — dropping');
+        return;
+      }
       if (error instanceof WorkerRequestError && error.code === 'CANCELLED') {
         this.dispatch({ type: 'scenario.failed', requestId: rid, error: { code: 'CANCELLED', messageKey: 'error.CANCELLED', recoverable: true } });
       } else {
@@ -688,7 +717,22 @@ export class SessionController {
   async prepareExport(): Promise<void> {
     const active = this.state.active;
     if (!active || this.state.phase !== 'ready') return;
-    const model = await this.buildModel(active.snapshot, active.table, this.state.scenario);
+    // A live requestId through the (unwatchdogged) model build lets
+    // cancelWork/cancelExport abort before export.begin, and gives model
+    // failures the same typed error surface as worker failures.
+    const rid = this.ids.request();
+    this.dispatch({ type: 'request.start', requestId: rid });
+    let model: ExportModel;
+    try {
+      model = await this.buildModel(active.snapshot, active.table, this.state.scenario);
+    } catch (error) {
+      this.fail(rid, error);
+      return;
+    }
+    if (this.state.requestId !== rid || this.state.active !== active) {
+      this.diagnostic('export superseded during model build — dropping result');
+      return;
+    }
     this.dispatch({ type: 'export.begin', model });
     const client = this.ensureExport();
     for (const format of ['xlsx', 'pptx'] as const) {
@@ -723,6 +767,11 @@ export class SessionController {
   }
 
   cancelExport(): void {
+    // Cover the pre-export.begin window: the model build holds a requestId
+    // but the export client may not exist yet.
+    if (this.state.requestId) {
+      this.dispatch({ type: 'request.cancelled', requestId: this.state.requestId });
+    }
     this.exportClient?.cancel('user');
   }
 
@@ -737,6 +786,7 @@ export class SessionController {
       this.dispatch({ type: 'request.cancelled', requestId: this.state.requestId });
     }
     this.analysis?.cancel(reason);
+    this.exportClient?.cancel(reason);
     if (this.state.scenarioRequestId) {
       this.dispatch({ type: 'scenario.failed', requestId: this.state.scenarioRequestId, error: { code: 'CANCELLED', messageKey: 'error.CANCELLED', recoverable: true } });
     }
