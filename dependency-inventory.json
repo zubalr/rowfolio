@@ -4,7 +4,7 @@
     "node": "22.23.2",
     "packageManager": "pnpm@12.5.1"
   },
-  "packageCount": 285,
+  "packageCount": 288,
   "packages": [
     {
       "name": "@cacheable/memory",
@@ -115,6 +115,39 @@
       "integrity": "sha512-uRsLYksqpbDmWaSmzvJcuApSEe38+6NQZBUsuAyMZKqHxH0g1wcJgsKUvN3WC8tewaqFjBMMGrkHmC+T7k8LvA==",
       "source": "npmjs",
       "declaredIn": []
+    },
+    {
+      "name": "@fontsource/ibm-plex-mono",
+      "version": "5.3.0",
+      "license": "OFL-1.1",
+      "scope": "runtime",
+      "integrity": "sha512-eTgnZjZEGk1QtD3ZstF+Vclo2HLAni8YMy34/DxllwZvyz1lR/1RF/xTiAquOBO7MvqBx8D2Ig2WCPMVfdZu7Q==",
+      "source": "npmjs",
+      "declaredIn": [
+        "packages/ui"
+      ]
+    },
+    {
+      "name": "@fontsource/ibm-plex-sans",
+      "version": "5.3.0",
+      "license": "OFL-1.1",
+      "scope": "runtime",
+      "integrity": "sha512-CbE4CbbEEZJX860XyUiRpsksXIQR8Rp2XDva2VO53NJox9tVNtusrysd2x5YkUEY3ErQ66W1IiiQL8/wihhw5w==",
+      "source": "npmjs",
+      "declaredIn": [
+        "packages/ui"
+      ]
+    },
+    {
+      "name": "@fontsource/ibm-plex-sans-arabic",
+      "version": "5.3.0",
+      "license": "OFL-1.1",
+      "scope": "runtime",
+      "integrity": "sha512-ZZ4g+JDgQY0NqSh4o0MNWU1sHQmtcee1g++aKAwyJvZxnT5y51JXsN1cIXnaQaMd40dcbK6QFYa+Z1LbaiNuqA==",
+      "source": "npmjs",
+      "declaredIn": [
+        "packages/ui"
+      ]
     },
     {
       "name": "@humanfs/core",
@@ -1213,7 +1246,8 @@
       "integrity": "sha512-XctvKaEMaj1Ii9oDOqbW/6e1gXknSY4g/aLCDicOXqBE4M0nRWkUu0PTp++UPNzoFY12BNHMfs/VadKIS6llvg==",
       "source": "npmjs",
       "declaredIn": [
-        "packages/export-xlsx"
+        "packages/export-xlsx",
+        "tooling/dataset"
       ]
     },
     {
@@ -2545,7 +2579,8 @@
       "source": "npmjs",
       "declaredIn": [
         ".",
-        "apps/web"
+        "apps/web",
+        "packages/ui"
       ]
     },
     {
