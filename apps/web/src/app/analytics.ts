@@ -1,4 +1,4 @@
-import type { BeforeSend, BeforeSendEvent } from "@vercel/analytics/react";
+import type { BeforeSend, BeforeSendEvent } from "@vercel/analytics";
 
 /**
  * Vercel Web Analytics — pageviews only, production only.
