@@ -1,0 +1,14 @@
+{
+  "name": "@rowfolio/contract-tests",
+  "private": true,
+  "type": "module",
+  "description": "Contract test suite for @rowfolio/contracts — positive/negative fixtures, oracle reconciliation, envelope guards. Not a workspace member yet (tests/* is not in pnpm-workspace globs); root `pnpm test` picks these files up via vitest.config.ts.",
+  "dependencies": {
+    "@rowfolio/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.2",
+    "typescript": "5.9.3",
+    "vitest": "5.0.0"
+  }
+}

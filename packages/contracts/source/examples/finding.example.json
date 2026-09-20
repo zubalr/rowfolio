@@ -1,0 +1,40 @@
+{
+  "id": "finding-north-target",
+  "ruleId": "north-target-orders-v1",
+  "kind": "divergence",
+  "severity": "attention",
+  "titleKey": "finding.north.title",
+  "bodyKey": "finding.north.body",
+  "metricIds": [
+    "north-june-revenue",
+    "north-june-target",
+    "north-target-gap",
+    "north-orders-change"
+  ],
+  "provenanceIds": [
+    "north-june-revenue-proof",
+    "north-june-target-proof",
+    "north-target-gap-proof",
+    "north-orders-change-proof"
+  ],
+  "qualityIssueIds": [],
+  "scope": {
+    "tableId": "operations-v1",
+    "periodStart": "2026-06-01",
+    "periodEnd": "2026-06-30",
+    "regions": [
+      "North"
+    ],
+    "complete": true,
+    "coverageNoteKey": "coverage.scheduledComplete"
+  },
+  "rank": {
+    "classPriority": 1,
+    "coverage": "1",
+    "magnitude": "0.119"
+  },
+  "chartId": "chart-north-target",
+  "limitations": [
+    "limitations.noCausality"
+  ]
+}
