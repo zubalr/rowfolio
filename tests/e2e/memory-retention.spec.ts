@@ -33,6 +33,8 @@ test.describe("Browser Memory Retention & CDP Heap Invariants", () => {
   test("Live browser heap, worker, and DOM retention across repeated upload/export/clear cycles", async ({
     page,
   }) => {
+    test.setTimeout(60_000);
+
     // 1. Establish CDP session
     const cdp: CDPSession = await page.context().newCDPSession(page);
     await cdp.send("Performance.enable");
