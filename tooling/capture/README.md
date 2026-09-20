@@ -11,6 +11,8 @@ repository.
 
 ## Usage
 
+Single shot:
+
 ```sh
 node tooling/capture/capture.ts \
   --url https://<candidate-host>/en/ \
@@ -19,10 +21,30 @@ node tooling/capture/capture.ts \
   --name landing-en-desktop
 ```
 
-Options: `--viewport WxH` (default `1440x1000`), `--full-page`,
-`--timeout-ms` (default `30000`), `--name` (output basename). The URL and the
-commit are always explicit inputs — the tool never starts a server, guesses a
-URL, or invents provenance.
+Scripted journeys (one PNG + metadata record per step; a step whose control
+never appears records an explicit `*-UNAVAILABLE.json` marker together with a
+`*-STATE.png` of the stuck screen):
+
+```sh
+node tooling/capture/capture.ts --url http://127.0.0.1:4543 \
+  --commit "$(git rev-parse HEAD)" --out tooling/capture/captures \
+  --journey landing --locale ar --viewport 320x700
+
+node tooling/capture/capture.ts --url http://127.0.0.1:4543 \
+  --commit "$(git rev-parse HEAD)" --out tooling/capture/captures \
+  --journey upload --locale en --viewport 1440x1000 \
+  --upload-file /private/path/synthetic.csv
+```
+
+Journeys: `landing` (hero → live preview → evidence → scenario → briefing),
+`guide` (guided walkthrough), `workspace-sample` (staged upload review of a
+workbook against `#/workspace`), `upload` (landing file intent → analyzed
+workspace → evidence → scenario → export). Options: `--viewport WxH`
+(default `1440x1000`), `--locale en|ar`, `--upload-file`,
+`--reduced-motion`, `--keyboard-probe` (records the focused element in each
+step's metadata), `--timeout-ms` (default `30000`). The URL and the commit
+are always explicit inputs — the tool never starts a server, guesses a URL,
+or invents provenance.
 
 First-time browser setup (already satisfied on machines with Playwright
 browsers installed):
@@ -44,6 +66,6 @@ pnpm exec playwright install chromium
 
 ## Known limitation
 
-This tool captures static screenshots only. Video clips and multi-viewport
-journeys are driven manually with the same metadata conventions until
-dedicated recording support lands.
+Journeys capture stills per step. Video clips, scroll-linked states and
+hover-only styling need manual drives under the same metadata conventions
+until recording support lands.

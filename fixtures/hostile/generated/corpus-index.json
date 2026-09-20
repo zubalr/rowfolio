@@ -10,8 +10,8 @@
     "cellTextMaxChars": 32000
   },
   "totals": {
-    "cases": 23,
-    "bytes": 18404
+    "cases": 24,
+    "bytes": 22183
   },
   "cases": [
     {
@@ -151,6 +151,12 @@
       "artifact": "xlsx-ragged-trailing-empty-cells.xlsx",
       "sha256": "78e0c91eb2e93ff7e5619f17b0d73e9d5902a607da06b9dd839dcb3150496bd0",
       "bytes": 3317
+    },
+    {
+      "caseId": "xlsx-formula-like-strings",
+      "artifact": "xlsx-formula-like-strings.xlsx",
+      "sha256": "66fc7985457c54a18f161935df55dd6576bfeccb9ee5eeff1207505d30e3fde8",
+      "bytes": 3779
     }
   ]
 }
