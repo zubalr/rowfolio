@@ -1,0 +1,117 @@
+/**
+ * Rowfolio design tokens as CSS custom properties.
+ * Source of truth: contracts/design-tokens.json v1.0.0 — see src/tokens.ts.
+ * One light theme; the dark evidence surface is a scoped treatment via
+ * [data-rf-surface="ink"], not a second theme.
+ */
+
+:root {
+  /* Palette (contract) */
+  --rf-ink: #172B35;
+  --rf-paper: #F7F4EC;
+  --rf-surface: #FFFEFA;
+  --rf-muted: #53636A;
+  --rf-rule: #D7DCD8;
+  --rf-data: #2855D9;
+  --rf-attention: #C84B31;
+  --rf-negative: #A33224;
+  --rf-positive: #116B63;
+  --rf-scenario: #946000;
+
+  /* On-ink tints — dark evidence surface only */
+  --rf-ink-text: #FFFEFA;
+  --rf-ink-muted: #AEC2CB;
+  --rf-ink-data: #9DB4F5;
+  --rf-ink-attention: #E8907C;
+  --rf-ink-positive: #7FC4BB;
+  --rf-ink-scenario: #E0B878;
+  --rf-ink-rule: #3A4A53;
+  --rf-ink-surface: #1F3947;
+
+  /* Semantic aliases (light theme) */
+  --rf-text: var(--rf-ink);
+  --rf-text-muted: var(--rf-muted);
+  --rf-bg: var(--rf-paper);
+  --rf-bg-raised: var(--rf-surface);
+  --rf-divider: var(--rf-rule);
+  --rf-accent: var(--rf-data);
+  --rf-focus: var(--rf-data);
+  --rf-danger-text: var(--rf-negative);
+
+  /* Spacing scale */
+  --rf-space-1: 4px;
+  --rf-space-2: 8px;
+  --rf-space-3: 12px;
+  --rf-space-4: 16px;
+  --rf-space-5: 24px;
+  --rf-space-6: 32px;
+  --rf-space-7: 48px;
+  --rf-space-8: 64px;
+  --rf-space-9: 96px;
+
+  /* Radius */
+  --rf-radius-control: 8px;
+  --rf-radius-panel: 16px;
+  --rf-radius-dialog: 20px;
+
+  /* Layout */
+  --rf-max-width: 1320px;
+  --rf-gutter: 48px;
+  --rf-evidence-width: 560px;
+  --rf-control-height: 44px;
+
+  /* Motion — restrained, meaningful. Reduced motion zeroes these. */
+  --rf-hover-ms: 120ms;
+  --rf-state-ms: 160ms;
+  --rf-panel-ms: 240ms;
+  --rf-number-ms: 240ms;
+  --rf-stagger-ms: 40ms;
+  --rf-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Type stacks */
+  --rf-font-body: "IBM Plex Sans", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --rf-font-mono: "IBM Plex Mono", "IBM Plex Sans", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* Elevation: shadows are for overlays only */
+  --rf-shadow-overlay: 0 20px 70px #172B351F;
+
+  color-scheme: light;
+}
+
+@media (max-width: 1199px) {
+  :root {
+    --rf-gutter: 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --rf-gutter: 16px;
+  }
+}
+
+/* Dark evidence treatment — a scoped surface, not a theme switch. */
+[data-rf-surface="ink"] {
+  --rf-text: var(--rf-ink-text);
+  --rf-text-muted: var(--rf-ink-muted);
+  --rf-bg: var(--rf-ink);
+  --rf-bg-raised: var(--rf-ink-surface);
+  --rf-divider: var(--rf-ink-rule);
+  --rf-accent: var(--rf-ink-data);
+  --rf-focus: var(--rf-ink-data);
+  --rf-danger-text: var(--rf-ink-attention);
+
+  background: var(--rf-ink);
+  color: var(--rf-ink-text);
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --rf-hover-ms: 0ms;
+    --rf-state-ms: 0ms;
+    --rf-panel-ms: 0ms;
+    --rf-number-ms: 0ms;
+    --rf-stagger-ms: 0ms;
+  }
+}
