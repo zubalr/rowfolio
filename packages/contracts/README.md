@@ -32,7 +32,7 @@ Rowfolio's **sole wire-schema authority** (contract version **1.0.0**). Every pa
 
 ## Schema-change procedure
 
-See [`SCHEMA_CHANGES.md`](./SCHEMA_CHANGES.md). Short version: schema edits require L00 approval, a version bump, regenerated types, migration fixtures and coordinated downstream updates. v1 freezes after lead review.
+See [`SCHEMA_CHANGES.md`](./SCHEMA_CHANGES.md). Short version: schema edits require maintainer approval, a version bump, regenerated types, migration fixtures and coordinated downstream updates. v1 freezes once marked final.
 
 ## Boundary
 

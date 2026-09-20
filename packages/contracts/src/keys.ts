@@ -1,7 +1,7 @@
 /**
  * Translation key manifest — the contract-level list of message keys and
  * their typed placeholder sets (source/translation-keys.json). Locale
- * catalogs themselves belong to packages/i18n (A04); this manifest is the
+ * catalogs themselves belong to packages/i18n; this manifest is the
  * key inventory validators check `*Key` fields against.
  */
 import keyManifestJson from '../source/translation-keys.json';
