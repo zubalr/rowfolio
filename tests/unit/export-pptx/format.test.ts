@@ -47,11 +47,13 @@ describe('display formatting', () => {
   });
 
   it('formats metric values by unit kind', () => {
-    expect(formatMetricValue('6000000.00', 'currency', 'USD')).toBe('USD 6,000,000.00');
-    expect(formatMetricValue('-0.119', 'ratio', 'fraction')).toBe('-11.9%');
-    expect(formatMetricValue('-6', 'percentage-point', 'pp')).toBe('-6pp');
-    expect(formatMetricValue('1565', 'minutes', 'minutes')).toBe('1,565 minutes');
-    expect(formatMetricValue(null, 'currency', 'USD')).toBe('—');
+    const u = (kind: string, label: string, currency: string | null = null) =>
+      ({ kind, label, currency }) as const;
+    expect(formatMetricValue('6000000.00', u('currency', 'USD', 'USD'))).toBe('USD 6,000,000.00');
+    expect(formatMetricValue('-0.119', u('ratio', 'fraction'))).toBe('-11.9%');
+    expect(formatMetricValue('-6', u('percentage-point', 'pp'))).toBe('-6pp');
+    expect(formatMetricValue('1565', u('minutes', 'minutes'))).toBe('1,565 minutes');
+    expect(formatMetricValue(null, u('currency', 'USD', 'USD'))).toBe('—');
   });
 });
 
