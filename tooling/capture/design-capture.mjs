@@ -22,7 +22,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 const { mkdirSync, writeFileSync } = fs;
 
-const REPO_ROOT = new URL('../../..', import.meta.url).pathname;
+const REPO_ROOT = new URL('../..', import.meta.url).pathname;
 const require = createRequire(`${REPO_ROOT}/package.json`);
 const { chromium } = require('@playwright/test');
 

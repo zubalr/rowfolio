@@ -7,7 +7,7 @@
 /* global window */
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
-const REPO_ROOT = new URL('../../..', import.meta.url).pathname;
+const REPO_ROOT = new URL('../..', import.meta.url).pathname;
 const require = createRequire(`${REPO_ROOT}/package.json`);
 const { chromium } = require('@playwright/test');
 const REPO = process.env.REPO ?? REPO_ROOT;
