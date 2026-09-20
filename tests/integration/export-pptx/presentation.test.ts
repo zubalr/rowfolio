@@ -276,12 +276,15 @@ describe('deck structure', () => {
       const artifact = await buildPresentation(model, () => undefined);
       const entries = unzip(new Uint8Array(artifact.bytes));
       const slide4 = textOf(entries, 'ppt/slides/slide4.xml');
-      // The unavailable reason still explains; the data table has 2,400
-      // usable rows, so the no-data line must not appear.
+      // No committed scenario: the panel names that accurately rather
+      // than implying the columns are missing, and the data table has
+      // 2,400 usable rows, so the no-data line must not appear.
       if (locale === 'en') {
-        expect(slide4).toContain('Confirm compatible revenue and operating-cost columns');
+        expect(slide4).toContain('No scenario is committed for this briefing.');
+        expect(slide4).toContain('What if operating costs change?');
         expect(slide4).not.toContain('No usable rows');
       } else {
+        expect(slide4).toContain('لم يُعتمد أي سيناريو');
         expect(slide4).not.toContain('قابلة للاستخدام');
       }
     }
@@ -293,5 +296,62 @@ describe('deck structure', () => {
     const xml = textOf(entries, 'ppt/slides/slide5.xml');
     expect(xml).toContain('Duplicate rows');
     expect((xml.match(/<a:prstGeom prst="rect">/g) ?? []).length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('carries designed chrome: masthead tick, folio, and a composed cover card', async () => {
+    const { bytes } = await buildDeck('en');
+    const entries = unzip(bytes);
+    const slide1 = textOf(entries, 'ppt/slides/slide1.xml');
+    // Cobalt masthead tick and hairline rules frame the page.
+    expect(slide1).toContain('slide-1-masthead-tick');
+    expect(slide1).toContain('slide-1-masthead-rule');
+    expect(slide1).toContain('slide-1-foot-rule');
+    // Page marker reads "1 / 6"; the lineage block sits on a surface card.
+    expect(slide1).toContain('>1 / 6<');
+    expect(slide1).toContain('slide-1-lineage-card');
+    expect(slide1).toContain('prst="roundRect"');
+    // Every slide carries its folio marker.
+    const slide6 = textOf(entries, 'ppt/slides/slide6.xml');
+    expect(slide6).toContain('>6 / 6<');
+  });
+
+  it('KPI slide keeps a labeled header band and column separators', async () => {
+    const { bytes } = await buildDeck('en');
+    const entries = unzip(bytes);
+    const slide2 = textOf(entries, 'ppt/slides/slide2.xml');
+    expect(slide2).toContain('slide-2-kpi-sep-1');
+    const tableText = slide2;
+    expect(tableText).toContain('>Metric<');
+    expect(tableText).toContain('>Value<');
+    expect(tableText).toContain('>Unit<');
+  });
+
+  it('styles native charts: outEnd labels, subtle gridlines, palette series', async () => {
+    const { bytes } = await buildDeck('en');
+    const entries = unzip(bytes);
+    const chartName = [...entries.keys()].find((k) => /ppt\/charts\/chart\d+\.xml$/.test(k));
+    expect(chartName).toBeDefined();
+    const chart = textOf(entries, chartName as string);
+    // Value labels render (default placement for clustered cols is outEnd),
+    // in ink — not the library's default black.
+    expect(chart).toContain('<c:showVal val="1"/>');
+    expect(chart).toContain('srgbClr val="172B35"'); // data labels in ink
+    expect(chart).toContain('srgbClr val="D7DCD8"'); // valAxis gridline in rule color
+    expect(chart).toContain('srgbClr val="2855D9"'); // observed series = data cobalt
+    // Axis bounds still honor the model contract (min/max from domain).
+    expect(chart).toContain('valAx');
+    expect(chart).toMatch(/<c:min val="0"\/>/);
+  });
+
+  it('declares an Arabic-capable complex-script font and presentation rtl', async () => {
+    const { bytes } = await buildDeck('ar');
+    const entries = unzip(bytes);
+    expect(textOf(entries, 'ppt/presentation.xml')).toContain('rtl="1"');
+    const theme = textOf(entries, 'ppt/theme/theme1.xml');
+    expect(theme).toContain('typeface="Arial"');
+    const slide1 = textOf(entries, 'ppt/slides/slide1.xml');
+    expect(slide1).toContain('a:cs typeface="IBM Plex Sans Arabic"');
+    // Latin/digit runs inside Arabic copy stay on the deck's Latin face.
+    expect(slide1).toContain('a:cs typeface="Arial"');
   });
 });

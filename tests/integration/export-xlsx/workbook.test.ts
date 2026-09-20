@@ -193,10 +193,12 @@ describe('workbook structure', () => {
     const entries = unzip(bytes);
     // Cell fills live in styles.xml; the sheet carries style indices.
     const styles = textOf(entries, 'xl/styles.xml');
-    expect(styles).toContain('FFB91C1C');
+    expect(styles).toContain('FFA33224');
     const quality = textOf(entries, 'xl/worksheets/sheet3.xml');
-    // Exactly the five unresolved status cells carry the adverse style.
-    expect(quality.match(/<c r="G\d+" s="\d+"/g)?.length ?? 0).toBe(5);
+    // The styled header band sits in G1; below it, exactly the five
+    // unresolved status cells carry a style (the adverse emphasis).
+    const styled = quality.match(/<c r="G\d+" s="\d+"/g) ?? [];
+    expect(styled.filter((c) => !c.includes('r="G1"')).length).toBe(5);
   });
 
   it('keeps clean-data rows and source coordinates in parity with the model', async () => {

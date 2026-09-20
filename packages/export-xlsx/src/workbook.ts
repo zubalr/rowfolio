@@ -12,6 +12,7 @@
 import ExcelJS from 'exceljs';
 import {
   assertExportModel,
+  DESIGN_TOKENS,
   isDecimal,
   sha256Hex,
   significantDigits,
@@ -131,7 +132,23 @@ function formatChangePercent(fraction: string): string {
 }
 
 /** Adverse red for explicitly negative results; restrained by design. */
-const ADVERSE_ARGB = 'FFB91C1C';
+const ADVERSE_ARGB = 'FF' + DESIGN_TOKENS.color.negative.replace('#', '').toUpperCase();
+const INK_ARGB = 'FF' + DESIGN_TOKENS.color.ink.replace('#', '').toUpperCase();
+const MUTED_ARGB = 'FF' + DESIGN_TOKENS.color.muted.replace('#', '').toUpperCase();
+const PAPER_ARGB = 'FF' + DESIGN_TOKENS.color.paper.replace('#', '').toUpperCase();
+const SURFACE_ARGB = 'FF' + DESIGN_TOKENS.color.surface.replace('#', '').toUpperCase();
+const RULE_ARGB = 'FF' + DESIGN_TOKENS.color.rule.replace('#', '').toUpperCase();
+const RULE_BORDER = { style: 'thin', color: { argb: RULE_ARGB } } as const;
+
+/** Header band: ink text on a surface fill, closed by a hairline rule. */
+function styleHeaderRow(row: ExcelJS.Row, cells: number): void {
+  for (let c = 1; c <= cells; c++) {
+    const cell = row.getCell(c);
+    cell.font = { bold: true, color: { argb: INK_ARGB } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: SURFACE_ARGB } };
+    cell.border = { bottom: RULE_BORDER };
+  }
+}
 
 function numFmtFor(kind: string | undefined): string {
   switch (kind) {
@@ -223,11 +240,15 @@ export const buildWorkbook = async (
   let summaryRow = 1;
   const summaryTitle = summary.getRow(summaryRow);
   summaryTitle.getCell(1).value = sheetLabel(locale, 'export.title');
-  summaryTitle.getCell(1).font = { bold: true, size: 14 };
+  summaryTitle.getCell(1).font = { bold: true, size: 16, color: { argb: INK_ARGB } };
+  for (const c of [1, 2]) {
+    summaryTitle.getCell(c).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: PAPER_ARGB } };
+    summaryTitle.getCell(c).border = { bottom: RULE_BORDER };
+  }
   summaryRow += 2;
   const observedHeader = summary.getRow(summaryRow);
   observedHeader.getCell(1).value = sheetLabel(locale, 'evidence.title');
-  observedHeader.getCell(1).font = { bold: true, size: 12 };
+  styleHeaderRow(observedHeader, 2);
   summaryRow += 1;
   const putSummary = (labelText: string, value: string | number, link?: string): void => {
     const row = summary.getRow(summaryRow);
@@ -286,6 +307,7 @@ export const buildWorkbook = async (
     if (typeof raw === 'number') {
       cell.value = raw;
       cell.numFmt = numFmtFor(metric.unit.kind);
+      cell.font = { bold: true, color: { argb: INK_ARGB } };
       if (metric.unit.kind === 'ratio' && raw < 0) {
         cell.font = { color: { argb: ADVERSE_ARGB }, bold: true };
       }
@@ -300,7 +322,7 @@ export const buildWorkbook = async (
   summaryRow += 1;
   const assumptionsHeader = summary.getRow(summaryRow);
   assumptionsHeader.getCell(1).value = sheetLabel(locale, 'scenario.title');
-  assumptionsHeader.getCell(1).font = { bold: true, size: 12 };
+  styleHeaderRow(assumptionsHeader, 2);
   summaryRow += 1;
   if (model.scenario !== null && model.scenario.status === 'defined') {
     putSummary(
@@ -444,6 +466,7 @@ export const buildWorkbook = async (
     columns: kpiHeaders.map((name) => ({ name, filterButton: true })),
     rows: [],
   });
+  styleHeaderRow(kpis.getRow(1), 4);
   kpis.autoFilter = { from: 'A1', to: `D${kpis.rowCount}` };
   kpis.pageSetup.printArea = `A1:D${kpis.rowCount}`;
 
@@ -486,6 +509,7 @@ export const buildWorkbook = async (
     ),
     rows: [],
   });
+  styleHeaderRow(quality.getRow(1), 9);
   quality.autoFilter = { from: 'A1', to: `I${model.table.qualityIssues.length + 1}` };
   quality.pageSetup.printArea = `A1:I${model.table.qualityIssues.length + 1}`;
   // Restrained emphasis: unresolved rows read red, nothing else shouts.
@@ -520,6 +544,7 @@ export const buildWorkbook = async (
   methodRows.forEach(([label, detail], i) => {
     const row = method.getRow(i + 1);
     row.getCell(1).value = label;
+    row.getCell(1).font = { bold: true, color: { argb: MUTED_ARGB } };
     row.getCell(2).value = detail;
     row.getCell(2).alignment = { wrapText: true };
   });
