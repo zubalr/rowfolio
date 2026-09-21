@@ -302,7 +302,7 @@ export function EvidencePanel({
                   services={services}
                   table={bundle.table}
                   metrics={bundle.snapshot.metrics}
-                  contextProofs={subject.proofs}
+                  contextProofs={bundle.snapshot.provenance}
                   i18n={i18n}
                 />
                 <p className="rf-evidence__method">
