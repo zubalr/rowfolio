@@ -66,10 +66,10 @@ function MiniChart({ model, chart }: { model: ExportModel; chart: ChartSpec }): 
           <div className="rf-sp__bars">
             {chart.series.map((series) => {
               const raw = point.values[series.id];
-              const height = raw === undefined ? 0 : Math.max(0, Math.min(88, (Number(raw) / domainMax) * 88));
+              const height = raw == null ? 0 : Math.max(0, Math.min(88, (Number(raw) / domainMax) * 88));
               return (
                 <span className="rf-sp__barcell" key={series.id}>
-                  <span className="rf-sp__barval">{raw === undefined ? '' : chartValue(raw, chart)}</span>
+                  <span className="rf-sp__barval">{raw == null ? '' : chartValue(raw, chart)}</span>
                   <span
                     className={`rf-sp__bar ${SERIES_CLASS[series.semantic] ?? 'rf-sp__bar--observed'}`}
                     style={{ height: `${height}%` }}
