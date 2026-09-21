@@ -123,7 +123,7 @@ test.describe("Browser Memory Retention & CDP Heap Invariants", () => {
       const applyBtn = page.locator('button:has-text("Apply approved changes")');
       await expect(applyBtn).toBeVisible({ timeout: 15_000 });
       await applyBtn.click();
-      await expect(page.locator("text=The briefing starts here")).toBeVisible({ timeout: 15_000 });
+      await expect(page.locator("text=Example analysis")).toBeVisible({ timeout: 15_000 });
 
       const prepareBtn = page.locator('[data-testid="export-prepare-btn"]');
       await expect(prepareBtn).toBeVisible();
@@ -160,7 +160,7 @@ test.describe("Browser Memory Retention & CDP Heap Invariants", () => {
       const applyBtn = page.locator('button:has-text("Apply approved changes")');
       await expect(applyBtn).toBeVisible({ timeout: 15_000 });
       await applyBtn.click();
-      await expect(page.locator("text=The briefing starts here")).toBeVisible({ timeout: 15_000 });
+      await expect(page.locator("text=Example analysis")).toBeVisible({ timeout: 15_000 });
 
       // Export
       const prepareBtn = page.locator('[data-testid="export-prepare-btn"]');

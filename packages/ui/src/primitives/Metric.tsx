@@ -44,7 +44,7 @@ export interface MetricProps {
   /** Localized reason for an undefined metric (required when undefined). */
   reasonLabel?: string | undefined;
   delta?: MetricDelta | undefined;
-  /** Optional trailing content, e.g. a "Show me why" evidence trigger. */
+  /** Optional trailing content, e.g. a "View calculation" evidence trigger. */
   footer?: ReactNode;
   size?: "rail" | "feature";
   testId?: string;

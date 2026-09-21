@@ -284,7 +284,7 @@ describe('deck structure', () => {
       // than implying the columns are missing, and the data table has
       // 2,400 usable rows, so the no-data line must not appear.
       if (locale === 'en') {
-        expect(slide4).toContain('No scenario is committed for this briefing.');
+        expect(slide4).toContain('No scenario is committed for this report.');
         expect(slide4).toContain('What if operating costs change?');
         expect(slide4).not.toContain('No usable rows');
       } else {

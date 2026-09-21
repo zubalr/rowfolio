@@ -39,7 +39,7 @@ test.describe("motion contract", () => {
     await expect(page.getByTestId("guide-caption")).toContainText("1/6");
 
     // Explicit consent still steps forward — the Next control names the
-    // destination step's caption ("What deserves attention" / "ما يستحق الانتباه").
+    // destination step's caption ("Results from this spreadsheet" / "نتائج من جدول البيانات هذا").
     await page
       .getByTestId("guide-bar")
       .getByRole("button", { name: /attention|الانتباه/i })

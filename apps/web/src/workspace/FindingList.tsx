@@ -5,7 +5,7 @@ import type { MessageKey } from '@rowfolio/i18n';
 import { findingBody, findingTestId, findingTitle } from './findingCopy.ts';
 
 /**
- * Finding list — the editorial spine. Clicking selects; "Show me why" opens
+ * Finding list — the editorial spine. Clicking selects; "View calculation" opens
  * the evidence drawer for the finding's provenance.
  */
 export function FindingList({ snapshot }: { snapshot: AnalysisSnapshot }) {
