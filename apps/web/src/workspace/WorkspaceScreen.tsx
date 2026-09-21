@@ -4,7 +4,7 @@ import type { MessageKey } from '@rowfolio/i18n';
 import { inspectSource } from '@rowfolio/ingest';
 import { evaluateProof, readEvidencePage } from '@rowfolio/provenance';
 import type { NormalizedTable } from '@rowfolio/contracts';
-import { takeWorkspaceIntent } from '../landing/pendingUpload.ts';
+import { takeWorkspaceIntent, type IntentDownload } from '../landing/pendingUpload.ts';
 import type { UploadPorts, UploadOutcome } from '../upload/index.ts';
 import { useI18n, useServices, useSessionState } from '../app/context.tsx';
 import type { SessionState } from '../app/state.ts';
@@ -51,16 +51,52 @@ export function WorkspaceScreen({ navigateLanding }: { navigateLanding: () => vo
     await controller.selectSource(bytes, file.name, /\.xlsx$/i.test(file.name) ? 'xlsx' : 'csv');
   };
 
+  const [pendingDownload, setPendingDownload] = useState<IntentDownload | null>(null);
+  const downloadKicked = useRef(false);
+
   // Claim the landing's one-shot intent: sample/guide → prepared-sample
   // pipeline; upload{file} → straight into the session (the file was already
-  // user-picked on the landing).
+  // user-picked on the landing). A sample intent may also carry a download
+  // format — the landing's Download actions mean a real file, so the export
+  // pipeline runs here once the session commits.
   useEffect(() => {
     const intent = takeWorkspaceIntent();
     if (intent === null) return;
     if (intent.kind === 'upload') void adoptFile(intent.file);
-    else void controller.useSample();
+    else {
+      if (intent.kind === 'sample' && intent.download !== undefined) {
+        setPendingDownload(intent.download);
+      }
+      void controller.useSample();
+    }
     // Mount-once: consumes the one-shot landing intent.
   }, []);
+
+  // Once the sample session is committed, open the export dialog and run the
+  // real pipeline — the visitor sees generation, not a silent redirect. Kicks
+  // exactly once per claimed intent.
+  useEffect(() => {
+    if (pendingDownload === null || downloadKicked.current) return;
+    if (state.phase !== 'ready') return;
+    downloadKicked.current = true;
+    controller.openExport();
+    void controller.prepareExport();
+  }, [pendingDownload, state.phase, controller]);
+
+  // When the requested artifact's blob URL lands, fire the same download the
+  // dialog's link performs. The dialog stays open so the other format and the
+  // hashes remain one click away.
+  useEffect(() => {
+    if (pendingDownload === null) return;
+    const entry = state.export.artifacts[pendingDownload];
+    if (entry === undefined || entry.url === '') return;
+    const anchor = document.createElement('a');
+    anchor.href = entry.url;
+    anchor.download = entry.artifact.filename;
+    anchor.rel = 'noopener';
+    anchor.click();
+    setPendingDownload(null);
+  }, [pendingDownload, state.export.artifacts]);
 
   // UploadFlow ports: inspect runs in-process (bounded preview); parse and
   // profile are delegated to the analysis worker — the raw table it retains
