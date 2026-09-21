@@ -7,8 +7,19 @@
  * workspace session claims it with `takeWorkspaceIntent`. Cleared on full
  * reload, which matches the no-persistence product decision.
  */
+/** A format the workspace should generate and hand to the visitor on arrival. */
+export type IntentDownload = "xlsx" | "pptx";
+
 export type WorkspaceIntent =
-  | { readonly kind: "sample" }
+  | {
+      readonly kind: "sample";
+      /**
+       * Set by the landing's Download actions: once the sample session is
+       * committed the workspace runs the export pipeline and fires the real
+       * file — the dialog stays open so both artifacts remain reachable.
+       */
+      readonly download?: IntentDownload;
+    }
   | { readonly kind: "upload"; readonly file: File }
   | { readonly kind: "guide" };
 

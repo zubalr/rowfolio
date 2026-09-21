@@ -23,7 +23,7 @@ import type {
   Metric,
   SlideModel,
 } from '@rowfolio/contracts';
-import { exportUnitLabel } from '@rowfolio/export-model';
+import { exportUnitLabel, periodLabel } from '@rowfolio/export-model';
 import { ExportPptxError } from './presentation.ts';
 import { hasLabel, label } from './labels.ts';
 import {
@@ -46,6 +46,8 @@ const GRAY = token(DESIGN_TOKENS.color.muted);
 const PAPER = token(DESIGN_TOKENS.color.paper);
 const SURFACE = token(DESIGN_TOKENS.color.surface);
 const RULE = token(DESIGN_TOKENS.color.rule);
+/** Teal marks verified/resolved content only — never chart series data. */
+const TEAL = token(DESIGN_TOKENS.color.positive);
 const FONT = DESIGN_TOKENS.font.deck;
 /** Arabic-capable face for complex-script runs (Arabic glyphs + shaping). */
 const FONT_AR = DESIGN_TOKENS.font.arabic;
@@ -64,6 +66,7 @@ const RIGHT_W = 6.28;
 const BODY_Y = 2.1;
 const BODY_H = 3.6;
 const FOOT_Y = 6.85;
+const PAGE_W = 13.333;
 
 export interface LayoutContext {
   readonly deck: Deck;
@@ -76,6 +79,20 @@ export interface LayoutContext {
   readonly chartById: ReadonlyMap<string, ChartSpec>;
   readonly findingById: ReadonlyMap<string, Finding>;
   readonly isSample: boolean;
+}
+
+/**
+ * Arabic decks are genuinely mirrored compositions, not right-aligned
+ * English: every placed box flips horizontally so the reading column sits on
+ * the right and visuals on the left. Masthead/footer boxes are symmetric and
+ * land on their own mirror. `ea` is the end-edge alignment for values pinned
+ * to the trailing side of a card.
+ */
+function mx(ctx: LayoutContext, x: number, w: number): number {
+  return ctx.rtl ? PAGE_W - x - w : x;
+}
+function ea(ctx: LayoutContext): 'left' | 'right' {
+  return ctx.rtl ? 'left' : 'right';
 }
 
 /** A requested region/model filter the sample pack recognizes. */
@@ -169,8 +186,8 @@ function chrome(ctx: LayoutContext): void {
   }
   const index = Number(slide.id.replace('slide-', '')) || 0;
   deck.addText([{ text: `${index} / ${ctx.model.slides.length}`, options: { rtlMode: false, fontFace: FONT } }], {
-    x: 11.2, y: FOOT_Y, w: 1.58, h: 0.4,
-    fontSize: FOOT_SIZE, fontFace: FONT, color: GRAY, align: 'right',
+    x: mx(ctx, 11.2, 1.58), y: FOOT_Y, w: 1.58, h: 0.4,
+    fontSize: FOOT_SIZE, fontFace: FONT, color: GRAY, align: ea(ctx),
     objectName: `${slide.id}-folio`,
   });
   if (slide.notes.length > 0) {
@@ -227,7 +244,7 @@ function textBox(
   const plain = runs.map((r) => r.text ?? '').join('');
   fitGuard(ctx.slide.id, name, plain, box.fontSize, box.w, box.h);
   ctx.deck.addText(runs, {
-    x: box.x, y: box.y, w: box.w, h: box.h,
+    x: mx(ctx, box.x, box.w), y: box.y, w: box.w, h: box.h,
     fontSize: box.fontSize, fontFace: FONT,
     color: box.color ?? INK, bold: box.bold ?? false,
     align: box.align ?? ctx.align, rtlMode: ctx.rtl,
@@ -247,9 +264,16 @@ function bar(
 ): void {
   if (w <= 0) return;
   ctx.deck.addShape('rect', {
-    x, y, w, h, fill: { color: color }, line: { color: color },
+    x: mx(ctx, x, w), y, w, h, fill: { color: color }, line: { color: color },
     objectName: `${ctx.slide.id}-${name}`,
   });
+}
+
+/** Finding scope line — region + period, localized when the region is known. */
+function findingScopeLine(ctx: LayoutContext, finding: Finding): string {
+  const regions = finding.scope.regions.map((r) => (hasLabel(`region.${r}`) ? label(ctx.locale, `region.${r}`) : r));
+  const period = periodLabel(finding.scope.periodStart, finding.scope.periodEnd, ctx.locale, ctx.model.numberingSystem);
+  return [...regions, period].join(' · ');
 }
 
 function toChartNumber(value: string, where: string): number {
@@ -311,7 +335,7 @@ export function chartBox(
   const labelFormat = chart.unit.kind === 'ratio' ? '0%' : undefined;
   const axisFont = ctx.rtl ? FONT_AR : FONT;
   ctx.deck.addChart('bar', data, {
-    x: box.x, y: box.y, w: box.w, h: box.h,
+    x: mx(ctx, box.x, box.w), y: box.y, w: box.w, h: box.h,
     barDir: 'col',
     showLegend: seriesIds.length > 1,
     legendPos: 'b',
@@ -393,7 +417,9 @@ function layoutSummary(ctx: LayoutContext): void {
     const annotated = finding.metricIds
       .map((id) => ctx.metricById.get(id))
       .filter((m) => m !== undefined);
-    const lines: TextRun[] = [];
+    const lines: TextRun[] = [
+      { text: findingScopeLine(ctx, finding), options: { fontSize: FOOT_SIZE, color: GRAY, breakLine: true, paraSpaceAfter: 10 } },
+    ];
     for (const metric of annotated) {
       const runs = metricLineRuns(ctx, metric as Metric);
       runs.forEach((run, i) => {
@@ -417,7 +443,7 @@ function layoutSummary(ctx: LayoutContext): void {
   // Lineage visual: retained records against raw input on a surface card,
   // bars to scale, each labeled so the diagram needs no legend.
   ctx.deck.addShape('roundRect', {
-    x: RIGHT_X - 0.22, y: BODY_Y - 0.05, w: RIGHT_W + 0.44, h: 3.05,
+    x: mx(ctx, RIGHT_X - 0.22, RIGHT_W + 0.44), y: BODY_Y - 0.05, w: RIGHT_W + 0.44, h: 3.05,
     rectRadius: 0.09, fill: { color: SURFACE }, line: { color: RULE, width: 0.75 },
     objectName: `${slide.id}-lineage-card`,
   });
@@ -428,14 +454,14 @@ function layoutSummary(ctx: LayoutContext): void {
   });
   bar(ctx, 'lineage-raw', RIGHT_X, 2.5, RIGHT_W, 0.4, RULE);
   textBox(ctx, 'lineage-raw-value', [{ text: formatInteger(String(rawRows)) }], {
-    x: RIGHT_X, y: 2.56, w: RIGHT_W - 0.1, h: 0.3, fontSize: FOOT_SIZE, color: INK, align: 'right',
+    x: RIGHT_X, y: 2.56, w: RIGHT_W - 0.1, h: 0.3, fontSize: FOOT_SIZE, color: INK, align: ea(ctx),
   });
   textBox(ctx, 'lineage-kept-label', [{ text: label(locale, 'common.retained') }], {
     x: RIGHT_X, y: 3.14, w: RIGHT_W, h: 0.3, fontSize: FOOT_SIZE, color: GRAY,
   });
   bar(ctx, 'lineage-kept', RIGHT_X, 3.42, keptW, 0.4, COBALT);
   textBox(ctx, 'lineage-kept-value', [{ text: formatInteger(String(retainedRows)) }], {
-    x: RIGHT_X, y: 3.48, w: RIGHT_W - 0.1, h: 0.3, fontSize: FOOT_SIZE, color: INK, align: 'right',
+    x: RIGHT_X, y: 3.48, w: RIGHT_W - 0.1, h: 0.3, fontSize: FOOT_SIZE, color: INK, align: ea(ctx),
   });
   const disclosure = ctx.isSample ? label(locale, 'common.prepared') : label(locale, 'common.local');
   const coverage = coverageLine(ctx);
@@ -492,9 +518,12 @@ function layoutKpis(ctx: LayoutContext): void {
     { text: exportUnitLabel(metric.unit), options: { color: GRAY } },
   ])];
   fitGuard(slide.id, 'table', JSON.stringify(rows), SMALL_SIZE, 12.23, 1.9);
-  ctx.deck.addTable(rows, {
-    x: LEFT_X, y: 4.4, w: 12.23,
-    colW: [5.5, 4.0, 2.73],
+  // Arabic reads the table right-to-left: the metric column leads on the
+  // right, so the column order itself mirrors rather than just the glyphs.
+  const ordered = ctx.rtl ? rows.map((r) => [...r].reverse()) : rows;
+  ctx.deck.addTable(ordered, {
+    x: mx(ctx, LEFT_X, 12.23), y: 4.4, w: 12.23,
+    colW: ctx.rtl ? [2.73, 4.0, 5.5] : [5.5, 4.0, 2.73],
     fontSize: SMALL_SIZE, fontFace: ctx.rtl ? FONT_AR : FONT, color: INK,
     border: { pt: 0.5, color: RULE },
     objectName: `${slide.id}-table`,
@@ -534,7 +563,9 @@ function layoutFinding(ctx: LayoutContext): void {
       `slide ${slide.id} finding carries ${finding.metricIds.length} metrics over the 8-line budget`,
     );
   }
-  const lines: TextRun[] = [];
+  const lines: TextRun[] = [
+    { text: findingScopeLine(ctx, finding), options: { fontSize: FOOT_SIZE, color: GRAY, breakLine: true, paraSpaceAfter: 10 } },
+  ];
   for (const metric of finding.metricIds
     .map((id) => ctx.metricById.get(id))
     .filter((m) => m !== undefined)) {
@@ -585,8 +616,10 @@ function layoutScenario(ctx: LayoutContext): void {
       : scenario.reasonKey !== null && scenario.reasonKey !== undefined && hasLabel(scenario.reasonKey)
         ? label(locale, scenario.reasonKey)
         : label(locale, 'scenario.unavailable');
+    // Centered panel: the empty state is a composed page, not a left-column
+    // stub beside dead space. Symmetric box mirrors to itself in RTL.
     ctx.deck.addShape('roundRect', {
-      x: LEFT_X, y: BODY_Y + 0.3, w: 8.6, h: 2.9,
+      x: (PAGE_W - 9.8) / 2, y: BODY_Y + 0.55, w: 9.8, h: 2.9,
       rectRadius: 0.09, fill: { color: SURFACE }, line: { color: RULE, width: 0.75 },
       objectName: `${slide.id}-empty-panel`,
     });
@@ -595,7 +628,7 @@ function layoutScenario(ctx: LayoutContext): void {
       { text: label(locale, 'scenario.question'), options: { bold: true, fontSize: 20, breakLine: true, paraSpaceBefore: 6 } },
       { text: reason, options: { fontSize: SMALL_SIZE, color: GRAY, paraSpaceBefore: 8 } },
     ], {
-      x: LEFT_X + 0.45, y: BODY_Y + 0.62, w: 7.7, h: 2.3, fontSize: BODY_SIZE, color: INK, valign: 'top',
+      x: (PAGE_W - 9.8) / 2 + 0.45, y: BODY_Y + 0.87, w: 8.9, h: 2.3, fontSize: BODY_SIZE, color: INK, valign: 'top',
     });
     return;
   }
@@ -673,14 +706,14 @@ function layoutQuality(ctx: LayoutContext): void {
   });
   const { issueCount, resolved, unresolved } = model.qualitySummary;
   ctx.deck.addShape('roundRect', {
-    x: RIGHT_X - 0.22, y: BODY_Y - 0.05, w: RIGHT_W + 0.44, h: 3.0,
+    x: mx(ctx, RIGHT_X - 0.22, RIGHT_W + 0.44), y: BODY_Y - 0.05, w: RIGHT_W + 0.44, h: 3.0,
     rectRadius: 0.09, fill: { color: SURFACE }, line: { color: RULE, width: 0.75 },
     objectName: `${slide.id}-reconcile-card`,
   });
   textBox(ctx, 'reconcile', [
     { text: label(locale, 'quality.reconciliation'), options: { fontSize: FOOT_SIZE, bold: true, color: GRAY, breakLine: true, paraSpaceAfter: 12 } },
     { text: `${label(locale, 'quality.resolved')}  `, options: { color: GRAY } },
-    { text: formatInteger(String(resolved)), options: { bold: true, breakLine: true, paraSpaceAfter: 8 } },
+    { text: formatInteger(String(resolved)), options: { bold: true, color: TEAL, breakLine: true, paraSpaceAfter: 8 } },
     { text: `${label(locale, 'quality.unresolved')}  `, options: { color: GRAY } },
     { text: formatInteger(String(unresolved)), options: { bold: true, breakLine: true, paraSpaceAfter: 12 } },
     { text: `${label(locale, 'quality.issues')}  `, options: { fontSize: SMALL_SIZE, color: GRAY } },
@@ -731,7 +764,7 @@ function layoutMethodology(ctx: LayoutContext): void {
     return { text: `${name} = ${shown}`, options: { breakLine: true, paraSpaceAfter: 8 } };
   });
   textBox(ctx, 'trace', [
-    { text: label(locale, 'common.verified'), options: { bold: true, fontSize: FOOT_SIZE, color: GRAY, breakLine: true, paraSpaceAfter: 12 } },
+    { text: label(locale, 'common.verified'), options: { bold: true, fontSize: FOOT_SIZE, color: TEAL, breakLine: true, paraSpaceAfter: 12 } },
     ...verified,
   ], { x: RIGHT_X, y: BODY_Y, w: RIGHT_W, h: 1.6, fontSize: SMALL_SIZE, color: INK });
 }

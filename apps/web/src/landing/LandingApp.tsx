@@ -89,22 +89,25 @@ export function LandingApp({ i18n }: LandingAppProps) {
             className="rf-lang"
             href={siblingLocaleHref(i18n.locale)}
             lang={i18n.locale === "ar" ? "en" : "ar"}
-            onClick={(e) => {
-              // Carry the presentation chapter across the locale switch —
-              // it lives in the landing hash (`#/pres-ch=N`), no storage.
-              // Modified clicks keep the native href (new tab/window).
+            onClick={(event) => {
+              // Locale links must not re-resolve mid-click: persisting the
+              // choice flips `i18n.locale`, which swaps this anchor's href
+              // before the browser follows it. Capture the target first and
+              // navigate explicitly; modified clicks keep the live href.
+              // The presentation chapter rides the landing hash
+              // (`#/pres-ch=N`) across the switch — no storage writes.
               const h = window.location.hash;
               const carry = h.startsWith("#/pres-ch") ? h : "";
-              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+              if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
                 if (carry !== "") {
-                  e.currentTarget.href = e.currentTarget.href.split("#")[0]! + carry;
+                  event.currentTarget.href = event.currentTarget.href.split("#")[0]! + carry;
                 }
-                persistLocaleChoice(i18n, i18n.locale === "ar" ? "en" : "ar");
                 return;
               }
-              e.preventDefault();
+              event.preventDefault();
+              const target = siblingLocaleHref(i18n.locale);
               persistLocaleChoice(i18n, i18n.locale === "ar" ? "en" : "ar");
-              window.location.assign(e.currentTarget.href.split("#")[0]! + carry);
+              window.location.assign(target + carry);
             }}
           >
             {i18n.localeName(i18n.locale === "ar" ? "en" : "ar")}

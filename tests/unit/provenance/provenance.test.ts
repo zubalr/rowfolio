@@ -95,6 +95,33 @@ describe('proof evaluation', () => {
     }
   });
 
+  it('resolves every finding proof under the full-snapshot context the drawer passes', () => {
+    // Regression for the evidence-drawer "Not defined" defect: composite
+    // expressions (e.g. orders-change = (jun−may)/may) reference operand
+    // metrics whose proofs are NOT in the finding's provenanceIds, so the
+    // evaluator needs all snapshot metrics + all snapshot provenance.
+    for (const finding of snapshot.findings) {
+      const proofs = snapshot.provenance.filter((p) => finding.provenanceIds.includes(p.id));
+      for (const proof of proofs) {
+        const outcome = evaluateProof(proof, table, snapshot.metrics, snapshot.provenance);
+        expect(outcome.reasonKey, `${finding.id}/${proof.id}`).toBeNull();
+        expect(compareDecimal(outcome.value as string, proof.result as string), proof.id).toBe(0);
+      }
+    }
+  });
+
+  it('documents that finding-scoped context cannot resolve cross-finding operands', () => {
+    // north-orders-change reads north-may/north-june-orders — proofs owned by
+    // the finding's sibling metrics, absent from its own provenanceIds.
+    const finding = snapshot.findings.find((f) => f.provenanceIds.includes('north-orders-change-proof'));
+    expect(finding).toBeDefined();
+    const proof = snapshot.provenance.find((p) => p.id === 'north-orders-change-proof') as Provenance;
+    const scoped = snapshot.provenance.filter((p) => finding!.provenanceIds.includes(p.id));
+    const metrics = snapshot.metrics.filter((m) => finding!.metricIds.includes(m.id));
+    expect(evaluateProof(proof, table, metrics, scoped).reasonKey).toBe('metric.missing');
+    expect(evaluateProof(proof, table, snapshot.metrics, snapshot.provenance).value).toBe('0.08');
+  });
+
   it('reports missing sibling proofs instead of trusting stated values', () => {
     const gap = snapshot.provenance.find((p) => p.id === 'north-target-gap-proof') as Provenance;
     const outcome = evaluateProof(gap, table, snapshot.metrics);

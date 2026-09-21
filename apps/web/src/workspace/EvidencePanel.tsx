@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { NormalizedRow, Provenance } from '@rowfolio/contracts';
+import type { Metric, NormalizedRow, NormalizedTable, Provenance } from '@rowfolio/contracts';
 
 /** Structural twin of contracts/interfaces EvidencePage (declaration module). */
 interface EvidencePage {
@@ -47,7 +47,14 @@ export function EvidencePanel() {
       {finding && active && (
         <>
           <p className="rf-evidence-finding">{findingTitle(i18n, finding)}</p>
-          <EvidenceBody i18n={i18n} proofs={proofs} table={active.table} sourceHash={active.source.hash} />
+          <EvidenceBody
+            i18n={i18n}
+            proofs={proofs}
+            table={active.table}
+            metrics={active.snapshot.metrics}
+            allProofs={active.snapshot.provenance}
+            sourceHash={active.source.hash}
+          />
         </>
       )}
     </Dialog>
@@ -58,11 +65,17 @@ function EvidenceBody({
   i18n,
   proofs,
   table,
+  metrics,
+  allProofs,
   sourceHash,
 }: {
   i18n: I18n;
   proofs: readonly Provenance[];
-  table: import('@rowfolio/contracts').NormalizedTable;
+  table: NormalizedTable;
+  metrics: readonly Metric[];
+  /** Every snapshot proof — composite expressions resolve sibling metric
+   *  refs through proofs the finding itself does not list. */
+  allProofs: readonly Provenance[];
   sourceHash: string;
 }) {
   const [proofResults, setProofResults] = useState<Map<string, { value: string | null; reasonKey: string | null }> | null>(null);
@@ -77,7 +90,12 @@ function EvidenceBody({
         const mod = await loadProvenance();
         const out = new Map<string, { value: string | null; reasonKey: string | null }>();
         for (const proof of proofs) {
-          const evaluated = mod.evaluateProof(proof as never, table as never, [] as never) as {
+          const evaluated = mod.evaluateProof(
+            proof as never,
+            table as never,
+            metrics as never,
+            allProofs as never,
+          ) as {
             value: string | null;
             reasonKey: string | null;
           };
@@ -91,7 +109,7 @@ function EvidenceBody({
     return () => {
       alive = false;
     };
-  }, [proofs, table]);
+  }, [proofs, table, metrics, allProofs]);
 
   return (
     <div className="rf-evidence">
@@ -118,7 +136,7 @@ function ProofBlock({
 }: {
   i18n: I18n;
   proof: Provenance;
-  table: import('@rowfolio/contracts').NormalizedTable;
+  table: NormalizedTable;
   result: { value: string | null; reasonKey: string | null } | null;
   unavailable: string | null;
 }) {
