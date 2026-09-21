@@ -92,6 +92,25 @@ export function ScenarioBarsPlot({ ctx }: { ctx: PlotContext }) {
     };
   }, [scenarioPoints, baselineVal, series, model.spec.unit, ctx.formatters]);
 
+  // The scenario delta reads as a bracket: a horizontal run inside the bar
+  // tops connecting baseline to scenario, the vertical leg spanning the
+  // difference — drawn in the scenario hue since the delta is hypothetical.
+  const bracket = useMemo(() => {
+    const sp = scenarioPoints[0];
+    if (!baselineVal || !sp) return null;
+    const sv = sp.values.find((v) => v.seriesId === series?.id);
+    if (sv?.coordinate == null || baselineVal.coordinate == null) return null;
+    const baseTop = Math.min(layout.xOf(baselineVal.coordinate), layout.zeroY);
+    const scenTop = Math.min(layout.xOf(sv.coordinate), layout.zeroY);
+    if (Math.abs(baseTop - scenTop) < 2) return null;
+    return {
+      baseCx: layout.baselineX + layout.barW / 2,
+      scenCx: layout.groupCx[sp.key]!,
+      baseTop,
+      scenTop,
+    };
+  }, [scenarioPoints, baselineVal, series, layout]);
+
   return (
     <div className="rf-chart-plot" {...ctx.explorerProps()}>
       <svg
@@ -161,6 +180,16 @@ export function ScenarioBarsPlot({ ctx }: { ctx: PlotContext }) {
                       data-neg={((v?.coordinate ?? 0) < 0) || undefined}
                       className="rf-chart-bar"
                     />
+                    {p.key === ctx.emphasisKey ? (
+                      <rect
+                        className="rf-chart-cellsel"
+                        x={x + 1}
+                        y={Math.min(vy, layout.zeroY) + 1}
+                        width={Math.max(layout.barW - 2, 0)}
+                        height={Math.max(Math.abs(layout.zeroY - vy) - 2, 0)}
+                        rx={1}
+                      />
+                    ) : null}
                     <text
                       x={layout.groupCx[p.key]!}
                       y={Math.min(vy, layout.zeroY) - 8}
@@ -203,6 +232,13 @@ export function ScenarioBarsPlot({ ctx }: { ctx: PlotContext }) {
               </g>
             );
           })}
+          {bracket !== null ? (
+            <path
+              className="rf-chart-deltabracket"
+              aria-hidden="true"
+              d={`M ${bracket.baseCx} ${bracket.baseTop + 6} H ${bracket.scenCx} V ${bracket.scenTop + 6} M ${bracket.baseCx - 5} ${bracket.baseTop + 6} h 10 M ${bracket.scenCx - 5} ${bracket.scenTop + 6} h 10`}
+            />
+          ) : null}
           {deltaChip !== null ? (
             <g className="rf-chart-deltagroup" aria-hidden="true">
               <text

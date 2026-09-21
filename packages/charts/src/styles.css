@@ -123,9 +123,11 @@ html[lang="ar"] .rf-chart__summary {
   stroke-width: 1;
 }
 
+/* The zero baseline is an axis rule, not a gridline — ink, slightly
+   heavier than the ruled gridlines. */
 .rf-chart-zero {
-  stroke: var(--rf-c-muted);
-  stroke-width: 1;
+  stroke: var(--rf-c-ink);
+  stroke-width: 1.25;
 }
 
 .rf-chart-tick {
@@ -252,11 +254,19 @@ html[lang="ar"] .rf-chart-hlabel {
   stroke-width: 1.5;
 }
 
-/* The selected datum reads differently: heavier ink ring, a notch cut into
-   the bar top, its value on an ink chip, and a bold axis label. */
-[data-emphasis="true"] .rf-chart-bar {
-  stroke: var(--rf-c-ink);
-  stroke-width: 2.25;
+/* The selected datum carries the one cell-selection chrome: a 2px cobalt
+   inset over an 8% cobalt tint (drawn as an overlay rect inset 1px inside
+   the mark), plus the notch and value chip for value-first reading. */
+.rf-chart-cellsel {
+  fill: color-mix(in srgb, var(--rf-c-data) 8%, transparent);
+  stroke: var(--rf-c-data);
+  stroke-width: 2;
+  pointer-events: none;
+  transition:
+    x var(--rf-chart-ms) var(--rf-chart-ease),
+    y var(--rf-chart-ms) var(--rf-chart-ease),
+    width var(--rf-chart-ms) var(--rf-chart-ease),
+    height var(--rf-chart-ms) var(--rf-chart-ease);
 }
 
 .rf-chart-mark {
@@ -264,7 +274,7 @@ html[lang="ar"] .rf-chart-hlabel {
 }
 
 .rf-chart-ring {
-  fill: none;
+  fill: color-mix(in srgb, var(--rf-c-data) 8%, transparent);
   stroke: var(--rf-c-data);
   stroke-width: 2;
 }
@@ -362,7 +372,9 @@ html[lang="ar"] .rf-chart-hunit {
 }
 
 .rf-chart-chip[aria-pressed="true"] {
-  border-color: var(--rf-c-ink);
+  border-color: var(--rf-c-data);
+  box-shadow: inset 0 0 0 1px var(--rf-c-data);
+  background: color-mix(in srgb, var(--rf-c-data) 8%, var(--rf-c-surface));
   color: var(--rf-c-ink);
   font-weight: 600;
 }
@@ -442,6 +454,27 @@ html[dir="rtl"] .rf-chart-tip,
 
 .rf-chart-tip__value {
   font-variant-numeric: tabular-nums;
+}
+
+/* Delta annotations — the gap between actual and target is drawn as a
+   shaded area (vermilion when behind, teal when ahead); the scenario delta
+   is a bracket between the bar tops in the scenario hue. */
+.rf-chart-deltaarea {
+  pointer-events: none;
+}
+
+.rf-chart-deltaarea--neg {
+  fill: color-mix(in srgb, var(--rf-c-attention) 14%, transparent);
+}
+
+.rf-chart-deltaarea--pos {
+  fill: color-mix(in srgb, var(--rf-c-positive) 12%, transparent);
+}
+
+.rf-chart-deltabracket {
+  fill: none;
+  stroke: var(--rf-c-scenario);
+  stroke-width: 1.5;
 }
 
 /* ---------- evidence table ---------- */
@@ -534,6 +567,7 @@ html[dir="rtl"] .rf-chart-tip,
 
 @media (prefers-reduced-motion: reduce) {
   .rf-chart .rf-chart-bar,
+  .rf-chart .rf-chart-cellsel,
   .rf-chart .rf-chart-point,
   .rf-chart .rf-chart-line,
   .rf-chart .rf-chart-target,
