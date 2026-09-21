@@ -23,9 +23,9 @@ import type {
   Metric,
   SlideModel,
 } from '@rowfolio/contracts';
-import { exportUnitLabel, periodLabel } from '@rowfolio/export-model';
+import { exportUnitLabel } from '@rowfolio/export-model';
 import { ExportPptxError } from './presentation.ts';
-import { hasLabel, label } from './labels.ts';
+import { hasLabel, label, metricDisplayName, scopeText } from './labels.ts';
 import {
   formatCompact,
   formatInteger,
@@ -136,24 +136,6 @@ function metricLineRuns(ctx: LayoutContext, metric: Metric): TextRun[] {
   ];
 }
 
-const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'] as const;
-
-/**
- * Display name for a metric within a slide set: when the same label key
- * would name two cells identically (e.g. May vs June order volume), qualify
- * with the metric's period-end month. Only rendered when that period key is
- * in the copy table — otherwise the plain name stands.
- */
-function metricDisplayName(ctx: LayoutContext, metric: Metric, siblings: readonly Metric[]): string {
-  const name = hasLabel(metric.labelKey) ? label(ctx.locale, metric.labelKey) : metric.id;
-  const duplicates = siblings.filter((m) => m.id !== metric.id && m.labelKey === metric.labelKey);
-  if (duplicates.length === 0) return name;
-  const end = metric.scope.periodEnd;
-  const month = end === null ? undefined : MONTHS[Number(end.slice(5, 7)) - 1];
-  const key = month !== undefined ? `period.${month}` : '';
-  if (key === '' || !hasLabel(key)) return name;
-  return `${name} · ${label(ctx.locale, key)}`;
-}
 
 function chrome(ctx: LayoutContext): void {
   const { deck, slide, locale, rtl, align } = ctx;
@@ -271,9 +253,7 @@ function bar(
 
 /** Finding scope line — region + period, localized when the region is known. */
 function findingScopeLine(ctx: LayoutContext, finding: Finding): string {
-  const regions = finding.scope.regions.map((r) => (hasLabel(`region.${r}`) ? label(ctx.locale, `region.${r}`) : r));
-  const period = periodLabel(finding.scope.periodStart, finding.scope.periodEnd, ctx.locale, ctx.model.numberingSystem);
-  return [...regions, period].join(' · ');
+  return scopeText(ctx.locale, finding.scope, ctx.model.numberingSystem);
 }
 
 function toChartNumber(value: string, where: string): number {
@@ -495,7 +475,7 @@ function layoutKpis(ctx: LayoutContext): void {
     const big = metric.unit.kind === 'currency' && metric.value !== null
       ? `${exportUnitLabel(metric.unit)} ${formatCompact(metric.value)}`.trim()
       : formatMetricValue(metric.value, metric.unit);
-    const name = metricDisplayName(ctx, metric, metrics);
+    const name = metricDisplayName(ctx.locale, metric, metrics);
     if (i > 0) {
       bar(ctx, `kpi-sep-${i}`, LEFT_X + i * colW - 0.07, BODY_Y + 0.08, 0.014, 1.35, RULE);
     }
@@ -513,7 +493,7 @@ function layoutKpis(ctx: LayoutContext): void {
     { text: label(locale, 'table.unit'), options: { bold: true, fill: { color: SURFACE } } },
   ];
   const rows = [header, ...metrics.map((metric) => [
-    { text: metricDisplayName(ctx, metric, metrics), options: {} },
+    { text: metricDisplayName(ctx.locale, metric, metrics), options: {} },
     { text: formatMetricValue(metric.value, metric.unit), options: { bold: true } },
     { text: exportUnitLabel(metric.unit), options: { color: GRAY } },
   ])];

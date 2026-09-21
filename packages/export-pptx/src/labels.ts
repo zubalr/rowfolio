@@ -14,7 +14,8 @@
  * No placeholders are interpolated here: callers pass through only
  * exact model values alongside these labels.
  */
-import type { Locale } from '@rowfolio/contracts';
+import type { Locale, Metric, Scope } from '@rowfolio/contracts';
+import { periodLabel } from '@rowfolio/export-model';
 
 const STRINGS: Record<Locale, Record<string, string>> = {
   en: {
@@ -240,4 +241,31 @@ export function label(locale: Locale, key: string): string {
 /** True when both locales carry the key. */
 export function hasLabel(key: string): boolean {
   return STRINGS.en[key] !== undefined && STRINGS.ar[key] !== undefined;
+}
+
+const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'] as const;
+
+/**
+ * Display name for a metric within a slide set: when the same label key
+ * would name two cells identically (e.g. May vs June order volume), qualify
+ * with the metric's period-end month. Only rendered when that period key is
+ * in the copy table — otherwise the plain name stands. Shared by the deck
+ * writer and the in-app preview so both name metrics identically.
+ */
+export function metricDisplayName(locale: Locale, metric: Metric, siblings: readonly Metric[]): string {
+  const name = hasLabel(metric.labelKey) ? label(locale, metric.labelKey) : metric.id;
+  const duplicates = siblings.filter((m) => m.id !== metric.id && m.labelKey === metric.labelKey);
+  if (duplicates.length === 0) return name;
+  const end = metric.scope.periodEnd;
+  const month = end === null ? undefined : MONTHS[Number(end.slice(5, 7)) - 1];
+  const key = month !== undefined ? `period.${month}` : '';
+  if (key === '' || !hasLabel(key)) return name;
+  return `${name} · ${label(locale, key)}`;
+}
+
+/** Human scope line — region(s) + period, localized when the region is known. */
+export function scopeText(locale: Locale, scope: Scope, numberingSystem: 'latn' | 'arab'): string {
+  const regions = scope.regions.map((r) => (hasLabel(`region.${r}`) ? label(locale, `region.${r}`) : r));
+  const period = periodLabel(scope.periodStart, scope.periodEnd, locale, numberingSystem);
+  return [...regions, period].join(' · ');
 }
