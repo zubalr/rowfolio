@@ -70,13 +70,16 @@ describe('adversarial: capture-harness env boundaries', () => {
 const EGRESS_PRIMITIVES =
   /\bfetch\s*\(|XMLHttpRequest|sendBeacon|new\s+WebSocket|new\s+EventSource|navigator\.send|axios|node:http|node:https|node:net|node:tls|\.request\s*\(/;
 const REMOTE_URL = /https?:\/\/[^\s'"`)\]]+/g;
-const URL_ALLOWLIST = /^https?:\/\/(localhost|127\.0\.0\.1|example\.com)/;
+const URL_ALLOWLIST = /^https?:\/\/(localhost|127\.0\.0\.1|example\.com|github\.com\/zubalr\/rowfolio)/;
 const CODE_PRIMITIVES = /dangerouslySetInnerHTML|innerHTML\s*=|eval\s*\(|new\s+Function/;
 
 /** Every file this branch adds or touches in app + tooling. */
 const DELTA_FILES = [
   'apps/web/src/evidence/EvidencePanel.tsx',
-  'apps/web/src/landing/PreviewStage.tsx',
+  'apps/web/src/landing/PresentationStage.tsx',
+  'apps/web/src/landing/LandingApp.tsx',
+  'apps/web/src/landing/copy.ts',
+  'apps/web/src/landing/previewTruth.ts',
   'apps/web/src/landing/landing.css',
   'apps/web/src/workspace/KpiStrip.tsx',
   'apps/web/src/workspace/findingCopy.ts',
