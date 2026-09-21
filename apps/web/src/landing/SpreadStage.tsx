@@ -421,7 +421,11 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
               <i className="gf-cap" />
             </div>
             <div className="rf-fchips">
-              <span className="rf-chip rf-chip--delta rf-numeric" dir="ltr">
+              <span
+                className="rf-chip rf-chip--delta rf-numeric"
+                dir="ltr"
+                style={{ opacity: seg(t, 4030, 4200) }}
+              >
                 {pct(deltaShown, true)}
               </span>
               <span className="rf-chip rf-chip--orders" style={{ opacity: ordersP }}>
