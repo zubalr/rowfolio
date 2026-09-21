@@ -986,10 +986,10 @@ html[lang="ar"] .rf-footer {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--rf-space-5);
   }
-  /* The guide rail docks under the specimen on narrow viewports — it must
-     never overlay the subject, same rule as the presentation pill. */
+  /* The guide rail pins to the viewport bottom while the specimen scrolls,
+     releasing at the section end — content stays scrollable above it. */
   .rf-preview__guide {
-    position: static;
+    inset-block-end: 0;
   }
   .rf-guide {
     flex-direction: column;
