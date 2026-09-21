@@ -24,3 +24,27 @@ export function takeWorkspaceIntent(): WorkspaceIntent | null {
   pending = null;
   return intent;
 }
+
+/**
+ * A file the app-level upload path could not resolve alone (e.g. an
+ * ambiguous CSV delimiter) — handed to the upload flow's configure stage
+ * so its picker renders instead of a dead-end error banner. Bytes travel
+ * directly; no File wrapper is needed at this seam.
+ */
+export interface PendingPickerFile {
+  readonly name: string;
+  readonly bytes: ArrayBuffer;
+}
+
+let pendingPicker: PendingPickerFile | null = null;
+
+export function setPendingPickerFile(file: PendingPickerFile): void {
+  pendingPicker = file;
+}
+
+/** Consume the file awaiting the delimiter/configure picker. */
+export function takePendingPickerFile(): PendingPickerFile | null {
+  const file = pendingPicker;
+  pendingPicker = null;
+  return file;
+}

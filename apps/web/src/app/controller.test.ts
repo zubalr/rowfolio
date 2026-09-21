@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { AnalysisSnapshot, ExportModel, NormalizedTable, QualityIssue } from '@rowfolio/contracts';
 import { SessionController } from './controller.ts';
+import { takePendingPickerFile } from '../landing/pendingUpload.ts';
 import { BlobUrlStore } from './blobUrls.ts';
 import { WorkerClient } from '../workers/client.ts';
 import { InProcessWorker, inProcessFactory } from '../workers/test-helpers.ts';
@@ -658,6 +659,56 @@ describe('upload resilience — cancel coverage + progress honesty', () => {
     expect(s.export.building).toBe(false);
     expect(s.export.failure?.code).toBe('CANCELLED');
     expect(spawned.at(-1)?.terminated).toBe(true);
+    await controller.dispose();
+  });
+
+  it('ambiguous-delimiter upload defers to the picker instead of dead-ending on a banner', async () => {
+    const { controller } = makeController();
+    // Both ',' and ';' parse uniformly → the real inspector throws
+    // AMBIGUOUS_INPUT/csv.ambiguous-delimiter (D-33c repro).
+    const ambiguous = new TextEncoder().encode(
+      'id;date,region\nR-1;2026-06-01,North\nR-2;2026-06-02,South\nR-3;2026-06-03,East\n',
+    ).buffer;
+    await controller.selectSource(ambiguous, 'amb.csv', 'csv');
+    const s = controller.getState();
+    // No failure is surfaced — the file waits in the pending-picker slot
+    // for the upload flow's configure stage to claim it.
+    expect(s.phase).toBe('idle');
+    expect(s.error).toBeNull();
+    expect(s.pending).toBeNull();
+    const pending = takePendingPickerFile();
+    expect(pending?.name).toBe('amb.csv');
+    expect(new Uint8Array(pending!.bytes)).toEqual(new Uint8Array(ambiguous));
+    await controller.dispose();
+  });
+
+  it('a failed upload marks the error retryable; retrySource replays the retained bytes', async () => {
+    const { controller } = makeController();
+    // Empty bytes fail real inspection (INVALID_FILE / csv.empty).
+    await controller.selectSource(new ArrayBuffer(0), 'empty.csv', 'csv');
+    const failed = controller.getState();
+    expect(failed.error?.code).toBe('INVALID_FILE');
+    expect(failed.error?.retrySource).toBe(true);
+    expect(failed.phase).toBe('idle');
+
+    controller.retrySource();
+    await waitFor(() => controller.getState().error !== null);
+    const retried = controller.getState();
+    expect(retried.error?.code).toBe('INVALID_FILE');
+    await controller.dispose();
+  });
+
+  it('non-upload failures carry no source retry', async () => {
+    const { controller } = makeController({
+      fetchSample: async () => new Response(null, { status: 404 }),
+    });
+    await controller.useSample();
+    const s = controller.getState();
+    expect(s.error).not.toBeNull();
+    expect(s.error?.retrySource).toBeUndefined();
+    controller.retrySource();
+    // No pending source → the retry is a no-op.
+    expect(controller.getState().pending).toBeNull();
     await controller.dispose();
   });
 });

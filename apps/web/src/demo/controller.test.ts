@@ -60,6 +60,14 @@ class FakeHost implements DemoHost {
   focusResults() {
     this.focused += 1;
   }
+  captured = 0;
+  exitFocused = 0;
+  captureFocus() {
+    this.captured += 1;
+  }
+  focusExit() {
+    this.exitFocused += 1;
+  }
 }
 
 const tick = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
@@ -200,6 +208,19 @@ describe("DemoController", () => {
     expect(controller.getState().status).toBe("idle");
     expect(host.actions.at(-1)).toBe("reset");
     expect(host.focused).toBe(1);
+  });
+
+  it("captures focus on start and restores it on exit — never drops to body", async () => {
+    const { controller, host } = make();
+    controller.start();
+    await settle();
+    expect(host.captured).toBe(1);
+    controller.exit();
+    expect(controller.getState().status).toBe("idle");
+    expect(host.exitFocused).toBe(1);
+    // An idle exit (dispose) must not steal focus.
+    controller.exit();
+    expect(host.exitFocused).toBe(1);
   });
 
   it("surfaces a typed timeout when readiness never arrives", async () => {

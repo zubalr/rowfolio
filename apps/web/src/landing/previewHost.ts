@@ -28,6 +28,8 @@ interface Waiter {
 export class PreviewDemoHost implements DemoHost {
   private satisfied: ReadonlySet<DemoReadiness> = new Set();
   private waiters: Waiter[] = [];
+  /** Element that held focus when the guide started (usually its trigger). */
+  private returnFocus: HTMLElement | null = null;
 
   constructor(
     private readonly dispatch: (action: PreviewAction) => void,
@@ -89,5 +91,31 @@ export class PreviewDemoHost implements DemoHost {
 
   focusResults(): void {
     this.onFocusResults();
+  }
+
+  captureFocus(): void {
+    this.returnFocus =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  }
+
+  focusExit(): void {
+    // Only rescue a dead drop: focus on <body> or inside the unmounting
+    // guide bar. Focus deliberately moved elsewhere is left alone.
+    const active = document.activeElement;
+    const deadDrop =
+      active === null ||
+      active === document.body ||
+      (active instanceof Element && active.closest("[data-guide-controls]") !== null);
+    if (!deadDrop) {
+      this.returnFocus = null;
+      return;
+    }
+    const target = this.returnFocus;
+    this.returnFocus = null;
+    if (target !== null && target.isConnected) {
+      target.focus();
+    } else {
+      this.onFocusResults();
+    }
   }
 }

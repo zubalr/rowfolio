@@ -41,6 +41,33 @@
   flex-wrap: wrap;
 }
 
+/* Narrow masthead: brand pins the first row; the toolbar drops to a
+   single scrollable second row — never a ragged wrap around the wordmark.
+   A minmax(0,…) track is the hard floor: the nav cannot widen the page. */
+@media (max-width: 640px) {
+  .rf-workspace .rf-masthead {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--rf-space-3);
+    padding-block: var(--rf-space-3);
+    inline-size: 100%;
+    max-inline-size: 100%;
+    min-inline-size: 0;
+    box-sizing: border-box;
+  }
+  .rf-mastnav {
+    min-inline-size: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-block-end: var(--rf-space-1);
+    scrollbar-width: none;
+  }
+  .rf-mastnav::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 .rf-hero {
   flex: 1;
   display: flex;
@@ -106,6 +133,16 @@
 .rf-banner-error {
   color: var(--rf-danger-text);
   border-inline-start: 3px solid var(--rf-danger-text);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rf-space-2) var(--rf-space-4);
+}
+
+.rf-banner__actions {
+  display: inline-flex;
+  gap: var(--rf-space-2);
 }
 
 .rf-workspace {
@@ -123,6 +160,36 @@
   display: flex;
   flex-direction: column;
   gap: var(--rf-space-7);
+  /* The ruled ledger — faint 1px cell grid at ~4% ink under the content. */
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--rf-ink) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--rf-ink) 4%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* The ink chart stage keeps a hairline ledger of its own. */
+.rf-stage-panel {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--rf-ink-text) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--rf-ink-text) 5%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* KPI numerals are ledger figures — mono + tabular always. */
+.rf-workspace .rf-metric__value .rf-numeric,
+.rf-workspace .rf-metric-scope,
+.rf-workspace .rf-scenario-result,
+.rf-workspace .rf-workspace-title {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+.rf-workspace .rf-metric__value .rf-numeric {
+  font-family: var(--rf-font-mono);
+}
+/* The lead metric reads larger than the rail metrics beside it — scaled
+   so the headline figure never pushes the page past its viewport. */
+.rf-metric--feature .rf-metric__value {
+  font-size: clamp(26px, 9vw, 52px);
 }
 
 .rf-workspace-head {
@@ -157,22 +224,27 @@
   flex-direction: column;
 }
 
-/* Finding rows separate by rules; the active finding carries a tinted
-   inset and a 3px accent rule — never a floating card. */
+/* Finding rows separate by rules; the active finding carries THE cell
+   selection chrome — 2px cobalt inset rule + 8% cobalt wash, identical to
+   every other selected element in the product. */
 .rf-finding {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--rf-space-4);
   border-block-start: 1px solid var(--rf-divider);
-  border-inline-start: 3px solid transparent;
   padding-block: var(--rf-space-5);
   padding-inline-start: var(--rf-space-3);
+  border-radius: var(--rf-radius-control);
 }
 
+/* On the ink verdict surface the chrome is the 2px accent frame alone —
+   the card lifts to the surface's raised step; text keeps ink tokens, so
+   contrast holds in both locales. (On paper contexts the same chrome is
+   the frame + raised paper.) */
 .rf-finding.is-selected {
-  border-inline-start-color: var(--rf-attention);
-  background: color-mix(in srgb, var(--rf-data) 6%, var(--rf-bg));
+  box-shadow: inset 0 0 0 2px var(--rf-accent);
+  background: var(--rf-bg-raised);
 }
 
 .rf-finding.is-selected .rf-finding-title {
@@ -258,6 +330,13 @@
   margin-block-start: var(--rf-space-4);
   border-block-start: 1px solid var(--rf-divider);
   padding-block-start: var(--rf-space-3);
+}
+
+/* Assumption notes wear the amber rail — hypotheses, never observed data. */
+.rf-scenario-assumptions {
+  color: var(--rf-scenario-text);
+  border-inline-start: 3px solid color-mix(in srgb, var(--rf-scenario) 60%, transparent);
+  padding-inline-start: var(--rf-space-3);
 }
 
 /* Evidence drawer content (ink surface) */
@@ -367,26 +446,10 @@
   margin-block-start: var(--rf-space-4);
 }
 
-/* Export dialog */
+/* Export dialog — preview + outline move to briefing/export.css;
+   the link list stays here with the download rows. */
 .rf-export-preview {
   margin-block-end: var(--rf-space-5);
-}
-
-.rf-export-outline {
-  margin-block: var(--rf-space-3);
-  padding-inline-start: var(--rf-space-5);
-  display: flex;
-  flex-direction: column;
-  gap: var(--rf-space-1);
-  font-size: 0.9rem;
-}
-
-.rf-slide-kind {
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--rf-text-muted);
-  margin-inline-end: var(--rf-space-2);
 }
 
 .rf-export-links {

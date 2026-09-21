@@ -14,13 +14,15 @@
  * dispatch the same preview actions the DemoController dispatches as a
  * host — the guide is a driver of the real surface, not a fake cursor.
  */
-import type { ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { m } from "motion/react";
 import { Button, Bidi, DataTable, Icon } from "@rowfolio/ui";
 import type { I18n } from "@rowfolio/i18n";
 import { compareDecimal, divideDecimal, subtractDecimal } from "@rowfolio/contracts";
 import type { Decimal } from "@rowfolio/contracts";
 import { landingCopy } from "./copy.ts";
+import { SlideGlyph } from "../briefing/slide-glyphs.tsx";
+import type { SlideKind } from "../briefing/slide-glyphs.tsx";
 import type { LandingPreviewTruth } from "./previewTruth.ts";
 import type { PreviewAction, PreviewState } from "./previewState.ts";
 
@@ -43,6 +45,16 @@ export interface PreviewStageProps {
   /** Slot rendered inside the stage (guide controls). */
   readonly children?: ReactNode;
 }
+
+/** Deck order in the export model — the preview cards use the same glyphs. */
+const BRIEFING_KIND_BY_SLIDE: Record<1 | 2 | 3 | 4 | 5 | 6, SlideKind> = {
+  1: "summary",
+  2: "kpis",
+  3: "finding",
+  4: "scenario",
+  5: "quality",
+  6: "methodology",
+};
 
 const PCT = { minFractionDigits: 0, maxFractionDigits: 1, signDisplay: "exceptZero" } as const;
 const PCT_UNSIGNED = { minFractionDigits: 0, maxFractionDigits: 1 } as const;
@@ -228,9 +240,15 @@ export function PreviewStage({
 
   const hashShort = dataset.sha256.slice(0, 12);
 
+  // Drag-state for the scenario value chip — shown while the pointer is
+  // down or the range has keyboard focus.
+  const [scrubbing, setScrubbing] = useState(false);
+  const rangePct = ((Number(state.scenarioRatio) * 100 - -20) / 50) * 100;
+  const rangeStyle = { "--rf-range-pct": `${rangePct}%` } as CSSProperties;
+
   return (
     <section
-      className="rf-stage"
+      className="rf-stage rf-ledger"
       id="demo"
       aria-labelledby="rf-preview-title"
       data-testid="preview-stage"
@@ -453,23 +471,43 @@ export function PreviewStage({
           <label className="rf-scenario__label" htmlFor="rf-cost-range">
             {i18n.t("scenario.costChange")}
           </label>
-          <input
-            id="rf-cost-range"
-            className="rf-scenario__range"
-            data-testid="scenario-range"
-            type="range"
-            min={-20}
-            max={30}
-            step={0.1}
-            value={Number(state.scenarioRatio) * 100}
-            onChange={(event) => {
-              onManualInteraction();
-              dispatch({
-                type: "set-scenario",
-                ratio: divideDecimal(event.currentTarget.value, "100"),
-              });
-            }}
-          />
+          <div className="rf-scenario__slider" data-scrubbing={scrubbing || undefined}>
+            <input
+              id="rf-cost-range"
+              className="rf-scenario__range"
+              data-testid="scenario-range"
+              type="range"
+              min={-20}
+              max={30}
+              step={0.1}
+              value={Number(state.scenarioRatio) * 100}
+              style={rangeStyle}
+              onPointerDown={() => setScrubbing(true)}
+              onPointerUp={() => setScrubbing(false)}
+              onPointerCancel={() => setScrubbing(false)}
+              onBlur={() => setScrubbing(false)}
+              onChange={(event) => {
+                onManualInteraction();
+                dispatch({
+                  type: "set-scenario",
+                  ratio: divideDecimal(event.currentTarget.value, "100"),
+                });
+              }}
+            />
+            {/* Value chip rides the thumb while scrubbing — assumptions
+                stay amber end to end. */}
+            <output
+              className="rf-scenario__chip"
+              aria-hidden="true"
+              style={{
+                insetInlineStart: `calc(9px + (100% - 18px) * ${rangePct / 100})`,
+              }}
+            >
+              <bdi dir="ltr" className="rf-numeric">
+                {i18n.formatPercent(state.scenarioRatio, PCT)}
+              </bdi>
+            </output>
+          </div>
           {/* Paired bars on a fixed scale: observed baseline (cobalt, solid)
               vs assumption layer (amber, dashed outline). */}
           <div className="rf-scenario__bars" dir="ltr" role="img"
@@ -492,9 +530,17 @@ export function PreviewStage({
                   style={{ inlineSize: `${scenPct}%` }}
                 />
               </span>
-              <span className="rf-scenario__bar-value rf-numeric">
+              {/* Number roll — the assumed figure rolls into place on each
+                  assumption change (240ms; instant under reduced motion). */}
+              <m.span
+                className="rf-scenario__bar-value rf-numeric"
+                key={String(scenario.contribution)}
+                initial={{ opacity: 0, y: "0.3em" }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.24, ease: EASE }}
+              >
                 {i18n.formatInteger(scenario.contribution)}
-              </span>
+              </m.span>
             </div>
           </div>
           <p className="rf-scenario__result">
@@ -540,12 +586,15 @@ export function PreviewStage({
           <ol className="rf-briefing__slides" aria-label={i18n.t("export.preview")}>
             {([1, 2, 3, 4, 5, 6] as const).map((n) => (
               <li key={n} className="rf-briefing__slide" data-ready={state.briefingReady || undefined}>
-                <span className="rf-briefing__slide-num rf-numeric" dir="ltr">
-                  {landingCopy(i18n.locale, "export.deckSlides", { n })}
-                </span>
-                <span className="rf-briefing__slide-title">{landingCopy(i18n.locale, `export.slide.${n}`)}</span>
-                <span className="rf-briefing__state">
-                  {state.briefingReady ? <Icon name="check" size={16} /> : "—"}
+                <SlideGlyph kind={BRIEFING_KIND_BY_SLIDE[n]} />
+                <span className="rf-briefing__slide-row">
+                  <span className="rf-briefing__slide-num rf-numeric" dir="ltr">
+                    {landingCopy(i18n.locale, "export.deckSlides", { n })}
+                  </span>
+                  <span className="rf-briefing__slide-title">{landingCopy(i18n.locale, `export.slide.${n}`)}</span>
+                  <span className="rf-briefing__state">
+                    {state.briefingReady ? <Icon name="check" size={16} /> : "—"}
+                  </span>
                 </span>
               </li>
             ))}

@@ -3,6 +3,13 @@ import type { MessageKey } from '@rowfolio/i18n';
 import { useI18n, useServices, useSessionState } from '../app/context.tsx';
 import { formatInteger } from '../workspace/format.ts';
 import type { ExportFormat } from '../app/state.ts';
+import { SlideGlyph } from './slide-glyphs.tsx';
+import './export.css';
+
+/** Hashed filenames stay legible by the middle — head … tail, never a flood. */
+function truncateMiddle(value: string, head = 30, tail = 14): string {
+  return value.length <= head + tail + 1 ? value : `${value.slice(0, head)}…${value.slice(-tail)}`;
+}
 
 const FORMAT_LABEL: Record<ExportFormat, MessageKey> = {
   xlsx: 'action.saveWorkbook' as MessageKey,
@@ -64,8 +71,8 @@ export function ExportDialog() {
                 <a href={entry.url} download={entry.artifact.filename} className="rf-download">
                   {i18n.tSafe(FORMAT_LABEL[format])}
                 </a>
-                <span className="rf-quiet" dir="ltr">
-                  {entry.artifact.filename} · {formatInteger(i18n, entry.artifact.byteLength)} B · sha256 {entry.artifact.sha256.slice(0, 12)}…
+                <span className="rf-export-link__meta" dir="ltr" title={entry.artifact.filename}>
+                  {truncateMiddle(entry.artifact.filename)} · {formatInteger(i18n, entry.artifact.byteLength)} B · sha256 {entry.artifact.sha256.slice(0, 12)}…
                 </span>
               </div>
             );
@@ -98,8 +105,12 @@ function ModelPreview({ state }: { state: ReturnType<typeof useSessionState> }) 
         <>
           <ol className="rf-export-outline">
             {model.slides.map((slide) => (
-              <li key={slide.id}>
-                <span className="rf-slide-kind">{slide.kind}</span> {slide.title}
+              <li key={slide.id} className="rf-export-slide" data-kind={slide.kind}>
+                <SlideGlyph kind={slide.kind} />
+                <span className="rf-export-slide__meta">
+                  <span className="rf-slide-kind">{slide.kind}</span>
+                  <span className="rf-export-slide__title">{slide.title}</span>
+                </span>
               </li>
             ))}
           </ol>

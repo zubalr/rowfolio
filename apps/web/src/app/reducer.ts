@@ -30,6 +30,7 @@ export type SessionAction =
   | { type: 'analyze.done'; requestId: string; sourceHash: Hash; table: NormalizedTable; snapshot: AnalysisSnapshot }
   | { type: 'request.failed'; requestId: string; error: SessionError }
   | { type: 'request.cancelled'; requestId: string }
+  | { type: 'upload.deferToPicker'; requestId: string }
   | { type: 'request.start'; requestId: string }
   | { type: 'review.approve'; requestId: string }
   | { type: 'finding.select'; findingId: string }
@@ -226,6 +227,23 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
         pending: null,
         requestId: null,
         error: null,
+      };
+    }
+
+    // Not a failure — the source needs a user decision only the upload
+    // flow's configure stage can express (e.g. an ambiguous CSV delimiter).
+    // The file was handed to that surface; the session returns to source
+    // selection, keeping any committed dataset.
+    case 'upload.deferToPicker': {
+      if (!isCurrent(state, action.requestId)) return state;
+      const retained = state.active !== null;
+      return {
+        ...state,
+        phase: 'idle',
+        pending: null,
+        requestId: null,
+        error: null,
+        notice: retained ? 'upload.previousRetained' : null,
       };
     }
 

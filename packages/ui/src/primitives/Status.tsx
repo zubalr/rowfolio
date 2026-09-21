@@ -66,24 +66,15 @@ export function Status({
       aria-live={role === "status" ? "polite" : undefined}
       data-testid={testId}
     >
-      <span className="rf-status__icon" aria-hidden="true">
-        {kind === "loading" ? (
-          <svg
-            className="rf-spinner"
-            viewBox="0 0 24 24"
-            width="18"
-            height="18"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.75"
-            strokeLinecap="round"
-          >
-            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-          </svg>
-        ) : (
+      {kind === "loading" ? (
+        <span className="rf-loader" aria-hidden="true">
+          <span className="rf-loader__fill" />
+        </span>
+      ) : (
+        <span className="rf-status__icon" aria-hidden="true">
           <Icon name={KIND_ICON[kind]} />
-        )}
-      </span>
+        </span>
+      )}
       <div>
         <p className="rf-status__title">{title}</p>
         {children ? <div className="rf-status__body">{children}</div> : null}

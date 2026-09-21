@@ -17,7 +17,7 @@ export interface ButtonProps extends Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
   "className" | "children"
 > {
-  variant?: "primary" | "secondary" | "attention";
+  variant?: "primary" | "secondary" | "attention" | "ghost";
   /** Leading icon (never mirrored-sensitive unless the glyph is directional). */
   icon?: IconName;
   /** Trailing icon — `arrow-end` mirrors in RTL automatically. */
