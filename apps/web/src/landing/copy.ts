@@ -191,7 +191,7 @@ const COPY: Record<CopyKey, Record<Locale, string>> = {
   "pres.prepare.slideEn": { en: "English", ar: "الإنجليزية" },
   "pres.prepare.slideAr": { en: "Arabic", ar: "العربية" },
   "pres.workbook.title": { en: "Workbook", ar: "ملف العمل" },
-  "pres.scene.result.caption": { en: "Rows, a chart and a report page. The same data through the process.", ar: "صفوف ورسم وصفحة تقرير. البيانات نفسها عبر العملية." },
+  "pres.scene.result.caption": { en: "A spreadsheet goes in; a finished report comes out. Every figure is checked along the way.", ar: "يُدخَل جدول بيانات؛ يخرج تقرير جاهز. ويُتحقَّق من كل رقم على الطريق." },
   "pres.scene.transform.caption": { en: "A manager needs the monthly operations update. The figures are in a spreadsheet. The report still needs to be prepared.", ar: "يحتاج المدير إلى تحديث العمليات الشهري. الأرقام موجودة في جدول بيانات. والتقرير ما زال بحاجة إلى إعداد." },
   "pres.scene.transform.note": { en: "Each selected cell becomes one mark.", ar: "كل خلية محددة تصبح علامة واحدة." },
   "pres.scene.transform.scope": { en: "{region} · June 2026 · revenue vs target", ar: "{region} · يونيو 2026 · الإيراد مقابل المستهدف" },

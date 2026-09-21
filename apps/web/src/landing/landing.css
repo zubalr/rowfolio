@@ -986,6 +986,11 @@ html[lang="ar"] .rf-footer {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--rf-space-5);
   }
+  /* The guide rail docks under the specimen on narrow viewports — it must
+     never overlay the subject, same rule as the presentation pill. */
+  .rf-preview__guide {
+    position: static;
+  }
   .rf-guide {
     flex-direction: column;
     align-items: stretch;

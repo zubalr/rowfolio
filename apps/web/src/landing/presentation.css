@@ -104,7 +104,7 @@ html[lang="ar"] .rf-pres__fiction {
 }
 .rf-pres-art .rf-pres-sheet,
 .rf-pres-art .rf-pres-chart,
-.rf-pres-art .rf-pres-report,
+.rf-pres-art .rf-pres-slide,
 .rf-pres-art .rf-pres-card {
   border: 1px solid color-mix(in srgb, var(--rf-ink) 24%, transparent);
   box-shadow: 10px 12px 0 rgb(20 37 46 / 8%);
@@ -426,11 +426,26 @@ html[lang="ar"] .rf-pres-art__cap {
 /* ---------- Artifact surfaces ---------- */
 .rf-pres-sheet,
 .rf-pres-chart,
-.rf-pres-report,
+.rf-pres-slide,
 .rf-pres-card {
   background: var(--rf-surface);
   color: var(--rf-ink);
   border-radius: var(--rf-radius-control);
+}
+/* The slide/workbook previews are real ExportModel renders — the wrapper
+   carries the deliverable's teal spine. */
+.rf-pres-slide {
+  overflow: clip;
+  border-inline-start: 5px solid var(--rf-positive);
+}
+.rf-pres-slide .rf-sp {
+  inline-size: 100%;
+  border: none;
+  border-radius: 0;
+}
+/* The workbook preview isn't a deck page — no spine ratio constraint. */
+.rf-pres-art--workbook .rf-pres-slide .rf-sp {
+  aspect-ratio: auto;
 }
 
 /* Side-card surfaces — task, preparation, evidence, workbook. */
@@ -692,32 +707,26 @@ html[lang="ar"] .rf-pres-chart__head {
   font-size: 8px;
   fill: var(--rf-text-muted);
 }
-/* S1 rest: the stage chart's marks are not yet drawn — the triad shows
-   the table and the labeled axes, the marks arrive in the change beat.
-   Once drawn they stay drawn through evidence, prepare and deliver. */
+/* S1 rest: the stage chart's marks read as ghost marks at ~30% tint — a
+   paused first frame still looks intentional — and commit to full cobalt
+   when the change chapter draws them, bar by bar. Once drawn they stay
+   drawn through evidence, prepare and deliver. */
 .rf-pres-art--chart .rf-pres-chart__bar {
-  transform: scaleY(0);
+  fill: color-mix(in srgb, var(--rf-data) 30%, var(--rf-surface));
+  transition: fill 400ms var(--rf-ease);
 }
 [data-chapter="change"] .rf-pres-art--chart .rf-pres-chart__bar,
 [data-chapter="evidence"] .rf-pres-art--chart .rf-pres-chart__bar,
 [data-chapter="prepare"] .rf-pres-art--chart .rf-pres-chart__bar,
 [data-chapter="deliver"] .rf-pres-art--chart .rf-pres-chart__bar {
-  transform: scaleY(1);
+  fill: var(--rf-data);
 }
 [data-chapter="change"] .rf-pres-art--chart .rf-pres-chart__bar {
-  animation: rf-bar-grow 640ms var(--rf-ease) both;
-  animation-delay: calc(480ms + var(--i) * 150ms);
+  transition-delay: calc(480ms + var(--i) * 150ms);
 }
-@keyframes rf-bar-grow {
-  from {
-    transform: scaleY(0);
-  }
-  to {
-    transform: scaleY(1);
-  }
-}
+
 /* The report card's own chart is always finished. */
-.rf-pres-report .rf-pres-chart__bar {
+.rf-pres-slide .rf-pres-chart__bar {
   transform: none;
 }
 
@@ -779,79 +788,12 @@ html[lang="ar"] .rf-pres-chart__head {
 [data-chapter="deliver"] .rf-pres-art--chart .rf-pres-delta {
   opacity: 1;
 }
-/* The finished report's inner chart carries its bracket already drawn. */
-.rf-pres-report .rf-pres-delta {
-  opacity: 1;
-}
+/* The finished slide's own mini chart is always drawn — no bracket step. */
 
-/* ---------- Report page — teal spine marks the deliverable ---------- */
-.rf-pres-report {
-  padding: var(--rf-space-4);
-  border-inline-start: 5px solid var(--rf-positive);
-}
-.rf-pres-report__head {
-  margin-block-end: var(--rf-space-2);
-}
-.rf-pres-report__title {
-  margin: 0;
-  font-size: clamp(14px, 1.6vw, 20px);
-  font-weight: 600;
-  line-height: 1.2;
-}
-html[lang="ar"] .rf-pres-report__title {
-  font-size: clamp(15px, 1.7vw, 21px);
-}
-.rf-pres-report__period {
-  margin: 2px 0 0;
-  font-size: 11px;
-  color: var(--rf-text-muted);
-}
-html[lang="ar"] .rf-pres-report__period {
-  font-size: 12px;
-}
-.rf-pres-report__obs {
-  margin: var(--rf-space-2) 0 0;
-  font-size: clamp(11px, 1.1vw, 14px);
-  line-height: 1.55;
-}
-html[lang="ar"] .rf-pres-report__obs {
-  font-size: clamp(12px, 1.2vw, 15px);
-}
-.rf-pres-report__proof {
-  display: flex;
-  align-items: center;
-  gap: var(--rf-space-2);
-  margin: var(--rf-space-2) 0 0;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--rf-positive-text);
-}
-.rf-pres-report__proof .rf-icon {
-  color: var(--rf-positive);
-  flex: none;
-}
-/* Resting the report as a compact cover card — body copy appears when
-   the report is the chapter's subject. */
-[data-chapter="result"] .rf-pres-art--report .rf-pres-report__obs,
-[data-chapter="result"] .rf-pres-art--report .rf-pres-report__proof,
-[data-chapter="task"] .rf-pres-art--report .rf-pres-report__obs,
-[data-chapter="task"] .rf-pres-art--report .rf-pres-report__proof,
-[data-chapter="check"] .rf-pres-art--report .rf-pres-report__obs,
-[data-chapter="check"] .rf-pres-art--report .rf-pres-report__proof,
-[data-chapter="change"] .rf-pres-art--report .rf-pres-report__obs,
-[data-chapter="change"] .rf-pres-art--report .rf-pres-report__proof {
+/* Exactly one 'A project by Zubair' renders at a time: the intro's
+   credit steps aside when the deliver scene shows its own. */
+.rf-pres__intro[data-chapter="deliver"] .rf-pres__credit {
   display: none;
-}
-[data-chapter="result"] .rf-pres-art--report .rf-pres-report,
-[data-chapter="task"] .rf-pres-art--report .rf-pres-report,
-[data-chapter="check"] .rf-pres-art--report .rf-pres-report,
-[data-chapter="change"] .rf-pres-art--report .rf-pres-report {
-  padding: var(--rf-space-3);
-}
-/* The mirrored layout card keeps its own direction regardless of page. */
-.rf-pres-art--slideAlt .rf-pres-report__obs,
-.rf-pres-art--slideAlt .rf-pres-report__proof {
-  display: flex;
 }
 
 /* ---------- Held ending: credit + actions beside the report ---------- */
@@ -1089,16 +1031,15 @@ html[lang="ar"] .rf-pres__credit {
     display: flex;
     flex-direction: column;
     gap: var(--rf-space-3);
-    padding: var(--rf-space-5) var(--rf-space-4) var(--rf-space-6);
-    padding-block-start: var(--rf-space-7);
-    min-block-size: 60vh;
+    padding: var(--rf-space-3) var(--rf-space-4) var(--rf-space-4);
+    padding-block-start: var(--rf-space-5);
   }
   [data-chapter] .rf-pres-art,
   .rf-pres-end__aside {
     position: static;
     inline-size: 100%;
-    max-block-size: none;
-    overflow: visible;
+    max-block-size: 150px;
+    overflow: clip;
     transform: none;
     opacity: 0;
     visibility: hidden;
@@ -1193,15 +1134,18 @@ html[lang="ar"] .rf-pres__credit {
   /* The pill docks under the window, never over the subject. */
   .rf-pres__controls {
     margin-block-start: var(--rf-space-3);
-    gap: var(--rf-space-3);
+    gap: var(--rf-space-2) var(--rf-space-3);
     flex-wrap: wrap;
     border-radius: var(--rf-radius-panel);
-    padding: var(--rf-space-2) var(--rf-space-4);
+    padding: var(--rf-space-2) var(--rf-space-3);
   }
   .rf-pres__label {
     order: 3;
     flex-basis: 100%;
     text-align: center;
+  }
+  .rf-pres__intro {
+    margin-block-start: var(--rf-space-4);
   }
   .rf-pres-end__actions {
     max-inline-size: none;

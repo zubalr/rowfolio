@@ -31,7 +31,6 @@
  */
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Button, Icon, VisuallyHidden } from "@rowfolio/ui";
-import { createI18n } from "@rowfolio/i18n";
 import type { I18n, Locale } from "@rowfolio/i18n";
 import {
   PresentationController,
@@ -40,19 +39,24 @@ import {
 } from "../demo/presentation.ts";
 import { landingCopy, type CopyKey } from "./copy.ts";
 import { LANDING_TRUTH, type LandingPreviewTruth } from "./previewTruth.ts";
+import { SAMPLE_EXPORT_MODEL, findingSlide } from "./sampleExportModel.ts";
+import { SlidePreview, WorkbookPreview } from "../briefing/SlidePreview.tsx";
+// SlidePreview's component stylesheet is owned by the export dialog — the
+// landing must import it directly or the previews render unstyled.
+import "../briefing/export.css";
 import { prefersReducedMotion } from "./useReducedMotion.ts";
 import { setWorkspaceIntent, type IntentDownload } from "./pendingUpload.ts";
 import { navigateToWorkspace } from "./routes.ts";
 import "./presentation.css";
 
 const CHAPTERS: readonly PresentationChapterDef[] = [
-  { id: "result", dwellMs: 7000 },
-  { id: "task", dwellMs: 11000 },
-  { id: "check", dwellMs: 13000 },
-  { id: "change", dwellMs: 13000 },
-  { id: "evidence", dwellMs: 13000 },
-  { id: "prepare", dwellMs: 14000 },
-  { id: "deliver", dwellMs: 11000 },
+  { id: "result", dwellMs: 8000 },
+  { id: "task", dwellMs: 12000 },
+  { id: "check", dwellMs: 16000 },
+  { id: "change", dwellMs: 14000 },
+  { id: "evidence", dwellMs: 15000 },
+  { id: "prepare", dwellMs: 15000 },
+  { id: "deliver", dwellMs: 12000 },
 ];
 
 const CHAPTER_LABEL: Record<string, CopyKey> = {
@@ -121,10 +125,10 @@ export function PresentationStage({ i18n }: PresentationStageProps) {
   );
   const [state, setState] = useState<PresentationState>(controller.getState());
 
-  // The other locale's real i18n — scene 6 mirrors the report in place as
-  // an actual RTL layout, not a flipped copy. Pure factory, no storage.
+  // Scene 6 mirrors the report in place as a real second-locale layout —
+  // the other golden ExportModel inside a dir=rtl context, same component
+  // the export dialog previews with.
   const otherLocale: Locale = i18n.locale === "ar" ? "en" : "ar";
-  const otherI18n = useMemo(() => createI18n({ locale: otherLocale }), [otherLocale]);
 
   useEffect(() => controller.subscribe(setState), [controller]);
 
@@ -188,6 +192,8 @@ export function PresentationStage({ i18n }: PresentationStageProps) {
   }, [controller, i18n.locale]);
 
   const chapter = CHAPTERS[state.chapterIndex] ?? CHAPTERS[0]!;
+  const model = SAMPLE_EXPORT_MODEL[i18n.locale];
+  const altModel = SAMPLE_EXPORT_MODEL[otherLocale];
   const chapterLabel = landingCopy(i18n.locale, CHAPTER_LABEL[chapter.id] ?? "pres.chapter.result");
   const captionKey = CHAPTER_CAPTION[chapter.id] ?? "pres.scene.result.caption";
   const caption =
@@ -269,19 +275,25 @@ export function PresentationStage({ i18n }: PresentationStageProps) {
             <EvidenceCard truth={truth} i18n={i18n} />
           </figure>
           <figure className="rf-pres-art rf-pres-art--report">
-            <SceneReportCard truth={truth} i18n={i18n} />
+            <div className="rf-pres-slide">
+              <SlidePreview model={model} slide={findingSlide(model)} />
+            </div>
             <figcaption className="rf-pres-art__cap">
               {i18n.localeName(i18n.locale)}
             </figcaption>
           </figure>
           <figure className="rf-pres-art rf-pres-art--slideAlt">
-            <SceneReportCard truth={truth} i18n={otherI18n} locale={otherLocale} />
+            <div className="rf-pres-slide" dir={otherLocale === "ar" ? "rtl" : "ltr"}>
+              <SlidePreview model={altModel} slide={findingSlide(altModel)} />
+            </div>
             <figcaption className="rf-pres-art__cap">
               {i18n.localeName(otherLocale)}
             </figcaption>
           </figure>
           <figure className="rf-pres-art rf-pres-art--workbook">
-            <WorkbookCard truth={truth} i18n={i18n} />
+            <div className="rf-pres-slide">
+              <WorkbookPreview model={model} />
+            </div>
           </figure>
           <div className="rf-pres-end__aside">
             <p className="rf-pres-end__credit">{landingCopy(i18n.locale, "pres.credit")}</p>
@@ -412,7 +424,7 @@ export function PresentationStage({ i18n }: PresentationStageProps) {
       <p className="rf-pres__caption">{caption}</p>
 
       {/* Subject first — the page headline sits below the window. */}
-      <div className="rf-pres__intro">
+      <div className="rf-pres__intro" data-chapter={chapter.id}>
         <h1 className="rf-pres__title" id="rf-pres-title">
           {landingCopy(i18n.locale, "pres.title")}
         </h1>
@@ -496,7 +508,7 @@ function EvidenceCard({ truth, i18n }: { truth: LandingPreviewTruth; i18n: I18n 
         })}
       </p>
       <p className="rf-pres-evidence__calc rf-mono" dir="ltr">
-        ({i18n.formatInteger(truth.northJune.targetRevenue)} − {i18n.formatInteger(truth.northJune.revenue)})
+        ({i18n.formatInteger(truth.northJune.revenue)} − {i18n.formatInteger(truth.northJune.targetRevenue)})
         {" ÷ "}
         {i18n.formatInteger(truth.northJune.targetRevenue)}
         {" = "}
@@ -506,35 +518,6 @@ function EvidenceCard({ truth, i18n }: { truth: LandingPreviewTruth; i18n: I18n 
         <Icon name="check" size={16} />
         {landingCopy(L, "pres.evidence.match")}
       </p>
-    </div>
-  );
-}
-
-/** The formatted workbook — real region figures on a working sheet. */
-function WorkbookCard({ truth, i18n }: { truth: LandingPreviewTruth; i18n: I18n }) {
-  const L = i18n.locale;
-  return (
-    <div className="rf-pres-card rf-pres-workbook">
-      <p className="rf-pres-card__kicker">{landingCopy(L, "pres.workbook.title")}</p>
-      <table className="rf-pres-workbook__table" dir="ltr">
-        <thead>
-          <tr>
-            <th className="rf-mono">region</th>
-            <th className="rf-mono">revenue</th>
-            <th className="rf-mono">target_revenue</th>
-          </tr>
-        </thead>
-        <tbody>
-          {truth.regionsJune.map((r) => (
-            <tr key={r.region}>
-              <td>{i18n.t(`region.${r.region}`)}</td>
-              <td className="rf-numeric">{i18n.formatInteger(r.revenue)}</td>
-              <td className="rf-numeric">{i18n.formatInteger(r.targetRevenue)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <p className="rf-pres-workbook__tab rf-mono">{truth.dataset.sheetName}</p>
     </div>
   );
 }
@@ -734,41 +717,4 @@ function SceneChart({
   );
 }
 
-/** The report page — a real reading-size composition, teal spine. */
-function SceneReportCard({
-  truth,
-  i18n,
-  locale,
-}: {
-  truth: LandingPreviewTruth;
-  i18n: I18n;
-  /** Copy locale for this card — defaults to the card's own i18n locale. */
-  locale?: Locale;
-}) {
-  const L = locale ?? i18n.locale;
-  const north = truth.regionsJune.find((r) => r.region === "North");
-  const gap = north === undefined ? "0" : north.targetGapRatio;
-  return (
-    <article className="rf-pres-report" dir={L === "ar" ? "rtl" : "ltr"} lang={L}>
-      <header className="rf-pres-report__head">
-        <h3 className="rf-pres-report__title">{landingCopy(L, "pres.report.title")}</h3>
-        <p className="rf-pres-report__period">{landingCopy(L, "pres.report.period")}</p>
-      </header>
-      <SceneChart truth={truth} i18n={i18n} delta />
-      <p className="rf-pres-report__obs">
-        {landingCopy(L, "pres.report.observation", {
-          gap: i18n.formatPercent(gap, PCT_1),
-          orders: i18n.formatPercent(truth.northJune.ordersChangeRatio, PCT_1),
-        })}
-      </p>
-      <p className="rf-pres-report__proof">
-        <Icon name="check" size={16} />
-        {landingCopy(L, "pres.report.verified", {
-          sheet: truth.dataset.sheetName,
-          start: i18n.formatInteger(truth.northJune.sourceSpan.start),
-          end: i18n.formatInteger(truth.northJune.sourceSpan.end),
-        })}
-      </p>
-    </article>
-  );
-}
+
