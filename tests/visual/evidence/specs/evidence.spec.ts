@@ -81,9 +81,9 @@ test.describe("evidence dialog — content", () => {
   }, info) => {
     await openDialog(page, "disjoint", localeOf(info));
     const head = page.locator(".rf-evidence__selection-head").first();
-    await expect(head).toContainText("R1202–R1221");
-    await expect(head).toContainText("R1300–R1320");
-    await expect(head).not.toContainText("R1202–R1320");
+    await expect(head).toContainText("R1202-R1221");
+    await expect(head).toContainText("R1300-R1320");
+    await expect(head).not.toContainText("R1202-R1320");
     // The browser itself pages the disjoint set in span order.
     const rows = page.locator("[data-testid='evidence-rows-north-sparse-rows'] tbody tr");
     await expect(rows.nth(0).locator("th")).toContainText("R1202");
@@ -120,7 +120,7 @@ test.describe("evidence dialog — content", () => {
     const table = page.locator("[data-testid='evidence-rows-north-june-revenue-rows']");
     await expect(table.locator("tbody tr")).toHaveCount(50);
     await expect(table.locator(".rf-evidence__pager-status")).toContainText(
-      localeOf(info) === "ar" ? /٥٠|50/ : "Rows 1–50 of 100",
+      localeOf(info) === "ar" ? /٥٠|50/ : "Rows 1-50 of 100",
     );
     const more = table.getByRole("button", {
       name: localeOf(info) === "ar" ? "عرض صفوف إضافية" : "Show more rows",

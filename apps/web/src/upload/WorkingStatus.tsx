@@ -5,7 +5,7 @@
  * stage name plus an honest elapsed clock is the only progress claim.
  */
 import { useEffect, useState } from "react";
-import { Button, Status } from "@rowfolio/ui";
+import { Status } from "@rowfolio/ui";
 import type { I18n } from "@rowfolio/i18n";
 import type { UploadFileRef, UploadProgress } from "./types.ts";
 
@@ -30,9 +30,9 @@ export function WorkingStatus({ i18n, file, progress, onCancel }: WorkingStatusP
       title={i18n.t("a11y.processing")}
       testId="upload-working"
       actions={
-        <Button variant="secondary" onClick={onCancel} data-testid="upload-cancel">
+        <button type="button" className="rf-linkbtn" onClick={onCancel} data-testid="upload-cancel">
           {i18n.t("action.cancel")}
-        </Button>
+        </button>
       }
     >
       <span className="rf-upload__meta">

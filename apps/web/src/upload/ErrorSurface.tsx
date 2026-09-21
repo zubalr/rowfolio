@@ -28,9 +28,9 @@ export function ErrorSurface({ i18n, failure, hasPrior, onRetry, onDismiss }: Er
                 {i18n.t("action.retry")}
               </Button>
             ) : null}
-            <Button variant="secondary" onClick={onDismiss} data-testid="upload-error-dismiss">
+            <button type="button" className="rf-linkbtn" onClick={onDismiss} data-testid="upload-error-dismiss">
               {i18n.t("action.back")}
-            </Button>
+            </button>
           </>
         }
       >

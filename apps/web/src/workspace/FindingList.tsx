@@ -1,5 +1,4 @@
 import type { AnalysisSnapshot, Finding } from '@rowfolio/contracts';
-import { Button, Section } from '@rowfolio/ui';
 import { useI18n, useServices, useSessionState } from '../app/context.tsx';
 import type { MessageKey } from '@rowfolio/i18n';
 import { findingBody, findingTestId, findingTitle } from './findingCopy.ts';
@@ -14,21 +13,15 @@ export function FindingList({ snapshot }: { snapshot: AnalysisSnapshot }) {
   const findings = snapshot.findings;
 
   if (findings.length === 0) {
-    return (
-      <Section title={i18n.tSafe('workspace.findings' as MessageKey)}>
-        <p className="rf-quiet">{i18n.tSafe('empty.noFindings' as MessageKey)}</p>
-      </Section>
-    );
+    return <p className="rf-quiet">{i18n.tSafe('empty.noFindings' as MessageKey)}</p>;
   }
 
   return (
-    <Section title={i18n.tSafe('workspace.findings' as MessageKey)} id="findings">
-      <ul className="rf-findings">
-        {findings.map((finding) => (
-          <FindingCard key={finding.id} snapshot={snapshot} finding={finding} onEvidence={() => controller.openEvidence(finding.id)} />
-        ))}
-      </ul>
-    </Section>
+    <ul className="rf-findings" id="findings">
+      {findings.map((finding) => (
+        <FindingCard key={finding.id} snapshot={snapshot} finding={finding} onEvidence={() => controller.openEvidence(finding.id)} />
+      ))}
+    </ul>
   );
 }
 
@@ -48,7 +41,6 @@ function FindingCard({
   return (
     <li
       className={`rf-finding${selected ? ' is-selected' : ''} rf-severity-${finding.severity}`}
-      data-rf-surface="ink"
       data-testid={findingTestId(finding)}
     >
       <button
@@ -67,14 +59,14 @@ function FindingCard({
           </span>
         )}
       </button>
-      <Button
-        variant="secondary"
-        icon="info"
+      <button
+        type="button"
+        className="rf-linkbtn"
         onClick={onEvidence}
         data-testid="view-evidence-btn"
       >
         {i18n.tSafe('action.showWhy' as MessageKey)}
-      </Button>
+      </button>
     </li>
   );
 }

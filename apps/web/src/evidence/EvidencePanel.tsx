@@ -209,7 +209,7 @@ function TransformList({ issues, i18n }: { issues: readonly QualityIssue[]; i18n
             {q.normalized !== null ? (
               <Bidi dir="auto">{q.normalized}</Bidi>
             ) : (
-              <span className="rf-evidence__empty">—</span>
+              <span className="rf-evidence__empty">·</span>
             )}
           </span>
           <span className="rf-evidence__transform-status">
@@ -331,7 +331,7 @@ export function EvidencePanel({
         <Section
           key={selection.id}
           title={i18n.t("evidence.sourceRows")}
-          ariaLabel={`${i18n.t("evidence.sourceRows")} — ${selection.id}`}
+          ariaLabel={`${i18n.t("evidence.sourceRows")} · ${selection.id}`}
           headingLevel={3}
           className="rf-evidence__section"
         >
@@ -342,7 +342,7 @@ export function EvidencePanel({
             <span className="rf-evidence__spans">
               {selection.spans.map((span) => (
                 <Bidi dir="ltr" className="rf-evidence__num" key={`${span.start}-${span.end}`}>
-                  {span.start === span.end ? `R${span.start}` : `R${span.start}–R${span.end}`}
+                  {span.start === span.end ? `R${span.start}` : `R${span.start}-R${span.end}`}
                 </Bidi>
               ))}
             </span>

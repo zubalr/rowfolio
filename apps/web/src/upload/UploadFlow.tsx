@@ -3,8 +3,11 @@
  * supplies the locale provider, the ports (real `ingestPorts()` adapters plus
  * the contract `profileTable` once packages/normalize lands) and an
  * `onComplete` handler that hands the committed `UploadOutcome` downstream.
+ *
+ * Each stage renders on one plate carrying its spine label: `01 UPLOAD` for
+ * the drop/parse stages, `02 CHECKS` for configure and review.
  */
-import { Dialog, Section } from "@rowfolio/ui";
+import { Dialog } from "@rowfolio/ui";
 import { Button } from "@rowfolio/ui";
 import { useEffect } from "react";
 import type { I18n } from "@rowfolio/i18n";
@@ -16,6 +19,7 @@ import { WorkingStatus } from "./WorkingStatus.tsx";
 import { ConfigurePanel } from "./ConfigurePanel.tsx";
 import { ReviewPanel } from "./ReviewPanel.tsx";
 import { ErrorSurface } from "./ErrorSurface.tsx";
+import { Plate } from "../workspace/Plate.tsx";
 import "./upload.css";
 
 export interface UploadFlowProps {
@@ -38,27 +42,33 @@ export function UploadFlow({ i18n, ports, onComplete, testId }: UploadFlowProps)
     if (pending !== null) controller.acceptFile(pending.bytes, pending.name);
   }, [controller]);
 
+  const uploadPlate = { index: "01", name: i18n.t("plate.upload"), title: i18n.t("upload.title") };
+
   return (
     <div className="rf-upload" data-testid={testId ?? "upload-flow"}>
-      <Section title={i18n.t("upload.title")} headingLevel={2}>
-        {state.stage === "idle" || state.stage === "confirm-replace" ? (
+      {state.stage === "idle" || state.stage === "confirm-replace" ? (
+        <Plate {...uploadPlate}>
           <Dropzone
             i18n={i18n}
             hasPrior={state.prior !== null}
             onFile={(bytes, name) => controller.acceptFile(bytes, name)}
           />
-        ) : null}
+        </Plate>
+      ) : null}
 
-        {state.stage === "inspecting" || state.stage === "parsing" ? (
+      {state.stage === "inspecting" || state.stage === "parsing" ? (
+        <Plate {...uploadPlate}>
           <WorkingStatus
             i18n={i18n}
             file={state.file}
             progress={state.progress}
             onCancel={() => controller.cancel()}
           />
-        ) : null}
+        </Plate>
+      ) : null}
 
-        {state.stage === "configure" ? (
+      {state.stage === "configure" ? (
+        <Plate index="02" name={i18n.t("plate.checks")} title={i18n.t("upload.range")}>
           <ConfigurePanel
             i18n={i18n}
             inspection={state.inspection}
@@ -74,9 +84,11 @@ export function UploadFlow({ i18n, ports, onComplete, testId }: UploadFlowProps)
             onProceed={() => controller.proceed()}
             onCancel={() => controller.cancel()}
           />
-        ) : null}
+        </Plate>
+      ) : null}
 
-        {state.stage === "review" ? (
+      {state.stage === "review" ? (
+        <Plate index="02" name={i18n.t("plate.checks")} title={i18n.t("quality.preview")}>
           <ReviewPanel
             i18n={i18n}
             table={state.table}
@@ -92,9 +104,11 @@ export function UploadFlow({ i18n, ports, onComplete, testId }: UploadFlowProps)
             onBack={() => controller.editSelection()}
             onSubmit={() => controller.submit()}
           />
-        ) : null}
+        </Plate>
+      ) : null}
 
-        {state.stage === "error" ? (
+      {state.stage === "error" ? (
+        <Plate {...uploadPlate}>
           <ErrorSurface
             i18n={i18n}
             failure={state.failure}
@@ -102,8 +116,8 @@ export function UploadFlow({ i18n, ports, onComplete, testId }: UploadFlowProps)
             onRetry={() => controller.retry()}
             onDismiss={() => controller.cancel()}
           />
-        ) : null}
-      </Section>
+        </Plate>
+      ) : null}
 
       <Dialog
         open={state.stage === "confirm-replace"}

@@ -68,7 +68,7 @@ function MetricOperand({ metricId, ctx }: { metricId: string; ctx: TraceContext 
         </Bidi>
       ) : (
         <span className="rf-evidence__undefined" title={i18n.tSafe(metric.reasonKey as MessageKey)}>
-          —
+          ·
         </span>
       )}
       {metricUnitLabel(metric.unit) !== null ? (

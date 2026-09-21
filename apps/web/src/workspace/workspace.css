@@ -1,22 +1,172 @@
 /**
  * Workspace craft layer — scoped to .rf-workspace; nothing here reaches the
- * landing or upload surfaces. The stage palette comes from
- * `[data-rf-surface="ink"]` on the stage panel: it remaps the semantic tokens
- * (and, via .rf-chart's own remap, every chart paint) so marks keep their
- * roles on the dark stage without any per-element overrides.
+ * landing or upload surfaces beyond the product lease. Surfaces are
+ * Broadsheet plates: white cards with a hairline rule, a numbered mono plate
+ * label as the visual spine, and divider-led sections inside.
  */
+
+/* ---------- Plate grammar ------------------------------------------------- */
+
+/* The plate: one white surface, one hairline, panel radius, no shadow. */
+.rf-plate {
+  background: var(--rf-surface);
+  border: 1px solid var(--rf-rule);
+  border-radius: var(--rf-radius-panel);
+  padding: var(--rf-space-5);
+  min-width: 0;
+}
+
+.rf-plate__head {
+  margin-block-end: var(--rf-space-4);
+}
+
+.rf-plate__title {
+  margin: var(--rf-space-2) 0 0;
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+html[lang="ar"] .rf-plate__title {
+  font-size: 22px;
+  line-height: 1.55;
+  letter-spacing: normal;
+}
+
+/* The one-line "what am I seeing" that precedes each plate's data. */
+.rf-plate__note {
+  margin: var(--rf-space-2) 0 0;
+  color: var(--rf-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 64ch;
+}
+
+html[lang="ar"] .rf-plate__note {
+  font-size: 15px;
+}
+
+/* Plate label — the pipeline spine: index, 24px vermilion rule, mono name. */
+.rf-plate-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rf-space-3);
+  font-family: var(--rf-font-mono);
+  font-size: var(--rf-plate-label-size);
+  font-weight: var(--rf-plate-label-weight);
+  letter-spacing: var(--rf-plate-label-tracking);
+  text-transform: uppercase;
+  color: var(--rf-ink);
+}
+
+.rf-plate-label__num {
+  color: var(--rf-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-plate-label__rule {
+  flex: none;
+  inline-size: 24px;
+  block-size: 2px;
+  background: var(--rf-attention);
+}
+
+.rf-plate-label__name {
+  color: var(--rf-ink);
+}
+
+/* Plex Mono has no Arabic cut and tracking disconnects the script — the
+   name falls back to the body stack, untracked, sentence case. */
+html[lang="ar"] .rf-plate-label {
+  letter-spacing: normal;
+}
+
+html[lang="ar"] .rf-plate-label__name {
+  font-family: var(--rf-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* Divider-led sections inside a plate: the hairline stays but tightens, and
+   the section title steps down under the plate's own heading. */
+.rf-plate .rf-section {
+  margin-block-start: var(--rf-space-4);
+  padding-block-start: var(--rf-space-4);
+}
+
+.rf-plate .rf-section__title {
+  font-size: 19px;
+}
+
+html[lang="ar"] .rf-plate .rf-section__title {
+  font-size: 20px;
+}
+
+/* ---------- Quiet action — a mono underlined link, not a second button ---- */
+
+.rf-linkbtn {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: var(--rf-font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--rf-text-muted);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--rf-rule);
+  cursor: pointer;
+  min-height: var(--rf-control-height);
+  transition:
+    color var(--rf-hover-ms) var(--rf-ease),
+    text-decoration-color var(--rf-hover-ms) var(--rf-ease);
+}
+
+.rf-linkbtn:hover:not(:disabled) {
+  color: var(--rf-text);
+  text-decoration-color: currentColor;
+}
+
+.rf-linkbtn:focus-visible {
+  outline: 3px solid var(--rf-focus);
+  outline-offset: 3px;
+  border-radius: var(--rf-radius-control);
+}
+
+.rf-linkbtn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+html[lang="ar"] .rf-linkbtn {
+  font-family: var(--rf-font-body);
+  font-size: 14px;
+}
+
+[data-rf-surface="ink"] .rf-linkbtn {
+  color: var(--rf-ink-muted);
+  text-decoration-color: var(--rf-ink-rule);
+}
+
+[data-rf-surface="ink"] .rf-linkbtn:hover:not(:disabled) {
+  color: var(--rf-ink-text);
+}
+
+/* ---------- Stage ---------------------------------------------------------- */
 
 .rf-stage {
   display: grid;
   gap: var(--rf-space-5);
 }
 
-/* The hero stage — one expansive chart on ink. */
+/* The hero stage lives inside the overview plate — a named head, then the
+   figure with no card chrome of its own. */
 .rf-stage-panel {
-  background: var(--rf-ink);
-  color: var(--rf-ink-text);
-  border-radius: var(--rf-radius-panel);
-  padding: var(--rf-space-5) var(--rf-space-5) var(--rf-space-4);
+  color: var(--rf-text);
 }
 
 .rf-stage-head {
@@ -31,17 +181,21 @@
   min-width: 0;
 }
 
+/* The stage eyebrow is a quiet mono micro-label (Latin); Arabic keeps the
+   body stack. */
 .rf-stage-eyebrow {
   margin: 0 0 var(--rf-space-1);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-family: var(--rf-font-mono);
+  font-size: var(--rf-plate-label-size);
+  font-weight: var(--rf-plate-label-weight);
+  letter-spacing: var(--rf-plate-label-tracking);
   text-transform: uppercase;
-  color: var(--rf-ink-muted);
+  color: var(--rf-text-muted);
 }
 
 html[lang='ar'] .rf-stage-eyebrow {
-  font-size: 12px;
+  font-family: var(--rf-font-body);
+  font-size: 13px;
   letter-spacing: normal;
 }
 
@@ -61,7 +215,7 @@ html[lang='ar'] .rf-stage-title {
 .rf-stage-scope {
   margin: var(--rf-space-1) 0 0;
   font-size: 12px;
-  color: var(--rf-ink-muted);
+  color: var(--rf-text-muted);
 }
 
 html[lang='ar'] .rf-stage-scope {
@@ -72,13 +226,13 @@ html[lang='ar'] .rf-stage-scope {
    the finding; the chart block only needs its axes and marks. */
 .rf-stage-panel .rf-chart__title {
   font-size: 14px;
-  color: var(--rf-ink-muted);
+  color: var(--rf-text-muted);
   font-weight: 500;
   letter-spacing: normal;
 }
 
 .rf-stage-panel .rf-chart__summary {
-  color: var(--rf-ink-muted);
+  color: var(--rf-text-muted);
 }
 
 /* When the hero chart left the grid, the remaining pair sit side by side —
@@ -88,32 +242,32 @@ html[lang='ar'] .rf-stage-scope {
 }
 
 /* Evidence chip — the badge on the stage that morphs into the drawer badge.
-   Pill on the ink stage; shares its shape when it arrives in the panel. */
+   Pill on the plate; shares its shape when it arrives in the panel. */
 .rf-ev-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   min-height: 44px;
   padding: 0 var(--rf-space-4);
-  border: 1px solid var(--rf-ink-rule);
+  border: 1px solid var(--rf-rule);
   border-radius: 999px;
-  background: var(--rf-ink-surface);
-  color: var(--rf-ink-text);
+  background: var(--rf-surface);
+  color: var(--rf-text);
   font: inherit;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
   flex: none;
-  transition: background-color 120ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: background-color var(--rf-hover-ms) var(--rf-ease);
 }
 
 .rf-ev-chip:hover {
-  background: var(--rf-ink-rule);
+  background: var(--rf-paper);
 }
 
 .rf-ev-chip:focus-visible {
-  outline: 3px solid var(--rf-ink-data);
+  outline: 3px solid var(--rf-focus);
   outline-offset: 2px;
 }
 
@@ -121,14 +275,14 @@ html[lang='ar'] .rf-stage-scope {
   transform: scale(0.98);
 }
 
-/* Inside the evidence panel the badge is content, not a control. It is the
-   selected element landed in the drawer — it wears the same cell chrome:
-   2px cobalt inset + 8% cobalt tint (on-ink variants on this surface). */
+/* Inside the evidence drawer the badge is content, not a control — the
+   selected element landed on the ink surface. Semantic tokens remap under
+   [data-rf-surface="ink"], so the same chrome reads correctly on both. */
 .rf-ev-chip--badge {
   cursor: default;
-  background: color-mix(in srgb, var(--rf-ink-data) 8%, transparent);
+  background: color-mix(in srgb, var(--rf-accent) 8%, transparent);
   border: 1px solid transparent;
-  box-shadow: inset 0 0 0 2px var(--rf-ink-data);
+  box-shadow: inset 0 0 0 2px var(--rf-accent);
   font-size: 12px;
   min-height: 28px;
   padding: 0 10px;
@@ -147,6 +301,27 @@ html[lang='ar'] .rf-stage-scope {
   white-space: nowrap;
 }
 
+/* Stat block — headline figures sit on the 40px metric step (30px at small
+   widths); the caption under it is a plain sentence, never a label salad. */
+.rf-workspace .rf-metric--feature .rf-metric__value {
+  font-size: 40px;
+  line-height: 1.1;
+}
+
+@media (max-width: 767px) {
+  .rf-workspace .rf-metric--feature .rf-metric__value {
+    font-size: 30px;
+  }
+}
+
+/* Arabic-Indic figures run wide; at 320px even 30px can overflow — shrink
+   instead of breaking the numeral mid-token. */
+@media (max-width: 360px) {
+  .rf-workspace .rf-metric--feature .rf-metric__value {
+    font-size: clamp(18px, 7vw, 30px);
+  }
+}
+
 /* KPI denominators — "97 / 100 records" under each headline number. */
 .rf-metric-scope {
   font-size: 12px;
@@ -154,27 +329,18 @@ html[lang='ar'] .rf-stage-scope {
   font-variant-numeric: tabular-nums;
 }
 
-/* Ruled ledger — a faint 1px cell grid on a 32px rhythm runs under the
-   content stage (paper), so the workspace reads as one gridded sheet rather
-   than floating cards. */
-.rf-workspace-main {
-  background-image:
-    linear-gradient(to bottom, color-mix(in srgb, var(--rf-ink) 4%, transparent) 1px, transparent 1px),
-    linear-gradient(to right, color-mix(in srgb, var(--rf-ink) 4%, transparent) 1px, transparent 1px);
-  background-size: var(--rf-space-6) var(--rf-space-6);
+/* Inside the overview plate, the chart grid separates from the hero by one
+   hairline instead of card-on-card nesting. */
+.rf-plate .rf-charts {
+  border-block-start: 1px solid var(--rf-divider);
+  padding-block-start: var(--rf-space-4);
+  gap: var(--rf-space-5);
 }
 
-/* Cell-selection chrome — ONE treatment for every selected element: a 2px
-   cobalt inset plus an 8% cobalt tint. On the ink finding card the accent
-   remaps to the on-ink cobalt so the chrome stays identical in kind. */
-.rf-workspace .rf-finding.is-selected {
-  border-inline-start-color: transparent;
-  background: color-mix(in srgb, var(--rf-ink-data) 8%, var(--rf-ink));
-  box-shadow: inset 0 0 0 2px var(--rf-ink-data);
-}
-
-.rf-workspace .rf-finding.is-selected .rf-finding-title {
-  color: var(--rf-ink-data);
+/* Stat blocks sit on the plate; finding rows follow, ruled by their own
+   hairlines. */
+.rf-plate .rf-findings {
+  margin-block-start: var(--rf-space-4);
 }
 
 /* Scenario surface — the committed assumption block wears the scenario hue
@@ -196,14 +362,7 @@ html[lang='ar'] .rf-stage-scope {
   color: var(--rf-scenario-text);
 }
 
-/* Finding cards ride the ink surface — the landing's dark card rules reach
-   them via the shared .rf-finding class; the surface attribute keeps
-   contrast correct rather than fighting those rules selector-by-selector. */
 @media (max-width: 640px) {
-  .rf-stage-panel {
-    padding: var(--rf-space-4) var(--rf-space-3);
-  }
-
   .rf-stage-head {
     flex-direction: column;
     align-items: stretch;
@@ -220,6 +379,10 @@ html[lang='ar'] .rf-stage-scope {
 
   .rf-workspace .rf-finding .rf-btn {
     align-self: flex-start;
+  }
+
+  .rf-plate {
+    padding: var(--rf-space-4) var(--rf-space-3);
   }
 }
 

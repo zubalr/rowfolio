@@ -68,7 +68,7 @@ export function Dropzone({ i18n, onFile, hasPrior, disabled }: DropzoneProps) {
           />
         </label>
         <Button
-          variant="secondary"
+          variant="primary"
           onClick={() => inputRef.current?.click()}
           disabled={disabled}
         >
