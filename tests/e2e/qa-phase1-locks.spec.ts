@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { ensureStaticServer, stopStaticServer, VIEWPORTS } from "./helpers.ts";
+import { ensureStaticServer, stopStaticServer } from "./helpers.ts";
 
 /**
  * Phase-1 acceptance regression locks (Review Head lane).
@@ -9,9 +9,8 @@ import { ensureStaticServer, stopStaticServer, VIEWPORTS } from "./helpers.ts";
  *       in both toggle directions, on direct loads, and through history.
  *  R2 — evidence calc: the sample's 8% order-volume finding must resolve to a
  *       defined, verified result — never "Not defined"/"Something went wrong".
- *  R3 — mobile guide rail must never occlude the marked specimen region.
- *       The fix lands with the presentation build; kept as test.fixme so the
- *       intent is locked without turning the suite red — remove fixme then.
+ *  R3 (mobile guide occlusion) is RETIRED — the revamp removed the specimen
+ *       tour; mobile transport coverage moved to qa-presentation-locks.spec.ts.
  */
 test.beforeAll(async () => {
   await ensureStaticServer(4173);
@@ -125,42 +124,4 @@ test.describe("R2 — evidence drawer resolves composite proofs", () => {
     // The composite proof lands on 0.08 — rendered as a percent somewhere.
     await expect(drawer).toContainText(/0\.08|8%/);
   });
-});
-
-test.describe("R3 — mobile guide rail never occludes the subject", () => {
-  test(
-    "guide rail does not overlap the marked region at 390px",
-    async ({ page }) => {
-      await page.setViewportSize(VIEWPORTS.mobile);
-      await page.goto("/");
-      await page.locator('[data-testid="cta-guide"]').click();
-
-      const rail = page.locator('[data-testid="guide-bar"]');
-      await rail.waitFor({ state: "visible", timeout: 15_000 });
-      // Freeze the autoplay so each step's mark can be measured deterministically.
-      // Guide-bar controls: [0]=Back, [1]=Pause|Resume, [2]=next-step, [3]=Replay, [4]=Skip.
-      await rail.locator("button").nth(1).click();
-
-      const steps = ["intro", "findings", "evidence", "scenario", "briefing"];
-      const vh = page.viewportSize()?.height ?? 844;
-      for (const step of steps) {
-        const mark = page.locator(`[data-demo-target="${step}"]`);
-        if ((await mark.count()) === 0) continue;
-        // The guide scrolls each mark into view on advance; the sticky rail
-        // legitimately overlays content beneath it, so the invariant is that
-        // the mark is on-screen and its head is above the rail — never that
-        // no pixels overlap (marks can be taller than the space above).
-        await page.waitForTimeout(400);
-        const [railBox, markBox] = await Promise.all([rail.boundingBox(), mark.boundingBox()]);
-        if (railBox !== null && markBox !== null) {
-          const markVisible = markBox.bottom > 0 && markBox.top < vh;
-          expect(markVisible, `"${step}" mark not in viewport at 390px`).toBe(true);
-          expect(markBox.top < railBox.y, `"${step}" mark head covered by rail`).toBe(true);
-          const railDocked = railBox.y >= 0 && railBox.y + railBox.height <= vh + 2;
-          expect(railDocked, `guide rail not docked in viewport for "${step}"`).toBe(true);
-        }
-        await rail.locator("button").nth(2).click().catch(() => {});
-      }
-    },
-  );
 });
