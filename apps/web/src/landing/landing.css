@@ -458,6 +458,13 @@ html[lang="ar"] .rf-evidence__rows dt {
 .rf-evidence__rows dd {
   margin: 0;
   font-size: 14px;
+  min-inline-size: 0;
+}
+/* Long source refs (Operations!R1802:R1901) stay whole when they fit;
+   at the narrowest widths they break rather than overflow the viewport. */
+.rf-evidence__rows dd .rf-mono,
+.rf-evidence__rows dd .rf-bidi {
+  overflow-wrap: break-word;
 }
 html[lang="ar"] .rf-evidence__rows dd {
   font-size: 15px;
