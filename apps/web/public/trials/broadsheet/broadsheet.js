@@ -30,6 +30,8 @@
   var sNote = $("sNote");
   var sFoot = $("sFoot");
   var wbStrip = $("wbStrip");
+  var ghostF = $("ghostF");
+  var ghostR = $("ghostR");
   var replayBtn = $("replayBtn");
   var loopFade = $("loopFade");
   var marks = [].slice.call(document.querySelectorAll(".rmark"));
@@ -130,6 +132,10 @@
 
     rowCount.textContent = tt >= 2800 ? "2,417 \u2192 2,400 rows" : "2,417 rows read";
 
+    // ghost outlines recede as each plate's content lands
+    ghostF.style.opacity = 0.62 * (1 - seg(tt, 3300, 4000));
+    ghostR.style.opacity = 0.62 * (1 - seg(tt, 6300, 7050));
+
     // ---- FINDINGS beat ----
     var barP = seg(tt, 3400, 4000);
     var barH = 88.1 * barP;
@@ -160,9 +166,10 @@
     fRticks.querySelector("b").style.opacity = seg(tt, 4800, 5000);
     fRticks.style.opacity = seg(tt, 4300, 4600);
 
-    // findings chart crossfades into report (same chart, same geometry)
+    // findings plate dims evenly as the chart lands in the report
     var xfade = lin(tt, 6400, 7100);
-    fChart.style.opacity = 1 - xfade * 0.85;
+    plateFind.style.opacity = p2 * (1 - 0.45 * xfade);
+    fChart.style.opacity = 1;
     fChart.style.transform = "translateY(" + (-6 * xfade) + "px)";
 
     // ---- REPORT beat ----
@@ -222,6 +229,8 @@
     sNote.style.opacity = 1;
     sFoot.style.opacity = 1;
     wbStrip.style.transform = "translateY(0)";
+    ghostF.style.opacity = 0;
+    ghostR.style.opacity = 0;
     replayBtn.style.opacity = 1;
     loopFade.style.opacity = 0;
   }

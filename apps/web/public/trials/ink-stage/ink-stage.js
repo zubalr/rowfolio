@@ -84,24 +84,24 @@
     var g = { fw: fw, fh: fh, mobile: mobile, k: mobile ? 1 : fw / 960 };
 
     if (!mobile) {
-      g.sheet0 = rect(210, 76, 540, 388);
-      g.sheet1 = rect(8, 106, 540, 388);
-      g.sheet2 = rect(0, 118, 540, 388);
+      g.sheet0 = rect(230, 12, 500, 316);
+      g.sheet1 = rect(18, 18, 500, 316);
+      g.sheet2 = rect(0, 24, 500, 316);
       g.sheetS = [1, 0.85, 0.78];
       g.sheetO = [1, 1, 0.45];
-      g.chartIn = rect(1040, 70, 430, 400);
-      g.chartOn = rect(520, 70, 430, 400);
-      g.slide = rect(440, 58, 360, 404);
-      g.spineIn = rect(1040, 64, 140, 392);
-      g.spineOn = rect(812, 64, 140, 392);
-      g.dl = rect(505, 466, 0, 0);
-      g.replay = rect(866, 494, 0, 0);
-      g.plotChart = rect(0.037, 0.25, 0.926, 0.36);
-      g.plotSlide = rect(0.05, 0.30, 0.90, 0.42);
+      g.chartIn = rect(1000, 14, 430, 308);
+      g.chartOn = rect(505, 14, 430, 308);
+      g.slide = rect(430, 6, 370, 296);
+      g.spineIn = rect(1010, 12, 140, 290);
+      g.spineOn = rect(806, 12, 140, 290);
+      g.dl = rect(500, 306, 0, 0);
+      g.replay = rect(848, 306, 0, 0);
+      g.plotChart = rect(0.037, 0.27, 0.926, 0.38);
+      g.plotSlide = rect(0.05, 0.30, 0.90, 0.44);
       // static triptych (reduced motion)
-      g.stillSheet = rect(8, 74, 296, 388);
-      g.stillChart = rect(332, 74, 296, 388);
-      g.stillSlide = rect(656, 74, 296, 388);
+      g.stillSheet = rect(14, 14, 296, 312);
+      g.stillChart = rect(332, 14, 296, 312);
+      g.stillSlide = rect(650, 14, 296, 312);
     } else {
       g.sheet0 = rect(16, 34, fw - 32, fh - 44);
       g.sheetStrip = rect(16, 32, fw - 32, 24);
@@ -113,7 +113,7 @@
       g.dl = rect(16, fh - 58, 0, 0);
       g.replay = rect(fw - 92, fh - 64, 0, 0);
       g.plotChart = rect(0.04, 0.40, 0.92, 0.45);
-      g.plotSlide = rect(0.05, 0.40, 0.90, 0.34);
+      g.plotSlide = rect(0.05, 0.47, 0.90, 0.30);
       g.stillSheet = null;
     }
     // measure row geometry inside the sheet plate (post-layout); skip while stripped
@@ -157,6 +157,7 @@
     var sr, ss, so;
     var pA = seg(tt, 2600, 3300);
     var pB = seg(tt, 5900, 6600);
+    var cin = seg(tt, 2950, 3550);
     if (g.mobile) {
       sr = mixRect(g.sheet0, g.sheetStrip, pA);
       so = lerp(1, 0.9, pB);
@@ -171,7 +172,7 @@
     var introY = 16 * (1 - intro);
     var introS = lerp(0.96, 1, intro);
     setRect(sheet, rect(sr.x, sr.y + introY, sr.w, sr.h), ss * introS, so * intro, g.k);
-    sheet.classList.toggle("as-strip", g.mobile && pA > 0.6);
+    sheet.classList.toggle("as-strip", g.mobile && pA > 0.6 && cin > 0.65);
 
     // filename chip pop
     var fc = seg(tt, 850, 1300);
@@ -216,7 +217,6 @@
     counter.textContent = kept.toLocaleString("en-US") + " of 2,417 rows kept";
 
     // ---- chart plate position ----
-    var cin = seg(tt, 3200, 3750);
     var morph = seg(tt, 5800, 6500);
     var cr;
     if (g.mobile) {
@@ -258,6 +258,7 @@
     targetRule.style.transformOrigin = "center bottom";
 
     var dv = seg(tt, 4300, 4900);
+    deltaChip.style.opacity = tt >= 4250 ? 1 : 0;
     deltaChip.textContent = "-" + (11.9 * dv).toFixed(1) + "% vs plan";
 
     var ord = seg(tt, 4900, 5300);
@@ -366,6 +367,7 @@
     barVal.style.transform = "translate(calc(-100% - 8px), -50%)";
     barGhost.style.opacity = 1;
     targetRule.style.opacity = 1;
+    deltaChip.style.opacity = 1;
     deltaChip.textContent = "-11.9% vs plan";
     ordersChip.style.opacity = 1;
     var apath = ordersChip.querySelector("path");
@@ -376,13 +378,13 @@
 
     var sp2 = document.getElementById("spinePlate");
     setRect(sp2, rect(0, 0, 0, 0), 1, 0, g.k);
-    dlChips.style.left = 738 * g.k + "px";
-    dlChips.style.top = 470 * g.k + "px";
+    dlChips.style.left = 646 * g.k + "px";
+    dlChips.style.top = 302 * g.k + "px";
     dlChips.style.opacity = 1;
     dlChips.style.transform = "";
     replayBtn.style.opacity = 1;
-    replayBtn.style.left = 866 * g.k + "px";
-    replayBtn.style.top = 494 * g.k + "px";
+    replayBtn.style.left = 848 * g.k + "px";
+    replayBtn.style.top = 306 * g.k + "px";
     dim.style.opacity = 0;
     caption.style.opacity = 0;
     for (var di = 0; di < dots.length; di++) dots[di].classList.add("on");
@@ -412,6 +414,11 @@
   field.addEventListener("click", function () { if (!reduced) setPlaying(!playing); });
   field.addEventListener("keydown", function (e) {
     if (e.key === " " || e.key === "Enter") { e.preventDefault(); if (!reduced) setPlaying(!playing); }
+  });
+  document.addEventListener("keydown", function (e) {
+    if ((e.key === " " || e.key === "Enter") && e.target === document.body) {
+      e.preventDefault(); if (!reduced) setPlaying(!playing);
+    }
   });
   replayBtn.addEventListener("click", function (e) {
     e.stopPropagation();

@@ -219,6 +219,7 @@ a { color: inherit; }
   opacity: 0;
   pointer-events: none;
 }
+.flagrow { display: contents; }
 .flag {
   position: absolute;
   font-family: var(--mono);
@@ -231,6 +232,75 @@ a { color: inherit; }
   opacity: 0;
   white-space: nowrap;
   pointer-events: none;
+}
+
+/* faint structural outlines shown until real content lands */
+.ghost {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.ghost i, .ghost span { display: block; }
+.gf-head {
+  position: absolute; top: 14px; left: 14px;
+  width: 118px; height: 18px;
+  border: 1px solid var(--hair); border-radius: 3px;
+}
+.gf-plot {
+  position: absolute; top: 56px; left: 14px; right: 44px; bottom: 56px;
+  border-bottom: 1px solid var(--hair);
+}
+.gf-tgt {
+  position: absolute; left: 0; right: 0; top: 8%;
+  border-top: 1px dashed var(--hair);
+}
+.gf-bar {
+  position: absolute; left: 12%; bottom: 0; width: 30%; top: 8%;
+  border: 1px solid var(--hair); border-bottom: none;
+  border-radius: 2px 2px 0 0;
+}
+.gf-ticks {
+  position: absolute; left: 14px; right: 14px; bottom: 37px; height: 8px;
+  border: 1px solid var(--hair); border-radius: 4px;
+}
+.gf-cap {
+  position: absolute; left: 14px; bottom: 9px; width: 140px; height: 9px;
+  border: 1px solid var(--hair); border-radius: 3px;
+}
+.ghost-rep { inset: 14px; }
+.gr-kick {
+  position: absolute; top: 2px; left: 0; width: 92px; height: 9px;
+  border: 1px solid var(--hair); border-radius: 3px;
+}
+.gr-title {
+  position: absolute; top: 24px; left: 0; right: 22%; height: 18px;
+  border: 1px solid var(--hair); border-radius: 3px;
+}
+.gr-plot {
+  position: absolute; top: 32%; left: 0; right: 0; height: 38%;
+  border-bottom: 1px solid var(--hair);
+}
+.gr-tgt {
+  position: absolute; left: 0; right: 0; top: 8%;
+  border-top: 1px dashed var(--hair);
+}
+.gr-bar {
+  position: absolute; left: 12%; bottom: 0; width: 30%; top: 8%;
+  border: 1px solid var(--hair); border-bottom: none;
+  border-radius: 2px 2px 0 0;
+}
+.gr-note {
+  position: absolute; right: 0; bottom: 26%; width: 108px; height: 9px;
+  border: 1px solid var(--hair); border-radius: 3px;
+}
+.gr-foot {
+  position: absolute; left: 0; right: 0; bottom: 21%; height: 9px;
+  border-top: 1px solid var(--hair);
+}
+.gr-wb {
+  position: absolute; left: -14px; right: -14px; bottom: -14px; height: 76px;
+  border-top: 1px solid var(--hair);
 }
 
 /* FINDINGS plate */
@@ -507,8 +577,13 @@ a { color: inherit; }
   .p-data { height: 64vw; min-height: 248px; }
   .p-rep { height: 66vw; min-height: 240px; }
   .grid tr:nth-child(2), .grid tr:nth-child(3) { display: none; }
-  .grid td { font-size: 12.5px; padding: 5px 4px; white-space: nowrap; }
-  .grid th { padding: 0 4px 6px; }
+  .grid { width: 100%; }
+  .grid td { font-size: 12px; padding: 5px 2px; white-space: nowrap; }
+  .grid th { padding: 0 2px 6px; }
+  .flagrow { display: flex; flex-wrap: wrap; gap: 5px 6px; margin-top: 8px; }
+  .flagrow .flag { position: static; }
+  .p-data { min-height: 300px; }
+  .gr-wb { display: none; }
   .fchart { bottom: 26px; }
   .s-chart { top: 30%; height: 40%; }
   .s-note { bottom: 24%; }
@@ -528,4 +603,11 @@ a { color: inherit; }
 @media (max-width: 360px) {
   .h1 { font-size: 32px; }
   .standfirst { font-size: 15px; }
+}
+
+@media (max-width: 400px) {
+  .rmark { gap: 5px; font-size: 9.5px; padding: 0 4px; }
+  .rmark i { width: 14px; }
+  .replay { padding: 0 8px; gap: 4px; font-size: 9.5px; }
+  .replay .r-ic { width: 10px; height: 10px; }
 }

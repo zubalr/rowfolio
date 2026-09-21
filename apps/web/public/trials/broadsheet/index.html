@@ -63,11 +63,13 @@
           </tbody>
         </table>
         <p class="data-foot"><span id="rowCount">2,417 rows read</span></p>
+        <div class="flagrow">
+          <div class="flag flag-dup" id="bsFlagDup">Duplicate row excluded</div>
+          <div class="flag flag-blank" id="bsFlagBlank">Left blank, not filled</div>
+        </div>
         <div class="vrule" id="vrule"></div>
         <div class="strike" id="bsStrike"></div>
         <div class="ring" id="bsRing"></div>
-        <div class="flag flag-dup" id="bsFlagDup">Duplicate row excluded</div>
-        <div class="flag flag-blank" id="bsFlagBlank">Left blank, not filled</div>
       </div>
     </article>
 
@@ -85,11 +87,17 @@
             <div class="f-bar"><i id="fBarFill"></i><span class="f-bar-val" id="fBarVal">USD 881,000</span></div>
           </div>
           <div class="f-rticks" id="fRticks">
-            <span class="f-rticks-label">5 regions within 4% of plan</span>
-            <div class="f-rticks-track"><i style="left:88%"></i><i style="left:89.6%"></i><i style="left:90.9%"></i><i style="left:92.3%"></i><i style="left:93.6%"></i><b style="left:90.91%"></b></div>
+            <span class="f-rticks-label">4 regions within 4% of plan</span>
+            <div class="f-rticks-track"><i style="left:80.7%"></i><i style="left:89.2%"></i><i style="left:90.0%"></i><i style="left:90.0%"></i><i style="left:93.5%"></i><b style="left:90.91%"></b></div>
           </div>
         </div>
         <p class="f-cap">North · June 2026 · Actual vs target, USD</p>
+        <div class="ghost" id="ghostF" aria-hidden="true">
+          <i class="gf-head"></i>
+          <span class="gf-plot"><i class="gf-tgt"></i><i class="gf-bar"></i></span>
+          <i class="gf-ticks"></i>
+          <i class="gf-cap"></i>
+        </div>
       </div>
     </article>
 
@@ -99,20 +107,28 @@
       <div class="plate-body">
         <div class="slide">
           <p class="s-kicker">North · June 2026</p>
-          <p class="s-title" id="sTitle">More orders. Still below target.</p>
+          <p class="s-title" id="sTitle">Orders rose 8.0%; revenue sits 11.9% under target.</p>
           <div class="s-chart" id="sChart">
             <div class="s-chart-plot">
               <div class="s-target"><span>USD 1,000,000</span></div>
               <div class="s-bar"><i></i><span class="s-bar-val">USD 881,000</span></div>
             </div>
           </div>
-          <p class="s-note" id="sNote">Rows: Operations!B:D</p>
+          <p class="s-note" id="sNote">Operations rows 1802-1901</p>
           <div class="s-foot" id="sFoot">3 / 6 · English</div>
         </div>
         <div class="wbstrip" id="wbStrip">
           <p class="wb-title">Monthly operations report</p>
           <p class="wb-tabs">Executive Summary · Cleaned Data · Data Quality · KPI Analysis · Methodology</p>
           <p class="wb-dl">Editable .pptx and .xlsx</p>
+        </div>
+        <div class="ghost ghost-rep" id="ghostR" aria-hidden="true">
+          <i class="gr-kick"></i>
+          <i class="gr-title"></i>
+          <span class="gr-plot"><i class="gr-tgt"></i><i class="gr-bar"></i></span>
+          <i class="gr-note"></i>
+          <i class="gr-foot"></i>
+          <i class="gr-wb"></i>
         </div>
       </div>
     </article>
