@@ -13,20 +13,16 @@ describe("landing copy", () => {
   });
 
   it("renders {params} placeholders", () => {
-    expect(landingCopy("en", "export.deckSlides", { n: 3 })).toBe("Slide 3");
+    expect(landingCopy("en", "pres.progress", { n: 2, total: 4 })).toBe("Step 2 of 4");
     expect(
-      landingCopy("en", "common.scopeValue", {
-        region: "North",
-        period: "June 2026",
-        sheet: "Operations",
-      }),
-    ).toContain("North");
+      landingCopy("en", "walk.check.dupNote", { n: 17 }),
+    ).toContain("17");
   });
 
   it("Arabic copy is distinct from English where the string is translated", () => {
     // Shared-format strings (placeholders) are identical by design; the rest
     // must be a real translation, not a copied English string.
-    const shared = new Set(["common.scopeValue"]);
+    const shared = new Set<string>(["common.scopeValue"]);
     for (const key of LANDING_COPY_KEYS) {
       if (shared.has(key)) continue;
       expect(
