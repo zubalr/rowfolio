@@ -810,6 +810,7 @@ html[lang="ar"] .rf-metric__value {
   font-weight: 400;
   color: var(--rf-text-muted);
   letter-spacing: normal;
+  white-space: nowrap;
 }
 .rf-metric__delta {
   display: inline-flex;

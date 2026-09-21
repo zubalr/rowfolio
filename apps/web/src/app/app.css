@@ -41,6 +41,33 @@
   flex-wrap: wrap;
 }
 
+/* Narrow masthead: brand pins the first row; the toolbar drops to a
+   single scrollable second row — never a ragged wrap around the wordmark.
+   A minmax(0,…) track is the hard floor: the nav cannot widen the page. */
+@media (max-width: 640px) {
+  .rf-workspace .rf-masthead {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--rf-space-3);
+    padding-block: var(--rf-space-3);
+    inline-size: 100%;
+    max-inline-size: 100%;
+    min-inline-size: 0;
+    box-sizing: border-box;
+  }
+  .rf-mastnav {
+    min-inline-size: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-block-end: var(--rf-space-1);
+    scrollbar-width: none;
+  }
+  .rf-mastnav::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 .rf-hero {
   flex: 1;
   display: flex;
@@ -201,9 +228,13 @@
   border-radius: var(--rf-radius-control);
 }
 
+/* On the ink verdict surface the chrome is the 2px accent frame alone —
+   the card lifts to the surface's raised step; text keeps ink tokens, so
+   contrast holds in both locales. (On paper contexts the same chrome is
+   the frame + raised paper.) */
 .rf-finding.is-selected {
   box-shadow: inset 0 0 0 2px var(--rf-accent);
-  background: color-mix(in srgb, var(--rf-accent) 8%, transparent);
+  background: var(--rf-bg-raised);
 }
 
 .rf-finding.is-selected .rf-finding-title {

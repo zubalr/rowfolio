@@ -216,6 +216,14 @@ html[lang="ar"] .rf-chip {
   font-weight: 500;
 }
 
+/* Mono/data cells never break mid-token — IDs and dates stay whole in
+   both locales; the scroll container takes the overflow instead. */
+.rf-stage__raw .rf-table td,
+.rf-stage__raw .rf-table th,
+.rf-table .rf-mono {
+  white-space: nowrap;
+}
+
 /* Mechanism: source rows beside the regional comparison. */
 .rf-stage__mechanism {
   display: grid;
@@ -516,8 +524,9 @@ html[lang="ar"] .rf-scenario__label {
   font-size: 14px;
 }
 /* The assumption slider is amber — assumptions wear scenario hue, never
-   the cobalt reserved for observed data. */
-.rf-scenario__range {
+   the cobalt reserved for observed data. (Must out-specify the shared
+   input[type="range"] rule that sets the cobalt default.) */
+input[type="range"].rf-scenario__range {
   --rf-range-accent: var(--rf-scenario);
   --rf-range-track: color-mix(in srgb, var(--rf-scenario) 30%, var(--rf-divider));
   inline-size: 100%;
@@ -610,16 +619,33 @@ html[lang="ar"] .rf-briefing__title {
   margin: var(--rf-space-4) 0 0;
   padding: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  column-gap: var(--rf-space-6);
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--rf-space-3);
 }
+/* Slides are the same mini-compositions as the export dialog — the preview
+   promise is visible before Prepare is pressed. Dimmed until authored. */
 .rf-briefing__slide {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-2);
+  padding: var(--rf-space-2);
+  border: 1px solid var(--rf-divider);
+  border-radius: var(--rf-radius-control);
+  background: var(--rf-bg-raised);
+  color: var(--rf-text-muted);
+  transition: opacity var(--rf-state-ms) var(--rf-ease);
+}
+.rf-briefing__slide .rf-export-slide__art {
+  transition: opacity var(--rf-state-ms) var(--rf-ease), filter var(--rf-state-ms) var(--rf-ease);
+}
+.rf-briefing__slide:not([data-ready]) .rf-export-slide__art {
+  opacity: 0.45;
+  filter: saturate(0.3);
+}
+.rf-briefing__slide-row {
   display: flex;
   align-items: baseline;
   gap: var(--rf-space-3);
-  padding-block: var(--rf-space-2);
-  border-block-start: 1px solid var(--rf-divider);
-  color: var(--rf-text-muted);
 }
 .rf-briefing__slide[data-ready] {
   color: var(--rf-text);
@@ -927,9 +953,6 @@ html[lang="ar"] .rf-footer {
   }
   html[lang="ar"] .rf-finding-card__figure {
     font-size: 28px;
-  }
-  .rf-briefing__slides {
-    grid-template-columns: minmax(0, 1fr);
   }
   .rf-steps__list {
     grid-template-columns: minmax(0, 1fr);

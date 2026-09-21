@@ -66,6 +66,16 @@ html[lang="ar"] .rf-slide-kind {
   overflow-wrap: anywhere;
 }
 
+/* Provenance lines under each download link — hashed filenames stay
+   de-emphasized: muted, mono, middle-truncated by the caller. */
+.rf-export-link__meta {
+  font-family: var(--rf-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--rf-text-muted);
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 479px) {
   .rf-export-outline {
     grid-template-columns: repeat(2, minmax(0, 1fr));

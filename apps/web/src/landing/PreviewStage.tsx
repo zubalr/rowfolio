@@ -21,6 +21,8 @@ import type { I18n } from "@rowfolio/i18n";
 import { compareDecimal, divideDecimal, subtractDecimal } from "@rowfolio/contracts";
 import type { Decimal } from "@rowfolio/contracts";
 import { landingCopy } from "./copy.ts";
+import { SlideGlyph } from "../briefing/slide-glyphs.tsx";
+import type { SlideKind } from "../briefing/slide-glyphs.tsx";
 import type { LandingPreviewTruth } from "./previewTruth.ts";
 import type { PreviewAction, PreviewState } from "./previewState.ts";
 
@@ -43,6 +45,16 @@ export interface PreviewStageProps {
   /** Slot rendered inside the stage (guide controls). */
   readonly children?: ReactNode;
 }
+
+/** Deck order in the export model — the preview cards use the same glyphs. */
+const BRIEFING_KIND_BY_SLIDE: Record<1 | 2 | 3 | 4 | 5 | 6, SlideKind> = {
+  1: "summary",
+  2: "kpis",
+  3: "finding",
+  4: "scenario",
+  5: "quality",
+  6: "methodology",
+};
 
 const PCT = { minFractionDigits: 0, maxFractionDigits: 1, signDisplay: "exceptZero" } as const;
 const PCT_UNSIGNED = { minFractionDigits: 0, maxFractionDigits: 1 } as const;
@@ -548,12 +560,15 @@ export function PreviewStage({
           <ol className="rf-briefing__slides" aria-label={i18n.t("export.preview")}>
             {([1, 2, 3, 4, 5, 6] as const).map((n) => (
               <li key={n} className="rf-briefing__slide" data-ready={state.briefingReady || undefined}>
-                <span className="rf-briefing__slide-num rf-numeric" dir="ltr">
-                  {landingCopy(i18n.locale, "export.deckSlides", { n })}
-                </span>
-                <span className="rf-briefing__slide-title">{landingCopy(i18n.locale, `export.slide.${n}`)}</span>
-                <span className="rf-briefing__state">
-                  {state.briefingReady ? <Icon name="check" size={16} /> : "—"}
+                <SlideGlyph kind={BRIEFING_KIND_BY_SLIDE[n]} />
+                <span className="rf-briefing__slide-row">
+                  <span className="rf-briefing__slide-num rf-numeric" dir="ltr">
+                    {landingCopy(i18n.locale, "export.deckSlides", { n })}
+                  </span>
+                  <span className="rf-briefing__slide-title">{landingCopy(i18n.locale, `export.slide.${n}`)}</span>
+                  <span className="rf-briefing__state">
+                    {state.briefingReady ? <Icon name="check" size={16} /> : "—"}
+                  </span>
                 </span>
               </li>
             ))}

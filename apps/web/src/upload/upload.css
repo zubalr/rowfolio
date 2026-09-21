@@ -185,6 +185,13 @@ html[lang="ar"] .rf-upload__note {
   border-block-end: 2px solid var(--rf-ink);
 }
 
+/* Mono/data cells never break mid-token — IDs and dates stay whole in
+   both locales; the preview scroll container takes the overflow. */
+.rf-upload__preview .rf-table td,
+.rf-upload__preview .rf-table th {
+  white-space: nowrap;
+}
+
 /* The pending header-row choice reads as a selected cell row — cobalt
    chrome over the row, darker baseline under it. */
 .rf-upload__preview-header > td,
