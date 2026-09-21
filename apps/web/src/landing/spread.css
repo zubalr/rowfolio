@@ -201,7 +201,8 @@ html[lang="ar"] .rf-plate__num { font-family: var(--rf-font-mono); }
 .rf-plate--rep  { inset-inline-start: 44%; inset-inline-end: 0; top: 6%; height: 88%; z-index: 3; }
 
 /* --- DATA plate --------------------------------------------------------- */
-.rf-data__head { display: flex; align-items: center; gap: 8px; margin-block-end: 10px; }
+.rf-data__head { display: flex; align-items: center; gap: 8px; margin-block-end: 6px; }
+.rf-data__sheet { font-family: var(--rf-font-mono); font-size: 10.5px; color: var(--rf-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rf-filechip {
   display: inline-block;
   font-family: var(--rf-font-mono);
@@ -212,7 +213,6 @@ html[lang="ar"] .rf-plate__num { font-family: var(--rf-font-mono); }
   padding: 3px 9px;
   background: var(--rf-bg);
 }
-.rf-data__sheet { font-family: var(--rf-font-mono); font-size: 10.5px; color: var(--rf-muted); }
 html[lang="ar"] .rf-data__sheet { font-family: var(--rf-font-body); }
 
 .rf-grid { width: 100%; border-collapse: collapse; }
@@ -231,13 +231,22 @@ html[lang="ar"] .rf-data__sheet { font-family: var(--rf-font-body); }
 .rf-grid td {
   font-size: 12px;
   color: var(--rf-ink);
-  padding: 5px 4px;
+  padding: 4px 4px;
   border-block-end: 1px solid var(--rf-rule);
   white-space: nowrap;
 }
 .rf-grid tr:last-child td { border-block-end: none; }
 .rf-grid .rf-num { text-align: end; font-variant-numeric: tabular-nums; }
 
+/* flags live in a strip under the plate head — the only band that is never
+   covered by the overlapping plates or the annotated rows themselves */
+.rf-data__flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 6px;
+  margin-block: 0 6px;
+  min-height: 22px;
+}
 .rf-data__foot {
   margin-block-start: 10px;
   display: flex;
@@ -275,16 +284,14 @@ html[dir="rtl"] .rf-strike { transform-origin: right center; }
   opacity: 0;
   pointer-events: none;
 }
-.rf-flagrow { display: contents; }
 .rf-flag {
-  position: absolute;
   font-family: var(--rf-font-mono);
   font-size: 10.5px;
   font-weight: 500;
   color: var(--rf-attention);
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(224, 78, 26, 0.5);
-  padding: 3px 9px;
+  padding: 2px 8px;
   opacity: 0;
   white-space: nowrap;
   pointer-events: none;
@@ -730,15 +737,10 @@ html[lang="ar"] .rf-replay { font-family: var(--rf-font-body); font-size: 12px; 
   .rf-plate--find { height: 56vw; min-height: 208px; }
   .rf-plate--rep { height: 64vw; min-height: 240px; }
 
-  /* mobile table: two excerpt rows + the struck dup + the blank cell */
-  .rf-grid tbody tr:nth-child(3),
-  .rf-grid tbody tr:nth-child(4) { display: none; }
+  /* mobile table: one excerpt row + the struck dup + the blank cell */
+  .rf-grid tbody tr:nth-child(3) { display: none; }
   .rf-grid td { font-size: 12px; padding: 5px 2px; }
   .rf-grid th { padding: 0 2px 6px; }
-
-  /* flags drop to a strip under the table instead of overlaying rows */
-  .rf-flagrow { display: flex; flex-wrap: wrap; gap: 5px 6px; }
-  .rf-flag { position: static; }
 
   .rf-ghost--rep .gr-wb { display: none; }
   .rf-plate--rep { height: auto; min-height: 400px; }

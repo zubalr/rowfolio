@@ -215,7 +215,7 @@ const COPY: Record<CopyKey, Record<Locale, string>> = {
   "pres.replay": { en: "Replay", ar: "إعادة العرض" },
   "pres.sampleNote": { en: "The walkthrough uses made-up example data.", ar: "يستخدم الشرح التوضيحي بيانات مثال مختلقة." },
   "pres.title": { en: "Turn a spreadsheet into a presentation.", ar: "حوّل جدول بيانات إلى عرض تقديمي." },
-  "pres.uploadHelp": { en: "Accepts .csv or .xlsx files with a header row (up to 10,000 rows). The file is read on this device only.", ar: "يقبل ملفات ‎.csv أو ‎.xlsx ذات صف عناوين (حتى ١٠٬٠٠٠ صف). يُقرأ الملف على هذا الجهاز فقط." },
+  "pres.uploadHelp": { en: "Accepts .csv or .xlsx files with a header row. The file is read on this device only.", ar: "يقبل ملفات ‎.csv أو ‎.xlsx ذات صف عناوين. يُقرأ الملف على هذا الجهاز فقط." },
   "pres.useOwn": { en: "Use your own spreadsheet", ar: "استخدم جدولك الخاص" },
   "pres.watch": { en: "Watch how it works", ar: "شاهد كيف يعمل" },
   "walk.build.chartNote": { en: "The chart compares North's June revenue with its plan.", ar: "يقارن الرسم إيراد يونيو في الشمال مع مستهدفها." },
