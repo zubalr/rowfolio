@@ -50,8 +50,22 @@
 }
 
 /* --- Visual ------------------------------------------------------- */
+/* All four step panes share one grid cell; inactive panes stay mounted
+   but hidden, so the visual's height is always the tallest pane's and
+   the surrounding layout does not move between steps. */
 .rf-walk__visual {
+  display: grid;
   min-block-size: 220px;
+}
+
+.rf-walk__pane {
+  grid-area: 1 / 1;
+  min-inline-size: 0;
+  visibility: hidden;
+}
+
+.rf-walk__pane[data-active] {
+  visibility: visible;
   animation: rf-walk-in 380ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
@@ -362,17 +376,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rf-walk__visual {
+  .rf-walk__pane[data-active] {
     animation: none;
   }
 }
 
 /* --- Compact: one artifact, caption, controls — all in normal flow --- */
 @media (max-width: 900px) {
-  .rf-walk__explain {
-    min-block-size: 0;
-  }
-
   .rf-walk__visual {
     min-block-size: 0;
   }
@@ -469,9 +479,17 @@
     order: 3;
     flex-basis: 100%;
   }
+}
 
-  .rf-walk__explain {
-    min-block-size: 0;
+@media (max-width: 600px) {
+  /* Phones: let the report card grow with its content instead of
+     clipping the body to a fixed 16:9 box, and keep the type readable
+     instead of letting it shrink with the card. */
+  .rf-walk-build__slide .rf-sp,
+  .rf-walk-get__slide .rf-sp,
+  .rf-output__preview .rf-sp {
+    aspect-ratio: auto;
+    font-size: clamp(6px, 3cqw, 0.72rem);
   }
 }
 

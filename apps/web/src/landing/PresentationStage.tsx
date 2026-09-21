@@ -227,41 +227,52 @@ export function PresentationStage({ i18n, controller }: PresentationStageProps) 
         <p className="rf-walk__caption">{landingCopy(i18n.locale, STEP_CAPTION[step.id])}</p>
       </div>
 
-      <div className="rf-walk__visual" key={step.id}>
-        {step.id === "start" && <StartVisual truth={truth} i18n={i18n} />}
-        {step.id === "check" && <CheckVisual truth={truth} i18n={i18n} />}
-        {step.id === "build" && <BuildVisual i18n={i18n} />}
-        {step.id === "download" && <DownloadVisual i18n={i18n} />}
-      </div>
-
-      {(step.id === "download" || held) && (
-        <div className="rf-walk__end">
-          <Button
-            variant="primary"
-            icon="download"
-            onClick={() => download("pptx")}
-            data-testid="presentation-download-pptx"
-          >
-            {landingCopy(i18n.locale, "pres.downloadPptx")}
-          </Button>
-          <Button
-            variant="secondary"
-            icon="download"
-            onClick={() => download("xlsx")}
-            data-testid="presentation-download-xlsx"
-          >
-            {landingCopy(i18n.locale, "pres.downloadXlsx")}
-          </Button>
-          <Button
-            variant="secondary"
-            iconEnd="arrow-end"
-            onClick={openWorkspace}
-            data-testid="presentation-explore"
-          >
-            {landingCopy(i18n.locale, "pres.explore")}
-          </Button>
+      {/* Every pane stays mounted in one grid cell — the visual keeps
+          the tallest pane's height, so the stage never shifts size when
+          the step changes. */}
+      <div className="rf-walk__visual">
+        <div className="rf-walk__pane" data-active={step.id === "start" || undefined} aria-hidden={step.id !== "start"}>
+          <StartVisual truth={truth} i18n={i18n} />
         </div>
-      )}
+        <div className="rf-walk__pane" data-active={step.id === "check" || undefined} aria-hidden={step.id !== "check"}>
+          <CheckVisual truth={truth} i18n={i18n} />
+        </div>
+        <div className="rf-walk__pane" data-active={step.id === "build" || undefined} aria-hidden={step.id !== "build"}>
+          <BuildVisual i18n={i18n} />
+        </div>
+        <div className="rf-walk__pane" data-active={step.id === "download" || undefined} aria-hidden={step.id !== "download"}>
+          <DownloadVisual i18n={i18n} />
+          {/* Always mounted — the download pane's height stays constant
+              and the other panes inherit it; the parent pane's hidden
+              visibility keeps the row out of reach until the final step. */}
+          <div className="rf-walk__end">
+            <Button
+              variant="primary"
+              icon="download"
+              onClick={() => download("pptx")}
+              data-testid="presentation-download-pptx"
+            >
+              {landingCopy(i18n.locale, "pres.downloadPptx")}
+            </Button>
+            <Button
+              variant="secondary"
+              icon="download"
+              onClick={() => download("xlsx")}
+              data-testid="presentation-download-xlsx"
+            >
+              {landingCopy(i18n.locale, "pres.downloadXlsx")}
+            </Button>
+            <Button
+              variant="secondary"
+              iconEnd="arrow-end"
+              onClick={openWorkspace}
+              data-testid="presentation-explore"
+            >
+              {landingCopy(i18n.locale, "pres.explore")}
+            </Button>
+          </div>
+        </div>
+      </div>
 
       <div className="rf-walk__controls" data-presentation-controls="">
         <div className="rf-walk__transport">
@@ -480,6 +491,9 @@ function BuildVisual({ i18n }: { i18n: I18n }) {
     toggle swaps the real ExportModel in place. */
 function DownloadVisual({ i18n }: { i18n: I18n }) {
   const [viewLocale, setViewLocale] = useState<Locale>(i18n.locale);
+  // The pane stays mounted across steps, so a page-language switch must
+  // re-seed the toggle instead of keeping the mount-time locale.
+  useEffect(() => setViewLocale(i18n.locale), [i18n.locale]);
   const model = SAMPLE_EXPORT_MODEL[viewLocale];
   const locales: readonly Locale[] = ["en", "ar"];
   return (

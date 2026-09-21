@@ -47,6 +47,9 @@ describe('SlidePreview parity with ExportModel', () => {
     // 881000 / 1100000 on the 88% track = 70.48% height on the observed
     // bar; the value readout rides above the mark ('USD 881k').
     expect(html).toContain('height:70.48%');
+    // The target mark must carry its own scale (1000000 / 1100000 → 80%)
+    // — a shared height would render the comparison meaningless.
+    expect(html).toContain('height:80%');
     expect(html).toContain('USD 881k');
     expect(html).toContain('Actual / Target');
     expect(chart.points[0]!.values.actual).toBe('881000');
