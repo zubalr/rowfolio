@@ -13,6 +13,23 @@
 import type { Locale } from "@rowfolio/i18n";
 
 export type CopyKey =
+  | "beat.findings"
+  | "beat.report"
+  | "cur.usd"
+  | "data.rows.kept"
+  | "data.rows.read"
+  | "find.caption"
+  | "find.orders"
+  | "find.regions"
+  | "find.scale"
+  | "flag.blank"
+  | "flag.dup"
+  | "guide.context.briefing"
+  | "guide.context.complete"
+  | "guide.context.evidence"
+  | "guide.context.findings"
+  | "guide.context.intro"
+  | "guide.context.scenario"
   | "landing.close.body"
   | "landing.close.title"
   | "pres.body"
@@ -89,6 +106,21 @@ export type CopyKey =
   | "landing.chart.summary"
   | "landing.chart.title"
   | "landing.specimen.note"
+  | "lead.context"
+  | "lead.cta"
+  | "lead.ctaNote"
+  | "lead.kicker"
+  | "lead.standfirst"
+  | "lead.statCaption"
+  | "lead.statInline"
+  | "lead.statValue"
+  | "lead.title.accent"
+  | "lead.title.post"
+  | "lead.title.pre"
+  | "nav.tag"
+  | "plate.data"
+  | "plate.findings"
+  | "plate.report"
   | "pres.artifact.chart"
   | "pres.artifact.report"
   | "pres.artifact.sheet"
@@ -135,12 +167,33 @@ export type CopyKey =
   | "pres.task.request"
   | "pres.task.requestTitle"
   | "pres.workbook.title"
+  | "rep.wbFormats"
   | "scenario.assumed"
+  | "spread.label"
   | "scenario.contributionLabel"
   | "scenario.observed"
 ;
 
 const COPY: Record<CopyKey, Record<Locale, string>> = {
+  /* Broadsheet spread — new keys for the landing redesign (PR redesign/landing-demo).
+     AR strings are authored here for review; nothing below is contract-pinned. */
+  "beat.findings": { en: "The checks turn those rows into findings: what moved, and by how much.", ar: "تحوّل الفحوصات تلك الصفوف إلى نتائج: ما الذي تحرّك وبأي قدر." },
+  "beat.report": { en: "The findings land in a finished report: slides and a workbook, ready to edit.", ar: "تصل النتائج إلى تقرير جاهز: شرائح وملف عمل جاهزان للتحرير." },
+  "cur.usd": { en: "USD {n}", ar: "{n} دولار" },
+  "data.rows.kept": { en: "{raw} → {kept} rows", ar: "{raw} → {kept} صفًا" },
+  "data.rows.read": { en: "{n} rows read", ar: "قُرئت {n} صفًا" },
+  "find.caption": { en: "{region} · June 2026 · actual vs target, USD", ar: "{region} · يونيو ٢٠٢٦ · الفعلي مقابل المستهدف بالدولار" },
+  "find.orders": { en: "Orders {change}", ar: "الطلبات {change}" },
+  "find.regions": { en: "{n} regions within {pct} of plan", ar: "{n} مناطق ضمن {pct} من المستهدف" },
+  "find.scale": { en: "share of target", ar: "نسبة إلى المستهدف" },
+  "flag.blank": { en: "Left blank, not filled", ar: "تُركت فارغة ولم تُملأ" },
+  "flag.dup": { en: "Duplicate row excluded", ar: "استُبعد صف مكرر" },
+  "guide.context.briefing": { en: "The briefing writes the same figures into slides and a workbook you can edit.", ar: "تكتب الإحاطة الأرقام نفسها في شرائح وملف عمل يمكنك تحريره." },
+  "guide.context.complete": { en: "Nothing is uploaded; the same analysis is ready for your own file.", ar: "لا يُرفع شيء؛ والتحليل نفسه جاهز لملفك." },
+  "guide.context.evidence": { en: "Every figure opens the worksheet rows it was computed from.", ar: "كل رقم يفتح صفوف ورقة العمل التي حُسب منها." },
+  "guide.context.findings": { en: "Findings name what moved and by how much, before anything is exported.", ar: "تسمّي النتائج ما تحرّك وبأي قدر، قبل تصدير أي شيء." },
+  "guide.context.intro": { en: "This example workbook is June 2026 operations for a fictional six-region service business.", ar: "ملف العمل النموذجي هذا هو عمليات يونيو ٢٠٢٦ لشركة خدمات افتراضية بست مناطق." },
+  "guide.context.scenario": { en: "An assumption runs against the checked snapshot while the baseline stays visible.", ar: "يعمل افتراض على اللقطة الموثّقة بينما يبقى خط الأساس ظاهرًا." },
   "landing.close.body": { en: "The parser, the arithmetic and the exports run in this page. Your file is never uploaded, and clearing the tab clears the data.", ar: "المحلل والحسابات والتصديرات تعمل داخل هذه الصفحة. لا يُرفع ملفك أبدًا، ومسح التبويب يمسح البيانات." },
   "landing.close.title": { en: "Everything stays on this device.", ar: "كل شيء يبقى على هذا الجهاز." },
   "pres.body": { en: "Rowfolio checks the data, builds charts, and prepares an editable report in English or Arabic.", ar: "يفحص روفوليو البيانات، ويبني الرسوم البيانية، ويُعد تقريرًا قابلًا للتحرير بالإنجليزية أو العربية." },
@@ -215,6 +268,21 @@ const COPY: Record<CopyKey, Record<Locale, string>> = {
   "landing.specimen.note": { en: "A working slice of the product: the same parser, arithmetic and components the app uses, driven by the checked-in sample.", ar: "مقطع عملي من المنتج: المحلل والحسابات والمكوّنات الحقيقية نفسها، مدفوعة بالنموذج المضمّن." },
   "pres.artifact.chart": { en: "Chart", ar: "الرسم" },
   "pres.artifact.report": { en: "Report", ar: "التقرير" },
+  "lead.context": { en: "Shown with an example workbook: June 2026 operations for a fictional six-region service business.", ar: "معروض بملف عمل نموذجي: عمليات يونيو ٢٠٢٦ لشركة خدمات افتراضية بست مناطق." },
+  "lead.cta": { en: "Open Rowfolio", ar: "افتح روفوليو" },
+  "lead.ctaNote": { en: "Runs locally. No upload.", ar: "يعمل محليًا. بلا رفع." },
+  "lead.kicker": { en: "Rowfolio · in-browser report builder", ar: "روفوليو · منشئ تقارير داخل المتصفح" },
+  "lead.standfirst": { en: "Drop in a CSV or XLSX. Rowfolio flags what needs attention, draws every figure from named source rows, and produces a report you can edit in PowerPoint and Excel. Your file never leaves this tab.", ar: "أدرج ملف CSV أو XLSX. يُعلّم روفوليو ما يحتاج إلى انتباه، ويرسم كل رقم من صفوف المصدر المسمّاة، وينتج تقريرًا يمكنك تحريره في PowerPoint وExcel. لا يغادر ملفك هذا التبويب أبدًا." },
+  "lead.statCaption": { en: "North region revenue, June 2026, against a USD 1,000,000 target", ar: "إيراد منطقة الشمال في يونيو ٢٠٢٦، مقابل مستهدف قدره ١٬٠٠٠٬٠٠٠ دولار" },
+  "lead.statInline": { en: "USD {rev} against a USD {target} target", ar: "{rev} دولار مقابل مستهدف قدره {target} دولار" },
+  "lead.statValue": { en: "USD {n}", ar: "{n} دولار" },
+  "lead.title.accent": { en: "checked", ar: "مفحوص" },
+  "lead.title.post": { en: " and explained.", ar: " ومشروح." },
+  "lead.title.pre": { en: "Your spreadsheet, ", ar: "جدولك، " },
+  "nav.tag": { en: "in-browser report builder", ar: "منشئ تقارير داخل المتصفح" },
+  "plate.data": { en: "Data", ar: "البيانات" },
+  "plate.findings": { en: "Findings", ar: "النتائج" },
+  "plate.report": { en: "Report", ar: "التقرير" },
   "pres.artifact.sheet": { en: "Spreadsheet", ar: "جدول البيانات" },
   "pres.chapter.change": { en: "What changed", ar: "ما الذي تغيّر" },
   "pres.chapter.check": { en: "Check the figures", ar: "فحص الأرقام" },
@@ -268,6 +336,8 @@ const COPY: Record<CopyKey, Record<Locale, string>> = {
   "export.slide.4": { en: "Test a cost assumption", ar: "اختبر افتراضاً للتكاليف" },
   "export.slide.5": { en: "What changed in the data", ar: "ما الذي تغيّر في البيانات؟" },
   "export.slide.6": { en: "Inspect before acting", ar: "تحقّق قبل اتخاذ القرار" },
+  "rep.wbFormats": { en: "Editable .pptx and .xlsx", ar: "قابل للتحرير بصيغتي ‎.pptx و‎.xlsx" },
+  "spread.label": { en: "Animated example: data, findings, report", ar: "مثال متحرك: البيانات والنتائج والتقرير" },
 };
 
 export function landingCopy(locale: Locale, key: CopyKey, params?: Record<string, string | number>): string {
