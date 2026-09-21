@@ -45,8 +45,6 @@ interface PlateRect {
   blankW: number;
   blankH: number;
   bodyW: number;
-  /** Viewport is stacked (single column) — flags render in-flow. */
-  stacked: boolean;
 }
 
 function relTo(el: HTMLElement, container: HTMLElement): { x: number; y: number } {
@@ -88,10 +86,10 @@ const EXCERPT_CSAT: Record<string, string> = {
 };
 
 const DATA_ROWS: readonly RowDef[] = [
-  // Four excerpt rows plus the real flagged rows — every row must stay
+  // Three excerpt rows plus the real flagged rows — every row must stay
   // inside the plate's height so the strike/ring annotators land on
   // visible cells.
-  ...LANDING_TRUTH.excerpt.slice(0, 4).map((cells) => ({
+  ...LANDING_TRUTH.excerpt.slice(0, 3).map((cells) => ({
     op: cells[0]!,
     dateIso: cells[1]!,
     region: cells[2]!,
@@ -154,7 +152,6 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
         blankW: blank.offsetWidth,
         blankH: blank.offsetHeight,
         bodyW: body.clientWidth,
-        stacked: window.matchMedia("(max-width: 760px)").matches,
       });
     };
     measure();
@@ -244,10 +241,7 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
     transform: `translateY(${12 * (1 - p)}px)`,
   });
 
-  const flagPos = (top: number): CSSProperties =>
-    // the REPORT plate permanently overlaps DATA's trailing ~14px — keep
-    // the flags clear of it
-    meas === null || meas.stacked ? {} : { insetInlineEnd: 38, top };
+
 
   return (
     <section className="rf-spread" id="how-it-works" aria-labelledby="rf-hero-title">
@@ -319,6 +313,14 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
                 {truth.dataset.sheetName} · {landingCopy(locale, "walk.sheet.monthly")}
               </span>
             </div>
+            <div className="rf-data__flags">
+              <span className="rf-flag" style={{ opacity: f1 }}>
+                {landingCopy(locale, "flag.dup")}
+              </span>
+              <span className="rf-flag" style={{ opacity: f2 }}>
+                {landingCopy(locale, "flag.blank")}
+              </span>
+            </div>
             <table className="rf-grid">
               <thead>
                 <tr>
@@ -354,14 +356,6 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
             <div className="rf-data__foot">
               <span className="rf-rowcount rf-numeric" dir="ltr">
                 {rowCountText}
-              </span>
-              <span className="rf-flagrow">
-                <span className="rf-flag" style={{ opacity: f1, ...flagPos(meas === null ? 0 : meas.dupTop + meas.dupH + 3) }}>
-                  {landingCopy(locale, "flag.dup")}
-                </span>
-                <span className="rf-flag" style={{ opacity: f2, ...flagPos(meas === null ? 0 : meas.blankTop - 26) }}>
-                  {landingCopy(locale, "flag.blank")}
-                </span>
               </span>
             </div>
             <span
