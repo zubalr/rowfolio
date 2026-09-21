@@ -1162,3 +1162,18 @@ html[lang="ar"] .rf-pres__credit {
     margin-block-start: var(--rf-space-5);
   }
 }
+/* ≤340px: the pill's label row must clear the first viewport — tighten the
+   artifact cap and stage chrome so it lands fully above the fold. */
+@media (max-width: 340px) {
+  [data-chapter] .rf-pres-art,
+  .rf-pres-end__aside {
+    max-block-size: 128px;
+  }
+  .rf-pres__stage {
+    gap: var(--rf-space-2);
+    padding-block-start: var(--rf-space-4);
+  }
+  .rf-pres__controls {
+    padding: var(--rf-space-1) var(--rf-space-3);
+  }
+}
