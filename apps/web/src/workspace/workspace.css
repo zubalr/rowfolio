@@ -8,6 +8,13 @@
 /* ---------- Plate grammar ------------------------------------------------- */
 
 /* The plate: one white surface, one hairline, panel radius, no shadow. */
+/* The landing spread positions decorative `.rf-plate` frames absolutely on the
+   bare class; product plates inside the workspace always stay in flow. */
+.rf-workspace .rf-plate {
+  position: static;
+  overflow: visible;
+}
+
 .rf-plate {
   background: var(--rf-surface);
   border: 1px solid var(--rf-rule);
