@@ -358,4 +358,43 @@ describe('deck structure', () => {
     // Latin/digit runs inside Arabic copy stay on the deck's Latin face.
     expect(slide1).toContain('a:cs typeface="Arial"');
   });
+
+  it('mirrors the body composition for Arabic and names finding scope', async () => {
+    const accentX = (xml: string): number => {
+      const m = /name="slide-1-finding-accent"[\s\S]*?<a:off x="(\d+)"/.exec(xml)
+        ?? /name="slide-3-finding-accent"[\s\S]*?<a:off x="(\d+)"/.exec(xml);
+      expect(m).not.toBeNull();
+      return Number((m as RegExpExecArray)[1]);
+    };
+    const en = unzip((await buildDeck('en')).bytes);
+    const ar = unzip((await buildDeck('ar')).bytes);
+    // The finding accent tick anchors the text column's leading edge —
+    // left in English, right in Arabic (a mirrored composition, not just
+    // right-aligned copy).
+    const enSlide = textOf(en, 'ppt/slides/slide1.xml');
+    const arSlide = textOf(ar, 'ppt/slides/slide1.xml');
+    const half = (13.333 / 2) * EMU_PER_INCH;
+    expect(accentX(enSlide)).toBeLessThan(half);
+    expect(accentX(arSlide)).toBeGreaterThan(half);
+    // Findings name their scope: region + period under the headline.
+    expect(enSlide).toContain('North');
+    expect(enSlide).toContain('June 2026');
+    expect(arSlide).toContain('الشمال');
+    expect(arSlide).toContain('يونيو');
+    // The KPI table mirrors column order for right-to-left reading.
+    const arSlide2 = textOf(ar, 'ppt/slides/slide2.xml');
+    const unitIdx = arSlide2.indexOf('>الوحدة<');
+    const metricIdx = arSlide2.indexOf('>المؤشر<');
+    expect(unitIdx).toBeGreaterThanOrEqual(0);
+    expect(metricIdx).toBeGreaterThanOrEqual(0);
+    expect(unitIdx).toBeLessThan(metricIdx);
+  });
+
+  it('marks verified and resolved content in the positive teal', async () => {
+    const { bytes } = await buildDeck('en');
+    const entries = unzip(bytes);
+    const teal = argb(DESIGN_TOKENS.color.positive);
+    expect(textOf(entries, 'ppt/slides/slide5.xml')).toContain(teal);
+    expect(textOf(entries, 'ppt/slides/slide6.xml')).toContain(teal);
+  });
 });
