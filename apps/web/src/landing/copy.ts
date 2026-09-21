@@ -49,6 +49,12 @@ export type CopyKey =
   | "pres.chapter.report"
   | "pres.chapter.result"
   | "pres.chapter.transform"
+  | "pres.chapter.task"
+  | "pres.chapter.check"
+  | "pres.chapter.change"
+  | "pres.chapter.evidence"
+  | "pres.chapter.prepare"
+  | "pres.chapter.deliver"
   | "pres.checkData"
   | "pres.credit"
   | "pres.downloadPptx"
@@ -67,11 +73,31 @@ export type CopyKey =
   | "pres.report.period"
   | "pres.report.title"
   | "pres.report.verified"
-  | "pres.scene.report.caption"
   | "pres.scene.result.caption"
   | "pres.scene.transform.caption"
   | "pres.scene.transform.note"
   | "pres.scene.transform.scope"
+  | "pres.scene.task.caption"
+  | "pres.scene.check.caption"
+  | "pres.scene.change.caption"
+  | "pres.scene.evidence.caption"
+  | "pres.scene.prepare.caption"
+  | "pres.scene.deliver.caption"
+  | "pres.task.request"
+  | "pres.task.requestTitle"
+  | "pres.task.period"
+  | "pres.task.measures"
+  | "pres.check.title"
+  | "pres.check.dup"
+  | "pres.check.missing"
+  | "pres.check.dupTag"
+  | "pres.check.missingTag"
+  | "pres.evidence.title"
+  | "pres.evidence.span"
+  | "pres.evidence.match"
+  | "pres.prepare.slideEn"
+  | "pres.prepare.slideAr"
+  | "pres.workbook.title"
   | "pres.title"
   | "scenario.assumed"
   | "scenario.contributionLabel"
@@ -138,7 +164,33 @@ const COPY: Record<CopyKey, Record<Locale, string>> = {
   "pres.report.period": { en: "June 2026 · six regions · service operations", ar: "يونيو 2026 · ست مناطق · عمليات الخدمة" },
   "pres.report.title": { en: "June operations briefing", ar: "إحاطة عمليات يونيو" },
   "pres.report.verified": { en: "Checked against {sheet} rows {start}–{end}", ar: "تحقّق منه مقابل صفوف {start}–{end} في {sheet}" },
-  "pres.scene.report.caption": { en: "The finished report. Downloads and the workspace are one click away.", ar: "التقرير الجاهز. التنزيلات ومساحة العمل على بُعد نقرة واحدة." },
+  "pres.scene.deliver.caption": { en: "The finished report. Downloads and the workspace are one click away.", ar: "التقرير الجاهز. التنزيلات ومساحة العمل على بُعد نقرة واحدة." },
+  "pres.scene.task.caption": { en: "A manager needs the monthly operations update. The figures are in a spreadsheet. The report still needs to be prepared.", ar: "يحتاج المدير إلى تحديث العمليات الشهري. الأرقام موجودة في جدول بيانات. والتقرير ما زال بحاجة إلى إعداد." },
+  "pres.scene.check.caption": { en: "Seventeen duplicate rows are excluded. Five optional survey cells stay blank; nothing is filled in.", ar: "تُستبعد سبعة عشر صفاً مكرراً. وتبقى خمس خلايا استبيان اختيارية فارغة؛ لا يُملأ شيء." },
+  "pres.scene.change.caption": { en: "North June revenue sits {gap} under plan while order volume rose {orders}.", ar: "إيراد يونيو في الشمال أدنى من المستهدف بنسبة {gap} بينما ارتفع حجم الطلبات بنسبة {orders}." },
+  "pres.scene.evidence.caption": { en: "Every figure traces to named rows and a calculation you can redo.", ar: "كل رقم يعود إلى صفوف مسماة وحساب يمكنك إعادته." },
+  "pres.scene.prepare.caption": { en: "One report, in English and Arabic. The workbook keeps the working sheets.", ar: "تقرير واحد بالإنجليزية والعربية. وملف العمل يحفظ الأوراق." },
+  "pres.chapter.task": { en: "The task", ar: "المهمة" },
+  "pres.chapter.check": { en: "Check the figures", ar: "فحص الأرقام" },
+  "pres.chapter.change": { en: "What changed", ar: "ما الذي تغيّر" },
+  "pres.chapter.evidence": { en: "The evidence", ar: "الدليل" },
+  "pres.chapter.prepare": { en: "The report in two languages", ar: "التقرير بلغتين" },
+  "pres.chapter.deliver": { en: "Take it with you", ar: "خذها معك" },
+  "pres.task.request": { en: "A manager needs the monthly operations update. The figures are in a spreadsheet. The report still needs to be prepared.", ar: "يحتاج المدير إلى تحديث العمليات الشهري. الأرقام موجودة في جدول بيانات. والتقرير ما زال بحاجة إلى إعداد." },
+  "pres.task.requestTitle": { en: "The request", ar: "الطلب" },
+  "pres.task.period": { en: "The period: June 2026, one complete scheduled month.", ar: "الفترة: يونيو 2026، شهر مجدول كامل." },
+  "pres.task.measures": { en: "The measures: revenue earned against plan, order volume and downtime minutes.", ar: "المقاييس: الإيراد المتحقق مقابل المستهدف، وحجم الطلبات، ودقائق التوقف." },
+  "pres.check.title": { en: "Preparation", ar: "التحضير" },
+  "pres.check.dup": { en: "{n} duplicate rows excluded", ar: "{n} صفاً مكرراً استُبعد" },
+  "pres.check.missing": { en: "{n} optional survey cells left blank, never filled in", ar: "{n} خلايا استبيان اختيارية تُركت فارغة، لا تُملأ أبداً" },
+  "pres.check.dupTag": { en: "excluded", ar: "مستبعد" },
+  "pres.check.missingTag": { en: "blank", ar: "فارغ" },
+  "pres.evidence.title": { en: "Where the figure comes from", ar: "من أين جاء الرقم" },
+  "pres.evidence.span": { en: "{region} · June 2026 · {sheet} rows {start}–{end}", ar: "{region} · يونيو 2026 · صفوف {start}–{end} في {sheet}" },
+  "pres.evidence.match": { en: "Matches the figure on the report.", ar: "يطابق الرقم على التقرير." },
+  "pres.prepare.slideEn": { en: "English", ar: "الإنجليزية" },
+  "pres.prepare.slideAr": { en: "Arabic", ar: "العربية" },
+  "pres.workbook.title": { en: "Workbook", ar: "ملف العمل" },
   "pres.scene.result.caption": { en: "Rows, a chart and a report page. The same data through the process.", ar: "صفوف ورسم وصفحة تقرير. البيانات نفسها عبر العملية." },
   "pres.scene.transform.caption": { en: "A manager needs the monthly operations update. The figures are in a spreadsheet. The report still needs to be prepared.", ar: "يحتاج المدير إلى تحديث العمليات الشهري. الأرقام موجودة في جدول بيانات. والتقرير ما زال بحاجة إلى إعداد." },
   "pres.scene.transform.note": { en: "Each selected cell becomes one mark.", ar: "كل خلية محددة تصبح علامة واحدة." },

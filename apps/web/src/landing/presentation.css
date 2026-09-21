@@ -1,14 +1,16 @@
 /**
- * Presentation stage (A21 composition spec):
+ * Presentation stage (A21 composition spec + the brief's seven beats):
  *  - One fixed 16:9 cobalt window on ivory margins.
- *  - Three artifacts (sheet / chart / report) persist and morph between
- *    positions per chapter — positioned absolutely with transitioned
- *    logical offsets + sizes; nothing teleports.
+ *  - Artifacts (task card, worksheet fragment, chart, preparation card,
+ *    evidence card, report, mirrored slide, workbook, end aside) persist
+ *    in the DOM and morph between chapter positions — absolute logical
+ *    offsets + sizes on one transition; nothing teleports, nothing loops.
  *  - Hard 1px edges + 8% ink offset shadow; no glass, no gradients.
  *  - Controls: an ink pill pinned at the window's bottom-center edge —
  *    Prev/Play/Next, dot progress, scene label, persistent workspace
- *    entry. Under 900px the pill docks below the window and artifacts
- *    stack in flow, so controls never overlay the subject.
+ *    entry. Under 900px the pill docks below the window and the active
+ *    scene's subjects stack in flow, so controls never overlay the
+ *    subject.
  *  - Hue discipline: cobalt = engine/observed, vermilion = the gap only,
  *    teal = the deliverable, amber reserved for assumptions elsewhere.
  *
@@ -72,28 +74,38 @@ html[lang="ar"] .rf-pres__fiction {
   font-size: 13px;
 }
 
-/* ---------- The three artifacts — hard edges, offset ink shadow ------ */
+/* ---------- Artifacts: hidden until their chapter claims them ------- */
 .rf-pres-art {
   position: absolute;
   margin: 0;
   display: flex;
   flex-direction: column;
   gap: var(--rf-space-1);
-  max-block-size: 90%;
+  max-block-size: 92%;
   overflow: clip;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
   transition:
     inset-inline-start 560ms var(--rf-ease),
     inset-block-start 560ms var(--rf-ease),
     inline-size 560ms var(--rf-ease),
     opacity 420ms var(--rf-ease),
-    transform 560ms var(--rf-ease);
+    transform 560ms var(--rf-ease),
+    visibility 0ms 420ms;
 }
-.rf-pres-art > .rf-pres-sheet,
-.rf-pres-art > .rf-pres-chart,
-.rf-pres-art > .rf-pres-report,
+/* A claimed artifact: visible, its chapter's position wins by order. */
+[data-chapter] .rf-pres-art--sheet,
+[data-chapter] .rf-pres-art--chart,
+[data-chapter] .rf-pres-art--report {
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0ms;
+}
 .rf-pres-art .rf-pres-sheet,
 .rf-pres-art .rf-pres-chart,
-.rf-pres-art .rf-pres-report {
+.rf-pres-art .rf-pres-report,
+.rf-pres-art .rf-pres-card {
   border: 1px solid color-mix(in srgb, var(--rf-ink) 24%, transparent);
   box-shadow: 10px 12px 0 rgb(20 37 46 / 8%);
 }
@@ -111,83 +123,252 @@ html[lang="ar"] .rf-pres-art__cap {
   text-transform: none;
 }
 
+/* ==================== Chapter maps ==================== */
+
 /* S1 — triad at rest: sheet left-back, chart mid, report right-front. */
 [data-chapter="result"] .rf-pres-art--sheet {
   inset-inline-start: 4%;
   inset-block-start: 15%;
   inline-size: 33%;
   z-index: 1;
+  opacity: 1;
 }
 [data-chapter="result"] .rf-pres-art--chart {
   inset-inline-start: 35%;
   inset-block-start: 30%;
   inline-size: 32%;
   z-index: 2;
+  opacity: 1;
 }
 [data-chapter="result"] .rf-pres-art--report {
   inset-inline-start: 63%;
   inset-block-start: 9%;
   inline-size: 33%;
   z-index: 3;
+  opacity: 1;
 }
-/* Transition — the marked range meets the chart; report waits, dimmed. */
-[data-chapter="transform"] .rf-pres-art--sheet {
-  inset-inline-start: 4%;
+
+/* S2 — the task: the request card meets the focused excerpt. */
+[data-chapter="task"] .rf-pres-art--task {
+  inset-inline-start: 5%;
+  inset-block-start: 15%;
+  inline-size: 36%;
+  z-index: 4;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0ms;
+}
+[data-chapter="task"] .rf-pres-art--sheet {
+  inset-inline-start: 46%;
   inset-block-start: 12%;
-  inline-size: 37%;
+  inline-size: 48%;
   z-index: 3;
+  opacity: 1;
 }
-[data-chapter="transform"] .rf-pres-art--chart {
-  inset-inline-start: 50%;
-  inset-block-start: 16%;
-  inline-size: 44%;
-  z-index: 4;
-}
-[data-chapter="transform"] .rf-pres-art--report {
-  inset-inline-start: 80%;
-  inset-block-start: 68%;
-  inline-size: 17%;
-  z-index: 1;
-  opacity: 0.35;
-  transform: scale(0.92);
-}
-/* Held ending — the report is the subject; the rest recedes. */
-[data-chapter="report"] .rf-pres-art--report {
-  inset-inline-start: 4%;
-  inset-block-start: 8%;
-  inline-size: 46%;
-  z-index: 4;
-}
-[data-chapter="report"] .rf-pres-art--chart {
-  inset-inline-start: 3%;
+[data-chapter="task"] .rf-pres-art--chart {
+  inset-inline-start: 72%;
   inset-block-start: 72%;
   inline-size: 22%;
   z-index: 1;
-  opacity: 0.4;
+  opacity: 0.3;
 }
-[data-chapter="report"] .rf-pres-art--sheet {
-  inset-inline-start: 27%;
+[data-chapter="task"] .rf-pres-art--report {
+  inset-inline-start: 30%;
   inset-block-start: 76%;
-  inline-size: 20%;
+  inline-size: 18%;
   z-index: 1;
   opacity: 0.3;
 }
 
-/* The connector the selected range travels along (transform chapter). */
+/* S3 — check the figures: fragment forward with the flagged rows. */
+[data-chapter="check"] .rf-pres-art--sheet {
+  inset-inline-start: 4%;
+  inset-block-start: 9%;
+  inline-size: 54%;
+  z-index: 3;
+  opacity: 1;
+}
+[data-chapter="check"] .rf-pres-art--check {
+  inset-inline-start: 62%;
+  inset-block-start: 16%;
+  inline-size: 34%;
+  z-index: 4;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0ms;
+}
+[data-chapter="check"] .rf-pres-art--chart {
+  inset-inline-start: 74%;
+  inset-block-start: 74%;
+  inline-size: 18%;
+  z-index: 1;
+  opacity: 0.3;
+}
+[data-chapter="check"] .rf-pres-art--report {
+  inset-inline-start: 38%;
+  inset-block-start: 78%;
+  inline-size: 18%;
+  z-index: 1;
+  opacity: 0.3;
+}
+
+/* S4 — explain what changed: the chart develops on the prepared data. */
+[data-chapter="change"] .rf-pres-art--sheet {
+  inset-inline-start: 4%;
+  inset-block-start: 14%;
+  inline-size: 22%;
+  z-index: 1;
+  opacity: 0.45;
+}
+[data-chapter="change"] .rf-pres-art--chart {
+  inset-inline-start: 34%;
+  inset-block-start: 10%;
+  inline-size: 52%;
+  z-index: 4;
+  opacity: 1;
+}
+[data-chapter="change"] .rf-pres-art--report {
+  inset-inline-start: 86%;
+  inset-block-start: 72%;
+  inline-size: 12%;
+  z-index: 1;
+  opacity: 0.3;
+}
+
+/* S5 — evidence: the result connects to its rows and the calculation. */
+[data-chapter="evidence"] .rf-pres-art--report {
+  inset-inline-start: 4%;
+  inset-block-start: 12%;
+  inline-size: 28%;
+  z-index: 3;
+  opacity: 1;
+}
+[data-chapter="evidence"] .rf-pres-art--sheet {
+  inset-inline-start: 38%;
+  inset-block-start: 8%;
+  inline-size: 38%;
+  z-index: 3;
+  opacity: 1;
+}
+[data-chapter="evidence"] .rf-pres-art--evidence {
+  inset-inline-start: 38%;
+  inset-block-start: 62%;
+  inline-size: 38%;
+  z-index: 4;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0ms;
+}
+[data-chapter="evidence"] .rf-pres-art--chart {
+  inset-inline-start: 82%;
+  inset-block-start: 74%;
+  inline-size: 14%;
+  z-index: 1;
+  opacity: 0.3;
+}
+
+/* S6 — prepare: the report at reading size in both locales + workbook. */
+[data-chapter="prepare"] .rf-pres-art--report {
+  inset-inline-start: 6%;
+  inset-block-start: 8%;
+  inline-size: 32%;
+  z-index: 3;
+  opacity: 1;
+}
+[data-chapter="prepare"] .rf-pres-art--slideAlt {
+  inset-inline-start: 46%;
+  inset-block-start: 8%;
+  inline-size: 32%;
+  z-index: 3;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0ms;
+}
+[data-chapter="prepare"] .rf-pres-art--workbook {
+  inset-inline-start: 24%;
+  inset-block-start: 62%;
+  inline-size: 52%;
+  z-index: 2;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0ms;
+}
+[data-chapter="prepare"] .rf-pres-art--sheet {
+  inset-inline-start: 87%;
+  inset-block-start: 74%;
+  inline-size: 11%;
+  z-index: 1;
+  opacity: 0.25;
+}
+[data-chapter="prepare"] .rf-pres-art--chart {
+  inset-inline-start: 6%;
+  inset-block-start: 74%;
+  inline-size: 13%;
+  z-index: 1;
+  opacity: 0.25;
+}
+
+/* S7 — deliver: the report holds beside credit, downloads, workspace. */
+[data-chapter="deliver"] .rf-pres-art--report {
+  inset-inline-start: 4%;
+  inset-block-start: 8%;
+  inline-size: 44%;
+  z-index: 4;
+  opacity: 1;
+}
+[data-chapter="deliver"] .rf-pres-art--chart {
+  inset-inline-start: 4%;
+  inset-block-start: 74%;
+  inline-size: 20%;
+  z-index: 1;
+  opacity: 0.4;
+}
+[data-chapter="deliver"] .rf-pres-art--sheet {
+  inset-inline-start: 27%;
+  inset-block-start: 72%;
+  inline-size: 20%;
+  z-index: 1;
+  opacity: 0.3;
+}
+[data-chapter="deliver"] .rf-pres-end__aside {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  pointer-events: auto;
+  transition-delay: 300ms, 300ms, 0ms;
+}
+
+/* ---------- The traveling mark — one connector, repositioned -------- */
 .rf-pres__link {
   position: absolute;
   z-index: 2;
-  inset-inline-start: 42%;
-  inset-block-start: 30%;
-  inline-size: 9%;
   block-size: 2px;
   background: color-mix(in srgb, var(--rf-ink-text) 45%, transparent);
   transform-origin: inline-start;
   opacity: 0;
+  transition:
+    inset-inline-start 560ms var(--rf-ease),
+    inset-block-start 560ms var(--rf-ease),
+    inline-size 560ms var(--rf-ease),
+    opacity 300ms var(--rf-ease);
 }
-[data-chapter="transform"] .rf-pres__link {
+[data-chapter="change"] .rf-pres__link {
+  inset-inline-start: 26.5%;
+  inset-block-start: 40%;
+  inline-size: 7%;
   opacity: 1;
   animation: rf-link-draw 480ms var(--rf-ease) 120ms both;
+}
+[data-chapter="evidence"] .rf-pres__link {
+  inset-inline-start: 32.5%;
+  inset-block-start: 30%;
+  inline-size: 5%;
+  opacity: 1;
 }
 @keyframes rf-link-draw {
   from {
@@ -222,10 +403,10 @@ html[lang="ar"] .rf-pres-art__cap {
     transform: translateX(calc(100% + 56px));
   }
 }
-[data-chapter="transform"] .rf-pres__link::after {
+[data-chapter="change"] .rf-pres__link::after {
   animation: rf-carrier 900ms var(--rf-ease) 350ms both;
 }
-[dir="rtl"] [data-chapter="transform"] .rf-pres__link::after {
+[dir="rtl"] [data-chapter="change"] .rf-pres__link::after {
   animation-name: rf-carrier-rtl;
 }
 @keyframes rf-carrier-rtl {
@@ -245,11 +426,158 @@ html[lang="ar"] .rf-pres-art__cap {
 /* ---------- Artifact surfaces ---------- */
 .rf-pres-sheet,
 .rf-pres-chart,
-.rf-pres-report {
+.rf-pres-report,
+.rf-pres-card {
   background: var(--rf-surface);
   color: var(--rf-ink);
   border-radius: var(--rf-radius-control);
 }
+
+/* Side-card surfaces — task, preparation, evidence, workbook. */
+.rf-pres-card {
+  padding: var(--rf-space-4);
+}
+.rf-pres-card__kicker {
+  margin: 0 0 var(--rf-space-2);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rf-text-muted);
+}
+html[lang="ar"] .rf-pres-card__kicker {
+  letter-spacing: normal;
+  font-size: 12px;
+  text-transform: none;
+}
+.rf-pres-task__quote {
+  margin: 0 0 var(--rf-space-3);
+  font-size: clamp(13px, 1.25vw, 16px);
+  line-height: 1.55;
+  font-weight: 500;
+}
+html[lang="ar"] .rf-pres-task__quote {
+  font-size: clamp(14px, 1.35vw, 17px);
+}
+.rf-pres-task__facts {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-2);
+}
+.rf-pres-task__fact {
+  display: flex;
+  gap: var(--rf-space-2);
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+html[lang="ar"] .rf-pres-task__fact {
+  font-size: 13px;
+}
+.rf-pres-task__fact dt {
+  font-weight: 600;
+  color: var(--rf-data);
+  white-space: nowrap;
+}
+.rf-pres-task__fact dd {
+  margin: 0;
+  color: var(--rf-text-muted);
+}
+.rf-pres-check__count {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rf-space-2);
+  margin: 0 0 var(--rf-space-3);
+  font-size: clamp(18px, 1.9vw, 26px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.rf-pres-check__arrow {
+  color: var(--rf-text-muted);
+  font-weight: 400;
+}
+.rf-pres-check__list {
+  margin: 0;
+  padding-inline-start: var(--rf-space-4);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--rf-ink);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-1);
+}
+html[lang="ar"] .rf-pres-check__list {
+  font-size: 13px;
+}
+.rf-pres-evidence__span {
+  margin: 0 0 var(--rf-space-2);
+  font-size: 12px;
+  color: var(--rf-text-muted);
+}
+html[lang="ar"] .rf-pres-evidence__span {
+  font-size: 13px;
+}
+.rf-pres-evidence__calc {
+  margin: 0 0 var(--rf-space-3);
+  padding: var(--rf-space-2) var(--rf-space-3);
+  font-size: clamp(11px, 1.05vw, 13px);
+  background: var(--rf-bg);
+  border-radius: var(--rf-radius-control);
+  border-block-start: 2px solid var(--rf-ink);
+}
+.rf-pres-evidence__calc strong {
+  color: var(--rf-negative);
+}
+.rf-pres-evidence__match {
+  display: flex;
+  align-items: center;
+  gap: var(--rf-space-2);
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--rf-positive-text);
+}
+.rf-pres-evidence__match .rf-icon {
+  color: var(--rf-positive);
+  flex: none;
+}
+/* Workbook — the formatted sheet keeps real region figures. */
+.rf-pres-workbook {
+  padding: var(--rf-space-3);
+}
+.rf-pres-workbook__table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+.rf-pres-workbook__table th {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--rf-text-muted);
+  padding: 3px var(--rf-space-2);
+  border-block-end: 1px solid var(--rf-divider);
+  text-align: start;
+}
+.rf-pres-workbook__table td {
+  padding: 3px var(--rf-space-2);
+  border-block-end: 1px solid var(--rf-divider);
+  color: var(--rf-ink);
+}
+.rf-pres-workbook__table td.rf-numeric {
+  font-family: var(--rf-font-mono);
+}
+.rf-pres-workbook__tab {
+  display: inline-block;
+  margin: var(--rf-space-2) 0 0;
+  padding: 2px var(--rf-space-2);
+  font-size: 10px;
+  border: 1px solid var(--rf-divider);
+  border-block-start: 2px solid var(--rf-positive);
+  border-radius: 4px 4px 0 0;
+  color: var(--rf-ink);
+}
+
 /* Worksheet fragment — legible cells, source headers as authored. */
 .rf-pres-sheet {
   inline-size: 100%;
@@ -281,6 +609,33 @@ html[lang="ar"] .rf-pres-art__cap {
   background: color-mix(in srgb, var(--rf-data) 10%, var(--rf-surface));
   box-shadow: inset 0 0 0 1px var(--rf-data);
 }
+/* The duplicate pair: the first copy keeps the row; the second takes the
+   excluded treatment — a fading row and an 'excluded' flag. */
+.rf-pres-sheet__row--dup td {
+  background: color-mix(in srgb, var(--rf-attention) 8%, var(--rf-surface));
+}
+.rf-pres-sheet__row--dup ~ .rf-pres-sheet__row--dup td {
+  color: var(--rf-text-muted);
+}
+.rf-pres-sheet__flag {
+  display: inline-block;
+  margin-inline-start: var(--rf-space-1);
+  padding: 0 var(--rf-space-1);
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--rf-attention) 14%, var(--rf-surface));
+  color: var(--rf-negative);
+}
+.rf-pres-sheet__cell--missing {
+  outline: 1px dashed var(--rf-scenario);
+  outline-offset: -1px;
+  color: var(--rf-text-muted);
+}
+.rf-pres-sheet__cell--missing .rf-pres-sheet__flag {
+  background: color-mix(in srgb, var(--rf-scenario) 14%, var(--rf-surface));
+  color: var(--rf-scenario-text);
+}
 /* Each selected cell flashes in sequence as its mark draws on the chart —
    one pulse per row, the transition's contribution beat. */
 @keyframes rf-cell-lit {
@@ -294,17 +649,30 @@ html[lang="ar"] .rf-pres-art__cap {
     background: color-mix(in srgb, var(--rf-data) 10%, var(--rf-surface));
   }
 }
-[data-chapter="transform"] .rf-pres-art--sheet .rf-pres-sheet__mark {
+[data-chapter="change"] .rf-pres-art--sheet .rf-pres-sheet__mark {
   animation: rf-cell-lit 620ms var(--rf-ease);
   animation-delay: calc(300ms + var(--i) * 150ms);
 }
 
 /* Chart — real labels, cobalt marks, vermilion reserved for the gap. */
 .rf-pres-chart {
+  padding: var(--rf-space-2) var(--rf-space-3);
+}
+.rf-pres-chart__head {
+  margin: 0;
+  padding-block-end: var(--rf-space-1);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--rf-ink);
+}
+html[lang="ar"] .rf-pres-chart__head {
+  font-size: 11px;
+}
+.rf-pres-chart__svg {
   display: block;
   inline-size: 100%;
   block-size: auto;
-  padding: var(--rf-space-2);
 }
 .rf-pres-chart__axis {
   stroke: var(--rf-ink);
@@ -324,17 +692,19 @@ html[lang="ar"] .rf-pres-art__cap {
   font-size: 8px;
   fill: var(--rf-text-muted);
 }
-/* S1 rest: the stage chart's marks are not yet drawn — only the table and
-   its labeled axes stand. In the transform chapter the bars grow in the
-   same order their cells pulsed; the held report keeps them settled. */
+/* S1 rest: the stage chart's marks are not yet drawn — the triad shows
+   the table and the labeled axes, the marks arrive in the change beat.
+   Once drawn they stay drawn through evidence, prepare and deliver. */
 .rf-pres-art--chart .rf-pres-chart__bar {
   transform: scaleY(0);
 }
-[data-chapter="transform"] .rf-pres-art--chart .rf-pres-chart__bar,
-[data-chapter="report"] .rf-pres-art--chart .rf-pres-chart__bar {
+[data-chapter="change"] .rf-pres-art--chart .rf-pres-chart__bar,
+[data-chapter="evidence"] .rf-pres-art--chart .rf-pres-chart__bar,
+[data-chapter="prepare"] .rf-pres-art--chart .rf-pres-chart__bar,
+[data-chapter="deliver"] .rf-pres-art--chart .rf-pres-chart__bar {
   transform: scaleY(1);
 }
-[data-chapter="transform"] .rf-pres-art--chart .rf-pres-chart__bar {
+[data-chapter="change"] .rf-pres-art--chart .rf-pres-chart__bar {
   animation: rf-bar-grow 640ms var(--rf-ease) both;
   animation-delay: calc(480ms + var(--i) * 150ms);
 }
@@ -374,11 +744,11 @@ html[lang="ar"] .rf-pres-art__cap {
   fill: var(--rf-negative);
 }
 /* Three sub-steps over ~600ms: bracket stroke, gap span, delta value. */
-[data-chapter="transform"] .rf-pres-art--chart .rf-pres-delta {
+[data-chapter="change"] .rf-pres-art--chart .rf-pres-delta {
   opacity: 1;
   animation: rf-fade-in 120ms linear 1450ms backwards;
 }
-[data-chapter="transform"] .rf-pres-art--chart .rf-pres-delta__bracket {
+[data-chapter="change"] .rf-pres-art--chart .rf-pres-delta__bracket {
   animation: rf-draw 380ms var(--rf-ease) 1450ms backwards;
   stroke-dashoffset: 0;
 }
@@ -390,10 +760,10 @@ html[lang="ar"] .rf-pres-art__cap {
     stroke-dashoffset: 0;
   }
 }
-[data-chapter="transform"] .rf-pres-art--chart .rf-pres-delta__span {
+[data-chapter="change"] .rf-pres-art--chart .rf-pres-delta__span {
   animation: rf-fade-in 160ms linear 1650ms backwards;
 }
-[data-chapter="transform"] .rf-pres-art--chart .rf-pres-delta__value {
+[data-chapter="change"] .rf-pres-art--chart .rf-pres-delta__value {
   animation: rf-fade-in 160ms linear 1800ms backwards;
 }
 @keyframes rf-fade-in {
@@ -404,7 +774,9 @@ html[lang="ar"] .rf-pres-art__cap {
     opacity: 1;
   }
 }
-[data-chapter="report"] .rf-pres-art--chart .rf-pres-delta {
+[data-chapter="evidence"] .rf-pres-art--chart .rf-pres-delta,
+[data-chapter="prepare"] .rf-pres-art--chart .rf-pres-delta,
+[data-chapter="deliver"] .rf-pres-art--chart .rf-pres-delta {
   opacity: 1;
 }
 /* The finished report's inner chart carries its bracket already drawn. */
@@ -458,17 +830,28 @@ html[lang="ar"] .rf-pres-report__obs {
   color: var(--rf-positive);
   flex: none;
 }
-/* The compact resting state (S1 + transform) reads as a cover card —
-   head + chart only; body copy appears when the report lifts forward. */
+/* Resting the report as a compact cover card — body copy appears when
+   the report is the chapter's subject. */
 [data-chapter="result"] .rf-pres-art--report .rf-pres-report__obs,
 [data-chapter="result"] .rf-pres-art--report .rf-pres-report__proof,
-[data-chapter="transform"] .rf-pres-art--report .rf-pres-report__obs,
-[data-chapter="transform"] .rf-pres-art--report .rf-pres-report__proof {
+[data-chapter="task"] .rf-pres-art--report .rf-pres-report__obs,
+[data-chapter="task"] .rf-pres-art--report .rf-pres-report__proof,
+[data-chapter="check"] .rf-pres-art--report .rf-pres-report__obs,
+[data-chapter="check"] .rf-pres-art--report .rf-pres-report__proof,
+[data-chapter="change"] .rf-pres-art--report .rf-pres-report__obs,
+[data-chapter="change"] .rf-pres-art--report .rf-pres-report__proof {
   display: none;
 }
 [data-chapter="result"] .rf-pres-art--report .rf-pres-report,
-[data-chapter="transform"] .rf-pres-art--report .rf-pres-report {
+[data-chapter="task"] .rf-pres-art--report .rf-pres-report,
+[data-chapter="check"] .rf-pres-art--report .rf-pres-report,
+[data-chapter="change"] .rf-pres-art--report .rf-pres-report {
   padding: var(--rf-space-3);
+}
+/* The mirrored layout card keeps its own direction regardless of page. */
+.rf-pres-art--slideAlt .rf-pres-report__obs,
+.rf-pres-art--slideAlt .rf-pres-report__proof {
+  display: flex;
 }
 
 /* ---------- Held ending: credit + actions beside the report ---------- */
@@ -483,15 +866,10 @@ html[lang="ar"] .rf-pres-report__obs {
   gap: var(--rf-space-4);
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transform: translateY(10px);
   transition: opacity 420ms var(--rf-ease) 300ms, transform 420ms var(--rf-ease) 300ms,
     visibility 0ms 720ms;
-}
-[data-chapter="report"] .rf-pres-end__aside {
-  opacity: 1;
-  visibility: visible;
-  transform: none;
-  transition-delay: 300ms, 300ms, 0ms;
 }
 .rf-pres-end__credit {
   margin: 0;
@@ -699,7 +1077,7 @@ html[lang="ar"] .rf-pres__credit {
   font-size: 14px;
 }
 
-/* ---------- ≤900px: artifacts stack in flow; controls dock below ------ */
+/* ---------- ≤900px: the active scene stacks in flow ------------------ */
 @media (max-width: 900px) {
   .rf-pres__frame {
     aspect-ratio: auto;
@@ -713,36 +1091,64 @@ html[lang="ar"] .rf-pres__credit {
     gap: var(--rf-space-3);
     padding: var(--rf-space-5) var(--rf-space-4) var(--rf-space-6);
     padding-block-start: var(--rf-space-7);
+    min-block-size: 60vh;
   }
-  /* [data-chapter] selector keeps specificity level with the per-chapter
-     rules above so this override wins on order. */
-  [data-chapter] .rf-pres-art {
+  [data-chapter] .rf-pres-art,
+  .rf-pres-end__aside {
     position: static;
     inline-size: 100%;
     max-block-size: none;
     overflow: visible;
+    transform: none;
+    opacity: 0;
+    visibility: hidden;
+    display: none;
+  }
+  /* The active scene's subjects stack in narrative order. */
+  [data-chapter="result"] .rf-pres-art--sheet,
+  [data-chapter="result"] .rf-pres-art--chart,
+  [data-chapter="result"] .rf-pres-art--report,
+  [data-chapter="task"] .rf-pres-art--task,
+  [data-chapter="task"] .rf-pres-art--sheet,
+  [data-chapter="check"] .rf-pres-art--sheet,
+  [data-chapter="check"] .rf-pres-art--check,
+  [data-chapter="change"] .rf-pres-art--chart,
+  [data-chapter="evidence"] .rf-pres-art--report,
+  [data-chapter="evidence"] .rf-pres-art--sheet,
+  [data-chapter="evidence"] .rf-pres-art--evidence,
+  [data-chapter="prepare"] .rf-pres-art--report,
+  [data-chapter="prepare"] .rf-pres-art--slideAlt,
+  [data-chapter="prepare"] .rf-pres-art--workbook,
+  [data-chapter="deliver"] .rf-pres-art--report,
+  [data-chapter="deliver"] .rf-pres-end__aside {
+    display: flex;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  [data-chapter="change"] .rf-pres-art--sheet {
+    display: flex;
+    opacity: 0.5;
+    max-block-size: 150px;
+    overflow: clip;
+  }
+  /* Narrative order on the column: evidence shows report → rows → calc. */
+  [data-chapter="evidence"] .rf-pres-art--report {
+    order: 1;
+  }
+  [data-chapter="evidence"] .rf-pres-art--sheet {
+    order: 2;
+  }
+  [data-chapter="evidence"] .rf-pres-art--evidence {
+    order: 3;
+  }
+  [data-chapter="deliver"] .rf-pres-end__aside {
+    order: 2;
   }
   .rf-pres-art__cap {
     display: none;
   }
-  /* The active chapter's subject is full-size; companions stay present
-     but recede — the same story read as a column. */
-  [data-chapter="result"] .rf-pres-art {
-    opacity: 1;
-  }
-  [data-chapter="transform"] .rf-pres-art--report {
-    opacity: 0.4;
-    max-block-size: 120px;
-    overflow: clip;
-    transform: none;
-  }
-  [data-chapter="report"] .rf-pres-art--sheet,
-  [data-chapter="report"] .rf-pres-art--chart {
-    opacity: 0.35;
-    max-block-size: 110px;
-    overflow: clip;
-    transform: none;
-  }
+  /* The connector becomes a vertical drop between stacked artifacts. */
   .rf-pres__link {
     position: static;
     inline-size: 2px;
@@ -750,8 +1156,10 @@ html[lang="ar"] .rf-pres__credit {
     margin-inline: auto;
     transform-origin: top;
   }
-  [data-chapter="transform"] .rf-pres__link {
+  [data-chapter="change"] .rf-pres__link,
+  [data-chapter="evidence"] .rf-pres__link {
     animation-name: rf-link-draw-y;
+    opacity: 1;
   }
   @keyframes rf-link-draw-y {
     from {
@@ -778,20 +1186,9 @@ html[lang="ar"] .rf-pres__credit {
       transform: translateY(36px);
     }
   }
-  [data-chapter="transform"] .rf-pres__link::after,
-  [dir="rtl"] [data-chapter="transform"] .rf-pres__link::after {
+  [data-chapter="change"] .rf-pres__link::after,
+  [dir="rtl"] [data-chapter="change"] .rf-pres__link::after {
     animation-name: rf-carrier-y;
-  }
-  .rf-pres-end__aside {
-    position: static;
-    inline-size: 100%;
-    transform: none;
-    transition: opacity 420ms var(--rf-ease) 300ms, visibility 0ms 720ms;
-  }
-  .rf-pres-end__actions {
-    max-inline-size: none;
-    flex-direction: row;
-    flex-wrap: wrap;
   }
   /* The pill docks under the window, never over the subject. */
   .rf-pres__controls {
@@ -805,6 +1202,11 @@ html[lang="ar"] .rf-pres__credit {
     order: 3;
     flex-basis: 100%;
     text-align: center;
+  }
+  .rf-pres-end__actions {
+    max-inline-size: none;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 }
 @media (max-width: 767px) {
