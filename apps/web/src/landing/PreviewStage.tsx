@@ -592,9 +592,11 @@ export function PreviewStage({
                     {landingCopy(i18n.locale, "export.deckSlides", { n })}
                   </span>
                   <span className="rf-briefing__slide-title">{landingCopy(i18n.locale, `export.slide.${n}`)}</span>
-                  <span className="rf-briefing__state">
-                    {state.briefingReady ? <Icon name="check" size={16} /> : "—"}
-                  </span>
+                  {state.briefingReady ? (
+                    <span className="rf-briefing__state">
+                      <Icon name="check" size={16} />
+                    </span>
+                  ) : null}
                 </span>
               </li>
             ))}
@@ -602,9 +604,11 @@ export function PreviewStage({
           <p className="rf-briefing__workbook" data-ready={state.briefingReady || undefined}>
             <Icon name="file" size={16} />
             {landingCopy(i18n.locale, "export.workbookSummary")}
-            <span className="rf-briefing__state">
-              {state.briefingReady ? <Icon name="check" size={16} /> : "—"}
-            </span>
+            {state.briefingReady ? (
+              <span className="rf-briefing__state">
+                <Icon name="check" size={16} />
+              </span>
+            ) : null}
           </p>
           <p className="rf-briefing__note">{i18n.t("export.previewNote")} {landingCopy(i18n.locale, "export.realDownloads")}</p>
           {state.briefingReady ? (
