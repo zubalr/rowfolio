@@ -492,9 +492,17 @@ export function PreviewStage({
                   style={{ inlineSize: `${scenPct}%` }}
                 />
               </span>
-              <span className="rf-scenario__bar-value rf-numeric">
+              {/* Number roll — the assumed figure rolls into place on each
+                  assumption change (240ms; instant under reduced motion). */}
+              <m.span
+                className="rf-scenario__bar-value rf-numeric"
+                key={String(scenario.contribution)}
+                initial={{ opacity: 0, y: "0.3em" }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.24, ease: EASE }}
+              >
                 {i18n.formatInteger(scenario.contribution)}
-              </span>
+              </m.span>
             </div>
           </div>
           <p className="rf-scenario__result">

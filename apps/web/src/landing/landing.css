@@ -554,7 +554,8 @@ html[lang="ar"] .rf-scenario__bar-row {
   display: block;
   block-size: 100%;
   border-radius: 3px;
-  transition: inline-size var(--rf-panel-ms) var(--rf-ease);
+  /* Numbers settle on the number rhythm — 240ms, instant when reduced. */
+  transition: inline-size var(--rf-number-ms) var(--rf-ease);
 }
 .rf-scenario__bar--baseline {
   background: var(--rf-data);

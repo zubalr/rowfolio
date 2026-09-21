@@ -755,7 +755,11 @@ html[lang="ar"] .rf-table__foot {
   padding-inline-start: var(--rf-space-5);
   border-inline-start: 1px solid var(--rf-divider);
   min-width: 0;
-  flex: 1 1 180px;
+  flex: 1 1 240px;
+}
+/* The lead metric takes a full row of the strip — the ledger's head figure. */
+.rf-metric--feature {
+  flex-basis: 100%;
 }
 .rf-metric-strip > .rf-metric:first-child,
 .rf-metric-strip > [dir] > .rf-metric:first-child {
@@ -781,11 +785,13 @@ html[lang="ar"] .rf-metric__label {
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
-/* Ledger numerals: mono tabular figures, always. */
+/* Ledger numerals: mono tabular figures — a figure never breaks mid-token. */
 .rf-metric__value .rf-numeric {
   font-family: var(--rf-font-mono);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
+  white-space: nowrap;
+  overflow-wrap: normal;
 }
 html[lang="ar"] .rf-metric__value {
   letter-spacing: normal;

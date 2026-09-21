@@ -149,9 +149,10 @@
 .rf-workspace .rf-metric__value .rf-numeric {
   font-family: var(--rf-font-mono);
 }
-/* The lead metric reads larger than the rail metrics beside it. */
+/* The lead metric reads larger than the rail metrics beside it — scaled
+   so the headline figure never pushes the page past its viewport. */
 .rf-metric--feature .rf-metric__value {
-  font-size: 52px;
+  font-size: clamp(26px, 9vw, 52px);
 }
 
 .rf-workspace-head {
