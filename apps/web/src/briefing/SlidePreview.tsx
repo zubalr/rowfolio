@@ -94,7 +94,7 @@ function MetricList({ model, metrics, limit }: { model: ExportModel; metrics: Me
   );
 }
 
-function SummaryBody({ model, metrics, finding }: { model: ExportModel; metrics: Metric[]; finding?: Finding }): ReactElement {
+function SummaryBody({ model, metrics, finding }: { model: ExportModel; metrics: Metric[]; finding?: Finding | undefined }): ReactElement {
   // The deck carries the finding's evidence list, not slide-level ids.
   const evidence = finding !== undefined && metrics.length === 0 ? finding.metricIds : [];
   const shown = metrics.length > 0 ? metrics : evidence.map((id) => model.metrics.find((m) => m.id === id)).filter((m): m is Metric => m !== undefined);
@@ -160,8 +160,8 @@ function FindingBody({
 }: {
   model: ExportModel;
   metrics: Metric[];
-  finding?: Finding;
-  chart?: ChartSpec;
+  finding?: Finding | undefined;
+  chart?: ChartSpec | undefined;
 }): ReactElement {
   const scoped = finding === undefined ? metrics : finding.metricIds
     .map((id) => model.metrics.find((m) => m.id === id))
@@ -189,7 +189,7 @@ function FindingBody({
   );
 }
 
-function ScenarioBody({ model, metrics, chart }: { model: ExportModel; metrics: Metric[]; chart?: ChartSpec }): ReactElement {
+function ScenarioBody({ model, metrics, chart }: { model: ExportModel; metrics: Metric[]; chart?: ChartSpec | undefined }): ReactElement {
   const committed = model.scenario !== null;
   return (
     <div className={committed ? 'rf-sp__split' : 'rf-sp__empty'}>
@@ -213,7 +213,7 @@ function ScenarioBody({ model, metrics, chart }: { model: ExportModel; metrics: 
   );
 }
 
-function QualityBody({ model, metrics, chart }: { model: ExportModel; metrics: Metric[]; chart?: ChartSpec }): ReactElement {
+function QualityBody({ model, metrics, chart }: { model: ExportModel; metrics: Metric[]; chart?: ChartSpec | undefined }): ReactElement {
   const q = model.qualitySummary;
   const tracks = metrics.slice(0, 3);
   const peak = Math.max(1, ...tracks.map((m) => Number(m.value ?? '0')));
