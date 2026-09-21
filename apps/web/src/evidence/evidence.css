@@ -150,11 +150,16 @@
   font-size: 0.85em;
 }
 
+/* Id/mono tokens ('R1802:site', 'north-june-revenue-rows') are atomic: they
+   wrap at element boundaries inside the flex operand rows, never mid-token
+   (a hyphen otherwise reads as a soft break: 'NO-' / '01'). */
 [data-rf-surface="ink"] .rf-evidence__id {
   font-family: var(--rf-font-mono);
   font-size: 0.85em;
   color: var(--rf-ink-muted);
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow-wrap: normal;
 }
 
 [data-rf-surface="ink"] .rf-evidence__num {
@@ -333,6 +338,12 @@
   flex-wrap: wrap;
 }
 
+/* Cell values are atomic tokens — 'NO-01' must not split at its hyphen.
+   Overflow escapes into the horizontally scrolling rows-scroll region. */
+[data-rf-surface="ink"] .rf-evidence__cell bdi {
+  white-space: nowrap;
+}
+
 [data-rf-surface="ink"] .rf-evidence__cell-original {
   color: var(--rf-ink-attention);
   text-decoration-thickness: 1px;
@@ -396,6 +407,12 @@
   gap: var(--rf-space-2);
   align-items: baseline;
   flex-wrap: wrap;
+}
+
+/* Transform values are atomic tokens — an original/normalized code such as
+   'NO-01' must not split at its hyphen; the flex row wraps around them. */
+[data-rf-surface="ink"] .rf-evidence__change bdi {
+  white-space: nowrap;
 }
 
 [data-rf-surface="ink"] .rf-evidence__transform-status {
