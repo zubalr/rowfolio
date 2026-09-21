@@ -1,1179 +1,502 @@
 /**
- * Presentation stage (A21 composition spec + the brief's seven beats):
- *  - One fixed 16:9 cobalt window on ivory margins.
- *  - Artifacts (task card, worksheet fragment, chart, preparation card,
- *    evidence card, report, mirrored slide, workbook, end aside) persist
- *    in the DOM and morph between chapter positions — absolute logical
- *    offsets + sizes on one transition; nothing teleports, nothing loops.
- *  - Hard 1px edges + 8% ink offset shadow; no glass, no gradients.
- *  - Controls: an ink pill pinned at the window's bottom-center edge —
- *    Prev/Play/Next, dot progress, scene label, persistent workspace
- *    entry. Under 900px the pill docks below the window and the active
- *    scene's subjects stack in flow, so controls never overlay the
- *    subject.
- *  - Hue discipline: cobalt = engine/observed, vermilion = the gap only,
- *    teal = the deliverable, amber reserved for assumptions elsewhere.
- *
- * The global reduced-motion rule in base.css collapses every animation
- * and transition here to 0.01ms — reduced-motion users get the same
- * chapters as stable end states with manual advance.
+ * Walkthrough — the landing's four-step presentation. One stable
+ * explanation area above the visual, named step tabs plus a text-labeled
+ * transport, and a quiet caption lane. Colors: vivid blue for the active
+ * step/action, teal for the deliverable, warm accent for check flags.
+ * Everything works without animation — steps swap in the DOM and fades
+ * are the only decoration; reduced-motion removes them.
  */
 
-/* ---------- Section + the fixed window ---------- */
-.rf-pres {
-  padding-inline: var(--rf-gutter);
-  padding-block-start: var(--rf-space-5);
-  max-inline-size: calc(var(--rf-max-width) + 2 * var(--rf-gutter));
-  margin-inline: auto;
-}
-.rf-pres__frame {
-  position: relative;
-  /* Strict 16:9; on short viewports the width shrinks instead of the
-     ratio breaking. */
-  inline-size: min(100%, calc((100vh - 140px) * 16 / 9));
-  margin-inline: auto;
-  aspect-ratio: 16 / 9;
-  min-block-size: 400px;
-  background: var(--rf-data);
-  border-radius: var(--rf-radius-panel);
-  color: var(--rf-ink-text);
-  overflow: clip;
-  box-shadow: var(--rf-shadow-overlay);
-}
-/* Faint ledger texture on cobalt — decorative, never under text. */
-.rf-pres__frame::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--rf-ink-text) 6%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--rf-ink-text) 6%, transparent) 1px, transparent 1px);
-  background-size: 32px 32px;
-  pointer-events: none;
-}
-.rf-pres__stage {
-  position: absolute;
-  inset: 0;
-}
-.rf-pres__fiction {
-  position: absolute;
-  inset-block-start: var(--rf-space-3);
-  inset-inline-start: var(--rf-space-4);
-  z-index: 6;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--rf-space-1);
-  font-size: 12px;
-  font-weight: 500;
-  padding: 3px var(--rf-space-2);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--rf-ink-text) 14%, transparent);
-  color: var(--rf-ink-text);
-}
-html[lang="ar"] .rf-pres__fiction {
-  font-size: 13px;
-}
-
-/* ---------- Artifacts: hidden until their chapter claims them ------- */
-.rf-pres-art {
-  position: absolute;
-  margin: 0;
+.rf-walk {
   display: flex;
   flex-direction: column;
-  gap: var(--rf-space-1);
-  max-block-size: 92%;
-  overflow: clip;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition:
-    inset-inline-start 560ms var(--rf-ease),
-    inset-block-start 560ms var(--rf-ease),
-    inline-size 560ms var(--rf-ease),
-    opacity 420ms var(--rf-ease),
-    transform 560ms var(--rf-ease),
-    visibility 0ms 420ms;
+  gap: var(--rf-space-3);
+  min-inline-size: 0;
 }
-/* A claimed artifact: visible, its chapter's position wins by order. */
-[data-chapter] .rf-pres-art--sheet,
-[data-chapter] .rf-pres-art--chart,
-[data-chapter] .rf-pres-art--report {
-  visibility: visible;
-  pointer-events: auto;
-  transition-delay: 0ms;
+
+/* --- Stable explanation area ------------------------------------- */
+.rf-walk__explain {
+  min-block-size: 4.5em;
 }
-.rf-pres-art .rf-pres-sheet,
-.rf-pres-art .rf-pres-chart,
-.rf-pres-art .rf-pres-slide,
-.rf-pres-art .rf-pres-card {
-  border: 1px solid color-mix(in srgb, var(--rf-ink) 24%, transparent);
-  box-shadow: 10px 12px 0 rgb(20 37 46 / 8%);
-}
-.rf-pres-art__cap {
-  font-size: 11px;
+
+.rf-walk__step {
+  margin: 0;
+  font-size: clamp(19px, 1.6vw, 23px);
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--rf-ink-text);
-  opacity: 0.85;
-}
-html[lang="ar"] .rf-pres-art__cap {
-  letter-spacing: normal;
-  font-size: 12px;
-  text-transform: none;
-}
-
-/* ==================== Chapter maps ==================== */
-
-/* S1 — triad at rest: sheet left-back, chart mid, report right-front. */
-[data-chapter="result"] .rf-pres-art--sheet {
-  inset-inline-start: 4%;
-  inset-block-start: 15%;
-  inline-size: 33%;
-  z-index: 1;
-  opacity: 1;
-}
-[data-chapter="result"] .rf-pres-art--chart {
-  inset-inline-start: 35%;
-  inset-block-start: 30%;
-  inline-size: 32%;
-  z-index: 2;
-  opacity: 1;
-}
-[data-chapter="result"] .rf-pres-art--report {
-  inset-inline-start: 63%;
-  inset-block-start: 9%;
-  inline-size: 33%;
-  z-index: 3;
-  opacity: 1;
-}
-
-/* S2 — the task: the request card meets the focused excerpt. */
-[data-chapter="task"] .rf-pres-art--task {
-  inset-inline-start: 5%;
-  inset-block-start: 15%;
-  inline-size: 36%;
-  z-index: 4;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transition-delay: 0ms;
-}
-[data-chapter="task"] .rf-pres-art--sheet {
-  inset-inline-start: 46%;
-  inset-block-start: 12%;
-  inline-size: 48%;
-  z-index: 3;
-  opacity: 1;
-}
-[data-chapter="task"] .rf-pres-art--chart {
-  inset-inline-start: 72%;
-  inset-block-start: 72%;
-  inline-size: 22%;
-  z-index: 1;
-  opacity: 0.3;
-}
-[data-chapter="task"] .rf-pres-art--report {
-  inset-inline-start: 30%;
-  inset-block-start: 76%;
-  inline-size: 18%;
-  z-index: 1;
-  opacity: 0.3;
-}
-
-/* S3 — check the figures: fragment forward with the flagged rows. */
-[data-chapter="check"] .rf-pres-art--sheet {
-  inset-inline-start: 4%;
-  inset-block-start: 9%;
-  inline-size: 54%;
-  z-index: 3;
-  opacity: 1;
-}
-[data-chapter="check"] .rf-pres-art--check {
-  inset-inline-start: 62%;
-  inset-block-start: 16%;
-  inline-size: 34%;
-  z-index: 4;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transition-delay: 0ms;
-}
-[data-chapter="check"] .rf-pres-art--chart {
-  inset-inline-start: 74%;
-  inset-block-start: 74%;
-  inline-size: 18%;
-  z-index: 1;
-  opacity: 0.3;
-}
-[data-chapter="check"] .rf-pres-art--report {
-  inset-inline-start: 38%;
-  inset-block-start: 78%;
-  inline-size: 18%;
-  z-index: 1;
-  opacity: 0.3;
-}
-
-/* S4 — explain what changed: the chart develops on the prepared data. */
-[data-chapter="change"] .rf-pres-art--sheet {
-  inset-inline-start: 4%;
-  inset-block-start: 14%;
-  inline-size: 22%;
-  z-index: 1;
-  opacity: 0.45;
-}
-[data-chapter="change"] .rf-pres-art--chart {
-  inset-inline-start: 34%;
-  inset-block-start: 10%;
-  inline-size: 52%;
-  z-index: 4;
-  opacity: 1;
-}
-[data-chapter="change"] .rf-pres-art--report {
-  inset-inline-start: 86%;
-  inset-block-start: 72%;
-  inline-size: 12%;
-  z-index: 1;
-  opacity: 0.3;
-}
-
-/* S5 — evidence: the result connects to its rows and the calculation. */
-[data-chapter="evidence"] .rf-pres-art--report {
-  inset-inline-start: 4%;
-  inset-block-start: 12%;
-  inline-size: 28%;
-  z-index: 3;
-  opacity: 1;
-}
-[data-chapter="evidence"] .rf-pres-art--sheet {
-  inset-inline-start: 38%;
-  inset-block-start: 8%;
-  inline-size: 38%;
-  z-index: 3;
-  opacity: 1;
-}
-[data-chapter="evidence"] .rf-pres-art--evidence {
-  inset-inline-start: 38%;
-  inset-block-start: 62%;
-  inline-size: 38%;
-  z-index: 4;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transition-delay: 0ms;
-}
-[data-chapter="evidence"] .rf-pres-art--chart {
-  inset-inline-start: 82%;
-  inset-block-start: 74%;
-  inline-size: 14%;
-  z-index: 1;
-  opacity: 0.3;
-}
-
-/* S6 — prepare: the report at reading size in both locales + workbook. */
-[data-chapter="prepare"] .rf-pres-art--report {
-  inset-inline-start: 6%;
-  inset-block-start: 8%;
-  inline-size: 32%;
-  z-index: 3;
-  opacity: 1;
-}
-[data-chapter="prepare"] .rf-pres-art--slideAlt {
-  inset-inline-start: 46%;
-  inset-block-start: 8%;
-  inline-size: 32%;
-  z-index: 3;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transition-delay: 0ms;
-}
-[data-chapter="prepare"] .rf-pres-art--workbook {
-  inset-inline-start: 24%;
-  inset-block-start: 62%;
-  inline-size: 52%;
-  z-index: 2;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transition-delay: 0ms;
-}
-[data-chapter="prepare"] .rf-pres-art--sheet {
-  inset-inline-start: 87%;
-  inset-block-start: 74%;
-  inline-size: 11%;
-  z-index: 1;
-  opacity: 0.25;
-}
-[data-chapter="prepare"] .rf-pres-art--chart {
-  inset-inline-start: 6%;
-  inset-block-start: 74%;
-  inline-size: 13%;
-  z-index: 1;
-  opacity: 0.25;
-}
-
-/* S7 — deliver: the report holds beside credit, downloads, workspace. */
-[data-chapter="deliver"] .rf-pres-art--report {
-  inset-inline-start: 4%;
-  inset-block-start: 8%;
-  inline-size: 44%;
-  z-index: 4;
-  opacity: 1;
-}
-[data-chapter="deliver"] .rf-pres-art--chart {
-  inset-inline-start: 4%;
-  inset-block-start: 74%;
-  inline-size: 20%;
-  z-index: 1;
-  opacity: 0.4;
-}
-[data-chapter="deliver"] .rf-pres-art--sheet {
-  inset-inline-start: 27%;
-  inset-block-start: 72%;
-  inline-size: 20%;
-  z-index: 1;
-  opacity: 0.3;
-}
-[data-chapter="deliver"] .rf-pres-end__aside {
-  opacity: 1;
-  visibility: visible;
-  transform: none;
-  pointer-events: auto;
-  transition-delay: 300ms, 300ms, 0ms;
-}
-
-/* ---------- The traveling mark — one connector, repositioned -------- */
-.rf-pres__link {
-  position: absolute;
-  z-index: 2;
-  block-size: 2px;
-  background: color-mix(in srgb, var(--rf-ink-text) 45%, transparent);
-  transform-origin: inline-start;
-  opacity: 0;
-  transition:
-    inset-inline-start 560ms var(--rf-ease),
-    inset-block-start 560ms var(--rf-ease),
-    inline-size 560ms var(--rf-ease),
-    opacity 300ms var(--rf-ease);
-}
-[data-chapter="change"] .rf-pres__link {
-  inset-inline-start: 26.5%;
-  inset-block-start: 40%;
-  inline-size: 7%;
-  opacity: 1;
-  animation: rf-link-draw 480ms var(--rf-ease) 120ms both;
-}
-[data-chapter="evidence"] .rf-pres__link {
-  inset-inline-start: 32.5%;
-  inset-block-start: 30%;
-  inline-size: 5%;
-  opacity: 1;
-}
-@keyframes rf-link-draw {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-/* A coral carrier rides the connector — the mark in transit. */
-.rf-pres__link::after {
-  content: "";
-  position: absolute;
-  inset-block-start: -3px;
-  inset-inline-start: 0;
-  inline-size: 8px;
-  block-size: 8px;
-  border-radius: 50%;
-  background: var(--rf-attention);
-  opacity: 0;
-}
-@keyframes rf-carrier {
-  0% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  85% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(calc(100% + 56px));
-  }
-}
-[data-chapter="change"] .rf-pres__link::after {
-  animation: rf-carrier 900ms var(--rf-ease) 350ms both;
-}
-[dir="rtl"] [data-chapter="change"] .rf-pres__link::after {
-  animation-name: rf-carrier-rtl;
-}
-@keyframes rf-carrier-rtl {
-  0% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  85% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(calc(-100% - 56px));
-  }
-}
-
-/* ---------- Artifact surfaces ---------- */
-.rf-pres-sheet,
-.rf-pres-chart,
-.rf-pres-slide,
-.rf-pres-card {
-  background: var(--rf-surface);
+  line-height: 1.25;
   color: var(--rf-ink);
-  border-radius: var(--rf-radius-control);
-}
-/* The slide/workbook previews are real ExportModel renders — the wrapper
-   carries the deliverable's teal spine. */
-.rf-pres-slide {
-  overflow: clip;
-  border-inline-start: 5px solid var(--rf-positive);
-}
-.rf-pres-slide .rf-sp {
-  inline-size: 100%;
-  border: none;
-  border-radius: 0;
-}
-/* The workbook preview isn't a deck page — no spine ratio constraint. */
-.rf-pres-art--workbook .rf-pres-slide .rf-sp {
-  aspect-ratio: auto;
-}
-
-/* Side-card surfaces — task, preparation, evidence, workbook. */
-.rf-pres-card {
-  padding: var(--rf-space-4);
-}
-.rf-pres-card__kicker {
-  margin: 0 0 var(--rf-space-2);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--rf-text-muted);
-}
-html[lang="ar"] .rf-pres-card__kicker {
-  letter-spacing: normal;
-  font-size: 12px;
-  text-transform: none;
-}
-.rf-pres-task__quote {
-  margin: 0 0 var(--rf-space-3);
-  font-size: clamp(13px, 1.25vw, 16px);
-  line-height: 1.55;
-  font-weight: 500;
-}
-html[lang="ar"] .rf-pres-task__quote {
-  font-size: clamp(14px, 1.35vw, 17px);
-}
-.rf-pres-task__facts {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--rf-space-2);
-}
-.rf-pres-task__fact {
-  display: flex;
-  gap: var(--rf-space-2);
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.5;
-}
-html[lang="ar"] .rf-pres-task__fact {
-  font-size: 13px;
-}
-.rf-pres-task__fact dt {
-  font-weight: 600;
-  color: var(--rf-data);
-  white-space: nowrap;
-}
-.rf-pres-task__fact dd {
-  margin: 0;
-  color: var(--rf-text-muted);
-}
-.rf-pres-check__count {
   display: flex;
   align-items: baseline;
   gap: var(--rf-space-2);
-  margin: 0 0 var(--rf-space-3);
-  font-size: clamp(18px, 1.9vw, 26px);
+}
+
+.rf-walk__stepnum {
+  font-size: 0.75em;
   font-weight: 600;
+  color: var(--rf-attention);
+  background: color-mix(in srgb, var(--rf-attention) 10%, var(--rf-surface));
+  border: 1px solid color-mix(in srgb, var(--rf-attention) 35%, transparent);
+  border-radius: 999px;
+  padding: 1px var(--rf-space-2);
+  white-space: nowrap;
+}
+
+.rf-walk__caption {
+  margin: var(--rf-space-1) 0 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--rf-muted);
+  max-inline-size: 62ch;
+}
+
+/* --- Visual ------------------------------------------------------- */
+.rf-walk__visual {
+  min-block-size: 220px;
+  animation: rf-walk-in 380ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@keyframes rf-walk-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.rf-walk__paper {
+  margin: 0;
+  background: var(--rf-surface);
+  border: 1px solid var(--rf-rule);
+  border-radius: 10px;
+  overflow: clip;
+}
+
+/* Step 1+2 — the spreadsheet fragment */
+.rf-walk-sheet__file {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rf-space-2);
+  padding: var(--rf-space-2) var(--rf-space-3);
+  border-block-end: 1px solid var(--rf-rule);
+  font-size: 12.5px;
+}
+
+.rf-walk-sheet__file .rf-mono {
+  font-family: var(--rf-font-mono, "IBM Plex Mono", ui-monospace, monospace);
+  color: var(--rf-ink);
+  overflow-wrap: break-word;
+}
+
+.rf-walk-sheet__note {
+  color: var(--rf-muted);
+}
+
+.rf-walk-sheet__table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.rf-walk-sheet__table th {
+  text-align: start;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--rf-muted);
+  padding: var(--rf-space-2) var(--rf-space-3);
+  border-block-end: 1px solid var(--rf-rule);
+}
+
+.rf-walk-sheet__table td {
+  padding: var(--rf-space-2) var(--rf-space-3);
+  border-block-end: 1px solid color-mix(in srgb, var(--rf-rule) 55%, transparent);
+  color: var(--rf-ink);
+  white-space: nowrap;
+}
+
+.rf-walk-sheet__table tr:last-child td {
+  border-block-end: none;
+}
+
+.rf-walk-sheet__table .rf-numeric {
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.rf-walk-sheet__table th.rf-numeric {
+  text-align: end;
+}
+
+.rf-walk-sheet tr[data-excluded] td {
+  background: color-mix(in srgb, var(--rf-attention) 8%, var(--rf-surface));
+  color: var(--rf-muted);
+}
+
+.rf-walk-sheet td[data-blank] {
+  background: color-mix(in srgb, var(--rf-scenario) 10%, var(--rf-surface));
+}
+
+.rf-walk-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 1px var(--rf-space-2);
+  white-space: nowrap;
+}
+
+.rf-walk-tag--excluded {
+  color: var(--rf-negative);
+  border: 1px solid color-mix(in srgb, var(--rf-negative) 40%, transparent);
+  background: color-mix(in srgb, var(--rf-negative) 8%, var(--rf-surface));
+}
+
+.rf-walk-tag--blank {
+  color: var(--rf-scenario-text);
+  border: 1px dashed color-mix(in srgb, var(--rf-scenario) 55%, transparent);
+}
+
+.rf-walk-check__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rf-space-1) var(--rf-space-4);
+  padding: var(--rf-space-2) var(--rf-space-3);
+  border-block-start: 1px solid var(--rf-rule);
+  font-size: 12.5px;
+  color: var(--rf-muted);
+}
+
+.rf-walk-check__count {
+  font-weight: 600;
+  color: var(--rf-ink);
   font-variant-numeric: tabular-nums;
 }
-.rf-pres-check__arrow {
-  color: var(--rf-text-muted);
-  font-weight: 400;
+
+.rf-walk-check__arrow {
+  color: var(--rf-attention);
+  margin-inline: 2px;
 }
-.rf-pres-check__list {
-  margin: 0;
-  padding-inline-start: var(--rf-space-4);
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--rf-ink);
-  display: flex;
-  flex-direction: column;
-  gap: var(--rf-space-1);
-}
-html[lang="ar"] .rf-pres-check__list {
-  font-size: 13px;
-}
-.rf-pres-evidence__span {
-  margin: 0 0 var(--rf-space-2);
-  font-size: 12px;
-  color: var(--rf-text-muted);
-}
-html[lang="ar"] .rf-pres-evidence__span {
-  font-size: 13px;
-}
-.rf-pres-evidence__calc {
-  margin: 0 0 var(--rf-space-3);
-  padding: var(--rf-space-2) var(--rf-space-3);
-  font-size: clamp(11px, 1.05vw, 13px);
-  background: var(--rf-bg);
-  border-radius: var(--rf-radius-control);
-  border-block-start: 2px solid var(--rf-ink);
-}
-.rf-pres-evidence__calc strong {
-  color: var(--rf-negative);
-}
-.rf-pres-evidence__match {
-  display: flex;
-  align-items: center;
-  gap: var(--rf-space-2);
-  margin: 0;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--rf-positive-text);
-}
-.rf-pres-evidence__match .rf-icon {
-  color: var(--rf-positive);
-  flex: none;
-}
-/* Workbook — the formatted sheet keeps real region figures. */
-.rf-pres-workbook {
+
+/* Step 3+4 — the real report */
+.rf-walk-build,
+.rf-walk-get {
   padding: var(--rf-space-3);
 }
-.rf-pres-workbook__table {
-  inline-size: 100%;
-  border-collapse: collapse;
-  font-size: 10px;
-}
-.rf-pres-workbook__table th {
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--rf-text-muted);
-  padding: 3px var(--rf-space-2);
-  border-block-end: 1px solid var(--rf-divider);
-  text-align: start;
-}
-.rf-pres-workbook__table td {
-  padding: 3px var(--rf-space-2);
-  border-block-end: 1px solid var(--rf-divider);
-  color: var(--rf-ink);
-}
-.rf-pres-workbook__table td.rf-numeric {
-  font-family: var(--rf-font-mono);
-}
-.rf-pres-workbook__tab {
-  display: inline-block;
-  margin: var(--rf-space-2) 0 0;
-  padding: 2px var(--rf-space-2);
-  font-size: 10px;
-  border: 1px solid var(--rf-divider);
-  border-block-start: 2px solid var(--rf-positive);
-  border-radius: 4px 4px 0 0;
-  color: var(--rf-ink);
-}
 
-/* Worksheet fragment — legible cells, source headers as authored. */
-.rf-pres-sheet {
-  inline-size: 100%;
-  border-collapse: collapse;
-  font-size: 11px;
-  table-layout: fixed;
-}
-.rf-pres-sheet th {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--rf-text-muted);
-  padding: var(--rf-space-1) var(--rf-space-2);
-  border-block-end: 1px solid var(--rf-divider);
-  text-align: start;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.rf-pres-sheet td {
-  padding: 6px var(--rf-space-2);
-  border-block-end: 1px solid var(--rf-divider);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--rf-ink);
-}
-/* The revenue column is the selected range — the cell chrome. */
-.rf-pres-sheet .rf-pres-sheet__mark {
-  background: color-mix(in srgb, var(--rf-data) 10%, var(--rf-surface));
-  box-shadow: inset 0 0 0 1px var(--rf-data);
-}
-/* The duplicate pair: the first copy keeps the row; the second takes the
-   excluded treatment — a fading row and an 'excluded' flag. */
-.rf-pres-sheet__row--dup td {
-  background: color-mix(in srgb, var(--rf-attention) 8%, var(--rf-surface));
-}
-.rf-pres-sheet__row--dup ~ .rf-pres-sheet__row--dup td {
-  color: var(--rf-text-muted);
-}
-.rf-pres-sheet__flag {
-  display: inline-block;
-  margin-inline-start: var(--rf-space-1);
-  padding: 0 var(--rf-space-1);
-  border-radius: 4px;
-  font-size: 9px;
-  font-weight: 600;
-  background: color-mix(in srgb, var(--rf-attention) 14%, var(--rf-surface));
-  color: var(--rf-negative);
-}
-.rf-pres-sheet__cell--missing {
-  outline: 1px dashed var(--rf-scenario);
-  outline-offset: -1px;
-  color: var(--rf-text-muted);
-}
-.rf-pres-sheet__cell--missing .rf-pres-sheet__flag {
-  background: color-mix(in srgb, var(--rf-scenario) 14%, var(--rf-surface));
-  color: var(--rf-scenario-text);
-}
-/* Each selected cell flashes in sequence as its mark draws on the chart —
-   one pulse per row, the transition's contribution beat. */
-@keyframes rf-cell-lit {
-  0% {
-    background: color-mix(in srgb, var(--rf-data) 10%, var(--rf-surface));
-  }
-  40% {
-    background: color-mix(in srgb, var(--rf-attention) 28%, var(--rf-surface));
-  }
-  100% {
-    background: color-mix(in srgb, var(--rf-data) 10%, var(--rf-surface));
-  }
-}
-[data-chapter="change"] .rf-pres-art--sheet .rf-pres-sheet__mark {
-  animation: rf-cell-lit 620ms var(--rf-ease);
-  animation-delay: calc(300ms + var(--i) * 150ms);
-}
-
-/* Chart — real labels, cobalt marks, vermilion reserved for the gap. */
-.rf-pres-chart {
-  padding: var(--rf-space-2) var(--rf-space-3);
-}
-.rf-pres-chart__head {
-  margin: 0;
-  padding-block-end: var(--rf-space-1);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--rf-ink);
-}
-html[lang="ar"] .rf-pres-chart__head {
-  font-size: 11px;
-}
-.rf-pres-chart__svg {
-  display: block;
-  inline-size: 100%;
-  block-size: auto;
-}
-.rf-pres-chart__axis {
-  stroke: var(--rf-ink);
-  stroke-width: 1.5;
-}
-.rf-pres-chart__bar {
-  fill: var(--rf-data);
-  transform-box: fill-box;
-  transform-origin: bottom;
-}
-.rf-pres-chart__tick {
-  stroke: var(--rf-ink);
-  stroke-width: 1.5;
-}
-.rf-pres-chart__label {
-  font-family: var(--rf-font-body);
-  font-size: 8px;
-  fill: var(--rf-text-muted);
-}
-/* S1 rest: the stage chart's marks read as ghost marks at ~30% tint — a
-   paused first frame still looks intentional — and commit to full cobalt
-   when the change chapter draws them, bar by bar. Once drawn they stay
-   drawn through evidence, prepare and deliver. */
-.rf-pres-art--chart .rf-pres-chart__bar {
-  fill: color-mix(in srgb, var(--rf-data) 30%, var(--rf-surface));
-  transition: fill 400ms var(--rf-ease);
-}
-[data-chapter="change"] .rf-pres-art--chart .rf-pres-chart__bar,
-[data-chapter="evidence"] .rf-pres-art--chart .rf-pres-chart__bar,
-[data-chapter="prepare"] .rf-pres-art--chart .rf-pres-chart__bar,
-[data-chapter="deliver"] .rf-pres-art--chart .rf-pres-chart__bar {
-  fill: var(--rf-data);
-}
-[data-chapter="change"] .rf-pres-art--chart .rf-pres-chart__bar {
-  transition-delay: calc(480ms + var(--i) * 150ms);
-}
-
-/* The report card's own chart is always finished. */
-.rf-pres-slide .rf-pres-chart__bar {
-  transform: none;
-}
-
-/* Vermilion delta bracket — the gap, and only the gap. */
-.rf-pres-delta {
-  opacity: 0;
-}
-.rf-pres-delta__bracket {
-  fill: none;
-  stroke: var(--rf-attention);
-  stroke-width: 2;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 0;
-}
-.rf-pres-delta__span {
-  stroke: var(--rf-attention);
-  stroke-width: 1.25;
-  stroke-dasharray: 3 3;
-}
-.rf-pres-delta__value {
-  font-family: var(--rf-font-mono);
-  font-size: 9px;
-  font-weight: 600;
-  fill: var(--rf-negative);
-}
-/* Three sub-steps over ~600ms: bracket stroke, gap span, delta value. */
-[data-chapter="change"] .rf-pres-art--chart .rf-pres-delta {
-  opacity: 1;
-  animation: rf-fade-in 120ms linear 1450ms backwards;
-}
-[data-chapter="change"] .rf-pres-art--chart .rf-pres-delta__bracket {
-  animation: rf-draw 380ms var(--rf-ease) 1450ms backwards;
-  stroke-dashoffset: 0;
-}
-@keyframes rf-draw {
-  from {
-    stroke-dashoffset: 1;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-[data-chapter="change"] .rf-pres-art--chart .rf-pres-delta__span {
-  animation: rf-fade-in 160ms linear 1650ms backwards;
-}
-[data-chapter="change"] .rf-pres-art--chart .rf-pres-delta__value {
-  animation: rf-fade-in 160ms linear 1800ms backwards;
-}
-@keyframes rf-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-[data-chapter="evidence"] .rf-pres-art--chart .rf-pres-delta,
-[data-chapter="prepare"] .rf-pres-art--chart .rf-pres-delta,
-[data-chapter="deliver"] .rf-pres-art--chart .rf-pres-delta {
-  opacity: 1;
-}
-/* The finished slide's own mini chart is always drawn — no bracket step. */
-
-/* Exactly one 'A project by Zubair' renders at a time: the intro's
-   credit steps aside when the deliver scene shows its own. */
-.rf-pres__intro[data-chapter="deliver"] .rf-pres__credit {
-  display: none;
-}
-
-/* ---------- Held ending: credit + actions beside the report ---------- */
-.rf-pres-end__aside {
-  position: absolute;
-  z-index: 5;
-  inset-inline-start: 56%;
-  inset-block-start: 10%;
-  inline-size: 40%;
-  display: flex;
-  flex-direction: column;
-  gap: var(--rf-space-4);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transform: translateY(10px);
-  transition: opacity 420ms var(--rf-ease) 300ms, transform 420ms var(--rf-ease) 300ms,
-    visibility 0ms 720ms;
-}
-.rf-pres-end__credit {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--rf-ink-text);
-}
-html[lang="ar"] .rf-pres-end__credit {
-  letter-spacing: normal;
-  font-size: 16px;
-}
-.rf-pres-end__actions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--rf-space-2);
-  align-items: stretch;
-  max-inline-size: 330px;
-}
-/* Teal = the deliverable — the end-of-story primary action. */
-.rf-btn.rf-pres-cta {
-  background: var(--rf-positive);
-  border-color: var(--rf-positive);
-  color: var(--rf-ink-text);
-}
-.rf-btn.rf-pres-cta:hover:not(:disabled) {
-  background: var(--rf-positive-text);
-  border-color: var(--rf-positive-text);
-}
-/* Ghost actions on cobalt keep ink-text foreground. */
-.rf-pres-end__actions .rf-btn--ghost,
-.rf-pres-end__actions .rf-btn--secondary {
-  border-color: color-mix(in srgb, var(--rf-ink-text) 45%, transparent);
-  color: var(--rf-ink-text);
-  background: transparent;
-}
-.rf-pres-end__actions .rf-btn--secondary {
-  background: color-mix(in srgb, var(--rf-ink-text) 10%, transparent);
-}
-.rf-pres-end__actions .rf-btn--ghost:hover,
-.rf-pres-end__actions .rf-btn--secondary:hover {
-  border-color: var(--rf-ink-text);
-  background: color-mix(in srgb, var(--rf-ink-text) 16%, transparent);
-}
-
-/* ---------- The ink pill — transport + progress + label + entry ------ */
-.rf-pres__controls {
-  position: relative;
-  z-index: 7;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--rf-space-4);
-  inline-size: fit-content;
+.rf-walk-build__slide,
+.rf-walk-get__slide {
+  max-inline-size: 560px;
   margin-inline: auto;
-  margin-block-start: -26px;
-  padding: 6px var(--rf-space-4);
-  border-radius: 999px;
-  background: var(--rf-ink);
-  color: var(--rf-ink-text);
-  box-shadow: var(--rf-shadow-overlay);
 }
-.rf-pres__transport {
+
+.rf-walk-build__slide .rf-sp,
+.rf-walk-get__slide .rf-sp,
+.rf-output__preview .rf-sp {
+  inline-size: 100%;
+  border: 1px solid var(--rf-rule);
+  border-radius: 6px;
+}
+
+.rf-walk-build__note {
+  margin-block-start: var(--rf-space-2);
+  padding-block-start: var(--rf-space-2);
+  border-block-start: 1px solid var(--rf-rule);
+  font-size: 12.5px;
+  color: var(--rf-muted);
   display: flex;
-  gap: var(--rf-space-1);
-}
-.rf-pres__tbtn {
-  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  inline-size: 32px;
-  block-size: 32px;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
-  color: var(--rf-ink-text);
-  cursor: pointer;
-  transition: background var(--rf-hover-ms) var(--rf-ease);
-}
-.rf-pres__tbtn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--rf-ink-text) 14%, transparent);
-}
-.rf-pres__tbtn:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-.rf-pres__tbtn--primary {
-  background: var(--rf-data);
-  color: var(--rf-ink-text);
-}
-.rf-pres__tbtn--primary:hover:not(:disabled) {
-  background: var(--rf-ink-data);
-  color: var(--rf-ink);
-}
-.rf-pres__chapters {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
   gap: var(--rf-space-2);
 }
-.rf-pres__dot {
-  inline-size: 10px;
+
+.rf-walk-build__note::before {
+  content: "";
+  inline-size: 22px;
   block-size: 10px;
-  padding: 0;
-  border-radius: 50%;
-  border: none;
-  background: color-mix(in srgb, var(--rf-ink-text) 34%, transparent);
-  cursor: pointer;
-  transition: background var(--rf-hover-ms) var(--rf-ease), transform var(--rf-hover-ms) var(--rf-ease);
+  border-radius: 2px;
+  background: var(--rf-data);
+  flex: none;
 }
-.rf-pres__dot[data-active] {
-  background: var(--rf-ink-data);
-  transform: scale(1.3);
-}
-.rf-pres__dot[data-done] {
-  background: var(--rf-ink-positive);
-}
-.rf-pres__label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--rf-ink-muted);
-  white-space: nowrap;
-}
-html[lang="ar"] .rf-pres__label {
-  font-size: 13px;
-}
-.rf-pres__count {
-  color: var(--rf-ink-muted);
-  font-size: 11px;
-}
-.rf-pres__entry {
-  border: 1px solid var(--rf-ink-rule);
+
+/* Step 4 — working EN/AR toggle */
+.rf-walk-get__toggle {
+  display: inline-flex;
+  gap: 2px;
+  margin-block-end: var(--rf-space-3);
+  padding: 2px;
+  border: 1px solid var(--rf-rule);
   border-radius: 999px;
-  background: transparent;
-  color: var(--rf-ink-text);
-  font-family: var(--rf-font-body);
-  font-size: 12px;
+  background: var(--rf-paper);
+}
+
+.rf-walk-get__lang {
+  border: none;
+  border-radius: 999px;
+  padding: 4px var(--rf-space-3);
+  font: inherit;
+  font-size: 12.5px;
   font-weight: 600;
-  padding: 6px var(--rf-space-3);
-  white-space: nowrap;
+  color: var(--rf-muted);
+  background: transparent;
   cursor: pointer;
-  transition: border-color var(--rf-hover-ms) var(--rf-ease), background var(--rf-hover-ms) var(--rf-ease);
 }
-html[lang="ar"] .rf-pres__entry {
-  font-size: 13px;
+
+.rf-walk-get__lang[data-active] {
+  background: var(--rf-data);
+  color: #fff;
 }
-.rf-pres__entry:hover {
-  border-color: var(--rf-ink-data);
-  background: color-mix(in srgb, var(--rf-ink-text) 10%, transparent);
-}
-.rf-pres__tbtn:focus-visible,
-.rf-pres__dot:focus-visible,
-.rf-pres__entry:focus-visible {
-  outline: 2px solid var(--rf-ink-data);
+
+.rf-walk-get__lang:focus-visible {
+  outline: 2px solid var(--rf-focus);
   outline-offset: 2px;
 }
 
-/* ---------- Scene narration + page headline (ivory, below the window) - */
-.rf-pres__caption {
-  margin: var(--rf-space-5) 0 0;
-  text-align: center;
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--rf-text-muted);
-}
-html[lang="ar"] .rf-pres__caption {
-  font-size: 16px;
-}
-.rf-pres__intro {
-  max-inline-size: 46em;
-  margin-block-start: var(--rf-space-6);
-}
-.rf-pres__title {
-  font-size: clamp(30px, 4.6vw, 52px);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  font-weight: 500;
-  margin: 0;
-  max-inline-size: 18em;
-}
-html[lang="ar"] .rf-pres__title {
-  letter-spacing: normal;
-}
-.rf-pres__body {
-  margin-block: var(--rf-space-3) 0;
-  font-size: 18px;
-  line-height: 1.55;
-  color: var(--rf-text-muted);
-  max-inline-size: 42ch;
-}
-html[lang="ar"] .rf-pres__body {
-  font-size: 19px;
-  max-inline-size: 52ch;
-}
-.rf-pres__credit {
-  margin-block: var(--rf-space-3) 0;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--rf-text-muted);
-}
-html[lang="ar"] .rf-pres__credit {
-  letter-spacing: normal;
-  font-size: 14px;
+/* End-state actions on the download step */
+.rf-walk__end {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rf-space-2);
+  padding-block-start: var(--rf-space-1);
 }
 
-/* ---------- ≤900px: the active scene stacks in flow ------------------ */
+/* --- Controls ------------------------------------------------------ */
+.rf-walk__controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--rf-space-2) var(--rf-space-3);
+  padding: var(--rf-space-2) var(--rf-space-3);
+  border: 1px solid var(--rf-rule);
+  border-radius: 999px;
+  background: var(--rf-surface);
+}
+
+.rf-walk__transport {
+  display: flex;
+  gap: 2px;
+  flex: none;
+}
+
+.rf-walk__tbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  border-radius: 999px;
+  padding: 5px var(--rf-space-2);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--rf-muted);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.rf-walk__tbtn:hover:not(:disabled) {
+  color: var(--rf-ink);
+}
+
+.rf-walk__tbtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.rf-walk__tbtn--primary {
+  color: var(--rf-data);
+}
+
+.rf-walk__steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.rf-walk__tab {
+  border: none;
+  border-radius: 999px;
+  padding: 5px var(--rf-space-2);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--rf-muted);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.rf-walk__tab[data-active] {
+  color: var(--rf-ink);
+  background: color-mix(in srgb, var(--rf-data) 10%, var(--rf-surface));
+  box-shadow: inset 0 -2px 0 var(--rf-data);
+}
+
+.rf-walk__tab[data-done] {
+  color: var(--rf-positive-text);
+}
+
+.rf-walk__tbtn:focus-visible,
+.rf-walk__tab:focus-visible,
+.rf-walk__replay:focus-visible {
+  outline: 2px solid var(--rf-focus);
+  outline-offset: 2px;
+}
+
+.rf-walk__replay {
+  border: 1px solid var(--rf-rule);
+  border-radius: 999px;
+  padding: 5px var(--rf-space-3);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--rf-muted);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  flex: none;
+}
+
+.rf-walk__replay:hover {
+  color: var(--rf-ink);
+  border-color: var(--rf-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-walk__visual {
+    animation: none;
+  }
+}
+
+/* --- Compact: one artifact, caption, controls — all in normal flow --- */
 @media (max-width: 900px) {
-  .rf-pres__frame {
-    aspect-ratio: auto;
+  .rf-walk__explain {
     min-block-size: 0;
-    inline-size: 100%;
   }
-  .rf-pres__stage {
-    position: static;
-    display: flex;
-    flex-direction: column;
-    gap: var(--rf-space-3);
-    padding: var(--rf-space-3) var(--rf-space-4) var(--rf-space-4);
-    padding-block-start: var(--rf-space-5);
+
+  .rf-walk__visual {
+    min-block-size: 0;
   }
-  [data-chapter] .rf-pres-art,
-  .rf-pres-end__aside {
-    position: static;
-    inline-size: 100%;
-    max-block-size: 150px;
-    overflow: clip;
-    transform: none;
-    opacity: 0;
-    visibility: hidden;
-    display: none;
+
+  .rf-walk-sheet__table {
+    font-size: 12.5px;
   }
-  /* The active scene's subjects stack in narrative order. */
-  [data-chapter="result"] .rf-pres-art--sheet,
-  [data-chapter="result"] .rf-pres-art--chart,
-  [data-chapter="result"] .rf-pres-art--report,
-  [data-chapter="task"] .rf-pres-art--task,
-  [data-chapter="task"] .rf-pres-art--sheet,
-  [data-chapter="check"] .rf-pres-art--sheet,
-  [data-chapter="check"] .rf-pres-art--check,
-  [data-chapter="change"] .rf-pres-art--chart,
-  [data-chapter="evidence"] .rf-pres-art--report,
-  [data-chapter="evidence"] .rf-pres-art--sheet,
-  [data-chapter="evidence"] .rf-pres-art--evidence,
-  [data-chapter="prepare"] .rf-pres-art--report,
-  [data-chapter="prepare"] .rf-pres-art--slideAlt,
-  [data-chapter="prepare"] .rf-pres-art--workbook,
-  [data-chapter="deliver"] .rf-pres-art--report,
-  [data-chapter="deliver"] .rf-pres-end__aside {
-    display: flex;
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
+
+  .rf-walk-sheet__table th,
+  .rf-walk-sheet__table td {
+    padding: 6px var(--rf-space-2);
   }
-  [data-chapter="change"] .rf-pres-art--sheet {
-    display: flex;
-    opacity: 0.5;
-    max-block-size: 150px;
-    overflow: clip;
-  }
-  /* Narrative order on the column: evidence shows report → rows → calc. */
-  [data-chapter="evidence"] .rf-pres-art--report {
-    order: 1;
-  }
-  [data-chapter="evidence"] .rf-pres-art--sheet {
-    order: 2;
-  }
-  [data-chapter="evidence"] .rf-pres-art--evidence {
-    order: 3;
-  }
-  [data-chapter="deliver"] .rf-pres-end__aside {
-    order: 2;
-  }
-  .rf-pres-art__cap {
-    display: none;
-  }
-  /* The connector becomes a vertical drop between stacked artifacts. */
-  .rf-pres__link {
-    position: static;
-    inline-size: 2px;
-    block-size: 36px;
-    margin-inline: auto;
-    transform-origin: top;
-  }
-  [data-chapter="change"] .rf-pres__link,
-  [data-chapter="evidence"] .rf-pres__link {
-    animation-name: rf-link-draw-y;
-    opacity: 1;
-  }
-  @keyframes rf-link-draw-y {
-    from {
-      transform: scaleY(0);
-    }
-    to {
-      transform: scaleY(1);
-    }
-  }
-  .rf-pres__link::after {
-    inset-inline-start: -3px;
-    inset-block-start: 0;
-  }
-  @keyframes rf-carrier-y {
-    0% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    85% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(36px);
-    }
-  }
-  [data-chapter="change"] .rf-pres__link::after,
-  [dir="rtl"] [data-chapter="change"] .rf-pres__link::after {
-    animation-name: rf-carrier-y;
-  }
-  /* The pill docks under the window, never over the subject. */
-  .rf-pres__controls {
-    margin-block-start: var(--rf-space-3);
-    gap: var(--rf-space-2) var(--rf-space-3);
-    flex-wrap: wrap;
+
+  .rf-walk__controls {
     border-radius: var(--rf-radius-panel);
-    padding: var(--rf-space-2) var(--rf-space-3);
   }
-  .rf-pres__label {
+}
+
+/* --- First-viewport fit: keep controls on-screen on phones ----------- */
+@media (max-width: 900px) {
+  .rf-walk__caption {
+    font-size: 13.5px;
+    margin-block-start: 2px;
+  }
+
+  .rf-walk__step {
+    font-size: 17px;
+  }
+
+  .rf-walk-sheet__table {
+    font-size: 12px;
+  }
+
+  .rf-walk-sheet__table th,
+  .rf-walk-sheet__table td {
+    padding: 4px var(--rf-space-2);
+  }
+
+  /* A phone shows one artifact: drop the Plan column rather than clip. */
+  .rf-walk-sheet__table th:nth-child(4),
+  .rf-walk-sheet__table td:nth-child(4) {
+    display: none;
+  }
+
+  .rf-walk-sheet tr:nth-child(n + 6) {
+    display: none;
+  }
+
+  .rf-walk__controls {
+    padding: var(--rf-space-1) var(--rf-space-2);
+    gap: var(--rf-space-1);
+  }
+
+  .rf-walk__tbtn {
+    padding: 4px 6px;
+    font-size: 12px;
+  }
+
+  .rf-walk__tab {
+    padding: 4px 6px;
+    font-size: 11.5px;
+  }
+
+  .rf-walk__replay {
+    padding: 4px var(--rf-space-2);
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* At 320px the check table drops Plan too, keeping region + revenue +
+     the flagged survey cell. */
+  .rf-walk-sheet--check .rf-walk-sheet__table th:nth-child(3),
+  .rf-walk-sheet--check .rf-walk-sheet__table td:nth-child(3) {
+    display: none;
+  }
+
+  .rf-walk__end {
+    gap: var(--rf-space-1);
+  }
+}
+
+@media (max-width: 900px) {
+  /* One more row off: four visible rows keep the table legible. */
+  .rf-walk-sheet tr:nth-child(n + 5) {
+    display: none;
+  }
+
+  .rf-walk__controls {
+    row-gap: 2px;
+  }
+
+  .rf-walk__steps {
     order: 3;
     flex-basis: 100%;
-    text-align: center;
   }
-  .rf-pres__intro {
-    margin-block-start: var(--rf-space-4);
-  }
-  .rf-pres-end__actions {
-    max-inline-size: none;
-    flex-direction: row;
-    flex-wrap: wrap;
+
+  .rf-walk__explain {
+    min-block-size: 0;
   }
 }
-@media (max-width: 767px) {
-  .rf-pres {
-    padding-inline: var(--rf-space-4);
-    padding-block-start: var(--rf-space-4);
-  }
-  .rf-pres__intro {
-    margin-block-start: var(--rf-space-5);
-  }
-}
-/* ≤340px: the pill's label row must clear the first viewport — tighten the
-   artifact cap and stage chrome so it lands fully above the fold. */
+
 @media (max-width: 340px) {
-  [data-chapter] .rf-pres-art,
-  .rf-pres-end__aside {
-    max-block-size: 128px;
+  .rf-walk__controls {
+    padding: 2px var(--rf-space-1);
   }
-  .rf-pres__stage {
-    gap: var(--rf-space-2);
-    padding-block-start: var(--rf-space-4);
+
+  .rf-walk__tbtn {
+    padding: 3px 4px;
+    font-size: 11.5px;
   }
-  .rf-pres__controls {
-    padding: var(--rf-space-1) var(--rf-space-3);
+
+  .rf-walk__tab {
+    padding: 3px 5px;
+    font-size: 11px;
+  }
+
+  .rf-walk__replay {
+    padding: 3px var(--rf-space-2);
+    font-size: 11.5px;
+  }
+
+  .rf-walk-sheet__table th,
+  .rf-walk-sheet__table td {
+    padding: 3px var(--rf-space-2);
   }
 }

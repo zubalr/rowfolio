@@ -1,29 +1,37 @@
 /**
- * LandingApp — presentation-first entry (brief authority): a compact
- * identity + language header, then one dominant presentation stage that
- * plays the spreadsheet → chart → report story automatically. The working
- * product stays one click away through the masthead's persistent workspace
- * entry and the end-of-scene actions.
+ * LandingApp — the presentation-first entry (owner-approved revamp): a
+ * compact identity + language header, then a hero where the H1, the
+ * explanation, the actions and the controllable walkthrough all fit the
+ * first viewport. Below it, one finished-output section with the real
+ * report previews and downloads, then the product invitation with the
+ * own-file action and the privacy note.
  *
- * Below the stage, the real working specimen (PreviewLoader lazy chunk)
- * keeps the four-beat demonstration and its e2e testids; a short hand band
- * carries Check-the-data / Upload / Guide.
- *
- * No parser/export/chart library is reachable from this graph, and nothing
- * touches `window` at module scope, so the entry stays prerender-safe.
+ * The working product is one click away: "Explore the example" opens the
+ * prepared analysis, "Use your own spreadsheet" carries a real file, and
+ * the downloads fire the real export pipeline through the workspace
+ * intent seam. Nothing touches `window` at module scope — the entry stays
+ * prerender-safe.
  */
-import { Suspense, lazy, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Icon, SkipLink } from "@rowfolio/ui";
 import type { I18n } from "@rowfolio/i18n";
+import { PresentationController, type PresentationState } from "../demo/presentation.ts";
 import { landingCopy } from "./copy.ts";
-import type { PendingDemoAction } from "./PreviewLoader.tsx";
-import { PresentationStage } from "./PresentationStage.tsx";
+import {
+  PresentationStage,
+  WALKTHROUGH_STEPS,
+  readStoredStep,
+} from "./PresentationStage.tsx";
+import { SAMPLE_EXPORT_MODEL, findingSlide } from "./sampleExportModel.ts";
+import { SlidePreview, WorkbookPreview } from "../briefing/SlidePreview.tsx";
+// SlidePreview's component stylesheet is owned by the export dialog — the
+// landing must import it directly or the previews render unstyled.
+import "../briefing/export.css";
 import { persistLocaleChoice } from "./i18n.ts";
-import { scrollToId, siblingLocaleHref, workspaceHref } from "./routes.ts";
-import { setWorkspaceIntent } from "./pendingUpload.ts";
+import { siblingLocaleHref, workspaceHref, scrollToId, navigateToWorkspace } from "./routes.ts";
+import { setWorkspaceIntent, type IntentDownload } from "./pendingUpload.ts";
+import { prefersReducedMotion } from "./useReducedMotion.ts";
 import "./landing.css";
-
-const PreviewLoader = lazy(() => import("./PreviewLoader.tsx"));
 
 const UPLOAD_ACCEPT = ".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
@@ -31,32 +39,44 @@ export interface LandingAppProps {
   readonly i18n: I18n;
 }
 
-const STEPS = [
-  { key: "spot", action: "reveal" },
-  { key: "inspect", action: "evidence" },
-  { key: "assume", action: "scenario" },
-  { key: "brief", action: "briefing" },
-] as const;
-
 export function LandingApp({ i18n }: LandingAppProps) {
-  const [pendingDemo, setPendingDemo] = useState<PendingDemoAction | null>(null);
   const uploadInput = useRef<HTMLInputElement>(null);
 
-  const requestDemo = (action: PendingDemoAction) => {
-    setPendingDemo(action);
-    scrollToId("demo");
-  };
+  // The shared walkthrough controller — the hero's Watch/Replay action and
+  // the stage's own transport drive the same instance.
+  const controller = useMemo(
+    () =>
+      new PresentationController({
+        chapters: WALKTHROUGH_STEPS,
+        prefersReducedMotion,
+        initialIndex: readStoredStep(),
+      }),
+    [],
+  );
+  const [presState, setPresState] = useState<PresentationState>(controller.getState());
+  useEffect(() => controller.subscribe(setPresState), [controller]);
+  useEffect(() => {
+    controller.start();
+    return () => controller.dispose();
+  }, [controller]);
+
   const exploreSample = () => {
     setWorkspaceIntent({ kind: "sample" });
-    requestDemo("explore");
-  };
-  const startGuide = () => {
-    setWorkspaceIntent({ kind: "guide" });
-    requestDemo("guide");
+    navigateToWorkspace();
   };
   const openWorkspace = () => {
     setWorkspaceIntent({ kind: "sample" });
     window.location.hash = workspaceHref();
+  };
+  const download = (format: IntentDownload) => {
+    setWorkspaceIntent({ kind: "sample", download: format });
+    navigateToWorkspace();
+  };
+  const watch = () => {
+    // "Watch how it works" starts/resumes the walkthrough; once it holds
+    // the finished report the same action replays it.
+    controller.resume();
+    scrollToId("how-it-works");
   };
   const pickUpload = () => uploadInput.current?.click();
   const onFileChosen = (file: File | undefined) => {
@@ -66,6 +86,11 @@ export function LandingApp({ i18n }: LandingAppProps) {
     setWorkspaceIntent({ kind: "upload", file });
     window.location.hash = workspaceHref();
   };
+
+  const model = SAMPLE_EXPORT_MODEL[i18n.locale];
+  const otherLocale = i18n.locale === "ar" ? "en" : "ar";
+  const altModel = SAMPLE_EXPORT_MODEL[otherLocale];
+  const held = presState.status === "held";
 
   return (
     <>
@@ -81,7 +106,7 @@ export function LandingApp({ i18n }: LandingAppProps) {
           {i18n.t("brand.name")}
         </a>
         <nav className="rf-nav" aria-label="Rowfolio">
-          <a href="#demo">{i18n.t("nav.demo")}</a>
+          <a href="#how-it-works">{i18n.t("nav.demo")}</a>
           <a href="https://github.com/zubalr/rowfolio" rel="noopener noreferrer">
             {i18n.t("nav.github")}
           </a>
@@ -94,8 +119,8 @@ export function LandingApp({ i18n }: LandingAppProps) {
               // choice flips `i18n.locale`, which swaps this anchor's href
               // before the browser follows it. Capture the target first and
               // navigate explicitly; modified clicks keep the live href.
-              // The presentation chapter rides the landing hash
-              // (`#/pres-ch=N`) across the switch — no storage writes.
+              // The walkthrough step rides the landing hash (`#/pres-ch=N`)
+              // across the switch — no storage writes.
               const h = window.location.hash;
               const carry = h.startsWith("#/pres-ch") ? h : "";
               if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
@@ -115,83 +140,102 @@ export function LandingApp({ i18n }: LandingAppProps) {
           <Button
             variant="secondary"
             iconEnd="arrow-end"
-            onClick={openWorkspace}
+            onClick={exploreSample}
             className="rf-masthead__ws"
+            data-testid="cta-demo"
           >
-            {landingCopy(i18n.locale, "pres.openWorkspace")}
+            {landingCopy(i18n.locale, "pres.explore")}
           </Button>
         </nav>
       </header>
 
       <main id="main">
-        {/* The presentation — auto-playing first screen. */}
-        <PresentationStage i18n={i18n} />
+        {/* Hero — the walkthrough IS the first screen. */}
+        <section className="rf-hero" id="how-it-works" aria-labelledby="rf-hero-title">
+          <div className="rf-hero__copy">
+            <h1 className="rf-hero__title" id="rf-hero-title">
+              {landingCopy(i18n.locale, "pres.title")}
+            </h1>
+            <p className="rf-hero__body">{landingCopy(i18n.locale, "pres.body")}</p>
+            <p className="rf-hero__credit">{landingCopy(i18n.locale, "pres.credit")}</p>
+            <div className="rf-hero__actions">
+              <Button
+                variant="primary"
+                onClick={watch}
+                data-testid="cta-watch"
+              >
+                {held
+                  ? landingCopy(i18n.locale, "pres.replay")
+                  : landingCopy(i18n.locale, "pres.watch")}
+              </Button>
+              <Button variant="secondary" iconEnd="arrow-end" onClick={exploreSample} data-testid="cta-explore">
+                {landingCopy(i18n.locale, "pres.explore")}
+              </Button>
+              <button type="button" className="rf-hero__ownfile" onClick={pickUpload} data-testid="cta-upload">
+                {landingCopy(i18n.locale, "pres.useOwn")}
+              </button>
+            </div>
+            <p className="rf-hero__note">{landingCopy(i18n.locale, "pres.sampleNote")}</p>
+          </div>
 
-        {/* The large working specimen — real mechanism, real values. */}
-        <Suspense
-          fallback={
-            <section className="rf-stage rf-ledger" id="demo" aria-labelledby="rf-preview-title">
-              <header className="rf-stage__head">
-                <div>
-                  <h2 id="rf-preview-title" className="rf-stage__title">
-                    {i18n.t("workspace.findings")}
-                  </h2>
-                  <span className="rf-skeleton" aria-hidden="true" style={{ inlineSize: "12em", marginBlockStart: "0.5em" }} />
-                </div>
-              </header>
-              <span className="rf-skeleton" aria-hidden="true" style={{ blockSize: "15em", inlineSize: "min(38em, 100%)" }} />
-            </section>
-          }
-        >
-          <PreviewLoader
-            i18n={i18n}
-            pendingAction={pendingDemo}
-            onActionHandled={() => setPendingDemo(null)}
-          />
-        </Suspense>
-
-        {/* Staged demonstration — each beat is one sentence and one action. */}
-        <section className="rf-steps" aria-labelledby="rf-steps-title">
-          <h2 id="rf-steps-title" className="rf-steps__title">
-            {landingCopy(i18n.locale, "demo.band.title")}
-          </h2>
-          <ol className="rf-steps__list">
-            {STEPS.map((step, i) => (
-              <li className="rf-steps__step" key={step.key}>
-                <span className="rf-steps__num" aria-hidden="true">
-                  {`0${i + 1}`}
-                </span>
-                <h3 className="rf-steps__name">{landingCopy(i18n.locale, `demo.step.${step.key}.title`)}</h3>
-                <p className="rf-steps__body">{landingCopy(i18n.locale, `demo.step.${step.key}.body`)}</p>
-                <Button
-                  variant="secondary"
-                  iconEnd="arrow-end"
-                  onClick={() => requestDemo(step.action)}
-                >
-                  {landingCopy(i18n.locale, `demo.step.${step.key}.action`)}
-                </Button>
-              </li>
-            ))}
-          </ol>
+          <PresentationStage i18n={i18n} controller={controller} />
         </section>
 
-        {/* The hand-off: what a viewer does next, in their verbs. */}
-        <section className="rf-hand" aria-labelledby="rf-hand-title">
-          <h2 id="rf-hand-title" className="rf-hand__title">
-            {landingCopy(i18n.locale, "pres.hand.title")}
-          </h2>
-          <p className="rf-hand__body">{landingCopy(i18n.locale, "pres.hand.body")}</p>
-          <div className="rf-hand__actions">
-            <Button variant="primary" iconEnd="arrow-end" onClick={exploreSample} data-testid="cta-demo">
-              {landingCopy(i18n.locale, "pres.checkData")}
+        {/* The finished output — real previews of the real artifacts. */}
+        <section className="rf-output" aria-labelledby="rf-output-title">
+          <div className="rf-output__head">
+            <h2 className="rf-output__title" id="rf-output-title">
+              {landingCopy(i18n.locale, "pres.output.title")}
+            </h2>
+            <p className="rf-output__body">{landingCopy(i18n.locale, "pres.output.body")}</p>
+          </div>
+          <div className="rf-output__previews">
+            <figure className="rf-output__fig">
+              <div className="rf-output__preview">
+                <SlidePreview model={model} slide={findingSlide(model)} />
+              </div>
+              <figcaption className="rf-output__cap">
+                {i18n.localeName(i18n.locale)} · {landingCopy(i18n.locale, "pres.output.slides", { n: model.slides.length })}
+              </figcaption>
+            </figure>
+            <figure className="rf-output__fig">
+              <div className="rf-output__preview" dir={otherLocale === "ar" ? "rtl" : "ltr"}>
+                <SlidePreview model={altModel} slide={findingSlide(altModel)} />
+              </div>
+              <figcaption className="rf-output__cap">{i18n.localeName(otherLocale)}</figcaption>
+            </figure>
+            <figure className="rf-output__fig rf-output__fig--book">
+              <div className="rf-output__preview">
+                <WorkbookPreview model={model} />
+              </div>
+              <figcaption className="rf-output__cap">{landingCopy(i18n.locale, "pres.output.workbook")}</figcaption>
+            </figure>
+          </div>
+          <div className="rf-output__actions">
+            <Button variant="primary" icon="download" onClick={() => download("pptx")} data-testid="output-download-pptx">
+              {landingCopy(i18n.locale, "pres.downloadPptx")}
             </Button>
-            <Button variant="secondary" icon="upload" onClick={pickUpload} data-testid="cta-upload">
-              {i18n.t("action.upload")}
-            </Button>
-            <Button variant="ghost" onClick={startGuide} data-testid="cta-guide">
-              {i18n.t("action.startGuide")}
+            <Button variant="secondary" icon="download" onClick={() => download("xlsx")} data-testid="output-download-xlsx">
+              {landingCopy(i18n.locale, "pres.downloadXlsx")}
             </Button>
           </div>
+        </section>
+
+        {/* The invitation — the visitor's own file, with honest limits. */}
+        <section className="rf-invite" aria-labelledby="rf-invite-title">
+          <h2 className="rf-invite__title" id="rf-invite-title">
+            {landingCopy(i18n.locale, "pres.invite.title")}
+          </h2>
+          <p className="rf-invite__body">{landingCopy(i18n.locale, "pres.invite.body")}</p>
+          <div className="rf-invite__actions">
+            <Button variant="primary" icon="upload" onClick={pickUpload}>
+              {landingCopy(i18n.locale, "pres.useOwn")}
+            </Button>
+            <Button variant="secondary" iconEnd="arrow-end" onClick={openWorkspace}>
+              {landingCopy(i18n.locale, "pres.explore")}
+            </Button>
+          </div>
+          <p className="rf-invite__help">{landingCopy(i18n.locale, "pres.uploadHelp")}</p>
           <input
             ref={uploadInput}
             type="file"
@@ -201,27 +245,13 @@ export function LandingApp({ i18n }: LandingAppProps) {
             onChange={(event) => onFileChosen(event.currentTarget.files?.[0])}
           />
         </section>
-
-        {/* Closing — privacy note and the return to product. */}
-        <section className="rf-close" aria-labelledby="rf-close-title">
-          <h2 id="rf-close-title">{landingCopy(i18n.locale, "landing.close.title")}</h2>
-          <p className="rf-close__body">{landingCopy(i18n.locale, "landing.close.body")}</p>
-          <div className="rf-close__actions">
-            <Button variant="primary" iconEnd="arrow-end" onClick={openWorkspace}>
-              {landingCopy(i18n.locale, "pres.openWorkspace")}
-            </Button>
-            <Button variant="secondary" onClick={pickUpload}>
-              {i18n.t("action.upload")}
-            </Button>
-          </div>
-        </section>
       </main>
 
       <footer className="rf-footer">
         <p>
           <Icon name="check" size={16} /> {i18n.t("common.verified")} · {i18n.t("privacy.short")}
         </p>
-        <p className="rf-footer__muted">{i18n.t("privacy.assets")}</p>
+        <p className="rf-footer__muted">{landingCopy(i18n.locale, "pres.credit")}</p>
       </footer>
     </>
   );
