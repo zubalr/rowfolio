@@ -150,7 +150,7 @@ html[lang='ar'] .rf-stage-scope {
 /* KPI denominators — "97 / 100 records" under each headline number. */
 .rf-metric-scope {
   font-size: 12px;
-  color: var(--rf-text-muted, #53636a);
+  color: var(--rf-text-muted, #54666e);
   font-variant-numeric: tabular-nums;
 }
 

@@ -1,10 +1,10 @@
 {
   "color": {
-    "ink": "#14252E",
-    "paper": "#F7F4EC",
-    "surface": "#FFFEFA",
-    "muted": "#53636A",
-    "rule": "#D7DCD8",
+    "ink": "#10191E",
+    "paper": "#F5F7F8",
+    "surface": "#FFFFFF",
+    "muted": "#54666E",
+    "rule": "#D9E0E4",
     "data": "#2B50E8",
     "attention": "#E04E1A",
     "negative": "#A33224",
@@ -54,6 +54,13 @@
     "numberMs": 240,
     "progressMs": 120,
     "reducedMs": 0
+  },
+  "plateLabel": {
+    "sizePx": 11.5,
+    "family": "code",
+    "weight": 600,
+    "transform": "uppercase",
+    "trackingEm": 0.12
   },
   "typePx": {
     "hero": 64,

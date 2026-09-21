@@ -13,7 +13,6 @@
   gap: var(--rf-space-3);
   padding: var(--rf-space-3) var(--rf-space-5);
   border-block-end: 1px solid var(--rf-rule);
-  background: var(--rf-surface);
 }
 
 .rf-brand {
@@ -21,7 +20,7 @@
   align-items: center;
   gap: var(--rf-space-2);
   font-weight: 700;
-  font-size: 17px;
+  font-size: 18px;
   color: var(--rf-ink);
   text-decoration: none;
   flex: none;
@@ -53,11 +52,26 @@
   justify-content: flex-end;
 }
 
+/* Chrome labels are plate-label micro-labels: mono, uppercase, tracked.
+   Arabic links/labels keep the body stack — Plex Mono has no Arabic cut
+   and tracking disconnects the script. */
 .rf-nav a {
   color: var(--rf-muted);
   text-decoration: none;
+  font-family: var(--rf-font-mono);
+  font-size: var(--rf-plate-label-size);
+  font-weight: var(--rf-plate-label-weight);
+  letter-spacing: var(--rf-plate-label-tracking);
+  text-transform: uppercase;
+}
+
+.rf-nav a[lang="ar"],
+html[lang="ar"] .rf-nav a:not([lang]) {
+  font-family: var(--rf-font-body);
   font-size: 14px;
   font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .rf-nav a:hover { color: var(--rf-ink); }
