@@ -3,7 +3,7 @@ import type { MessageKey } from '@rowfolio/i18n';
 import { useI18n, useServices, useSessionState } from '../app/context.tsx';
 import { formatInteger } from '../workspace/format.ts';
 import type { ExportFormat } from '../app/state.ts';
-import { SlideGlyph } from './slide-glyphs.tsx';
+import { SlidePreview, WorkbookPreview } from './SlidePreview.tsx';
 import './export.css';
 
 /** Hashed filenames stay legible by the middle — head … tail, never a flood. */
@@ -17,8 +17,9 @@ const FORMAT_LABEL: Record<ExportFormat, MessageKey> = {
 };
 
 /**
- * Export preparation dialog — explicitly started by the user. Shows the
- * briefing MODEL preview (slide/sheet plan, never a pixel render), build
+ * Export preparation dialog — explicitly started by the user. Shows a
+ * readable preview of the actual deliverables (each slide page composed
+ * from the same ExportModel + copy tables the writers consume), build
  * progress per stage, then download links bound to the committed scenario +
  * locale captured at prepare time. A partial failure keeps completed links.
  */
@@ -83,7 +84,7 @@ export function ExportDialog() {
   );
 }
 
-/** Model preview — slide + sheet outline only; labeled as model preview. */
+/** Deliverable preview — real slide pages + the workbook sheet list. */
 function ModelPreview({ state }: { state: ReturnType<typeof useSessionState> }) {
   const i18n = useI18n();
   const model = state.export.model;
@@ -102,22 +103,16 @@ function ModelPreview({ state }: { state: ReturnType<typeof useSessionState> }) 
         {i18n.tSafe('export.locale' as MessageKey)}: {i18n.localeName(state.export.locale ?? i18n.getState().locale)}
       </p>
       {model && (
-        <>
-          <ol className="rf-export-outline">
-            {model.slides.map((slide) => (
-              <li key={slide.id} className="rf-export-slide" data-kind={slide.kind}>
-                <SlideGlyph kind={slide.kind} />
-                <span className="rf-export-slide__meta">
-                  <span className="rf-slide-kind">{slide.kind}</span>
-                  <span className="rf-export-slide__title">{slide.title}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
-          <p className="rf-quiet" dir="ltr">
-            {model.sheets.map((s) => s.name).join(' · ')}
-          </p>
-        </>
+        <ol className="rf-export-outline">
+          {model.slides.map((slide) => (
+            <li key={slide.id}>
+              <SlidePreview model={model} slide={slide} />
+            </li>
+          ))}
+          <li>
+            <WorkbookPreview model={model} />
+          </li>
+        </ol>
       )}
     </div>
   );
