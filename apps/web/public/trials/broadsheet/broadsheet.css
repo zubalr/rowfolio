@@ -582,12 +582,13 @@ a { color: inherit; }
   .grid th { padding: 0 2px 6px; }
   .flagrow { display: flex; flex-wrap: wrap; gap: 5px 6px; margin-top: 8px; }
   .flagrow .flag { position: static; }
-  .p-data { min-height: 300px; }
+  .p-data { min-height: 340px; }
   .gr-wb { display: none; }
   .fchart { bottom: 26px; }
-  .s-chart { top: 30%; height: 40%; }
-  .s-note { bottom: 24%; }
-  .s-foot { bottom: 17%; }
+  .s-title { font-size: 18px; }
+  .s-chart { top: 44%; height: 32%; }
+  .s-note { bottom: 19%; }
+  .s-foot { bottom: 12%; }
   .wbstrip { display: none; }
 
   .rail {
