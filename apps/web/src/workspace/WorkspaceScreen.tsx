@@ -357,15 +357,16 @@ function PhaseBody({
           <header className="rf-workspace-head">
             <h1 className="rf-workspace-title">{i18n.tSafe('workspace.title' as MessageKey)}</h1>
             <p className="rf-quiet">
-              {i18n.tSafe('workspace.records' as MessageKey, {
-                raw: String(active.snapshot.qualitySummary.rawRows),
-                clean: String(active.snapshot.qualitySummary.retainedRows),
-              })}
-              {' · '}
               <span dir="ltr">{active.source.name}</span>
             </p>
             <p className="rf-quiet rf-workspace-scope">
               {formatScope(i18n, active.snapshot.scope)}
+            </p>
+            <p className="rf-quiet">
+              {i18n.tSafe('workspace.records' as MessageKey, {
+                raw: String(active.snapshot.qualitySummary.rawRows),
+                clean: String(active.snapshot.qualitySummary.retainedRows),
+              })}
             </p>
           </header>
           <KpiStrip snapshot={active.snapshot} />

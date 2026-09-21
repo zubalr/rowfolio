@@ -63,7 +63,7 @@ test.describe("Web Worker Lifecycle & Boundary Guarantees", () => {
     await expect(applyBtn).toBeVisible({ timeout: 15_000 });
     await applyBtn.click();
 
-    await expect(page.locator("text=The briefing starts here")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("text=Example analysis")).toBeVisible({ timeout: 15_000 });
     // Active worker count remains bounded (exactly 1 active worker)
     expect(page.workers().length).toBe(1);
 
@@ -126,7 +126,7 @@ test.describe("Web Worker Lifecycle & Boundary Guarantees", () => {
     const applyBtn = page.locator('button:has-text("Apply approved changes")');
     await expect(applyBtn).toBeVisible({ timeout: 15_000 });
     await applyBtn.click();
-    await expect(page.locator("text=The briefing starts here")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("text=Example analysis")).toBeVisible({ timeout: 15_000 });
 
     expect(spawnedWorkers.length).toBe(1);
     const firstWorker = spawnedWorkers[0];
@@ -152,7 +152,7 @@ test.describe("Web Worker Lifecycle & Boundary Guarantees", () => {
     await expect(applyNewBtn).toBeVisible({ timeout: 15_000 });
     await applyNewBtn.click();
 
-    await expect(page.locator("text=The briefing starts here")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("text=Example analysis")).toBeVisible({ timeout: 15_000 });
 
     // Active workers remain bounded to at most 1 active worker
     expect(page.workers().length).toBeLessThanOrEqual(1);
@@ -217,7 +217,7 @@ test.describe("Web Worker Lifecycle & Boundary Guarantees", () => {
     await expect(applyBtn).toBeVisible({ timeout: 15_000 });
     await applyBtn.click();
 
-    await expect(page.locator("text=The briefing starts here")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("text=Example analysis")).toBeVisible({ timeout: 15_000 });
     expect(page.workers().length).toBeLessThanOrEqual(1);
 
     // 5. Clean teardown
@@ -252,7 +252,7 @@ test.describe("Web Worker Lifecycle & Boundary Guarantees", () => {
     const applyBtn = page.locator('button:has-text("Apply approved changes")');
     await expect(applyBtn).toBeVisible({ timeout: 15_000 });
     await applyBtn.click();
-    await expect(page.locator("text=The briefing starts here")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("text=Example analysis")).toBeVisible({ timeout: 15_000 });
 
     // Open export preparation: the footer offers Cancel while building.
     const prepareBtn = page.locator('[data-testid="export-prepare-btn"]');

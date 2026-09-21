@@ -1,6 +1,6 @@
 /**
  * Evidence visual harness — mounts the real `EvidenceDialog` behind a
- * "Show me why" trigger so Playwright exercises genuine open/close/focus
+ * "View calculation" trigger so Playwright exercises genuine open/close/focus
  * semantics. Fixture data comes from the validated contract examples through
  * `support/scenarios.ts`; services are the reference adapter (real contract
  * evaluator), never stubs.

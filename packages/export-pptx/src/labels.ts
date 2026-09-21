@@ -120,7 +120,7 @@ const STRINGS: Record<Locale, Record<string, string>> = {
     "table.unit": "Unit",
     "quality.reconciliation": "Reconciliation",
     "scenario.layer": "Editable assumption",
-    "scenario.notCommitted": "No scenario is committed for this briefing.",
+    "scenario.notCommitted": "No scenario is committed for this report.",
   },
   ar: {
     "metric.revenue": "الإيرادات",
@@ -224,7 +224,7 @@ const STRINGS: Record<Locale, Record<string, string>> = {
     "table.unit": "الوحدة",
     "quality.reconciliation": "المطابقة",
     "scenario.layer": "افتراض قابل للتعديل",
-    "scenario.notCommitted": "لم يُعتمد أي سيناريو لهذه الإحاطة.",
+    "scenario.notCommitted": "لم يُعتمد أي سيناريو لهذا التقرير.",
   },
 };
 

@@ -30,7 +30,7 @@ export const strings = {
     openCenter: "Open centered dialog",
     close: "Close",
     back: "Back",
-    showWhy: "Show me why",
+    showWhy: "View calculation",
     cancel: "Cancel",
     save: "Save PowerPoint briefing",
     upload: "Use your spreadsheet",

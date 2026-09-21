@@ -174,12 +174,12 @@ describe('workbook structure', () => {
       const entries = unzip(new Uint8Array(artifact.bytes));
       const strings = textOf(entries, 'xl/sharedStrings.xml');
       if (locale === 'en') {
-        expect(strings).toContain('A briefing you can take with you.');
+        expect(strings).toContain('A report you can take with you.');
         expect(strings).toContain('Revenue');
-        expect(strings).toContain('Test one assumption.');
-        expect(strings).toContain('Includes the committed 8% operating-cost scenario.');
+        expect(strings).toContain('Change operating costs');
+        expect(strings).toContain('Includes the 8% operating-cost scenario.');
       } else {
-        expect(strings).toContain('إحاطة يمكنك الاحتفاظ بها.');
+        expect(strings).toContain('تقرير يمكنك الاحتفاظ به.');
         expect(strings).toContain('الإيرادات');
       }
       // Print areas keep every sheet self-contained on paper.

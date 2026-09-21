@@ -41,7 +41,7 @@ test.describe("Full User Journeys", () => {
     const finding = page.locator('[data-testid="preview-finding"], [data-testid="finding-north"]');
     await expect(finding.first()).toBeVisible();
 
-    const showWhyBtn = page.locator('button[aria-controls="rf-preview-evidence"], button:has-text("Show me why"), [data-testid="view-evidence-btn"]');
+    const showWhyBtn = page.locator('button[aria-controls="rf-preview-evidence"], button:has-text("View calculation"), [data-testid="view-evidence-btn"]');
     await expect(showWhyBtn.first()).toBeVisible();
     await showWhyBtn.first().click();
 
@@ -59,7 +59,7 @@ test.describe("Full User Journeys", () => {
     // workbook summary flip to data-ready (the demo path previews
     // readiness here; real downloads happen in the workspace flow and
     // are covered by Journey 5).
-    const prepareBtn = page.locator('[data-testid="preview-briefing"] button, button:has-text("Prepare briefing"), [data-testid="export-prepare-btn"]');
+    const prepareBtn = page.locator('[data-testid="preview-briefing"] button, button:has-text("Create report"), [data-testid="export-prepare-btn"]');
     await expect(prepareBtn.first()).toBeVisible();
     await prepareBtn.first().click();
     const readySlides = page.locator('.rf-briefing__slide[data-ready="true"]');
@@ -118,7 +118,7 @@ test.describe("Full User Journeys", () => {
     await applyBtn.click();
 
     // Verification of ready workspace
-    await expect(page.locator("text=The briefing starts here")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("text=Example analysis")).toBeVisible({ timeout: 15_000 });
     await expect(page.locator("text=2400 retained")).toBeVisible();
 
     // Clear session resets back to landing page
@@ -174,7 +174,7 @@ test.describe("Full User Journeys", () => {
     await expect(applyBtn).toBeVisible({ timeout: 15_000 });
     await applyBtn.click();
 
-    await expect(page.locator("text=The briefing starts here")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("text=Example analysis")).toBeVisible({ timeout: 15_000 });
 
     // Open export and prepare briefing
     const prepareBtn = page.locator('[data-testid="export-prepare-btn"]');
