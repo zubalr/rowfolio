@@ -7,7 +7,7 @@
  */
 import type { Locale } from "@rowfolio/i18n";
 
-type CopyKey =
+export type CopyKey =
   | "action.openWorkspace"
   | "action.skipGuide"
   | "common.region"
@@ -42,6 +42,37 @@ type CopyKey =
   | "landing.close.body"
   | "landing.close.title"
   | "landing.specimen.note"
+  | "pres.artifact.chart"
+  | "pres.artifact.report"
+  | "pres.artifact.sheet"
+  | "pres.body"
+  | "pres.chapter.report"
+  | "pres.chapter.result"
+  | "pres.chapter.transform"
+  | "pres.checkData"
+  | "pres.credit"
+  | "pres.downloadPptx"
+  | "pres.downloadXlsx"
+  | "pres.fictional"
+  | "pres.hand.body"
+  | "pres.hand.title"
+  | "pres.next"
+  | "pres.openWorkspace"
+  | "pres.pause"
+  | "pres.play"
+  | "pres.previous"
+  | "pres.progress"
+  | "pres.replay"
+  | "pres.report.observation"
+  | "pres.report.period"
+  | "pres.report.title"
+  | "pres.report.verified"
+  | "pres.scene.report.caption"
+  | "pres.scene.result.caption"
+  | "pres.scene.transform.caption"
+  | "pres.scene.transform.note"
+  | "pres.scene.transform.scope"
+  | "pres.title"
   | "scenario.assumed"
   | "scenario.contributionLabel"
   | "scenario.observed"
@@ -82,6 +113,37 @@ const COPY: Record<CopyKey, Record<Locale, string>> = {
   "landing.close.body": { en: "The parser, the arithmetic and the exports run in this page. Your file is never uploaded, and clearing the tab clears the data.", ar: "المحلل والحسابات والتصديرات تعمل داخل هذه الصفحة. لا يُرفع ملفك أبدًا، ومسح التبويب يمسح البيانات." },
   "landing.close.title": { en: "Everything stays on this device.", ar: "كل شيء يبقى على هذا الجهاز." },
   "landing.specimen.note": { en: "A working slice of the product — the same parser, arithmetic and components the app uses, driven by the checked-in sample.", ar: "مقطع عملي من المنتج — المحلل والحسابات والمكوّنات الحقيقية نفسها، مدفوعة بالنموذج المضمّن." },
+  "pres.artifact.chart": { en: "Chart", ar: "الرسم" },
+  "pres.artifact.report": { en: "Report", ar: "التقرير" },
+  "pres.artifact.sheet": { en: "Spreadsheet", ar: "جدول البيانات" },
+  "pres.body": { en: "Check the data. Understand the results. Prepare a presentation in English or Arabic.", ar: "افحص البيانات. افهم النتائج. جهّز العرض بالإنجليزية أو العربية." },
+  "pres.chapter.report": { en: "The finished report", ar: "التقرير الجاهز" },
+  "pres.chapter.result": { en: "The result", ar: "النتيجة" },
+  "pres.chapter.transform": { en: "From cells to chart", ar: "من الخلايا إلى الرسم" },
+  "pres.checkData": { en: "Check the data", ar: "افحص البيانات" },
+  "pres.credit": { en: "A project by Zubair", ar: "مشروع من إعداد زبير" },
+  "pres.downloadPptx": { en: "Download PowerPoint", ar: "نزّل PowerPoint" },
+  "pres.downloadXlsx": { en: "Download workbook", ar: "نزّل ملف العمل" },
+  "pres.fictional": { en: "Fictional sample data", ar: "بيانات نموذجية افتراضية" },
+  "pres.hand.body": { en: "Every figure below is computed by the real parser on the checked-in sample. Step through it yourself.", ar: "كل رقم أدناه يحسبه المحلل الحقيقي على النموذج المضمّن. تنقّل فيه بنفسك." },
+  "pres.hand.title": { en: "The same engine, live in the page.", ar: "المحرّك نفسه يعمل داخل الصفحة." },
+  "pres.next": { en: "Next", ar: "التالي" },
+  "pres.openWorkspace": { en: "Open workspace", ar: "افتح مساحة العمل" },
+  "pres.pause": { en: "Pause", ar: "إيقاف مؤقت" },
+  "pres.play": { en: "Play", ar: "تشغيل" },
+  "pres.previous": { en: "Previous", ar: "السابق" },
+  "pres.progress": { en: "Chapter {n} of {total}", ar: "الفصل {n} من {total}" },
+  "pres.replay": { en: "Replay presentation", ar: "أعد العرض" },
+  "pres.report.observation": { en: "North June revenue sits {gap} under target while order volume rose {orders}.", ar: "إيراد يونيو في الشمال أدنى من المستهدف بنسبة {gap} بينما ارتفع حجم الطلبات بنسبة {orders}." },
+  "pres.report.period": { en: "June 2026 · six regions · service operations", ar: "يونيو 2026 · ست مناطق · عمليات الخدمة" },
+  "pres.report.title": { en: "June operations briefing", ar: "إحاطة عمليات يونيو" },
+  "pres.report.verified": { en: "Checked against {sheet} rows {start}–{end}", ar: "تحقّق منه مقابل صفوف {start}–{end} في {sheet}" },
+  "pres.scene.report.caption": { en: "The finished report. Downloads and the workspace are one click away.", ar: "التقرير الجاهز. التنزيلات ومساحة العمل على بُعد نقرة واحدة." },
+  "pres.scene.result.caption": { en: "Rows, a chart and a report page. The same data through the process.", ar: "صفوف ورسم وصفحة تقرير. البيانات نفسها عبر العملية." },
+  "pres.scene.transform.caption": { en: "A manager needs the monthly operations update. The figures are in a spreadsheet. The report still needs to be prepared.", ar: "يحتاج المدير إلى تحديث العمليات الشهري. الأرقام موجودة في جدول بيانات. والتقرير ما زال بحاجة إلى إعداد." },
+  "pres.scene.transform.note": { en: "Each selected cell becomes one mark.", ar: "كل خلية محددة تصبح علامة واحدة." },
+  "pres.scene.transform.scope": { en: "{region} · June 2026 · revenue vs target", ar: "{region} · يونيو 2026 · الإيراد مقابل المستهدف" },
+  "pres.title": { en: "Watch a spreadsheet become a finished report.", ar: "شاهد جدول بيانات يتحوّل إلى تقرير جاهز." },
   "scenario.assumed": { en: "Assumed layer", ar: "طبقة الافتراض" },
   "scenario.contributionLabel": { en: "June contribution", ar: "مساهمة يونيو" },
   "scenario.observed": { en: "Observed baseline", ar: "خط الأساس المرصود" },

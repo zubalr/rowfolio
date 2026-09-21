@@ -1011,3 +1011,58 @@ html[lang="ar"] .rf-footer {
     margin-inline-start: 0;
   }
 }
+
+/* ---------- Hand band: the viewer's next action ---------- */
+.rf-hand {
+  padding: var(--rf-space-7) var(--rf-gutter);
+  max-width: calc(var(--rf-max-width) + 2 * var(--rf-gutter));
+  margin-inline: auto;
+  border-block-start: 1px solid var(--rf-divider);
+}
+.rf-hand__title {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  max-inline-size: 24em;
+}
+html[lang="ar"] .rf-hand__title {
+  letter-spacing: normal;
+}
+.rf-hand__body {
+  margin: var(--rf-space-3) 0 0;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--rf-text-muted);
+  max-inline-size: 44em;
+}
+html[lang="ar"] .rf-hand__body {
+  font-size: 17px;
+}
+.rf-hand__actions {
+  display: flex;
+  gap: var(--rf-space-3);
+  margin-block-start: var(--rf-space-4);
+  flex-wrap: wrap;
+}
+/* Persistent workspace entry — stays a bordered control next to the lang
+   switcher at every width. */
+.rf-masthead__ws {
+  flex: none;
+}
+@media (max-width: 479px) {
+  /* The workspace entry survives narrow widths: let the nav wrap to a
+     second row instead of hiding or overflowing. */
+  .rf-masthead {
+    flex-wrap: wrap;
+    padding-block: var(--rf-space-2);
+    row-gap: var(--rf-space-2);
+  }
+  .rf-nav {
+    flex-wrap: wrap;
+  }
+  .rf-masthead__ws {
+    font-size: 13px;
+    padding-block: 5px;
+  }
+}

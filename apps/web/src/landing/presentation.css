@@ -1,0 +1,818 @@
+/**
+ * Presentation stage (A21 composition spec):
+ *  - One fixed 16:9 cobalt window on ivory margins.
+ *  - Three artifacts (sheet / chart / report) persist and morph between
+ *    positions per chapter — positioned absolutely with transitioned
+ *    logical offsets + sizes; nothing teleports.
+ *  - Hard 1px edges + 8% ink offset shadow; no glass, no gradients.
+ *  - Controls: an ink pill pinned at the window's bottom-center edge —
+ *    Prev/Play/Next, dot progress, scene label, persistent workspace
+ *    entry. Under 900px the pill docks below the window and artifacts
+ *    stack in flow, so controls never overlay the subject.
+ *  - Hue discipline: cobalt = engine/observed, vermilion = the gap only,
+ *    teal = the deliverable, amber reserved for assumptions elsewhere.
+ *
+ * The global reduced-motion rule in base.css collapses every animation
+ * and transition here to 0.01ms — reduced-motion users get the same
+ * chapters as stable end states with manual advance.
+ */
+
+/* ---------- Section + the fixed window ---------- */
+.rf-pres {
+  padding-inline: var(--rf-gutter);
+  padding-block-start: var(--rf-space-5);
+  max-inline-size: calc(var(--rf-max-width) + 2 * var(--rf-gutter));
+  margin-inline: auto;
+}
+.rf-pres__frame {
+  position: relative;
+  /* Strict 16:9; on short viewports the width shrinks instead of the
+     ratio breaking. */
+  inline-size: min(100%, calc((100vh - 140px) * 16 / 9));
+  margin-inline: auto;
+  aspect-ratio: 16 / 9;
+  min-block-size: 400px;
+  background: var(--rf-data);
+  border-radius: var(--rf-radius-panel);
+  color: var(--rf-ink-text);
+  overflow: clip;
+  box-shadow: var(--rf-shadow-overlay);
+}
+/* Faint ledger texture on cobalt — decorative, never under text. */
+.rf-pres__frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--rf-ink-text) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--rf-ink-text) 6%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+}
+.rf-pres__stage {
+  position: absolute;
+  inset: 0;
+}
+.rf-pres__fiction {
+  position: absolute;
+  inset-block-start: var(--rf-space-3);
+  inset-inline-start: var(--rf-space-4);
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rf-space-1);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px var(--rf-space-2);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--rf-ink-text) 14%, transparent);
+  color: var(--rf-ink-text);
+}
+html[lang="ar"] .rf-pres__fiction {
+  font-size: 13px;
+}
+
+/* ---------- The three artifacts — hard edges, offset ink shadow ------ */
+.rf-pres-art {
+  position: absolute;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-1);
+  max-block-size: 90%;
+  overflow: clip;
+  transition:
+    inset-inline-start 560ms var(--rf-ease),
+    inset-block-start 560ms var(--rf-ease),
+    inline-size 560ms var(--rf-ease),
+    opacity 420ms var(--rf-ease),
+    transform 560ms var(--rf-ease);
+}
+.rf-pres-art > .rf-pres-sheet,
+.rf-pres-art > .rf-pres-chart,
+.rf-pres-art > .rf-pres-report,
+.rf-pres-art .rf-pres-sheet,
+.rf-pres-art .rf-pres-chart,
+.rf-pres-art .rf-pres-report {
+  border: 1px solid color-mix(in srgb, var(--rf-ink) 24%, transparent);
+  box-shadow: 10px 12px 0 rgb(20 37 46 / 8%);
+}
+.rf-pres-art__cap {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rf-ink-text);
+  opacity: 0.85;
+}
+html[lang="ar"] .rf-pres-art__cap {
+  letter-spacing: normal;
+  font-size: 12px;
+  text-transform: none;
+}
+
+/* S1 — triad at rest: sheet left-back, chart mid, report right-front. */
+[data-chapter="result"] .rf-pres-art--sheet {
+  inset-inline-start: 4%;
+  inset-block-start: 15%;
+  inline-size: 33%;
+  z-index: 1;
+}
+[data-chapter="result"] .rf-pres-art--chart {
+  inset-inline-start: 35%;
+  inset-block-start: 30%;
+  inline-size: 32%;
+  z-index: 2;
+}
+[data-chapter="result"] .rf-pres-art--report {
+  inset-inline-start: 63%;
+  inset-block-start: 9%;
+  inline-size: 33%;
+  z-index: 3;
+}
+/* Transition — the marked range meets the chart; report waits, dimmed. */
+[data-chapter="transform"] .rf-pres-art--sheet {
+  inset-inline-start: 4%;
+  inset-block-start: 12%;
+  inline-size: 37%;
+  z-index: 3;
+}
+[data-chapter="transform"] .rf-pres-art--chart {
+  inset-inline-start: 50%;
+  inset-block-start: 16%;
+  inline-size: 44%;
+  z-index: 4;
+}
+[data-chapter="transform"] .rf-pres-art--report {
+  inset-inline-start: 80%;
+  inset-block-start: 68%;
+  inline-size: 17%;
+  z-index: 1;
+  opacity: 0.35;
+  transform: scale(0.92);
+}
+/* Held ending — the report is the subject; the rest recedes. */
+[data-chapter="report"] .rf-pres-art--report {
+  inset-inline-start: 4%;
+  inset-block-start: 8%;
+  inline-size: 46%;
+  z-index: 4;
+}
+[data-chapter="report"] .rf-pres-art--chart {
+  inset-inline-start: 3%;
+  inset-block-start: 72%;
+  inline-size: 22%;
+  z-index: 1;
+  opacity: 0.4;
+}
+[data-chapter="report"] .rf-pres-art--sheet {
+  inset-inline-start: 27%;
+  inset-block-start: 76%;
+  inline-size: 20%;
+  z-index: 1;
+  opacity: 0.3;
+}
+
+/* The connector the selected range travels along (transform chapter). */
+.rf-pres__link {
+  position: absolute;
+  z-index: 2;
+  inset-inline-start: 42%;
+  inset-block-start: 30%;
+  inline-size: 9%;
+  block-size: 2px;
+  background: color-mix(in srgb, var(--rf-ink-text) 45%, transparent);
+  transform-origin: inline-start;
+  opacity: 0;
+}
+[data-chapter="transform"] .rf-pres__link {
+  opacity: 1;
+  animation: rf-link-draw 480ms var(--rf-ease) 120ms both;
+}
+@keyframes rf-link-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+/* A coral carrier rides the connector — the mark in transit. */
+.rf-pres__link::after {
+  content: "";
+  position: absolute;
+  inset-block-start: -3px;
+  inset-inline-start: 0;
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 50%;
+  background: var(--rf-attention);
+  opacity: 0;
+}
+@keyframes rf-carrier {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(calc(100% + 56px));
+  }
+}
+[data-chapter="transform"] .rf-pres__link::after {
+  animation: rf-carrier 900ms var(--rf-ease) 350ms both;
+}
+[dir="rtl"] [data-chapter="transform"] .rf-pres__link::after {
+  animation-name: rf-carrier-rtl;
+}
+@keyframes rf-carrier-rtl {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(calc(-100% - 56px));
+  }
+}
+
+/* ---------- Artifact surfaces ---------- */
+.rf-pres-sheet,
+.rf-pres-chart,
+.rf-pres-report {
+  background: var(--rf-surface);
+  color: var(--rf-ink);
+  border-radius: var(--rf-radius-control);
+}
+/* Worksheet fragment — legible cells, source headers as authored. */
+.rf-pres-sheet {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  table-layout: fixed;
+}
+.rf-pres-sheet th {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--rf-text-muted);
+  padding: var(--rf-space-1) var(--rf-space-2);
+  border-block-end: 1px solid var(--rf-divider);
+  text-align: start;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rf-pres-sheet td {
+  padding: 6px var(--rf-space-2);
+  border-block-end: 1px solid var(--rf-divider);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--rf-ink);
+}
+/* The revenue column is the selected range — the cell chrome. */
+.rf-pres-sheet .rf-pres-sheet__mark {
+  background: color-mix(in srgb, var(--rf-data) 10%, var(--rf-surface));
+  box-shadow: inset 0 0 0 1px var(--rf-data);
+}
+/* Each selected cell flashes in sequence as its mark draws on the chart —
+   one pulse per row, the transition's contribution beat. */
+@keyframes rf-cell-lit {
+  0% {
+    background: color-mix(in srgb, var(--rf-data) 10%, var(--rf-surface));
+  }
+  40% {
+    background: color-mix(in srgb, var(--rf-attention) 28%, var(--rf-surface));
+  }
+  100% {
+    background: color-mix(in srgb, var(--rf-data) 10%, var(--rf-surface));
+  }
+}
+[data-chapter="transform"] .rf-pres-art--sheet .rf-pres-sheet__mark {
+  animation: rf-cell-lit 620ms var(--rf-ease);
+  animation-delay: calc(300ms + var(--i) * 150ms);
+}
+
+/* Chart — real labels, cobalt marks, vermilion reserved for the gap. */
+.rf-pres-chart {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  padding: var(--rf-space-2);
+}
+.rf-pres-chart__axis {
+  stroke: var(--rf-ink);
+  stroke-width: 1.5;
+}
+.rf-pres-chart__bar {
+  fill: var(--rf-data);
+  transform-box: fill-box;
+  transform-origin: bottom;
+}
+.rf-pres-chart__tick {
+  stroke: var(--rf-ink);
+  stroke-width: 1.5;
+}
+.rf-pres-chart__label {
+  font-family: var(--rf-font-body);
+  font-size: 8px;
+  fill: var(--rf-text-muted);
+}
+/* S1 rest: the stage chart's marks are not yet drawn — only the table and
+   its labeled axes stand. In the transform chapter the bars grow in the
+   same order their cells pulsed; the held report keeps them settled. */
+.rf-pres-art--chart .rf-pres-chart__bar {
+  transform: scaleY(0);
+}
+[data-chapter="transform"] .rf-pres-art--chart .rf-pres-chart__bar,
+[data-chapter="report"] .rf-pres-art--chart .rf-pres-chart__bar {
+  transform: scaleY(1);
+}
+[data-chapter="transform"] .rf-pres-art--chart .rf-pres-chart__bar {
+  animation: rf-bar-grow 640ms var(--rf-ease) both;
+  animation-delay: calc(480ms + var(--i) * 150ms);
+}
+@keyframes rf-bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+/* The report card's own chart is always finished. */
+.rf-pres-report .rf-pres-chart__bar {
+  transform: none;
+}
+
+/* Vermilion delta bracket — the gap, and only the gap. */
+.rf-pres-delta {
+  opacity: 0;
+}
+.rf-pres-delta__bracket {
+  fill: none;
+  stroke: var(--rf-attention);
+  stroke-width: 2;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.rf-pres-delta__span {
+  stroke: var(--rf-attention);
+  stroke-width: 1.25;
+  stroke-dasharray: 3 3;
+}
+.rf-pres-delta__value {
+  font-family: var(--rf-font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  fill: var(--rf-negative);
+}
+/* Three sub-steps over ~600ms: bracket stroke, gap span, delta value. */
+[data-chapter="transform"] .rf-pres-art--chart .rf-pres-delta {
+  opacity: 1;
+  animation: rf-fade-in 120ms linear 1450ms backwards;
+}
+[data-chapter="transform"] .rf-pres-art--chart .rf-pres-delta__bracket {
+  animation: rf-draw 380ms var(--rf-ease) 1450ms backwards;
+  stroke-dashoffset: 0;
+}
+@keyframes rf-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+[data-chapter="transform"] .rf-pres-art--chart .rf-pres-delta__span {
+  animation: rf-fade-in 160ms linear 1650ms backwards;
+}
+[data-chapter="transform"] .rf-pres-art--chart .rf-pres-delta__value {
+  animation: rf-fade-in 160ms linear 1800ms backwards;
+}
+@keyframes rf-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+[data-chapter="report"] .rf-pres-art--chart .rf-pres-delta {
+  opacity: 1;
+}
+/* The finished report's inner chart carries its bracket already drawn. */
+.rf-pres-report .rf-pres-delta {
+  opacity: 1;
+}
+
+/* ---------- Report page — teal spine marks the deliverable ---------- */
+.rf-pres-report {
+  padding: var(--rf-space-4);
+  border-inline-start: 5px solid var(--rf-positive);
+}
+.rf-pres-report__head {
+  margin-block-end: var(--rf-space-2);
+}
+.rf-pres-report__title {
+  margin: 0;
+  font-size: clamp(14px, 1.6vw, 20px);
+  font-weight: 600;
+  line-height: 1.2;
+}
+html[lang="ar"] .rf-pres-report__title {
+  font-size: clamp(15px, 1.7vw, 21px);
+}
+.rf-pres-report__period {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: var(--rf-text-muted);
+}
+html[lang="ar"] .rf-pres-report__period {
+  font-size: 12px;
+}
+.rf-pres-report__obs {
+  margin: var(--rf-space-2) 0 0;
+  font-size: clamp(11px, 1.1vw, 14px);
+  line-height: 1.55;
+}
+html[lang="ar"] .rf-pres-report__obs {
+  font-size: clamp(12px, 1.2vw, 15px);
+}
+.rf-pres-report__proof {
+  display: flex;
+  align-items: center;
+  gap: var(--rf-space-2);
+  margin: var(--rf-space-2) 0 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--rf-positive-text);
+}
+.rf-pres-report__proof .rf-icon {
+  color: var(--rf-positive);
+  flex: none;
+}
+/* The compact resting state (S1 + transform) reads as a cover card —
+   head + chart only; body copy appears when the report lifts forward. */
+[data-chapter="result"] .rf-pres-art--report .rf-pres-report__obs,
+[data-chapter="result"] .rf-pres-art--report .rf-pres-report__proof,
+[data-chapter="transform"] .rf-pres-art--report .rf-pres-report__obs,
+[data-chapter="transform"] .rf-pres-art--report .rf-pres-report__proof {
+  display: none;
+}
+[data-chapter="result"] .rf-pres-art--report .rf-pres-report,
+[data-chapter="transform"] .rf-pres-art--report .rf-pres-report {
+  padding: var(--rf-space-3);
+}
+
+/* ---------- Held ending: credit + actions beside the report ---------- */
+.rf-pres-end__aside {
+  position: absolute;
+  z-index: 5;
+  inset-inline-start: 56%;
+  inset-block-start: 10%;
+  inline-size: 40%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-4);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 420ms var(--rf-ease) 300ms, transform 420ms var(--rf-ease) 300ms,
+    visibility 0ms 720ms;
+}
+[data-chapter="report"] .rf-pres-end__aside {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition-delay: 300ms, 300ms, 0ms;
+}
+.rf-pres-end__credit {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--rf-ink-text);
+}
+html[lang="ar"] .rf-pres-end__credit {
+  letter-spacing: normal;
+  font-size: 16px;
+}
+.rf-pres-end__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-2);
+  align-items: stretch;
+  max-inline-size: 330px;
+}
+/* Teal = the deliverable — the end-of-story primary action. */
+.rf-btn.rf-pres-cta {
+  background: var(--rf-positive);
+  border-color: var(--rf-positive);
+  color: var(--rf-ink-text);
+}
+.rf-btn.rf-pres-cta:hover:not(:disabled) {
+  background: var(--rf-positive-text);
+  border-color: var(--rf-positive-text);
+}
+/* Ghost actions on cobalt keep ink-text foreground. */
+.rf-pres-end__actions .rf-btn--ghost,
+.rf-pres-end__actions .rf-btn--secondary {
+  border-color: color-mix(in srgb, var(--rf-ink-text) 45%, transparent);
+  color: var(--rf-ink-text);
+  background: transparent;
+}
+.rf-pres-end__actions .rf-btn--secondary {
+  background: color-mix(in srgb, var(--rf-ink-text) 10%, transparent);
+}
+.rf-pres-end__actions .rf-btn--ghost:hover,
+.rf-pres-end__actions .rf-btn--secondary:hover {
+  border-color: var(--rf-ink-text);
+  background: color-mix(in srgb, var(--rf-ink-text) 16%, transparent);
+}
+
+/* ---------- The ink pill — transport + progress + label + entry ------ */
+.rf-pres__controls {
+  position: relative;
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rf-space-4);
+  inline-size: fit-content;
+  margin-inline: auto;
+  margin-block-start: -26px;
+  padding: 6px var(--rf-space-4);
+  border-radius: 999px;
+  background: var(--rf-ink);
+  color: var(--rf-ink-text);
+  box-shadow: var(--rf-shadow-overlay);
+}
+.rf-pres__transport {
+  display: flex;
+  gap: var(--rf-space-1);
+}
+.rf-pres__tbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--rf-ink-text);
+  cursor: pointer;
+  transition: background var(--rf-hover-ms) var(--rf-ease);
+}
+.rf-pres__tbtn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--rf-ink-text) 14%, transparent);
+}
+.rf-pres__tbtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.rf-pres__tbtn--primary {
+  background: var(--rf-data);
+  color: var(--rf-ink-text);
+}
+.rf-pres__tbtn--primary:hover:not(:disabled) {
+  background: var(--rf-ink-data);
+  color: var(--rf-ink);
+}
+.rf-pres__chapters {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: var(--rf-space-2);
+}
+.rf-pres__dot {
+  inline-size: 10px;
+  block-size: 10px;
+  padding: 0;
+  border-radius: 50%;
+  border: none;
+  background: color-mix(in srgb, var(--rf-ink-text) 34%, transparent);
+  cursor: pointer;
+  transition: background var(--rf-hover-ms) var(--rf-ease), transform var(--rf-hover-ms) var(--rf-ease);
+}
+.rf-pres__dot[data-active] {
+  background: var(--rf-ink-data);
+  transform: scale(1.3);
+}
+.rf-pres__dot[data-done] {
+  background: var(--rf-ink-positive);
+}
+.rf-pres__label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--rf-ink-muted);
+  white-space: nowrap;
+}
+html[lang="ar"] .rf-pres__label {
+  font-size: 13px;
+}
+.rf-pres__count {
+  color: var(--rf-ink-muted);
+  font-size: 11px;
+}
+.rf-pres__entry {
+  border: 1px solid var(--rf-ink-rule);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--rf-ink-text);
+  font-family: var(--rf-font-body);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px var(--rf-space-3);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color var(--rf-hover-ms) var(--rf-ease), background var(--rf-hover-ms) var(--rf-ease);
+}
+html[lang="ar"] .rf-pres__entry {
+  font-size: 13px;
+}
+.rf-pres__entry:hover {
+  border-color: var(--rf-ink-data);
+  background: color-mix(in srgb, var(--rf-ink-text) 10%, transparent);
+}
+.rf-pres__tbtn:focus-visible,
+.rf-pres__dot:focus-visible,
+.rf-pres__entry:focus-visible {
+  outline: 2px solid var(--rf-ink-data);
+  outline-offset: 2px;
+}
+
+/* ---------- Scene narration + page headline (ivory, below the window) - */
+.rf-pres__caption {
+  margin: var(--rf-space-5) 0 0;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--rf-text-muted);
+}
+html[lang="ar"] .rf-pres__caption {
+  font-size: 16px;
+}
+.rf-pres__intro {
+  max-inline-size: 46em;
+  margin-block-start: var(--rf-space-6);
+}
+.rf-pres__title {
+  font-size: clamp(30px, 4.6vw, 52px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  margin: 0;
+  max-inline-size: 18em;
+}
+html[lang="ar"] .rf-pres__title {
+  letter-spacing: normal;
+}
+.rf-pres__body {
+  margin-block: var(--rf-space-3) 0;
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--rf-text-muted);
+  max-inline-size: 42ch;
+}
+html[lang="ar"] .rf-pres__body {
+  font-size: 19px;
+  max-inline-size: 52ch;
+}
+.rf-pres__credit {
+  margin-block: var(--rf-space-3) 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--rf-text-muted);
+}
+html[lang="ar"] .rf-pres__credit {
+  letter-spacing: normal;
+  font-size: 14px;
+}
+
+/* ---------- ≤900px: artifacts stack in flow; controls dock below ------ */
+@media (max-width: 900px) {
+  .rf-pres__frame {
+    aspect-ratio: auto;
+    min-block-size: 0;
+    inline-size: 100%;
+  }
+  .rf-pres__stage {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    gap: var(--rf-space-3);
+    padding: var(--rf-space-5) var(--rf-space-4) var(--rf-space-6);
+    padding-block-start: var(--rf-space-7);
+  }
+  /* [data-chapter] selector keeps specificity level with the per-chapter
+     rules above so this override wins on order. */
+  [data-chapter] .rf-pres-art {
+    position: static;
+    inline-size: 100%;
+    max-block-size: none;
+    overflow: visible;
+  }
+  .rf-pres-art__cap {
+    display: none;
+  }
+  /* The active chapter's subject is full-size; companions stay present
+     but recede — the same story read as a column. */
+  [data-chapter="result"] .rf-pres-art {
+    opacity: 1;
+  }
+  [data-chapter="transform"] .rf-pres-art--report {
+    opacity: 0.4;
+    max-block-size: 120px;
+    overflow: clip;
+    transform: none;
+  }
+  [data-chapter="report"] .rf-pres-art--sheet,
+  [data-chapter="report"] .rf-pres-art--chart {
+    opacity: 0.35;
+    max-block-size: 110px;
+    overflow: clip;
+    transform: none;
+  }
+  .rf-pres__link {
+    position: static;
+    inline-size: 2px;
+    block-size: 36px;
+    margin-inline: auto;
+    transform-origin: top;
+  }
+  [data-chapter="transform"] .rf-pres__link {
+    animation-name: rf-link-draw-y;
+  }
+  @keyframes rf-link-draw-y {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+  .rf-pres__link::after {
+    inset-inline-start: -3px;
+    inset-block-start: 0;
+  }
+  @keyframes rf-carrier-y {
+    0% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    85% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(36px);
+    }
+  }
+  [data-chapter="transform"] .rf-pres__link::after,
+  [dir="rtl"] [data-chapter="transform"] .rf-pres__link::after {
+    animation-name: rf-carrier-y;
+  }
+  .rf-pres-end__aside {
+    position: static;
+    inline-size: 100%;
+    transform: none;
+    transition: opacity 420ms var(--rf-ease) 300ms, visibility 0ms 720ms;
+  }
+  .rf-pres-end__actions {
+    max-inline-size: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  /* The pill docks under the window, never over the subject. */
+  .rf-pres__controls {
+    margin-block-start: var(--rf-space-3);
+    gap: var(--rf-space-3);
+    flex-wrap: wrap;
+    border-radius: var(--rf-radius-panel);
+    padding: var(--rf-space-2) var(--rf-space-4);
+  }
+  .rf-pres__label {
+    order: 3;
+    flex-basis: 100%;
+    text-align: center;
+  }
+}
+@media (max-width: 767px) {
+  .rf-pres {
+    padding-inline: var(--rf-space-4);
+    padding-block-start: var(--rf-space-4);
+  }
+  .rf-pres__intro {
+    margin-block-start: var(--rf-space-5);
+  }
+}

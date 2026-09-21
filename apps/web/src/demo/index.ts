@@ -23,3 +23,11 @@ export type {
 } from "./controller.ts";
 export { GuideBar } from "./GuideBar.tsx";
 export type { GuideBarProps } from "./GuideBar.tsx";
+export { PresentationController } from "./presentation.ts";
+export type {
+  PresentationChapterDef,
+  PresentationControllerOptions,
+  PresentationScheduler,
+  PresentationState,
+  PresentationStatus,
+} from "./presentation.ts";
