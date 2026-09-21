@@ -140,6 +140,13 @@ html[lang='ar'] .rf-stage-scope {
   margin-block-start: 2px;
 }
 
+/* KPI unit badges are atomic tokens — 'USD' must never split as U/S/D on
+   narrow viewports. (The badge element itself lives in @rowfolio/ui; the
+   nowrap override stays scoped to the workspace.) */
+.rf-workspace .rf-metric__unit {
+  white-space: nowrap;
+}
+
 /* KPI denominators — "97 / 100 records" under each headline number. */
 .rf-metric-scope {
   font-size: 12px;

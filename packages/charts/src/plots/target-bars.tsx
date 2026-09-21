@@ -37,12 +37,46 @@ interface TargetRow {
   anchor: DatumAnchor;
 }
 
+interface TargetTick {
+  tick: number;
+  /** Gridline x (true tick position). */
+  x: number;
+  /** Label center x, clamped inside the plot so edge labels cannot clip. */
+  cx: number;
+  /** Estimated rendered width; currency ticks emit full precision. */
+  w: number;
+  label: string;
+}
+
 interface TargetLayout {
   rows: TargetRow[];
   anchors: Record<string, DatumAnchor>;
   plotWidth: number;
-  tickXs: { tick: number; x: number }[];
+  ticks: TargetTick[];
+  /** Subset of ticks whose labels render without colliding. */
+  labeledTicks: TargetTick[];
   xOf: (v: number) => number;
+}
+
+const TICK_GLYPH_W = 7;
+const TICK_GAP = 10;
+
+/** Keep the max label (defines the scale), then the zero label, then interior
+ * ticks from the right — dropping any whose estimated box would collide. */
+function thinTicks(ticks: TargetTick[]): TargetTick[] {
+  const n = ticks.length;
+  const order = [n - 1, 0];
+  for (let i = n - 2; i >= 1; i--) order.push(i);
+  const kept: TargetTick[] = [];
+  const fits = (e: TargetTick) =>
+    kept.every(
+      (k) => e.cx + e.w / 2 + TICK_GAP <= k.cx - k.w / 2 || k.cx + k.w / 2 + TICK_GAP <= e.cx - e.w / 2,
+    );
+  for (const i of order) {
+    const e = ticks[i]!;
+    if (fits(e)) kept.push(e);
+  }
+  return kept.sort((a, b) => a.cx - b.cx);
 }
 
 export function layoutTarget(ctx: PlotContext, keys: string[], labelCol: number): TargetLayout {
@@ -75,11 +109,24 @@ export function layoutTarget(ctx: PlotContext, keys: string[], labelCol: number)
     anchors[p.key] = { x: labelCol + row.anchor.x, y: row.anchor.y };
     rows.push(row);
   });
+  const ticks: TargetTick[] = model.ticks.map((tick) => {
+    const label = formatAxisTick(tick, model.spec.unit, ctx.formatters);
+    const w = label.length * TICK_GLYPH_W;
+    const xi = x(tick);
+    return {
+      tick,
+      x: xi,
+      cx: Math.min(Math.max(xi, w / 2), Math.max(plotWidth - w / 2, w / 2)),
+      w,
+      label,
+    };
+  });
   return {
     rows,
     anchors,
     plotWidth,
-    tickXs: model.ticks.map((tick) => ({ tick, x: x(tick) })),
+    ticks,
+    labeledTicks: thinTicks(ticks),
     xOf: x,
   };
 }
@@ -232,19 +279,20 @@ export function TargetBarsPlot({ ctx }: { ctx: PlotContext }) {
           direction="ltr" unicodeBidi="isolate"
         >
           <g aria-hidden="true">
-            {layout.tickXs.map(({ tick, x }) => (
-              <g key={tick}>
-                <line
-                  x1={x}
-                  x2={x}
-                  y1={0}
-                  y2={height - 22}
-                  className="rf-chart-grid__line"
-                />
-                <text x={x} y={height - 4} textAnchor="middle" className="rf-chart-tick" direction="ltr" unicodeBidi="isolate">
-                  {formatAxisTick(tick, model.spec.unit, ctx.formatters)}
-                </text>
-              </g>
+            {layout.ticks.map(({ tick, x }) => (
+              <line
+                key={tick}
+                x1={x}
+                x2={x}
+                y1={0}
+                y2={height - 22}
+                className="rf-chart-grid__line"
+              />
+            ))}
+            {layout.labeledTicks.map(({ tick, cx, label }) => (
+              <text key={tick} x={cx} y={height - 4} textAnchor="middle" className="rf-chart-tick" direction="ltr" unicodeBidi="isolate">
+                {label}
+              </text>
             ))}
             <line
               x1={layout.xOf(0)}
