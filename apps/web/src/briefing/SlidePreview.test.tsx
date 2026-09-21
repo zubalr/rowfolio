@@ -44,8 +44,11 @@ describe('SlidePreview parity with ExportModel', () => {
   it('renders chart marks scaled from the model points', () => {
     const html = renderSlide(EN, 'finding');
     const chart = EN.charts.find((c) => c.id === 'chart-north-target')!;
-    // 881000 / 1100000 ≈ 80% height on the observed bar.
-    expect(html).toContain('height:80.');
+    // 881000 / 1100000 on the 88% track = 70.48% height on the observed
+    // bar; the value readout rides above the mark ('USD 881k').
+    expect(html).toContain('height:70.48%');
+    expect(html).toContain('USD 881k');
+    expect(html).toContain('Actual / Target');
     expect(chart.points[0]!.values.actual).toBe('881000');
   });
 

@@ -95,7 +95,11 @@ export function exportUnitLabel(unit: Unit): string {
   }
 }
 
-/** Required sample metric ids that unlock the pre-authored narrative. */
+/**
+ * Metric ids only the versioned sample rule pack emits (packages/analysis
+ * gates them behind samplePolicyId), so their presence identifies the sample
+ * regardless of whether a scenario was committed.
+ */
 const SAMPLE_REQUIRED_IDS = [
   'june-revenue',
   'june-operating-cost',
@@ -103,16 +107,16 @@ const SAMPLE_REQUIRED_IDS = [
   'june-margin',
   'north-target-gap',
   'north-orders-change',
-  'scenario-margin',
-  'scenario-contribution',
 ];
 
+/**
+ * Sample-ness is a property of the analyzed data, not of whether a scenario
+ * was committed — a baseline export of the sample is still the example
+ * report, and must not be titled 'User upload'.
+ */
 export function isSampleModel(snapshot: AnalysisSnapshot, scenario: ScenarioResult | null): boolean {
-  if (scenario === null || scenario.status !== 'defined') return false;
-  const ids = new Set([
-    ...snapshot.metrics.map((m) => m.id),
-    ...scenario.metrics.map((m) => m.id),
-  ]);
+  void scenario;
+  const ids = new Set(snapshot.metrics.map((m) => m.id));
   return SAMPLE_REQUIRED_IDS.every((id) => ids.has(id));
 }
 
@@ -123,26 +127,26 @@ interface SlideCopy {
 
 const SAMPLE_TITLES: Record<Locale, string[]> = {
   en: [
-    'From rows to a clear briefing',
+    'Monthly operations report',
     'June at a glance',
     'More orders. Below target.',
-    'Test a cost assumption',
+    'Change operating costs',
     'What changed in the data',
     'Inspect before acting',
   ],
   ar: [
-    'من الصفوف إلى إحاطة واضحة',
+    'تقرير العمليات الشهري',
     'يونيو في لمحة',
     'طلبات أكثر وإيرادات دون المستهدف',
-    'اختبر افتراضاً للتكاليف',
+    'غيّر تكاليف التشغيل',
     'ما الذي تغيّر في البيانات؟',
     'تحقّق قبل اتخاذ القرار',
   ],
 };
 
-const SAMPLE_SUBTITLES: Record<Locale, string> = {
-  en: 'Synthetic reference / June 2026',
-  ar: 'نموذج اصطناعي مرجعي / يونيو ٢٠٢٦',
+const SAMPLE_SUBTITLE_PREFIX: Record<Locale, string> = {
+  en: 'Example analysis',
+  ar: 'تحليل المثال',
 };
 
 const GENERIC_TITLES: Record<Locale, string[]> = {
@@ -177,9 +181,12 @@ function slideCopy(
   isSample: boolean,
 ): SlideCopy {
   if (isSample) {
+    // Period resolves through the model's numbering system so the subtitle's
+    // digits match the rest of the deck (يونيو 2026 vs يونيو ٢٠٢٦).
+    const period = periodLabel(snapshot.scope.periodStart, snapshot.scope.periodEnd, locale, numbering);
     return {
       title: (SAMPLE_TITLES[locale][index] as string),
-      subtitle: SAMPLE_SUBTITLES[locale],
+      subtitle: `${SAMPLE_SUBTITLE_PREFIX[locale]} · ${period}`,
     };
   }
   const period = periodLabel(snapshot.scope.periodStart, snapshot.scope.periodEnd, locale, numbering);
@@ -379,7 +386,7 @@ export function buildExportModel(
       metricIds: [],
       findingIds: leadFinding !== undefined ? [leadFinding.id] : [],
       chartIds: [],
-      notes: [`scope:${scopeText}`, recordsNote, isSample ? 'synthetic reference' : 'user upload'],
+      notes: [`scope:${scopeText}`, recordsNote, isSample ? 'example analysis' : 'user upload'],
     },
     {
       kind: 'kpis',

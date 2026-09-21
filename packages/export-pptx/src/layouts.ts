@@ -23,7 +23,7 @@ import type {
   Metric,
   SlideModel,
 } from '@rowfolio/contracts';
-import { exportUnitLabel } from '@rowfolio/export-model';
+import { exportUnitLabel, periodLabel } from '@rowfolio/export-model';
 import { ExportPptxError } from './presentation.ts';
 import { hasLabel, label, metricDisplayName, scopeText } from './labels.ts';
 import {
@@ -217,6 +217,42 @@ function findingSpanTokens(ctx: LayoutContext, finding: Finding): string | null 
   return seen.size > tokens.length ? `${tokens.join(', ')} +${seen.size - tokens.length}` : tokens.join(', ');
 }
 
+/**
+ * Every body run goes through the per-script split so Arabic segments declare
+ * the complex-script face rather than relying on an implicit theme fallback;
+ * caller options carry over, and breakLine stays on the last segment only.
+ */
+function scriptRuns(ctx: LayoutContext, runs: TextRun[]): TextRun[] {
+  const out: TextRun[] = [];
+  for (const run of runs) {
+    const { breakLine, ...rest } = run.options ?? {};
+    // Same-script neighbours merge back into one run so values like
+    // 'USD 6.00m' stay contiguous in the XML while true Arabic segments
+    // still get the declared complex-script face.
+    const merged: Array<{ text: string; options: { rtlMode: boolean; fontFace: string } }> = [];
+    for (const piece of runsFor(run.text ?? '', ctx.locale)) {
+      const prev = merged[merged.length - 1];
+      if (prev !== undefined && prev.options.fontFace === piece.options.fontFace) {
+        prev.text += piece.text;
+      } else {
+        merged.push({ text: piece.text, options: { ...piece.options } });
+      }
+    }
+    merged.forEach((piece, i) => {
+      const last = i === merged.length - 1;
+      out.push({
+        text: piece.text,
+        options: {
+          ...rest,
+          ...piece.options,
+          ...(breakLine !== undefined && last ? { breakLine } : {}),
+        },
+      });
+    });
+  }
+  return out;
+}
+
 function textBox(
   ctx: LayoutContext,
   name: string,
@@ -225,7 +261,7 @@ function textBox(
 ): void {
   const plain = runs.map((r) => r.text ?? '').join('');
   fitGuard(ctx.slide.id, name, plain, box.fontSize, box.w, box.h);
-  ctx.deck.addText(runs, {
+  ctx.deck.addText(scriptRuns(ctx, runs), {
     x: mx(ctx, box.x, box.w), y: box.y, w: box.w, h: box.h,
     fontSize: box.fontSize, fontFace: FONT,
     color: box.color ?? INK, bold: box.bold ?? false,
@@ -314,6 +350,7 @@ export function chartBox(
   // money keep the general format. (Labels never alter the cached values.)
   const labelFormat = chart.unit.kind === 'ratio' ? '0%' : undefined;
   const axisFont = ctx.rtl ? FONT_AR : FONT;
+  const unitText = exportUnitLabel(chart.unit);
   ctx.deck.addChart('bar', data, {
     x: mx(ctx, box.x, box.w), y: box.y, w: box.w, h: box.h,
     barDir: 'col',
@@ -331,9 +368,26 @@ export function chartBox(
     dataLabelFontSize: 10,
     dataLabelFontFace: axisFont,
     ...(labelFormat !== undefined ? { dataLabelFormatCode: labelFormat } : {}),
+    // The accessible data table under the plot: exact values plus the named
+    // series keys, so the figures survive without relying on label placement.
+    showDataTable: true,
+    showDataTableKeys: seriesIds.length > 1,
+    showDataTableHorzBorder: true,
+    showDataTableOutline: true,
+    showDataTableVerticalBorder: false,
+    dataTableFontSize: 9,
+    dataTableFontFace: axisFont,
+    dataTableColor: GRAY,
+    dataTableBorderColor: RULE,
+    ...(labelFormat !== undefined ? { dataTableFormatCode: labelFormat } : {}),
     chartColors: colors,
     valAxisMinVal: Number(chart.domain.min),
     valAxisMaxVal: Number(chart.domain.max),
+    // Unit context on the value axis; series names come from the legend.
+    ...(unitText !== '' ? { valAxisTitle: unitText, showValAxisTitle: true } : {}),
+    valAxisTitleFontSize: 10,
+    valAxisTitleColor: GRAY,
+    valAxisTitleFontFace: axisFont,
     valGridLine: { color: RULE, size: 0.5 },
     catAxisLineColor: GRAY,
     valAxisLineColor: GRAY,
@@ -343,6 +397,17 @@ export function chartBox(
     valAxisLabelFontSize: 10,
     valAxisLabelColor: GRAY,
     valAxisLabelFontFace: axisFont,
+  });
+  // Chart caption: title, the named comparison, unit and period — the figure
+  // stays readable detached from the surrounding slide copy.
+  const seriesNames = data.map((d) => d.name).join(' / ');
+  const period = periodLabel(chart.scope.periodStart, chart.scope.periodEnd, ctx.locale, ctx.model.numberingSystem);
+  const context = [seriesNames, unitText, period].filter((bit) => bit !== '').join(' · ');
+  textBox(ctx, 'chart-caption', [
+    { text: hasLabel(chart.titleKey) ? label(ctx.locale, chart.titleKey) : chart.titleKey, options: { bold: true, color: INK, breakLine: true } },
+    { text: context, options: { color: GRAY } },
+  ], {
+    x: box.x, y: box.y + box.h + 0.06, w: box.w, h: 0.72, fontSize: FOOT_SIZE, color: INK, valign: 'top',
   });
 }
 

@@ -12,7 +12,7 @@
  * matching the mx() flip the deck writer performs.
  */
 import type { ChartSpec, ExportModel, Finding, Metric, SlideModel } from '@rowfolio/contracts';
-import { exportUnitLabel } from '@rowfolio/export-model';
+import { exportUnitLabel, periodLabel } from '@rowfolio/export-model';
 import {
   formatCompact,
   formatInteger,
@@ -42,27 +42,65 @@ const SERIES_CLASS: Record<string, string> = {
   attention: 'rf-sp__bar--attention',
 };
 
-/** Column marks over the chart's real points, scaled to its declared domain. */
-function MiniChart({ chart }: { chart: ChartSpec }): ReactElement {
+/** Compact figure readout for a mark — compact currency, exact otherwise. */
+function chartValue(raw: string, chart: ChartSpec): string {
+  return chart.unit.kind === 'currency'
+    ? `${exportUnitLabel(chart.unit)} ${formatCompact(raw)}`.trim()
+    : formatMetricValue(raw, chart.unit);
+}
+
+/**
+ * Column marks over the chart's real points, scaled to its declared domain,
+ * with the value on each mark and the category under the baseline — the same
+ * figure anatomy the native chart part carries in the PPTX.
+ */
+function MiniChart({ model, chart }: { model: ExportModel; chart: ChartSpec }): ReactElement {
   const domainMax = Math.max(Number(chart.domain.max), 1);
+  const labelFor = (key: string, fallback: string): string =>
+    hasLabel(key) ? label(model.locale, key) : fallback;
+  const title = labelFor(chart.titleKey, chart.titleKey);
   return (
-    <div className="rf-sp__chart" dir="ltr" role="img" aria-label={chart.id}>
+    <div className="rf-sp__chart" dir="ltr" role="img" aria-label={title}>
       {chart.points.slice(0, 8).map((point) => (
         <div className="rf-sp__chart-group" key={point.key}>
-          {chart.series.map((series) => {
-            const raw = point.values[series.id];
-            const height = raw === undefined ? 0 : Math.max(0, Math.min(100, (Number(raw) / domainMax) * 100));
-            return (
-              <span
-                key={series.id}
-                className={`rf-sp__bar ${SERIES_CLASS[series.semantic] ?? 'rf-sp__bar--observed'}`}
-                style={{ height: `${height}%` }}
-              />
-            );
-          })}
+          <div className="rf-sp__bars">
+            {chart.series.map((series) => {
+              const raw = point.values[series.id];
+              const height = raw === undefined ? 0 : Math.max(0, Math.min(88, (Number(raw) / domainMax) * 88));
+              return (
+                <span className="rf-sp__barcell" key={series.id}>
+                  <span className="rf-sp__barval">{raw === undefined ? '' : chartValue(raw, chart)}</span>
+                  <span
+                    className={`rf-sp__bar ${SERIES_CLASS[series.semantic] ?? 'rf-sp__bar--observed'}`}
+                    style={{ height: `${height}%` }}
+                  />
+                </span>
+              );
+            })}
+          </div>
+          <span className="rf-sp__cat">{labelFor(point.labelKey, point.key)}</span>
         </div>
       ))}
     </div>
+  );
+}
+
+/** Title + named comparison + unit + period — mirrors the deck's chart caption. */
+function ChartCaption({ model, chart }: { model: ExportModel; chart: ChartSpec }): ReactElement {
+  const title = hasLabel(chart.titleKey) ? label(model.locale, chart.titleKey) : chart.titleKey;
+  const names = chart.series
+    .map((s) => (hasLabel(s.labelKey) ? label(model.locale, s.labelKey) : s.id))
+    .join(' / ');
+  const meta = [
+    names,
+    exportUnitLabel(chart.unit),
+    periodLabel(chart.scope.periodStart, chart.scope.periodEnd, model.locale, model.numberingSystem),
+  ].filter((bit) => bit !== '').join(' · ');
+  return (
+    <p className="rf-sp__chart-caption">
+      <span className="rf-sp__chart-title">{title}</span>
+      <span className="rf-sp__chart-meta">{meta}</span>
+    </p>
   );
 }
 
@@ -179,10 +217,8 @@ function FindingBody({
       </div>
       {chart !== undefined && (
         <div className="rf-sp__visual">
-          <MiniChart chart={chart} />
-          <p className="rf-sp__chart-caption">
-            {hasLabel(chart.titleKey) ? label(model.locale, chart.titleKey) : chart.titleKey}
-          </p>
+          <MiniChart model={model} chart={chart} />
+          <ChartCaption model={model} chart={chart} />
         </div>
       )}
     </div>
@@ -206,7 +242,8 @@ function ScenarioBody({ model, metrics, chart }: { model: ExportModel; metrics: 
       </div>
       {committed && chart !== undefined && (
         <div className="rf-sp__visual">
-          <MiniChart chart={chart} />
+          <MiniChart model={model} chart={chart} />
+          <ChartCaption model={model} chart={chart} />
         </div>
       )}
     </div>
@@ -233,7 +270,12 @@ function QualityBody({ model, metrics, chart }: { model: ExportModel; metrics: M
             </div>
           </div>
         ))}
-        {chart !== undefined && tracks.length === 0 && <MiniChart chart={chart} />}
+        {chart !== undefined && tracks.length === 0 && (
+          <>
+            <MiniChart model={model} chart={chart} />
+            <ChartCaption model={model} chart={chart} />
+          </>
+        )}
       </div>
       <div className="rf-sp__card">
         <p className="rf-sp__card-label">{label(model.locale, 'quality.reconciliation')}</p>
@@ -346,11 +388,13 @@ export function WorkbookPreview({ model, className }: WorkbookPreviewProps): Rea
     >
       <header className="rf-sp__mast">
         <span className="rf-sp__tick rf-sp__tick--sheet" aria-hidden="true" />
-        <p className="rf-sp__title rf-sp__title--file" dir="ltr" title={`rowfolio-${model.exportId}.xlsx`}>
+        <p className="rf-sp__title">{model.slides[0]?.title ?? label(model.locale, 'export.title')}</p>
+        <p className="rf-sp__subtitle rf-sp__title--file" dir="ltr" title={`rowfolio-${model.exportId}.xlsx`}>
           {model.exportId.length > 20 ? `rowfolio-${model.exportId.slice(0, 20)}….xlsx` : `rowfolio-${model.exportId}.xlsx`}
         </p>
-        <p className="rf-sp__subtitle">
-          {formatInteger(String(model.qualitySummary.retainedRows))} / {formatInteger(String(model.qualitySummary.rawRows))}
+        <p className="rf-sp__wrows">
+          {formatInteger(String(model.qualitySummary.retainedRows))} / {formatInteger(String(model.qualitySummary.rawRows))}{' '}
+          {label(model.locale, 'common.rows')}
         </p>
       </header>
       <ul className="rf-sp__sheets">

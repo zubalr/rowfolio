@@ -240,18 +240,37 @@ export const buildWorkbook = async (
     model.scope.regions.length > 0 ? model.scope.regions.join(', ') : sheetLabel(locale, 'common.allRegions'),
   ].join(' / ');
   let summaryRow = 1;
+  // The cover slide carries the report identity ('Monthly operations
+  // report' for the sample pack, 'Data briefing' for uploads); the summary
+  // page mirrors it so the workbook opens on the same title + context.
+  const cover = model.slides[0];
   const summaryTitle = summary.getRow(summaryRow);
-  summaryTitle.getCell(1).value = sheetLabel(locale, 'export.title');
+  summaryTitle.getCell(1).value = cover?.title ?? sheetLabel(locale, 'export.title');
   summaryTitle.getCell(1).font = { bold: true, size: 16, color: { argb: INK_ARGB } };
   for (const c of [1, 2]) {
     summaryTitle.getCell(c).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: PAPER_ARGB } };
-    summaryTitle.getCell(c).border = { bottom: RULE_BORDER };
   }
-  // Merge the banded title/header rows so Excel spans the text across the
-  // print width (LibreOffice still clips at the column edge — hence the
-  // 50-unit column A above).
   summary.mergeCells(`A${summaryRow}:B${summaryRow}`);
-  summaryRow += 2;
+  summaryRow += 1;
+  if (cover !== undefined && cover.subtitle !== '') {
+    const subtitleRow = summary.getRow(summaryRow);
+    subtitleRow.getCell(1).value = cover.subtitle;
+    subtitleRow.getCell(1).font = { size: 11, color: { argb: MUTED_ARGB } };
+    for (const c of [1, 2]) {
+      subtitleRow.getCell(c).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: PAPER_ARGB } };
+      subtitleRow.getCell(c).border = { bottom: RULE_BORDER };
+    }
+    // Merge the banded title/subtitle rows so Excel spans the text across the
+    // print width (LibreOffice still clips at the column edge — hence the
+    // 50-unit column A above).
+    summary.mergeCells(`A${summaryRow}:B${summaryRow}`);
+    summaryRow += 1;
+  } else {
+    summaryTitle.getCell(1).border = { bottom: RULE_BORDER };
+    summaryTitle.getCell(2).border = { bottom: RULE_BORDER };
+    summaryRow += 1;
+  }
+  summaryRow += 1;
   const observedHeader = summary.getRow(summaryRow);
   observedHeader.getCell(1).value = sheetLabel(locale, 'evidence.title');
   styleHeaderRow(observedHeader, 2);
@@ -352,7 +371,17 @@ export const buildWorkbook = async (
   const clean = get('clean');
   const dataColumns = [...model.table.columns];
   const headers = [...dataColumns.map((c) => c.id), 'source_sheet', 'source_row', 'record_id'];
-  clean.columns = headers.map((h) => ({ header: h, key: h, width: Math.max(12, Math.min(h.length + 4, 28)) }));
+  // Display headings: measure columns get the localized metric names, while
+  // identifier/provenance columns keep their raw ids (evidence surfaces stay
+  // technical, matching the Methodology field list).
+  const displayHeader = (id: string): string => {
+    const key = `metric.${id}`;
+    return hasSheetLabel(key) ? sheetLabel(locale, key) : id;
+  };
+  clean.columns = headers.map((h) => {
+    const header = displayHeader(h);
+    return { header, key: h, width: Math.max(12, Math.min(header.length + 4, 28)) };
+  });
   const cleanLetters = new Map<string, string>();
   headers.forEach((h, i) => cleanLetters.set(h, columnLetter(i + 1)));
   const cleanName = (byId.get('clean')?.name ?? 'Cleaned Data').replace(/'/g, "''");
@@ -373,7 +402,7 @@ export const buildWorkbook = async (
     headerRow: true,
     totalsRow: false,
     style: { theme: 'TableStyleMedium2', showRowStripes: true },
-    columns: headers.map((h) => ({ name: h, filterButton: true })),
+    columns: headers.map((h) => ({ name: displayHeader(h), filterButton: true })),
     rows: [],
   });
   clean.autoFilter = {

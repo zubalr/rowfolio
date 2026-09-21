@@ -174,12 +174,15 @@ describe('workbook structure', () => {
       const entries = unzip(new Uint8Array(artifact.bytes));
       const strings = textOf(entries, 'xl/sharedStrings.xml');
       if (locale === 'en') {
-        expect(strings).toContain('A report you can take with you.');
+        // The summary page opens on the report's cover identity, not the
+        // dataset: title from the model's cover slide plus its context line.
+        expect(strings).toContain('Monthly operations report');
+        expect(strings).toContain('Example analysis');
         expect(strings).toContain('Revenue');
         expect(strings).toContain('Change operating costs');
         expect(strings).toContain('Includes the 8% operating-cost scenario.');
       } else {
-        expect(strings).toContain('تقرير يمكنك الاحتفاظ به.');
+        expect(strings).toContain('تقرير العمليات الشهري');
         expect(strings).toContain('الإيرادات');
       }
       // Print areas keep every sheet self-contained on paper.
