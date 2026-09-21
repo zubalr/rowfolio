@@ -86,7 +86,7 @@
     if (!mobile) {
       g.sheet0 = rect(210, 76, 540, 388);
       g.sheet1 = rect(8, 106, 540, 388);
-      g.sheet2 = rect(-18, 118, 540, 388);
+      g.sheet2 = rect(0, 118, 540, 388);
       g.sheetS = [1, 0.85, 0.78];
       g.sheetO = [1, 1, 0.45];
       g.chartIn = rect(1040, 70, 430, 400);
