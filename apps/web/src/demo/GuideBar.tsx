@@ -12,8 +12,10 @@
 import { useEffect, useState } from "react";
 import { Button, VisuallyHidden } from "@rowfolio/ui";
 import type { I18n } from "@rowfolio/i18n";
+import { landingCopy, type CopyKey } from "../landing/copy.ts";
 import type { DemoController, GuideState } from "./controller.ts";
 import { GUIDE_STEPS } from "./controller.ts";
+import "./guide.css";
 
 export interface GuideBarProps {
   readonly controller: DemoController;
@@ -35,6 +37,10 @@ export function GuideBar({ controller, i18n, onOpenWorkspace, skipLabel }: Guide
   if (status === "idle") return null;
 
   const caption = step ? i18n.tSafe(step.captionKey) : "";
+  // One plain sentence of context before the step's figures (copy.ts).
+  const context = step
+    ? landingCopy(i18n.locale, `guide.context.${step.id}` as CopyKey)
+    : "";
   const nextStep = stepIndex + 1 < GUIDE_STEPS.length ? GUIDE_STEPS[stepIndex + 1] : undefined;
   const atFirst = stepIndex <= 0;
   const atLast = stepIndex + 1 >= GUIDE_STEPS.length;
@@ -44,7 +50,6 @@ export function GuideBar({ controller, i18n, onOpenWorkspace, skipLabel }: Guide
       className="rf-guide"
       data-testid="guide-bar"
       data-guide-controls=""
-      data-rf-surface="ink"
       role="group"
       aria-label={i18n.tSafe("nav.demo")}
       onKeyDown={(event) => {
@@ -54,17 +59,24 @@ export function GuideBar({ controller, i18n, onOpenWorkspace, skipLabel }: Guide
         }
       }}
     >
+      <header className="rf-guide__label">
+        <i aria-hidden="true" />
+        <span className="rf-guide__num">
+          <bdi dir="ltr" className="rf-numeric">
+            {Math.min(stepIndex + 1, GUIDE_STEPS.length)} / {GUIDE_STEPS.length}
+          </bdi>
+        </span>
+        {i18n.tSafe("nav.demo")}
+      </header>
+
       {/* Short step announcement — not every animated frame. */}
       <div role="status" aria-live="polite" className="rf-guide__live">
         <VisuallyHidden>{caption}</VisuallyHidden>
       </div>
 
+      <p className="rf-guide__context">{context}</p>
+
       <div className="rf-guide__caption" data-testid="guide-caption">
-        <span className="rf-guide__count">
-          <bdi dir="ltr" className="rf-numeric">
-            {Math.min(stepIndex + 1, GUIDE_STEPS.length)}/{GUIDE_STEPS.length}
-          </bdi>
-        </span>
         <span className="rf-guide__text">{caption}</span>
         {state.errorCode !== null ? (
           <span className="rf-guide__error" role="alert">

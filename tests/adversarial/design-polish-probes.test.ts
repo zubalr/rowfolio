@@ -76,11 +76,15 @@ const CODE_PRIMITIVES = /dangerouslySetInnerHTML|innerHTML\s*=|eval\s*\(|new\s+F
 /** Every file this branch adds or touches in app + tooling. */
 const DELTA_FILES = [
   'apps/web/src/evidence/EvidencePanel.tsx',
-  'apps/web/src/landing/PresentationStage.tsx',
+  'apps/web/src/landing/SpreadStage.tsx',
   'apps/web/src/landing/LandingApp.tsx',
   'apps/web/src/landing/copy.ts',
   'apps/web/src/landing/previewTruth.ts',
   'apps/web/src/landing/landing.css',
+  'apps/web/src/landing/spread.css',
+  'apps/web/src/demo/loopClock.ts',
+  'apps/web/src/demo/GuideBar.tsx',
+  'apps/web/src/demo/guide.css',
   'apps/web/src/workspace/KpiStrip.tsx',
   'apps/web/src/workspace/findingCopy.ts',
   'apps/web/src/workspace/format.ts',

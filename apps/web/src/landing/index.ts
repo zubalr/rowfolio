@@ -7,7 +7,8 @@
  */
 export { LandingApp } from "./LandingApp.tsx";
 export type { LandingAppProps } from "./LandingApp.tsx";
-export { PresentationStage, WALKTHROUGH_STEPS, readStoredStep } from "./PresentationStage.tsx";
+export { SpreadStage } from "./SpreadStage.tsx";
+export type { SpreadStageProps } from "./SpreadStage.tsx";
 export { LANDING_TRUTH } from "./previewTruth.ts";
 export type { LandingPreviewTruth, PreviewScenarioResult } from "./previewTruth.ts";
 export { createLandingI18n, localeOfDocument, persistLocaleChoice } from "./i18n.ts";
