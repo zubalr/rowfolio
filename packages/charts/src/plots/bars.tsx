@@ -189,6 +189,16 @@ export function BarsPlot({ ctx, variant }: { ctx: PlotContext; variant: BarsVari
                       rx={2}
                       className="rf-chart-bar"
                     />
+                    {p.key === ctx.emphasisKey && m.height >= 2 ? (
+                      <rect
+                        className="rf-chart-cellsel"
+                        x={m.x + 1}
+                        y={m.y + 1}
+                        width={Math.max(m.width - 2, 0)}
+                        height={Math.max(m.height - 2, 0)}
+                        rx={1}
+                      />
+                    ) : null}
                     {p.key === ctx.emphasisKey && m.height >= 20 ? (
                       <path
                         className="rf-chart-mark"

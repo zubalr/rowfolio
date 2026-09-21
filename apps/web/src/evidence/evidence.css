@@ -220,6 +220,18 @@
 
 /* ---- contributing inputs -------------------------------------------- */
 
+/* Ruled ledger inside the drawer: the same faint cell grid as the content
+   stage, here printed in ink-text at ~5% so it sits on the dark surface. */
+[data-rf-surface="ink"] .rf-evidence__inputs,
+[data-rf-surface="ink"] .rf-evidence__transforms,
+[data-rf-surface="ink"] .rf-evidence__fingerprint-grid,
+[data-rf-surface="ink"] .rf-evidence__table {
+  background-image:
+    linear-gradient(to bottom, color-mix(in srgb, var(--rf-ink-text) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to right, color-mix(in srgb, var(--rf-ink-text) 5%, transparent) 1px, transparent 1px);
+  background-size: var(--rf-space-6) var(--rf-space-6);
+}
+
 [data-rf-surface="ink"] .rf-evidence__inputs {
   margin: 0;
   display: flex;
@@ -284,6 +296,17 @@
 [data-rf-surface="ink"] .rf-evidence__table {
   /* rf-table supplies borders/typography; evidence tightens density. */
   font-size: 0.85em;
+}
+
+/* Column rules turn the row striping into a true cell grid. */
+[data-rf-surface="ink"] .rf-evidence__table tbody th,
+[data-rf-surface="ink"] .rf-evidence__table tbody td {
+  border-inline-end: 1px solid color-mix(in srgb, var(--rf-ink-rule) 65%, transparent);
+}
+
+[data-rf-surface="ink"] .rf-evidence__table tbody th:last-child,
+[data-rf-surface="ink"] .rf-evidence__table tbody td:last-child {
+  border-inline-end: none;
 }
 
 [data-rf-surface="ink"] .rf-evidence__table thead th {

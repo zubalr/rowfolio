@@ -84,15 +84,36 @@ export function layoutTarget(ctx: PlotContext, keys: string[], labelCol: number)
   };
 }
 
-function RowContent({ ctx, row, rowY }: { ctx: PlotContext; row: TargetRow; rowY: number }) {
+function RowContent({ ctx, row, rowY, emphasized, width }: { ctx: PlotContext; row: TargetRow; rowY: number; emphasized: boolean; width: number }) {
   const { model } = ctx;
   const t = ctx.strings.t;
   const barCy = ROW_H / 2;
   const rel =
     row.actual !== null && row.target !== null ? relativeVariance(row.actual, row.target) : null;
   const relNeg = rel !== null && rel.startsWith("-");
+  const actualEnd = row.actualX + row.actualW;
+  const gapW = row.actual !== null && row.targetX !== null ? Math.abs(row.targetX - actualEnd) : 0;
   return (
     <g transform={`translate(0,${rowY})`}>
+      {emphasized ? (
+        <rect
+          className="rf-chart-cellsel"
+          x={1}
+          y={1}
+          width={Math.max(width - 2, 0)}
+          height={ROW_H - 2}
+          rx={2}
+        />
+      ) : null}
+      {gapW >= 2 && row.targetX !== null ? (
+        <rect
+          className={`rf-chart-deltaarea ${relNeg ? "rf-chart-deltaarea--neg" : "rf-chart-deltaarea--pos"}`}
+          x={Math.min(actualEnd, row.targetX)}
+          y={barCy - BAR_H / 2}
+          width={gapW}
+          height={BAR_H}
+        />
+      ) : null}
       {row.actual !== null ? (
         <rect
           x={row.actualX}
@@ -236,7 +257,7 @@ export function TargetBarsPlot({ ctx }: { ctx: PlotContext }) {
           {layout.rows.map((row, i) => (
             <g key={row.key} {...ctx.datumProps(row.key)}>
               <HitTarget x={0} y={i * ROW_H} width={layout.plotWidth} height={ROW_H} />
-              <RowContent ctx={ctx} row={row} rowY={i * ROW_H} />
+              <RowContent ctx={ctx} row={row} rowY={i * ROW_H} emphasized={row.key === ctx.emphasisKey} width={layout.plotWidth} />
             </g>
           ))}
         </svg>

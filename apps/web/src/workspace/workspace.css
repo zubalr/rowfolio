@@ -121,11 +121,14 @@ html[lang='ar'] .rf-stage-scope {
   transform: scale(0.98);
 }
 
-/* Inside the evidence panel the badge is content, not a control. */
+/* Inside the evidence panel the badge is content, not a control. It is the
+   selected element landed in the drawer — it wears the same cell chrome:
+   2px cobalt inset + 8% cobalt tint (on-ink variants on this surface). */
 .rf-ev-chip--badge {
   cursor: default;
-  background: transparent;
-  border-color: var(--rf-ink-rule);
+  background: color-mix(in srgb, var(--rf-ink-data) 8%, transparent);
+  border: 1px solid transparent;
+  box-shadow: inset 0 0 0 2px var(--rf-ink-data);
   font-size: 12px;
   min-height: 28px;
   padding: 0 10px;
@@ -144,12 +147,46 @@ html[lang='ar'] .rf-stage-scope {
   font-variant-numeric: tabular-nums;
 }
 
-/* Selected finding gets a named marker, not just tinted text. */
+/* Ruled ledger — a faint 1px cell grid on a 32px rhythm runs under the
+   content stage (paper), so the workspace reads as one gridded sheet rather
+   than floating cards. */
+.rf-workspace-main {
+  background-image:
+    linear-gradient(to bottom, color-mix(in srgb, var(--rf-ink) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(to right, color-mix(in srgb, var(--rf-ink) 4%, transparent) 1px, transparent 1px);
+  background-size: var(--rf-space-6) var(--rf-space-6);
+}
+
+/* Cell-selection chrome — ONE treatment for every selected element: a 2px
+   cobalt inset plus an 8% cobalt tint. On the ink finding card the accent
+   remaps to the on-ink cobalt so the chrome stays identical in kind. */
+.rf-workspace .rf-finding.is-selected {
+  border-inline-start-color: transparent;
+  background: color-mix(in srgb, var(--rf-ink-data) 8%, var(--rf-ink));
+  box-shadow: inset 0 0 0 2px var(--rf-ink-data);
+}
+
 .rf-workspace .rf-finding.is-selected .rf-finding-title {
-  text-decoration: underline;
-  text-decoration-color: var(--rf-accent, #2855d9);
-  text-underline-offset: 4px;
-  text-decoration-thickness: 2px;
+  color: var(--rf-ink-data);
+}
+
+/* Scenario surface — the committed assumption block wears the scenario hue
+   (amber = hypothetical) rather than the generic divider treatment. */
+.rf-workspace .rf-scenario-result {
+  border-block-start: none;
+  border-inline-start: 3px solid var(--rf-scenario);
+  background: color-mix(in srgb, var(--rf-scenario) 6%, var(--rf-bg));
+  padding-block: var(--rf-space-3);
+  padding-inline-start: var(--rf-space-4);
+  border-radius: 0 var(--rf-radius-control) var(--rf-radius-control) 0;
+}
+
+[dir='rtl'] .rf-workspace .rf-scenario-result {
+  border-radius: var(--rf-radius-control) 0 0 var(--rf-radius-control);
+}
+
+.rf-workspace .rf-scenario-result .rf-quiet {
+  color: var(--rf-scenario-text);
 }
 
 /* Finding cards ride the ink surface — the landing's dark card rules reach
