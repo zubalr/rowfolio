@@ -93,7 +93,19 @@ export function LandingApp({ i18n }: LandingAppProps) {
             className="rf-lang"
             href={siblingLocaleHref(i18n.locale)}
             lang={i18n.locale === "ar" ? "en" : "ar"}
-            onClick={() => persistLocaleChoice(i18n, i18n.locale === "ar" ? "en" : "ar")}
+            onClick={(event) => {
+              // Locale links must not re-resolve mid-click: persisting the
+              // choice flips `i18n.locale`, which swaps this anchor's href
+              // before the browser follows it. Capture the target first and
+              // navigate explicitly; modified clicks keep the live href.
+              if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                return;
+              }
+              event.preventDefault();
+              const target = siblingLocaleHref(i18n.locale);
+              persistLocaleChoice(i18n, i18n.locale === "ar" ? "en" : "ar");
+              window.location.assign(target);
+            }}
           >
             {i18n.localeName(i18n.locale === "ar" ? "en" : "ar")}
           </a>

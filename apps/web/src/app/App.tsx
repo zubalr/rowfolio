@@ -42,7 +42,8 @@ function AppShell() {
   // Locale ⇄ URL path sync: `/ar/` ↔ ar. popstate keeps the provider honest.
   useEffect(() => {
     const onPop = () => {
-      const ar = window.location.pathname.startsWith('/ar');
+      const ar =
+        window.location.pathname === '/ar' || window.location.pathname.startsWith('/ar/');
       i18n.setLocale(ar ? 'ar' : 'en');
     };
     window.addEventListener('popstate', onPop);
