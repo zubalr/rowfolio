@@ -5,7 +5,12 @@
  * Phones stack to one column; nothing overflows at 320px.
  */
 
-.rf-masthead {
+/* Layout-transparent scope root — the landing's chrome rules below live
+   under it so they can never collide with the app shell's own
+   `.rf-masthead`/`.rf-brand` rules in app.css (single source per side). */
+.rf-landing-root { display: contents; }
+
+.rf-landing-root .rf-masthead {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -14,7 +19,7 @@
   border-block-end: 1px solid var(--rf-rule);
 }
 
-.rf-brand {
+.rf-landing-root .rf-brand {
   display: inline-flex;
   align-items: center;
   gap: var(--rf-space-2);
@@ -25,25 +30,25 @@
   flex: none;
 }
 
-.rf-brand__mark {
+.rf-landing-root .rf-brand__mark {
   display: inline-flex;
   align-items: flex-end;
   gap: 2px;
   block-size: 16px;
 }
 
-.rf-brand__mark i {
+.rf-landing-root .rf-brand__mark i {
   display: block;
   inline-size: 4px;
   background: var(--rf-data);
   border-radius: 1px;
 }
 
-.rf-brand__mark i:nth-child(1) { block-size: 6px; }
-.rf-brand__mark i:nth-child(2) { block-size: 11px; }
-.rf-brand__mark i:nth-child(3) { block-size: 16px; background: var(--rf-positive); }
+.rf-landing-root .rf-brand__mark i:nth-child(1) { block-size: 6px; }
+.rf-landing-root .rf-brand__mark i:nth-child(2) { block-size: 11px; }
+.rf-landing-root .rf-brand__mark i:nth-child(3) { block-size: 16px; background: var(--rf-positive); }
 
-.rf-nav {
+.rf-landing-root .rf-nav {
   display: flex;
   align-items: center;
   gap: var(--rf-space-2) var(--rf-space-4);
@@ -54,7 +59,7 @@
 /* Chrome labels are plate-label micro-labels: mono, uppercase, tracked.
    Arabic links/labels keep the body stack — Plex Mono has no Arabic cut
    and tracking disconnects the script. */
-.rf-nav a {
+.rf-landing-root .rf-nav a {
   color: var(--rf-muted);
   text-decoration: none;
   font-family: var(--rf-font-mono);
@@ -64,8 +69,8 @@
   text-transform: uppercase;
 }
 
-.rf-nav a[lang="ar"],
-html[lang="ar"] .rf-nav a:not([lang]) {
+.rf-landing-root .rf-nav a[lang="ar"],
+html[lang="ar"] .rf-landing-root .rf-nav a:not([lang]) {
   font-family: var(--rf-font-body);
   font-size: 14px;
   font-weight: 500;
@@ -73,10 +78,10 @@ html[lang="ar"] .rf-nav a:not([lang]) {
   text-transform: none;
 }
 
-.rf-nav a:hover { color: var(--rf-ink); }
+.rf-landing-root .rf-nav a:hover { color: var(--rf-ink); }
 
-.rf-nav a:focus-visible,
-.rf-brand:focus-visible {
+.rf-landing-root .rf-nav a:focus-visible,
+.rf-landing-root .rf-brand:focus-visible {
   outline: 2px solid var(--rf-focus);
   outline-offset: 2px;
   border-radius: 4px;
@@ -150,9 +155,10 @@ html[lang="ar"] .rf-secmark {
   position: static;
   padding: var(--rf-space-3);
 }
-.rf-output .rf-plate__body .rf-sp {
-  position: relative;
-  aspect-ratio: 16 / 9;
+/* the output figures run the same plate-scale interior as the spread's
+   REPORT plate — explicit height so the chart column has room to draw */
+.rf-output .rf-plate__body .rf-mini {
+  height: clamp(300px, 26vw, 380px);
 }
 
 .rf-output__cap {
@@ -237,22 +243,22 @@ html[lang="ar"] .rf-output__cap { font-family: var(--rf-font-body); font-size: 1
 }
 
 @media (max-width: 767px) {
-  .rf-masthead {
+  .rf-landing-root .rf-masthead {
     flex-wrap: wrap;
   }
 
-  .rf-nav {
+  .rf-landing-root .rf-nav {
     inline-size: 100%;
     justify-content: flex-start;
   }
 }
 
 @media (max-width: 480px) {
-  .rf-masthead {
+  .rf-landing-root .rf-masthead {
     padding: var(--rf-space-2) var(--rf-space-3);
   }
 
-  .rf-nav {
+  .rf-landing-root .rf-nav {
     gap: var(--rf-space-1) var(--rf-space-3);
   }
 }

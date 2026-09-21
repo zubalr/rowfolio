@@ -7,7 +7,8 @@
  * physical rows (`LANDING_TRUTH.excerpt` plus the fixture's real duplicate
  * record OP-00830 and the real blank-survey row OP-00039); every figure is
  * derived from `LANDING_TRUTH`; the report plate renders the real
- * `SlidePreview` of the export model's finding slide.
+ * `MiniReport` — the finding slide recomposed at plate scale — renders the
+ * export model's real strings and figures at readable sizes.
  *
  * Motion: LoopClock (demo/loopClock.ts) drives `t`; this component maps
  * t → styles. Click/Space/tap toggles pause, rail ticks seek, Replay
@@ -17,7 +18,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { I18n } from "@rowfolio/i18n";
 import { LoopClock, type LoopClockState } from "../demo/loopClock.ts";
-import { SlidePreview } from "../briefing/SlidePreview.tsx";
+import { MiniReport } from "../demo/MiniReport.tsx";
 import { landingCopy, type CopyKey } from "./copy.ts";
 import { LANDING_TRUTH } from "./previewTruth.ts";
 import { SAMPLE_EXPORT_MODEL, findingSlide } from "./sampleExportModel.ts";
@@ -216,7 +217,9 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
   const xfade = lin(t, 6200, 7000);
   const deltaShown = -Number(truth.northJune.targetGapRatio) * seg(t, 4000, 4600);
   const ordersShown = Number(truth.northJune.ordersChangeRatio) * seg(t, 4600, 4900);
-  const ordersP = seg(t, 4600, 4850);
+  // The chip stays invisible until the count has resolved — an early
+  // "+0.0%" reads as the wrong sign before the count-up lands.
+  const ordersP = seg(t, 4900, 5050);
 
   const stamp = seg(t, 6400, 6650);
   const chartIn = seg(t, 6450, 7100);
@@ -520,7 +523,7 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
               <i className="gr-wb" />
             </div>
             <div className="rf-rep__slide">
-              <SlidePreview model={model} slide={slide} />
+              <MiniReport model={model} slide={slide} />
             </div>
             <p className="rf-rep__note rf-numeric">
               {landingCopy(locale, "pres.evidence.span", {
@@ -537,6 +540,9 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
             </div>
           </div>
         </article>
+
+        {/* loop seam: fades the plate region only — never the page frame */}
+        <div className="rf-loopfade" style={{ opacity: loopFade }} aria-hidden="true" />
       </div>
 
       {/* chapter rail */}
@@ -571,7 +577,6 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
         </button>
       </div>
 
-      <div className="rf-loopfade" style={{ opacity: loopFade }} aria-hidden="true" />
     </section>
   );
 }
