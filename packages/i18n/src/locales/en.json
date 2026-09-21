@@ -110,7 +110,7 @@
   "finding.downtime.body": "North downtime increased {change}, from {previous} to {current} minutes.",
   "finding.downtime.title": "Downtime is moving the wrong way.",
   "finding.north.body": "North June revenue is {gap} below target, while order volume is {orders} higher than May.",
-  "finding.north.title": "More orders. Still below target.",
+  "finding.north.title": "Revenue sits 11.9% under target even as orders rose 8.0%.",
   "finding.quality.body": "{duplicates} duplicate rows excluded, {categories} category cells normalized; {missing} optional scores remain missing.",
   "finding.quality.body.pending": "{duplicates} duplicate rows and {categories} category cells were flagged; proposed fixes apply only after approval — unapproved rows stay in the analysis. {missing} optional scores remain missing.",
   "finding.quality.title": "Cleaner data. Visible limitations.",
