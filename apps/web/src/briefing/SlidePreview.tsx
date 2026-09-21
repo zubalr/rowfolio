@@ -360,7 +360,7 @@ export function SlidePreview({ model, slide, className }: SlidePreviewProps): Re
       className={`rf-sp${className ? ` ${className}` : ''}`}
       data-kind={slide.kind}
       data-slide={slide.id}
-      aria-label={`${slide.title} — ${index}/${model.slides.length}`}
+      aria-label={`${slide.title} · ${index}/${model.slides.length}`}
     >
       <header className="rf-sp__mast">
         <span className="rf-sp__tick" aria-hidden="true" />

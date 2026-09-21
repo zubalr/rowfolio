@@ -207,6 +207,31 @@
   border-radius: 6px;
 }
 
+/* Output previews grow with the slide's content at every width instead of
+   clipping to a fixed 16:9 box. */
+.rf-output__preview .rf-sp {
+  aspect-ratio: auto;
+}
+
+/* Chart labels keep a 9px floor on landing slides — the card-scaled type
+   would otherwise drop them below legibility on narrow cards. */
+.rf-walk-build__slide .rf-sp__barval,
+.rf-walk-build__slide .rf-sp__cat,
+.rf-walk-get__slide .rf-sp__barval,
+.rf-walk-get__slide .rf-sp__cat,
+.rf-output__preview .rf-sp__barval,
+.rf-output__preview .rf-sp__cat {
+  font-size: max(0.8em, 9px);
+}
+
+/* The auto-height previews wrap the chart caption instead of truncating. */
+.rf-output__preview .rf-sp__chart-title,
+.rf-output__preview .rf-sp__chart-meta {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
 .rf-walk-build__note {
   margin-block-start: var(--rf-space-2);
   padding-block-start: var(--rf-space-2);
@@ -482,14 +507,27 @@
 }
 
 @media (max-width: 600px) {
-  /* Phones: let the report card grow with its content instead of
+  /* Phones: let the walkthrough card grow with its content instead of
      clipping the body to a fixed 16:9 box, and keep the type readable
      instead of letting it shrink with the card. */
   .rf-walk-build__slide .rf-sp,
+  .rf-walk-get__slide .rf-sp {
+    aspect-ratio: auto;
+  }
+
+  .rf-walk-build__slide .rf-sp,
   .rf-walk-get__slide .rf-sp,
   .rf-output__preview .rf-sp {
-    aspect-ratio: auto;
-    font-size: clamp(6px, 3cqw, 0.72rem);
+    font-size: clamp(7px, 3.6cqw, 0.78rem);
+  }
+
+  .rf-walk-build__slide .rf-sp__chart-title,
+  .rf-walk-build__slide .rf-sp__chart-meta,
+  .rf-walk-get__slide .rf-sp__chart-title,
+  .rf-walk-get__slide .rf-sp__chart-meta {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
   }
 }
 
