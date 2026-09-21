@@ -72,6 +72,10 @@ export interface DemoHost {
   waitReady(signal: DemoReadiness, timeoutMs: number): Promise<boolean>;
   /** Focus the results heading after a replay reset. */
   focusResults?(): void;
+  /** Remember the focused element when the guide starts (for focusExit). */
+  captureFocus?(): void;
+  /** Restore focus on guide exit — the remembered trigger or a landmark. */
+  focusExit?(): void;
 }
 
 export interface DemoScheduler {
@@ -148,6 +152,7 @@ export class DemoController {
   start(): void {
     this.epoch += 1;
     this.clearDwell();
+    this.host.captureFocus?.();
     void this.enterStep(0, this.epoch);
   }
 
@@ -167,11 +172,15 @@ export class DemoController {
     this.armDwell(this.state.stepIndex, epoch);
   }
 
-  /** Exit the guide (Escape/Exit) — preserves whatever results exist. */
+  /** Exit the guide (Escape/Exit) — preserves whatever results exist and
+   *  returns focus to the element that started the guide (or a landmark),
+   *  never a dead drop to <body>. */
   exit(): void {
+    const wasActive = this.state.status !== "idle";
     this.epoch += 1;
     this.clearDwell();
     this.setState(INITIAL_GUIDE_STATE);
+    if (wasActive) this.host.focusExit?.();
   }
 
   /** Manual override: jump to the next/previous step immediately. */

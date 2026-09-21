@@ -17,6 +17,7 @@ import { createAnalysisWorkerFactory, createExportWorkerFactory, type IngestPars
 import { BOUND_SAMPLE_SHA256 } from '../workers/supervisor.ts';
 import type { BinarySlot } from '../workers/transport.ts';
 import { loadSampleAssets, SampleError, type SampleAssets } from './sample.ts';
+import { setPendingPickerFile } from '../landing/pendingUpload.ts';
 import { sessionReducer, type SessionAction } from './reducer.ts';
 import {
   initialSession,
@@ -147,6 +148,9 @@ export class SessionController {
    * and released when the outcome is adopted.
    */
   private uploadAbort: { signal: AbortSignal; detach(): void } | null = null;
+  /** Last source handed to selectSource — retained so a failed upload can
+   *  retry without making the user re-pick the file. */
+  private lastSource: { bytes: ArrayBuffer; name: string; format: 'xlsx' | 'csv' } | null = null;
   private readonly ids: IdGen;
   private readonly deps: ControllerDeps;
 
@@ -403,7 +407,7 @@ export class SessionController {
     return { code: 'INTERNAL', messageKey: 'error.INTERNAL', recoverable: false };
   }
 
-  private fail(rid: string, error: unknown): void {
+  private fail(rid: string, error: unknown, opts?: { retrySource?: boolean }): void {
     const mapped = this.toSessionError(error);
     if (this.state.requestId !== rid) {
       // The reducer would ignore the dispatch anyway — but a terminal event
@@ -415,7 +419,14 @@ export class SessionController {
       this.dispatch({ type: 'request.cancelled', requestId: rid });
       return;
     }
-    this.dispatch({ type: 'request.failed', requestId: rid, error: mapped });
+    this.dispatch({
+      type: 'request.failed',
+      requestId: rid,
+      error:
+        opts?.retrySource === true && mapped.recoverable && this.lastSource !== null
+          ? { ...mapped, retrySource: true }
+          : mapped,
+    });
   }
 
   private progressFor(rid: string) {
@@ -468,6 +479,7 @@ export class SessionController {
   ): Promise<void> {
     this.cancelWork('new source');
     this.deps.blobStore?.releaseAll();
+    this.lastSource = { bytes, name: sourceName, format };
     this.dispatch({
       type: 'source.begin',
       kind: 'upload',
@@ -495,8 +507,29 @@ export class SessionController {
       const options = parseOptions ?? defaultParseFromInspection(inspection);
       await this.runIngestProfileAnalyze(rid, bytes, sourceName, format, options, null);
     } catch (error) {
-      this.fail(rid, error);
+      const detail = (error as { detail?: unknown })?.detail;
+      const code = (error as { code?: unknown })?.code;
+      if (code === 'AMBIGUOUS_INPUT' && detail === 'csv.ambiguous-delimiter') {
+        // Not a failure — the file needs a user decision the session
+        // pipeline cannot express. Hand it to the upload flow's configure
+        // stage (delimiter picker) via the pending-picker slot; it claims
+        // the file the moment phase returns to idle.
+        setPendingPickerFile({ name: sourceName, bytes });
+        this.dispatch({ type: 'upload.deferToPicker', requestId: rid });
+        return;
+      }
+      this.fail(rid, error, { retrySource: true });
     }
+  }
+
+  /**
+   * Retry the last `selectSource` after a recoverable failure — the bytes
+   * were retained, so the user does not re-pick the file.
+   */
+  retrySource(): void {
+    if (this.state.error?.retrySource !== true || this.lastSource === null) return;
+    const { bytes, name, format } = this.lastSource;
+    void this.selectSource(bytes, name, format);
   }
 
   /** Needs-review confirmation → normalize with the approved plan → analyze. */

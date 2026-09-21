@@ -14,7 +14,7 @@
  * dispatch the same preview actions the DemoController dispatches as a
  * host — the guide is a driver of the real surface, not a fake cursor.
  */
-import type { ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { m } from "motion/react";
 import { Button, Bidi, DataTable, Icon } from "@rowfolio/ui";
 import type { I18n } from "@rowfolio/i18n";
@@ -239,6 +239,12 @@ export function PreviewStage({
   const scenPct = Math.max(0, (scenarioContribution / scaleMax) * 100);
 
   const hashShort = dataset.sha256.slice(0, 12);
+
+  // Drag-state for the scenario value chip — shown while the pointer is
+  // down or the range has keyboard focus.
+  const [scrubbing, setScrubbing] = useState(false);
+  const rangePct = ((Number(state.scenarioRatio) * 100 - -20) / 50) * 100;
+  const rangeStyle = { "--rf-range-pct": `${rangePct}%` } as CSSProperties;
 
   return (
     <section
@@ -465,23 +471,43 @@ export function PreviewStage({
           <label className="rf-scenario__label" htmlFor="rf-cost-range">
             {i18n.t("scenario.costChange")}
           </label>
-          <input
-            id="rf-cost-range"
-            className="rf-scenario__range"
-            data-testid="scenario-range"
-            type="range"
-            min={-20}
-            max={30}
-            step={0.1}
-            value={Number(state.scenarioRatio) * 100}
-            onChange={(event) => {
-              onManualInteraction();
-              dispatch({
-                type: "set-scenario",
-                ratio: divideDecimal(event.currentTarget.value, "100"),
-              });
-            }}
-          />
+          <div className="rf-scenario__slider" data-scrubbing={scrubbing || undefined}>
+            <input
+              id="rf-cost-range"
+              className="rf-scenario__range"
+              data-testid="scenario-range"
+              type="range"
+              min={-20}
+              max={30}
+              step={0.1}
+              value={Number(state.scenarioRatio) * 100}
+              style={rangeStyle}
+              onPointerDown={() => setScrubbing(true)}
+              onPointerUp={() => setScrubbing(false)}
+              onPointerCancel={() => setScrubbing(false)}
+              onBlur={() => setScrubbing(false)}
+              onChange={(event) => {
+                onManualInteraction();
+                dispatch({
+                  type: "set-scenario",
+                  ratio: divideDecimal(event.currentTarget.value, "100"),
+                });
+              }}
+            />
+            {/* Value chip rides the thumb while scrubbing — assumptions
+                stay amber end to end. */}
+            <output
+              className="rf-scenario__chip"
+              aria-hidden="true"
+              style={{
+                insetInlineStart: `calc(9px + (100% - 18px) * ${rangePct / 100})`,
+              }}
+            >
+              <bdi dir="ltr" className="rf-numeric">
+                {i18n.formatPercent(state.scenarioRatio, PCT)}
+              </bdi>
+            </output>
+          </div>
           {/* Paired bars on a fixed scale: observed baseline (cobalt, solid)
               vs assumption layer (amber, dashed outline). */}
           <div className="rf-scenario__bars" dir="ltr" role="img"

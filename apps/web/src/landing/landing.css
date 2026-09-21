@@ -533,6 +533,32 @@ input[type="range"].rf-scenario__range {
   margin-block-start: var(--rf-space-2);
   accent-color: var(--rf-scenario);
 }
+/* The value chip rides the thumb while scrubbing (or on keyboard focus);
+   inset-inline-start tracks the thumb center in both directions. */
+.rf-scenario__slider {
+  position: relative;
+}
+.rf-scenario__chip {
+  position: absolute;
+  inset-block-end: calc(100% + 4px);
+  transform: translateX(-50%);
+  padding: 2px var(--rf-space-2);
+  border-radius: var(--rf-radius-control);
+  /* Ink verdict surface + an amber edge — the amber track already carries
+     the assumption hue; small text stays above contrast budget. */
+  background: var(--rf-ink);
+  border-block-end: 2px solid var(--rf-scenario);
+  color: var(--rf-surface);
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--rf-hover-ms) var(--rf-ease);
+}
+.rf-scenario__slider[data-scrubbing] .rf-scenario__chip,
+.rf-scenario__slider:focus-within .rf-scenario__chip {
+  opacity: 1;
+}
 /* Paired bars on a fixed scale: solid cobalt baseline, dashed amber layer. */
 .rf-scenario__bars {
   display: grid;

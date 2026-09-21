@@ -198,11 +198,24 @@ export function WorkspaceScreen({ navigateLanding }: { navigateLanding: () => vo
 
 function SessionBanner({ state }: { state: SessionState }) {
   const i18n = useI18n();
+  const { controller } = useServices();
   if (state.error) {
     return (
       <div className="rf-banner rf-banner-error" role="alert">
-        {i18n.tSafe(state.error.messageKey as MessageKey)}
-        {state.notice ? ` · ${i18n.tSafe('upload.previousRetained' as MessageKey)}` : ''}
+        <span className="rf-banner__text">
+          {i18n.tSafe(state.error.messageKey as MessageKey)}
+          {state.notice ? ` · ${i18n.tSafe('upload.previousRetained' as MessageKey)}` : ''}
+        </span>
+        <span className="rf-banner__actions">
+          {state.error.retrySource === true ? (
+            <Button variant="secondary" onClick={() => controller.retrySource()} data-testid="banner-retry">
+              {i18n.tSafe('action.retry' as MessageKey)}
+            </Button>
+          ) : null}
+          <Button variant="secondary" onClick={() => controller.cancelWork('user')} data-testid="banner-back">
+            {i18n.tSafe('action.back' as MessageKey)}
+          </Button>
+        </span>
       </div>
     );
   }

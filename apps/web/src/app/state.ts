@@ -86,6 +86,8 @@ export interface SessionError {
   code: string;
   messageKey: string;
   recoverable: boolean;
+  /** Set when the failed `selectSource` bytes are retained for Try-again. */
+  retrySource?: true;
 }
 
 export type Notice = 'upload.previousRetained';

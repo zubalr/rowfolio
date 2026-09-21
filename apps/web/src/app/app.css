@@ -133,6 +133,16 @@
 .rf-banner-error {
   color: var(--rf-danger-text);
   border-inline-start: 3px solid var(--rf-danger-text);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rf-space-2) var(--rf-space-4);
+}
+
+.rf-banner__actions {
+  display: inline-flex;
+  gap: var(--rf-space-2);
 }
 
 .rf-workspace {

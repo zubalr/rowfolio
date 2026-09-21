@@ -6,7 +6,9 @@
  */
 import { Dialog, Section } from "@rowfolio/ui";
 import { Button } from "@rowfolio/ui";
+import { useEffect } from "react";
 import type { I18n } from "@rowfolio/i18n";
+import { takePendingPickerFile } from "../landing/pendingUpload.ts";
 import { useUploadController } from "./useUpload.ts";
 import type { UploadOutcome, UploadPorts } from "./types.ts";
 import { Dropzone } from "./Dropzone.tsx";
@@ -27,6 +29,14 @@ export function UploadFlow({ i18n, ports, onComplete, testId }: UploadFlowProps)
   const { controller, state } = useUploadController(ports, {
     ...(onComplete !== undefined ? { onComplete } : {}),
   });
+
+  // A file the session-level upload path could not resolve alone (e.g. an
+  // ambiguous CSV delimiter) is stashed for this surface — claim it on
+  // mount so its configure/picker stage mounts instead of a dead banner.
+  useEffect(() => {
+    const pending = takePendingPickerFile();
+    if (pending !== null) controller.acceptFile(pending.bytes, pending.name);
+  }, [controller]);
 
   return (
     <div className="rf-upload" data-testid={testId ?? "upload-flow"}>

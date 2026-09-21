@@ -494,7 +494,50 @@ html[lang="ar"] .rf-status__body {
   margin-block-start: var(--rf-space-3);
 }
 
-/* Spinner — a cobalt quarter-arc on the ink rule; reduced-motion static. */
+/* Bar loader — the ruled-ledger indeterminate indicator: a cobalt segment
+   marching along a rule-width track across the top of the status. Static
+   under reduced-motion (a parked segment, never a fake percentage). */
+.rf-status--loading {
+  position: relative;
+  padding-block-start: calc(var(--rf-space-3) + 4px);
+}
+.rf-loader {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  block-size: 3px;
+  background: color-mix(in srgb, var(--rf-accent) 14%, transparent);
+  overflow: hidden;
+}
+.rf-loader__fill {
+  display: block;
+  block-size: 100%;
+  inline-size: 26%;
+  background: var(--rf-accent);
+  animation: rf-loader-march 1.3s var(--rf-ease) infinite alternate;
+}
+@keyframes rf-loader-march {
+  from {
+    transform: translateX(-8%);
+  }
+  to {
+    transform: translateX(292%);
+  }
+}
+[data-rf-surface="ink"] .rf-loader {
+  background: color-mix(in srgb, var(--rf-ink-data) 18%, transparent);
+}
+[data-rf-surface="ink"] .rf-loader__fill {
+  background: var(--rf-ink-data);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-loader__fill {
+    animation: none;
+    transform: translateX(137%);
+  }
+}
+
+/* Spinner — retained for compact callers outside the status banner. */
 .rf-spinner {
   animation: rf-spin 1.2s linear infinite;
 }
@@ -616,7 +659,24 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-runnable-track {
   block-size: 4px;
   border-radius: 2px;
-  background: var(--rf-range-track);
+  /* Filled track: accent up to --rf-range-pct, then the quiet rule. */
+  background: linear-gradient(
+    to right,
+    var(--rf-range-accent) 0 var(--rf-range-pct, 0%),
+    var(--rf-range-track) var(--rf-range-pct, 0%) 100%
+  );
+}
+input[type="range"]:dir(rtl)::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to left,
+    var(--rf-range-accent) 0 var(--rf-range-pct, 0%),
+    var(--rf-range-track) var(--rf-range-pct, 0%) 100%
+  );
+}
+input[type="range"]::-moz-range-progress {
+  block-size: 4px;
+  border-radius: 2px;
+  background: var(--rf-range-accent);
 }
 input[type="range"]::-webkit-slider-thumb {
   appearance: none;
