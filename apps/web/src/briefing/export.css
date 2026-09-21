@@ -148,7 +148,7 @@
 
 .rf-sp__metric-name {
   color: var(--rf-text-muted);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .rf-sp__metric-value {

@@ -41,7 +41,7 @@ describe("t()", () => {
   const i18n = createI18n({ locale: "en" });
 
   it("translates a key with placeholders", () => {
-    expect(i18n.t("evidence.more", { start: 1, end: 5, total: 12 })).toBe("Rows 1–5 of 12");
+    expect(i18n.t("evidence.more", { start: 1, end: 5, total: 12 })).toBe("Rows 1-5 of 12");
     expect(i18n.t("scenario.scope", { scope: "all rows" })).toBe("Scenario scope: all rows");
   });
 

@@ -368,7 +368,7 @@ export function PresentationStage({ i18n, controller }: PresentationStageProps) 
             n: state.chapterIndex + 1,
             total: WALKTHROUGH_STEPS.length,
           })}
-          {" — "}
+          {" · "}
           {landingCopy(i18n.locale, STEP_TITLE[step.id])}
         </VisuallyHidden>
       </div>
