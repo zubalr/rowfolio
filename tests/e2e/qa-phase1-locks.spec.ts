@@ -34,7 +34,7 @@ test.describe("R1 — locale race: content always matches route", () => {
   test("EN→AR toggle navigates to /ar/ and renders Arabic", async ({ page }) => {
     await page.goto("/");
     await page.locator("a.rf-lang").click();
-    await expect(page).toHaveURL(/\/ar\/?$/);
+    await expect(page).toHaveURL(/\/ar\/(#\/pres-ch=\d+)?$/);
     const { lang, dir } = await htmlAttrs(page);
     expect(lang).toBe("ar");
     expect(dir).toBe("rtl");
@@ -44,7 +44,7 @@ test.describe("R1 — locale race: content always matches route", () => {
   test("AR→EN toggle navigates to / and renders English", async ({ page }) => {
     await page.goto("/ar/");
     await page.locator("a.rf-lang").click();
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/(#\/pres-ch=\d+)?$/);
     const { lang, dir } = await htmlAttrs(page);
     expect(lang).toBe("en");
     expect(dir).toBe("ltr");
@@ -55,10 +55,10 @@ test.describe("R1 — locale race: content always matches route", () => {
     await page.goto("/");
     for (let i = 0; i < 2; i += 1) {
       await page.locator("a.rf-lang").click();
-      await expect(page).toHaveURL(/\/ar\/?$/);
+      await expect(page).toHaveURL(/\/ar\/(#\/pres-ch=\d+)?$/);
       expect((await htmlAttrs(page)).lang).toBe("ar");
       await page.locator("a.rf-lang").click();
-      await expect(page).toHaveURL(/\/$/);
+      await expect(page).toHaveURL(/\/(#\/pres-ch=\d+)?$/);
       expect((await htmlAttrs(page)).lang).toBe("en");
     }
   });
@@ -86,13 +86,13 @@ test.describe("R1 — locale race: content always matches route", () => {
   test("history back/forward keeps content aligned with the route", async ({ page }) => {
     await page.goto("/");
     await page.locator("a.rf-lang").click();
-    await expect(page).toHaveURL(/\/ar\/?$/);
+    await expect(page).toHaveURL(/\/ar\/(#\/pres-ch=\d+)?$/);
     expect((await htmlAttrs(page)).lang).toBe("ar");
     await page.goBack();
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/(#\/pres-ch=\d+)?$/);
     expect((await htmlAttrs(page)).lang).toBe("en");
     await page.goForward();
-    await expect(page).toHaveURL(/\/ar\/?$/);
+    await expect(page).toHaveURL(/\/ar\/(#\/pres-ch=\d+)?$/);
     expect((await htmlAttrs(page)).lang).toBe("ar");
   });
 });
@@ -128,8 +128,8 @@ test.describe("R2 — evidence drawer resolves composite proofs", () => {
 });
 
 test.describe("R3 — mobile guide rail never occludes the subject", () => {
-  test.fixme(
-    "guide rail does not overlap the marked region at 390px (pending presentation build)",
+  test(
+    "guide rail does not overlap the marked region at 390px",
     async ({ page }) => {
       await page.setViewportSize(VIEWPORTS.mobile);
       await page.goto("/");
