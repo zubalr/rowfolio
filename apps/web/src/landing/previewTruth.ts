@@ -91,6 +91,8 @@ export interface LandingPreviewTruth {
     readonly regionCount: number;
     readonly issueCount: number;
     readonly unresolvedIssues: number;
+    readonly duplicateRows: number;
+    readonly missingOptionalCells: number;
   };
   readonly northJune: {
     readonly revenue: Decimal;
@@ -129,6 +131,17 @@ export interface LandingPreviewTruth {
   /** Verbatim leading physical rows of sample_operations.csv. */
   readonly excerpt: readonly string[][];
   readonly excerptColumns: readonly string[];
+  /**
+   * Checking-scene rows, verbatim from sample_operations.csv — including a
+   * real duplicate pair (OP-00830 at physical rows 831 and 2408) and a row
+   * with the optional csat_score cell left blank (OP-00039). Columns match
+   * the source layout subset: id, region, revenue, target, csat.
+   */
+  readonly checkExcerpt: readonly string[][];
+  readonly checkExcerptColumns: readonly string[];
+  /** Indices in checkExcerpt of the duplicate pair and the blank-CSAT row. */
+  readonly checkDupPair: readonly [number, number];
+  readonly checkMissingRow: number;
 }
 
 export const LANDING_TRUTH: LandingPreviewTruth = {
@@ -141,6 +154,8 @@ export const LANDING_TRUTH: LandingPreviewTruth = {
     regionCount: sampleManifest.regions.length,
     issueCount: sampleManifest.quality.issueCount,
     unresolvedIssues: sampleManifest.quality.unresolved,
+    duplicateRows: sampleManifest.quality.duplicateRows,
+    missingOptionalCells: sampleManifest.quality.missingOptionalCells,
   },
   northJune: {
     revenue: northJune.revenue,
@@ -187,4 +202,14 @@ export const LANDING_TRUTH: LandingPreviewTruth = {
     ["OP-01805", "2026-06-01", "North", "NO-05", "10403.08", "9878.81"],
     ["OP-01806", "2026-06-02", "North", "NO-01", "6700.29", "8045.62"],
   ],
+  checkExcerptColumns: ["operation_id", "region", "revenue", "target_revenue", "csat_score"],
+  checkExcerpt: [
+    ["OP-01801", "North", "9080.66", "12017.52", "85"],
+    ["OP-01802", "North", "7934.55", "11304.61", "90"],
+    ["OP-00830", "East", "8886.64", "9873.09", "82"],
+    ["OP-00830", "East", "8886.64", "9873.09", "82"],
+    ["OP-00039", "North", "8390.41", "11999.21", ""],
+  ],
+  checkDupPair: [2, 3],
+  checkMissingRow: 4,
 };
