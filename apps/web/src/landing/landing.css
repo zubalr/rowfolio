@@ -302,3 +302,54 @@
     padding-inline: var(--rf-space-3);
   }
 }
+
+/* Landing primary actions are the "main action" role — vivid blue, not
+   ink. Scoped to landing surfaces so workspace/contract chrome is
+   untouched. */
+.rf-hero .rf-btn--primary,
+.rf-walk .rf-btn--primary,
+.rf-output .rf-btn--primary,
+.rf-invite .rf-btn--primary {
+  background: var(--rf-data);
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--rf-ink) 25%, transparent);
+}
+
+.rf-hero .rf-btn--primary:hover:not(:disabled),
+.rf-walk .rf-btn--primary:hover:not(:disabled),
+.rf-output .rf-btn--primary:hover:not(:disabled),
+.rf-invite .rf-btn--primary:hover:not(:disabled) {
+  background: #2443C7;
+  box-shadow: inset 0 -3px 0 var(--rf-ink);
+}
+
+.rf-hero .rf-btn--primary:active:not(:disabled),
+.rf-walk .rf-btn--primary:active:not(:disabled),
+.rf-output .rf-btn--primary:active:not(:disabled),
+.rf-invite .rf-btn--primary:active:not(:disabled) {
+  background: #1B35A2;
+}
+
+/* Tertiary own-file action in the hero — link treatment per hierarchy. */
+.rf-hero__ownfile {
+  border: none;
+  background: none;
+  padding: 0 var(--rf-space-1);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rf-data);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  align-self: center;
+}
+
+.rf-hero__ownfile:hover {
+  color: var(--rf-ink);
+}
+
+.rf-hero__ownfile:focus-visible {
+  outline: 2px solid var(--rf-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

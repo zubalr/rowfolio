@@ -171,6 +171,9 @@ export function LandingApp({ i18n }: LandingAppProps) {
               <Button variant="secondary" iconEnd="arrow-end" onClick={exploreSample} data-testid="cta-explore">
                 {landingCopy(i18n.locale, "pres.explore")}
               </Button>
+              <button type="button" className="rf-hero__ownfile" onClick={pickUpload} data-testid="cta-upload">
+                {landingCopy(i18n.locale, "pres.useOwn")}
+              </button>
             </div>
             <p className="rf-hero__note">{landingCopy(i18n.locale, "pres.sampleNote")}</p>
           </div>
@@ -225,7 +228,7 @@ export function LandingApp({ i18n }: LandingAppProps) {
           </h2>
           <p className="rf-invite__body">{landingCopy(i18n.locale, "pres.invite.body")}</p>
           <div className="rf-invite__actions">
-            <Button variant="primary" icon="upload" onClick={pickUpload} data-testid="cta-upload">
+            <Button variant="primary" icon="upload" onClick={pickUpload}>
               {landingCopy(i18n.locale, "pres.useOwn")}
             </Button>
             <Button variant="secondary" iconEnd="arrow-end" onClick={openWorkspace}>

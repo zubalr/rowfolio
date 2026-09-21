@@ -474,3 +474,29 @@
     min-block-size: 0;
   }
 }
+
+@media (max-width: 340px) {
+  .rf-walk__controls {
+    padding: 2px var(--rf-space-1);
+  }
+
+  .rf-walk__tbtn {
+    padding: 3px 4px;
+    font-size: 11.5px;
+  }
+
+  .rf-walk__tab {
+    padding: 3px 5px;
+    font-size: 11px;
+  }
+
+  .rf-walk__replay {
+    padding: 3px var(--rf-space-2);
+    font-size: 11.5px;
+  }
+
+  .rf-walk-sheet__table th,
+  .rf-walk-sheet__table td {
+    padding: 3px var(--rf-space-2);
+  }
+}
