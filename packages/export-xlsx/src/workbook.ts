@@ -230,8 +230,10 @@ export const buildWorkbook = async (
   const summary = get('summary');
   const locale = model.locale;
   // Portrait A4 fits ~74 width units at body size; the value column wraps
-  // instead of spilling onto a second page.
-  summary.columns = [{ width: 26 }, { width: 48 }];
+  // instead of spilling onto a second page. Column A must be wide enough for
+  // the 16pt title: LibreOffice clips cell text at the column edge even when
+  // the neighbor is empty or the range is merged.
+  summary.columns = [{ width: 50 }, { width: 48 }];
   const scopeText = [
     model.scope.periodStart ?? 'all',
     model.scope.periodEnd ?? 'all',
@@ -245,10 +247,15 @@ export const buildWorkbook = async (
     summaryTitle.getCell(c).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: PAPER_ARGB } };
     summaryTitle.getCell(c).border = { bottom: RULE_BORDER };
   }
+  // Merge the banded title/header rows so Excel spans the text across the
+  // print width (LibreOffice still clips at the column edge — hence the
+  // 50-unit column A above).
+  summary.mergeCells(`A${summaryRow}:B${summaryRow}`);
   summaryRow += 2;
   const observedHeader = summary.getRow(summaryRow);
   observedHeader.getCell(1).value = sheetLabel(locale, 'evidence.title');
   styleHeaderRow(observedHeader, 2);
+  summary.mergeCells(`A${summaryRow}:B${summaryRow}`);
   summaryRow += 1;
   const putSummary = (labelText: string, value: string | number, link?: string): void => {
     const row = summary.getRow(summaryRow);
@@ -323,6 +330,7 @@ export const buildWorkbook = async (
   const assumptionsHeader = summary.getRow(summaryRow);
   assumptionsHeader.getCell(1).value = sheetLabel(locale, 'scenario.title');
   styleHeaderRow(assumptionsHeader, 2);
+  summary.mergeCells(`A${summaryRow}:B${summaryRow}`);
   summaryRow += 1;
   if (model.scenario !== null && model.scenario.status === 'defined') {
     putSummary(
@@ -335,6 +343,9 @@ export const buildWorkbook = async (
   } else {
     putSummary(sheetLabel(locale, 'common.baseline'), '');
   }
+  summary.pageSetup.fitToPage = true;
+  summary.pageSetup.fitToWidth = 1;
+  summary.pageSetup.fitToHeight = 0;
   summary.pageSetup.printArea = `A1:B${summaryRow - 1}`;
 
   // ---- Cleaned Data --------------------------------------------------------
@@ -430,7 +441,7 @@ export const buildWorkbook = async (
     }
     row.getCell(3).value = exportUnitLabel(metric.unit);
     const coverageKey = metric.scope.coverageNoteKey;
-    row.getCell(4).value = localizeDigits(
+    const coverageText = localizeDigits(
       `${sheetLabel(locale, 'coverage.eligible')
         .replace('{eligible}', String(metric.eligibleRows))
         .replace('{total}', String(metric.totalRows))}; ${
@@ -438,6 +449,13 @@ export const buildWorkbook = async (
       }`,
       model.numberingSystem,
     );
+    row.getCell(4).value = coverageText;
+    row.getCell(4).alignment = { wrapText: true, vertical: 'top' };
+    // Rows inside a table don't auto-fit in LibreOffice; give two-line
+    // coverage strings an explicit height so they don't overlap.
+    if (coverageText.length > 28) {
+      row.height = 30;
+    }
   }
   // Second pass: constant template formulas with the model's cached results.
   // Placements are complete, so cross-metric references always resolve.
@@ -468,6 +486,9 @@ export const buildWorkbook = async (
   });
   styleHeaderRow(kpis.getRow(1), 4);
   kpis.autoFilter = { from: 'A1', to: `D${kpis.rowCount}` };
+  kpis.pageSetup.fitToPage = true;
+  kpis.pageSetup.fitToWidth = 1;
+  kpis.pageSetup.fitToHeight = 0;
   kpis.pageSetup.printArea = `A1:D${kpis.rowCount}`;
 
   progress('tables', 0.75);
@@ -522,7 +543,11 @@ export const buildWorkbook = async (
 
   // ---- Methodology -------------------------------------------------------------
   const method = get('methodology');
-  method.columns = [{ width: 26 }, { width: 60 }];
+  // 'Proof <id>' labels run ~34 chars; LibreOffice clips at the column edge,
+  // so the label column is sized for them rather than relying on overflow.
+  // The pair must stay within ~74 units of portrait width or the detail
+  // column spills onto its own page.
+  method.columns = [{ width: 36 }, { width: 38 }];
   const methodRows: Array<[string, string]> = [
     ['Policy', '1.0.0'],
     ['Analysis', model.analysisId],
@@ -546,7 +571,13 @@ export const buildWorkbook = async (
     row.getCell(1).value = label;
     row.getCell(1).font = { bold: true, color: { argb: MUTED_ARGB } };
     row.getCell(2).value = detail;
-    row.getCell(2).alignment = { wrapText: true };
+    row.getCell(2).alignment = { wrapText: true, vertical: 'top' };
+    // Rows inside a table don't auto-fit in LibreOffice — size the row for
+    // the wrapped detail text so it can't overlap or hide.
+    const detailLines = Math.ceil(detail.length / 36);
+    if (detailLines > 1) {
+      row.height = 15 * detailLines;
+    }
   });
   method.addTable({
     name: TABLE_NAMES['methodology'] as string,
@@ -557,6 +588,9 @@ export const buildWorkbook = async (
     columns: [{ name: 'Item' }, { name: 'Detail' }],
     rows: [],
   });
+  method.pageSetup.fitToPage = true;
+  method.pageSetup.fitToWidth = 1;
+  method.pageSetup.fitToHeight = 0;
   method.pageSetup.printArea = `A1:B${methodRows.length}`;
   clean.pageSetup.printArea = `A1:${columnLetter(headers.length)}${model.table.rows.length + 1}`;
 
