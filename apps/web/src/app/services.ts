@@ -4,6 +4,17 @@ import { BlobUrlStore } from './blobUrls.ts';
 import type { AppServices } from './context.tsx';
 
 /**
+ * Boot locale from the URL: `/ar` and `/ar/…` are Arabic, everything else is
+ * English. The route is the locale of record — a stored preference must
+ * never override it, or content and URL diverge.
+ */
+export function bootLocaleFromPath(pathname: string, documentLang?: string): 'ar' | 'en' {
+  return documentLang === 'ar' || pathname === '/ar' || pathname.startsWith('/ar/')
+    ? 'ar'
+    : 'en';
+}
+
+/**
  * Composition root — the one place concrete adapters meet. `document`/`window`
  * are injected so the same composition is testable under node.
  *
@@ -19,21 +30,20 @@ export function createAppServices(options?: {
   fetchSample?: (url: string) => Promise<Response>;
   onDiagnostic?: (msg: string) => void;
 }): AppServices {
-  // The MPA entry's <html lang> declares the boot locale; hosts that
-  // SPA-fallback /ar/ to the EN shell are caught by the path check too.
+  // An explicit locale is ALWAYS passed — letting the stored preference win
+  // on `/` renders Arabic content under an English route (the stored choice
+  // only mirrors the path the toggle navigated to).
   const bootLocale =
-    typeof document !== 'undefined' &&
-      (document.documentElement.lang === 'ar' ||
-        window.location.pathname.startsWith('/ar'))
-      ? 'ar'
-      : undefined;
+    typeof document !== 'undefined'
+      ? bootLocaleFromPath(window.location.pathname, document.documentElement.lang)
+      : 'en';
   const storage = options?.storage ?? (typeof localStorage !== 'undefined' ? localStorage : null);
   const blobStore = new BlobUrlStore();
 
   let resolvedI18n: I18n | null = null;
   const i18nReady: Promise<I18n> = import('@rowfolio/i18n').then((mod) => {
-    // The MPA entry's <html lang> declares the boot locale; the provider's
-    // stored preference wins when present.
+    // Path beats stored preference so content and route can never diverge;
+    // the stored digit preference still applies.
     resolvedI18n = mod.createI18n({
       ...(bootLocale ? { locale: bootLocale } : {}),
       storage,

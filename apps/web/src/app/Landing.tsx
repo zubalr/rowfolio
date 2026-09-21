@@ -82,7 +82,9 @@ export function LanguageToggle() {
       onClick={() => {
         i18n.setLocale(other);
         if (typeof history !== 'undefined') {
-          history.replaceState(null, '', other === 'ar' ? '/ar/' : '/');
+          // Keep the hash route: rewriting to a bare path would drop
+          // `#/workspace` and bounce a reload back to the landing.
+          history.replaceState(null, '', (other === 'ar' ? '/ar/' : '/') + window.location.hash);
         }
       }}
     >
