@@ -56,11 +56,11 @@ html[lang="ar"] .rf-btn {
   box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--rf-data) 55%, transparent);
 }
 .rf-btn--primary:hover:not(:disabled) {
-  background: #23404E;
-  box-shadow: inset 0 -3px 0 var(--rf-data);
+  background: var(--rf-data);
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--rf-ink) 40%, transparent);
 }
 .rf-btn--primary:active:not(:disabled) {
-  background: #0F1E26;
+  background: #2443C7;
 }
 
 /* Secondary: the ruled tier — hairline ledger rule on a raised cell. */
@@ -293,7 +293,7 @@ html[lang="ar"] .rf-field__error {
   box-shadow: var(--rf-shadow-overlay);
 }
 .rf-dialog::backdrop {
-  background: #14252E59;
+  background: #10191E59;
 }
 .rf-dialog[open] {
   animation: rf-dialog-in var(--rf-panel-ms) var(--rf-ease);
@@ -781,10 +781,10 @@ html[lang="ar"] .rf-table thead th {
   text-align: center;
 }
 .rf-table tbody tr:hover {
-  background: #14252E08;
+  background: #10191E08;
 }
 [data-rf-surface="ink"] .rf-table tbody tr:hover {
-  background: #FFFEFA08;
+  background: #FFFFFF08;
 }
 .rf-table__sourcerow {
   font-family: var(--rf-font-mono);

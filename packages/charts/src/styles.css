@@ -6,11 +6,11 @@
  */
 
 .rf-chart {
-  --rf-c-ink: #14252e;
-  --rf-c-paper: #f7f4ec;
-  --rf-c-surface: #fffefa;
-  --rf-c-muted: #53636a;
-  --rf-c-rule: #d7dcd8;
+  --rf-c-ink: #10191e;
+  --rf-c-paper: #f5f7f8;
+  --rf-c-surface: #ffffff;
+  --rf-c-muted: #54666e;
+  --rf-c-rule: #d9e0e4;
   --rf-c-data: #2b50e8;
   --rf-c-data-tint-30: #c6d1ff;
   --rf-c-attention: #e04e1a;
@@ -32,8 +32,8 @@
 /* Ink stage — a chart mounted on a dark surface adopts the ink palette.
    Every mark paint is a var() so the whole plot remaps here. */
 [data-rf-surface="ink"] .rf-chart {
-  --rf-c-ink: #fffefa;
-  --rf-c-paper: #14252e;
+  --rf-c-ink: #ffffff;
+  --rf-c-paper: #10191e;
   --rf-c-surface: #1e3846;
   --rf-c-muted: #aec2cb;
   --rf-c-rule: #3a4a53;

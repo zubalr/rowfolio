@@ -14,15 +14,15 @@
 
 export const color = {
   /** Brand ink — primary text and solid primary controls. */
-  ink: "#14252E",
-  /** Warm paper — page background. */
-  paper: "#F7F4EC",
+  ink: "#10191E",
+  /** Cool paper — page background. */
+  paper: "#F5F7F8",
   /** Surface — raised content regions (tables, preview panels). */
-  surface: "#FFFEFA",
+  surface: "#FFFFFF",
   /** Muted text / secondary labels on paper. */
-  muted: "#53636A",
+  muted: "#54666E",
   /** Subtle rule — divider-led hierarchy. */
-  rule: "#D7DCD8",
+  rule: "#D9E0E4",
   /** Primary data cobalt — actuals, focus, links. */
   data: "#2B50E8",
   /** Cobalt at 30% on surface — non-selected marks of the observed hue. */
@@ -46,11 +46,11 @@ export const color = {
  * single theme; the evidence drawer is a dark *treatment* of it, so these are
  * lightened tints of existing tokens (matching the interaction reference),
  * never new hues. Ratios vs `color.ink` are asserted in contrast.test.ts:
- *   dataOnInk #A8BCFF on ink ≈ 8.5:1, mutedOnInk #AEC2CB on ink ≈ 8.5:1,
- *   ruleOnInk rgba-equivalent #3A4A53 on ink ≈ 1.7:1 (non-text rule only).
+ *   dataOnInk #A8BCFF on ink ≈ 9.6:1, mutedOnInk #AEC2CB on ink ≈ 9.6:1,
+ *   ruleOnInk rgba-equivalent #3A4A53 on ink ≈ 1.9:1 (non-text rule only).
  */
 export const colorOnInk = {
-  text: "#FFFEFA",
+  text: "#FFFFFF",
   muted: "#AEC2CB",
   data: "#A8BCFF",
   attention: "#F0926C",
@@ -104,6 +104,18 @@ export const motion = {
 export const easing = "cubic-bezier(0.2, 0.7, 0.2, 1)" as const;
 
 /**
+ * Plate label — the numbered-plate micro-label (`01 DATA` style) from the
+ * broadsheet system: Plex Mono, 600, uppercase, wide tracking.
+ */
+export const plateLabel = {
+  sizePx: 11.5,
+  family: "code",
+  weight: 600,
+  transform: "uppercase",
+  trackingEm: 0.12,
+} as const;
+
+/**
  * Type ramp (px) per 04_DESIGN_SYSTEM.md. Arabic uses its own scale with
  * roomier line heights; both scripts share the rhythm, not identical pixels.
  * Labels never render below 12px (web) and Arabic never below 14px in primary
@@ -133,6 +145,7 @@ export const tokens = {
   layout,
   font,
   motion,
+  plateLabel,
   typePx,
 } as const;
 

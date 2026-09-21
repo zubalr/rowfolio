@@ -7,7 +7,7 @@
  * Rules:
  * - Normal text WCAG AA: >= 4.5:1
  * - Large text (>=18pt or >=14pt bold) / graphical objects: >= 3.0:1
- * - Attention (#E04E1A) on Paper (#F7F4EC) ratio is 3.62:1 (prohibited for normal text,
+ * - Attention (#E04E1A) on Paper (#F5F7F8) ratio is 3.62:1 (prohibited for normal text,
  *   only permitted for large display numerals or nontext markers).
  */
 import { describe, expect, it } from "vitest";

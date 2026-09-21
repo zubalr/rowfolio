@@ -4,16 +4,16 @@
  * and styles/tokens.css together, and check validation/contrast.json pairs.
  */
 import { describe, expect, it } from "vitest";
-import { color, layout, motion, radius, spacing, typePx } from "./tokens.ts";
+import { color, layout, motion, plateLabel, radius, spacing, typePx } from "./tokens.ts";
 
 describe("design tokens", () => {
   it("match contract color values", () => {
     expect(color).toEqual({
-      ink: "#14252E",
-      paper: "#F7F4EC",
-      surface: "#FFFEFA",
-      muted: "#53636A",
-      rule: "#D7DCD8",
+      ink: "#10191E",
+      paper: "#F5F7F8",
+      surface: "#FFFFFF",
+      muted: "#54666E",
+      rule: "#D9E0E4",
       data: "#2B50E8",
       dataTint30: "#C6D1FF",
       attention: "#E04E1A",
@@ -52,6 +52,16 @@ describe("design tokens", () => {
       numberMs: 240,
       progressMs: 120,
       reducedMs: 0,
+    });
+  });
+
+  it("match contract plate label", () => {
+    expect(plateLabel).toEqual({
+      sizePx: 11.5,
+      family: "code",
+      weight: 600,
+      transform: "uppercase",
+      trackingEm: 0.12,
     });
   });
 

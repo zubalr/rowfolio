@@ -5,7 +5,7 @@
 }
 
 .harness__hint {
-  color: #53636a;
+  color: #54666e;
   font-size: 12px;
   margin: 8px 16px;
 }
@@ -15,7 +15,7 @@
   display: flex;
   gap: 16px;
   align-items: center;
-  background: var(--rf-paper, #f7f4ec);
+  background: var(--rf-paper, #f5f7f8);
   min-height: 100vh;
 }
 

@@ -12,18 +12,18 @@ import { color, colorOnInk } from "./tokens.ts";
 // Expected ratios from the contract design-token palette (verified
 // WCAG relative luminance on sRGB). Tolerance ±0.02 covers float rounding.
 const CONTRACT_PAIRS = [
-  { fg: color.ink, bg: color.paper, ratio: 14.324, normalAA: true },
-  { fg: color.muted, bg: color.paper, ratio: 5.685, normalAA: true },
-  { fg: color.data, bg: color.paper, ratio: 5.594, normalAA: true },
-  { fg: color.negative, bg: color.paper, ratio: 6.287, normalAA: true },
-  { fg: color.positive, bg: color.paper, ratio: 3.64, normalAA: false },
-  { fg: color.positiveText, bg: color.paper, ratio: 5.777, normalAA: true },
-  { fg: color.scenario, bg: color.paper, ratio: 3.58, normalAA: false },
-  { fg: color.scenarioText, bg: color.paper, ratio: 4.859, normalAA: true },
-  { fg: color.surface, bg: color.data, ratio: 6.093, normalAA: true },
-  { fg: color.surface, bg: color.ink, ratio: 15.601, normalAA: true },
+  { fg: color.ink, bg: color.paper, ratio: 16.564, normalAA: true },
+  { fg: color.muted, bg: color.paper, ratio: 5.579, normalAA: true },
+  { fg: color.data, bg: color.paper, ratio: 5.722, normalAA: true },
+  { fg: color.negative, bg: color.paper, ratio: 6.430, normalAA: true },
+  { fg: color.positive, bg: color.paper, ratio: 3.723, normalAA: false },
+  { fg: color.positiveText, bg: color.paper, ratio: 5.909, normalAA: true },
+  { fg: color.scenario, bg: color.paper, ratio: 3.662, normalAA: false },
+  { fg: color.scenarioText, bg: color.paper, ratio: 4.970, normalAA: true },
+  { fg: color.surface, bg: color.data, ratio: 6.149, normalAA: true },
+  { fg: color.surface, bg: color.ink, ratio: 17.799, normalAA: true },
   // Vermilion on paper is below 4.5 — lawful for large text/graphics only.
-  { fg: color.attention, bg: color.paper, ratio: 3.623, normalAA: false },
+  { fg: color.attention, bg: color.paper, ratio: 3.705, normalAA: false },
 ] as const;
 
 describe("contrastRatio", () => {

@@ -7,11 +7,11 @@
 
 :root {
   /* Palette (contract) */
-  --rf-ink: #14252E;
-  --rf-paper: #F7F4EC;
-  --rf-surface: #FFFEFA;
-  --rf-muted: #53636A;
-  --rf-rule: #D7DCD8;
+  --rf-ink: #10191E;
+  --rf-paper: #F5F7F8;
+  --rf-surface: #FFFFFF;
+  --rf-muted: #54666E;
+  --rf-rule: #D9E0E4;
   --rf-data: #2B50E8;
   --rf-data-tint-30: #C6D1FF;
   --rf-attention: #E04E1A;
@@ -22,7 +22,7 @@
   --rf-scenario-text: #946000;
 
   /* On-ink tints — dark evidence surface only */
-  --rf-ink-text: #FFFEFA;
+  --rf-ink-text: #FFFFFF;
   --rf-ink-muted: #AEC2CB;
   --rf-ink-data: #A8BCFF;
   --rf-ink-attention: #F0926C;
@@ -71,12 +71,17 @@
   --rf-stagger-ms: 40ms;
   --rf-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 
+  /* Plate label — numbered-plate micro-labels (mono, uppercase, tracked) */
+  --rf-plate-label-size: 11.5px;
+  --rf-plate-label-weight: 600;
+  --rf-plate-label-tracking: 0.12em;
+
   /* Type stacks */
   --rf-font-body: "IBM Plex Sans", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --rf-font-mono: "IBM Plex Mono", "IBM Plex Sans", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
   /* Elevation: shadows are for overlays only */
-  --rf-shadow-overlay: 0 20px 70px #14252E1F;
+  --rf-shadow-overlay: 0 20px 70px #10191E1F;
 
   color-scheme: light;
 }
