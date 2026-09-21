@@ -733,7 +733,9 @@ html[lang="ar"] .rf-replay { font-family: var(--rf-font-body); font-size: 12px; 
   .rf-plates { display: block; }
   .rf-plate { position: relative; inset-inline: auto; top: auto; width: 100%; margin-block-end: 16px; }
   .rf-plate--data { height: auto; min-height: 320px; }
-  .rf-plate--data .rf-plate__body { position: static; padding: 14px; }
+  /* stays relative at all widths: the absolute annotators (strike, ring,
+     vrule) must share the containing block their offsets are measured in */
+  .rf-plate--data .rf-plate__body { position: relative; padding: 14px; }
   .rf-plate--find { height: 56vw; min-height: 208px; }
   .rf-plate--rep { height: 64vw; min-height: 240px; }
 

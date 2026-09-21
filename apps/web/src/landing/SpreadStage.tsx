@@ -381,7 +381,8 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
               style={{
                 opacity: rp,
                 transform: `scale(${lerp(1.2, 1, rp)})`,
-                insetInlineStart: meas === null ? 0 : meas.blankLeft + 4,
+                // physical offset — blankLeft is measured in offsetLeft space
+                left: meas === null ? 0 : meas.blankLeft + 4,
                 top: meas === null ? 0 : meas.blankTop + 1,
                 width: meas === null ? 0 : Math.max(0, meas.blankW - 8),
                 height: meas === null ? 0 : Math.max(0, meas.blankH - 2),
