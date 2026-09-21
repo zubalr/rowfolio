@@ -1,9 +1,9 @@
 /* Direction B - Broadsheet: ~11s annotator loop */
+/* global document, window, requestAnimationFrame */
 (function () {
   "use strict";
 
   var LOOP = 11000;
-  var BEAT_T = [400, 3600, 6600];
 
   var $ = function (id) { return document.getElementById(id); };
   var platesEl = $("plates");
@@ -188,7 +188,6 @@
   function renderStill() {
     // finished spread, all flags visible
     measure();
-    var g = { f: 1 };
     [plateData, plateFind, plateRep].forEach(function (p) { p.style.opacity = 1; p.style.transform = ""; });
     marks.forEach(function (mk) { mk.style.setProperty("--fill", 1); mk.classList.add("on"); });
     vrule.style.opacity = 0;

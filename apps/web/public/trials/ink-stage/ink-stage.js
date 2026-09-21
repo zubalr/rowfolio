@@ -1,3 +1,4 @@
+/* global document, window, requestAnimationFrame */
 (function () {
   "use strict";
 
