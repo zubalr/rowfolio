@@ -645,7 +645,7 @@ html[lang="ar"] .rf-briefing__title {
   margin: var(--rf-space-4) 0 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: var(--rf-space-3);
 }
 /* Slides are the same mini-compositions as the export dialog — the preview
@@ -677,9 +677,9 @@ html[lang="ar"] .rf-briefing__title {
   color: var(--rf-text);
 }
 .rf-briefing__slide-num {
+  flex: none;
   font-size: 12px;
   color: var(--rf-text-muted);
-  min-inline-size: 5.5em;
 }
 html[lang="ar"] .rf-briefing__slide-num {
   font-size: 13px;

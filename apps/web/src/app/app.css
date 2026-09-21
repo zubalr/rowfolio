@@ -191,6 +191,14 @@
 .rf-metric--feature .rf-metric__value {
   font-size: clamp(26px, 9vw, 52px);
 }
+/* Arabic-Indic numerals are wider than Latin at the same size — at 320px the
+   9vw floor yields a ~290px figure that cannot shrink (figures are nowrap),
+   so the floor drops further at the narrowest widths. */
+@media (max-width: 360px) {
+  .rf-metric--feature .rf-metric__value {
+    font-size: clamp(20px, 7vw, 30px);
+  }
+}
 
 .rf-workspace-head {
   border-block-end: 1px solid var(--rf-divider);

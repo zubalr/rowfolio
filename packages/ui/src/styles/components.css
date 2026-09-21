@@ -865,6 +865,14 @@ html[lang="ar"] .rf-metric__value {
     line-height: 1.2;
   }
 }
+/* Arabic-Indic numerals run wide — at 320px a 30px figure plus its unit is
+   broader than the KPI cell, and nowrap figures cannot shrink. Scale the
+   metric further at the narrowest widths instead of breaking mid-token. */
+@media (max-width: 360px) {
+  .rf-metric__value {
+    font-size: clamp(18px, 6.5vw, 26px);
+  }
+}
 .rf-metric__unit {
   font-size: 14px;
   font-weight: 400;
