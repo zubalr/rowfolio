@@ -141,6 +141,35 @@ describe('deck structure', () => {
     }
   });
 
+  it('completes every chart: data table, unit axis title, and slide caption', async () => {
+    const { bytes, model } = await buildDeck('en');
+    const entries = unzip(bytes);
+    const charts = [...entries.keys()].filter((n) => /^ppt\/charts\/chart\d+\.xml$/.test(n));
+    expect(charts.length).toBeGreaterThan(0);
+    for (const name of charts) {
+      const xml = textOf(entries, name);
+      // Accessible data table under the plot with the exact cached values.
+      expect(xml, `${name} data table`).toContain('<c:dTable>');
+      // The domain covers actual and target on a zero baseline.
+      expect(xml).toContain('<c:min val="0"');
+    }
+    // Unit labels sit on the value axis where a unit exists.
+    const chartBlob = charts.map((n) => textOf(entries, n)).join('\n');
+    expect(chartBlob).toContain('USD');
+    // Each slide that renders a chart carries the caption text box with the
+    // resolved chart title and the named comparison.
+    for (let i = 1; i <= 6; i += 1) {
+      const slide = model.slides[i - 1];
+      if (slide === undefined || slide.chartIds.length === 0) continue;
+      const xml = textOf(entries, `ppt/slides/slide${i}.xml`);
+      expect(xml, `slide${i} caption`).toContain(`name="${slide.id}-chart-caption"`);
+    }
+    const slide3 = textOf(entries, 'ppt/slides/slide3.xml');
+    expect(slide3).toContain('Actual revenue against target');
+    expect(slide3).toContain('Actual / Target');
+    expect(slide3).toContain('June 2026');
+  });
+
   it('keeps Arabic chronology unmirrored with RTL paragraphs', async () => {
     const { bytes } = await buildDeck('ar');
     const entries = unzip(bytes);

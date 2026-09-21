@@ -44674,7 +44674,7 @@
       ],
       "domain": {
         "min": "0",
-        "max": "0.30"
+        "max": "0.28"
       },
       "chronology": "not-temporal",
       "scope": {
@@ -46266,22 +46266,24 @@
     {
       "id": "slide-1",
       "kind": "summary",
-      "title": "من الصفوف إلى إحاطة واضحة",
-      "subtitle": "نموذج اصطناعي مرجعي / يونيو ٢٠٢٦",
+      "title": "تقرير العمليات الشهري",
+      "subtitle": "تحليل المثال · يونيو 2026",
       "metricIds": [],
       "findingIds": [
         "finding-north-target"
       ],
       "chartIds": [],
       "notes": [
-        "مخرج مرجعي؛ لا يُعدّ اختباراً لإصدار المتصفح."
+        "scope:يونيو 2026",
+        "records:2400/2417",
+        "example analysis"
       ]
     },
     {
       "id": "slide-2",
       "kind": "kpis",
       "title": "يونيو في لمحة",
-      "subtitle": "نموذج اصطناعي مرجعي / يونيو ٢٠٢٦",
+      "subtitle": "تحليل المثال · يونيو 2026",
       "metricIds": [
         "june-revenue",
         "june-operating-cost",
@@ -46291,14 +46293,14 @@
       "findingIds": [],
       "chartIds": [],
       "notes": [
-        "مخرج مرجعي؛ لا يُعدّ اختباراً لإصدار المتصفح."
+        "scope:يونيو 2026"
       ]
     },
     {
       "id": "slide-3",
       "kind": "finding",
       "title": "طلبات أكثر وإيرادات دون المستهدف",
-      "subtitle": "نموذج اصطناعي مرجعي / يونيو ٢٠٢٦",
+      "subtitle": "تحليل المثال · يونيو 2026",
       "metricIds": [
         "north-june-revenue",
         "north-june-target",
@@ -46312,14 +46314,15 @@
         "chart-north-target"
       ],
       "notes": [
-        "مخرج مرجعي؛ لا يُعدّ اختباراً لإصدار المتصفح."
+        "finding:finding-north-target",
+        "rule:north-target-orders-v1"
       ]
     },
     {
       "id": "slide-4",
       "kind": "scenario",
-      "title": "اختبر افتراضاً للتكاليف",
-      "subtitle": "نموذج اصطناعي مرجعي / يونيو ٢٠٢٦",
+      "title": "غيّر تكاليف التشغيل",
+      "subtitle": "تحليل المثال · يونيو 2026",
       "metricIds": [
         "june-margin",
         "scenario-margin",
@@ -46330,33 +46333,40 @@
         "chart-scenario"
       ],
       "notes": [
-        "مخرج مرجعي؛ لا يُعدّ اختباراً لإصدار المتصفح."
+        "scenario:0.08",
+        "baseline:analysis-a645db6d54cee88e2aa3"
       ]
     },
     {
       "id": "slide-5",
       "kind": "quality",
       "title": "ما الذي تغيّر في البيانات؟",
-      "subtitle": "نموذج اصطناعي مرجعي / يونيو ٢٠٢٦",
+      "subtitle": "تحليل المثال · يونيو 2026",
       "metricIds": [],
       "findingIds": [
         "finding-quality"
       ],
       "chartIds": [],
       "notes": [
-        "مخرج مرجعي؛ لا يُعدّ اختباراً لإصدار المتصفح."
+        "finding:finding-quality",
+        "issues:29",
+        "resolved:24",
+        "unresolved:5"
       ]
     },
     {
       "id": "slide-6",
       "kind": "methodology",
       "title": "تحقّق قبل اتخاذ القرار",
-      "subtitle": "نموذج اصطناعي مرجعي / يونيو ٢٠٢٦",
+      "subtitle": "تحليل المثال · يونيو 2026",
       "metricIds": [],
       "findingIds": [],
       "chartIds": [],
       "notes": [
-        "مخرج مرجعي؛ لا يُعدّ اختباراً لإصدار المتصفح."
+        "source:sample_operations.xlsx#Operations",
+        "hash:f0d6d06e934b",
+        "revision:cee5cbcf84bc",
+        "no forecast; no causal claim"
       ]
     }
   ],

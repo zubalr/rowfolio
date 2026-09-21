@@ -288,19 +288,53 @@
   flex: 1;
   min-height: 3em;
   display: flex;
-  align-items: flex-end;
   gap: 0.5em;
-  border-block-end: 1px solid var(--rf-ink);
-  padding-block-end: 0;
 }
 
 .rf-sp__chart-group {
   flex: 1;
   display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Bars row sits on the ink baseline; the category label rides under it. */
+.rf-sp__bars {
+  flex: 1;
+  display: flex;
   align-items: flex-end;
   gap: 2px;
+  border-block-end: 1px solid var(--rf-ink);
+}
+
+.rf-sp__barcell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   min-width: 0;
   block-size: 100%;
+}
+
+/* Value readout sits directly above its mark; hidden only when empty. */
+.rf-sp__barval {
+  font-size: 0.56em;
+  line-height: 1.2;
+  color: var(--rf-text);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.rf-sp__cat {
+  font-size: 0.6em;
+  line-height: 1.3;
+  color: var(--rf-text-muted);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .rf-sp__bar {
@@ -319,9 +353,33 @@
   margin: 0.35em 0 0;
   font-size: 0.8em;
   color: var(--rf-text-muted);
+  overflow: hidden;
+}
+
+.rf-sp__chart-title {
+  display: block;
+  font-weight: 600;
+  color: var(--rf-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.rf-sp__chart-meta {
+  display: block;
+  font-size: 0.82em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Workbook card: the report title leads; the deterministic filename drops to
+   a mono meta line under it. */
+.rf-sp__wrows {
+  margin: 0.2em 0 0;
+  font-size: 0.62em;
+  color: var(--rf-text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Quality page: track rails + reconciliation card. */

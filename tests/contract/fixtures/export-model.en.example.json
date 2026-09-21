@@ -44674,7 +44674,7 @@
       ],
       "domain": {
         "min": "0",
-        "max": "0.30"
+        "max": "0.28"
       },
       "chronology": "not-temporal",
       "scope": {
@@ -46266,22 +46266,24 @@
     {
       "id": "slide-1",
       "kind": "summary",
-      "title": "From rows to a clear briefing",
-      "subtitle": "Synthetic reference / June 2026",
+      "title": "Monthly operations report",
+      "subtitle": "Example analysis · June 2026",
       "metricIds": [],
       "findingIds": [
         "finding-north-target"
       ],
       "chartIds": [],
       "notes": [
-        "Reference output; not production browser validation."
+        "scope:June 2026",
+        "records:2400/2417",
+        "example analysis"
       ]
     },
     {
       "id": "slide-2",
       "kind": "kpis",
       "title": "June at a glance",
-      "subtitle": "Synthetic reference / June 2026",
+      "subtitle": "Example analysis · June 2026",
       "metricIds": [
         "june-revenue",
         "june-operating-cost",
@@ -46291,14 +46293,14 @@
       "findingIds": [],
       "chartIds": [],
       "notes": [
-        "Reference output; not production browser validation."
+        "scope:June 2026"
       ]
     },
     {
       "id": "slide-3",
       "kind": "finding",
       "title": "More orders. Below target.",
-      "subtitle": "Synthetic reference / June 2026",
+      "subtitle": "Example analysis · June 2026",
       "metricIds": [
         "north-june-revenue",
         "north-june-target",
@@ -46312,14 +46314,15 @@
         "chart-north-target"
       ],
       "notes": [
-        "Reference output; not production browser validation."
+        "finding:finding-north-target",
+        "rule:north-target-orders-v1"
       ]
     },
     {
       "id": "slide-4",
       "kind": "scenario",
-      "title": "Test a cost assumption",
-      "subtitle": "Synthetic reference / June 2026",
+      "title": "Change operating costs",
+      "subtitle": "Example analysis · June 2026",
       "metricIds": [
         "june-margin",
         "scenario-margin",
@@ -46330,33 +46333,40 @@
         "chart-scenario"
       ],
       "notes": [
-        "Reference output; not production browser validation."
+        "scenario:0.08",
+        "baseline:analysis-a645db6d54cee88e2aa3"
       ]
     },
     {
       "id": "slide-5",
       "kind": "quality",
       "title": "What changed in the data",
-      "subtitle": "Synthetic reference / June 2026",
+      "subtitle": "Example analysis · June 2026",
       "metricIds": [],
       "findingIds": [
         "finding-quality"
       ],
       "chartIds": [],
       "notes": [
-        "Reference output; not production browser validation."
+        "finding:finding-quality",
+        "issues:29",
+        "resolved:24",
+        "unresolved:5"
       ]
     },
     {
       "id": "slide-6",
       "kind": "methodology",
       "title": "Inspect before acting",
-      "subtitle": "Synthetic reference / June 2026",
+      "subtitle": "Example analysis · June 2026",
       "metricIds": [],
       "findingIds": [],
       "chartIds": [],
       "notes": [
-        "Reference output; not production browser validation."
+        "source:sample_operations.xlsx#Operations",
+        "hash:f0d6d06e934b",
+        "revision:cee5cbcf84bc",
+        "no forecast; no causal claim"
       ]
     }
   ],
