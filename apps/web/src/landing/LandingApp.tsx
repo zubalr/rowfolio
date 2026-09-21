@@ -16,10 +16,7 @@ import type { I18n } from "@rowfolio/i18n";
 import { landingCopy } from "./copy.ts";
 import { SpreadStage } from "./SpreadStage.tsx";
 import { SAMPLE_EXPORT_MODEL, findingSlide } from "./sampleExportModel.ts";
-import { SlidePreview, WorkbookPreview } from "../briefing/SlidePreview.tsx";
-// SlidePreview's component stylesheet is owned by the export dialog — the
-// landing must import it directly or the previews render unstyled.
-import "../briefing/export.css";
+import { MiniReport, WorkbookMini } from "../demo/MiniReport.tsx";
 import { persistLocaleChoice } from "./i18n.ts";
 import { siblingLocaleHref, workspaceHref, navigateToWorkspace } from "./routes.ts";
 import { setWorkspaceIntent, type IntentDownload } from "./pendingUpload.ts";
@@ -60,7 +57,9 @@ export function LandingApp({ i18n }: LandingAppProps) {
   const altModel = SAMPLE_EXPORT_MODEL[otherLocale];
 
   return (
-    <>
+    // `.rf-landing-root` scopes the landing's chrome rules so they cannot
+    // leak onto the app-shell masthead when both stylesheets are loaded.
+    <div className="rf-landing-root">
       <SkipLink targetId="#main">{i18n.t("a11y.skip")}</SkipLink>
       <div className="rf-frame" aria-hidden="true" />
 
@@ -92,8 +91,9 @@ export function LandingApp({ i18n }: LandingAppProps) {
                 return;
               }
               event.preventDefault();
+              const href = siblingLocaleHref(i18n.locale);
               persistLocaleChoice(i18n, i18n.locale === "ar" ? "en" : "ar");
-              window.location.assign(siblingLocaleHref(i18n.locale));
+              window.location.assign(href);
             }}
           >
             {i18n.localeName(i18n.locale === "ar" ? "en" : "ar")}
@@ -135,7 +135,7 @@ export function LandingApp({ i18n }: LandingAppProps) {
                   {landingCopy(i18n.locale, "plate.report")}
                 </header>
                 <div className="rf-plate__body rf-output__preview">
-                  <SlidePreview model={model} slide={findingSlide(model)} />
+                  <MiniReport model={model} slide={findingSlide(model)} />
                 </div>
               </div>
               <figcaption className="rf-output__cap">
@@ -150,7 +150,7 @@ export function LandingApp({ i18n }: LandingAppProps) {
                   {i18n.localeName(otherLocale)}
                 </header>
                 <div className="rf-plate__body rf-output__preview" dir={otherLocale === "ar" ? "rtl" : "ltr"}>
-                  <SlidePreview model={altModel} slide={findingSlide(altModel)} />
+                  <MiniReport model={altModel} slide={findingSlide(altModel)} />
                 </div>
               </div>
               <figcaption className="rf-output__cap">{i18n.localeName(otherLocale)}</figcaption>
@@ -163,7 +163,7 @@ export function LandingApp({ i18n }: LandingAppProps) {
                   {landingCopy(i18n.locale, "pres.workbook.title")}
                 </header>
                 <div className="rf-plate__body rf-output__preview">
-                  <WorkbookPreview model={model} />
+                  <WorkbookMini model={model} />
                 </div>
               </div>
               <figcaption className="rf-output__cap">{landingCopy(i18n.locale, "pres.output.workbook")}</figcaption>
@@ -215,6 +215,6 @@ export function LandingApp({ i18n }: LandingAppProps) {
         </p>
         <p className="rf-footer__muted">{landingCopy(i18n.locale, "pres.credit")}</p>
       </footer>
-    </>
+    </div>
   );
 }
