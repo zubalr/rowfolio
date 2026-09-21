@@ -225,18 +225,6 @@
 
 /* ---- contributing inputs -------------------------------------------- */
 
-/* Ruled ledger inside the drawer: the same faint cell grid as the content
-   stage, here printed in ink-text at ~5% so it sits on the dark surface. */
-[data-rf-surface="ink"] .rf-evidence__inputs,
-[data-rf-surface="ink"] .rf-evidence__transforms,
-[data-rf-surface="ink"] .rf-evidence__fingerprint-grid,
-[data-rf-surface="ink"] .rf-evidence__table {
-  background-image:
-    linear-gradient(to bottom, color-mix(in srgb, var(--rf-ink-text) 5%, transparent) 1px, transparent 1px),
-    linear-gradient(to right, color-mix(in srgb, var(--rf-ink-text) 5%, transparent) 1px, transparent 1px);
-  background-size: var(--rf-space-6) var(--rf-space-6);
-}
-
 [data-rf-surface="ink"] .rf-evidence__inputs {
   margin: 0;
   display: flex;
@@ -327,8 +315,12 @@
   color: var(--rf-ink-muted);
 }
 
+/* Numeric columns: mono tabular figures, end-aligned — the table grammar
+   for data columns on every surface. */
 [data-rf-surface="ink"] .rf-evidence__col-num {
   text-align: end;
+  font-family: var(--rf-font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 [data-rf-surface="ink"] .rf-evidence__cell {
@@ -349,8 +341,9 @@
   text-decoration-thickness: 1px;
 }
 
+/* Flagged rows wear attention — a genuine exception, never decorative. */
 [data-rf-surface="ink"] .rf-evidence__flag {
-  color: var(--rf-ink-scenario);
+  color: var(--rf-ink-attention);
   font-size: 0.7em;
   margin-inline-start: var(--rf-space-1);
 }

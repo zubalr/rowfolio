@@ -372,9 +372,9 @@ export function ReviewPanel({
       </Section>
 
       <div className="rf-upload__actions">
-        <Button variant="secondary" onClick={onBack} data-testid="review-back">
+        <button type="button" className="rf-linkbtn" onClick={onBack} data-testid="review-back">
           {i18n.t("action.back")}
-        </Button>
+        </button>
         <Button variant="primary" onClick={onSubmit} data-testid="review-submit">
           {i18n.t("action.approve")}
         </Button>

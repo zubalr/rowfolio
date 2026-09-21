@@ -70,8 +70,8 @@ describe("spanTokens", () => {
 
   it("renders disjoint spans as separate tokens — never collapsed", () => {
     expect(spanTokens(selection([{ start: 1202, end: 1221 }, { start: 1300, end: 1320 }]))).toEqual([
-      "R1202–R1221",
-      "R1300–R1320",
+      "R1202-R1221",
+      "R1300-R1320",
     ]);
   });
 
@@ -81,8 +81,8 @@ describe("spanTokens", () => {
 
   it("does not merge adjacent-but-separate spans", () => {
     expect(spanTokens(selection([{ start: 5, end: 6 }, { start: 7, end: 8 }]))).toEqual([
-      "R5–R6",
-      "R7–R8",
+      "R5-R6",
+      "R7-R8",
     ]);
   });
 });

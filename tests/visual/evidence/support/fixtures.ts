@@ -64,8 +64,8 @@ function synthRank(coverage = "1", magnitude = "0") {
 
 
 /**
- * A single metric whose two disjoint spans must render as `R1202–R1221 ·
- * R1300–R1320` — never collapsed into `R1202–R1320` (which would claim 20
+ * A single metric whose two disjoint spans must render as `R1202-R1221 ·
+ * R1300-R1320` — never collapsed into `R1202-R1320` (which would claim 20
  * extra rows contribute). `count-rows` keeps evaluation honest: the oracle
  * recomputes 41 from the fixture rows.
  */

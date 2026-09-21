@@ -1,7 +1,8 @@
-import { Button, Dialog, Status } from '@rowfolio/ui';
+import { Dialog, Status } from '@rowfolio/ui';
 import type { MessageKey } from '@rowfolio/i18n';
 import { useI18n, useServices, useSessionState } from '../app/context.tsx';
 import { formatInteger } from '../workspace/format.ts';
+import { PlateLabel } from '../workspace/Plate.tsx';
 import type { ExportFormat } from '../app/state.ts';
 import { SlidePreview, WorkbookPreview } from './SlidePreview.tsx';
 import './export.css';
@@ -37,9 +38,9 @@ export function ExportDialog() {
       closeLabel={i18n.tSafe('action.close' as MessageKey)}
       footer={
         ex.building ? (
-          <Button variant="secondary" onClick={() => controller.cancelExport()}>
+          <button type="button" className="rf-linkbtn" onClick={() => controller.cancelExport()}>
             {i18n.tSafe('action.cancel' as MessageKey)}
-          </Button>
+          </button>
         ) : undefined
       }
     >
@@ -90,7 +91,7 @@ function ModelPreview({ state }: { state: ReturnType<typeof useSessionState> }) 
   const model = state.export.model;
   return (
     <div className="rf-export-preview">
-      <p className="rf-evidence-label">{i18n.tSafe('export.preview' as MessageKey)}</p>
+      <PlateLabel index="04" name={i18n.tSafe('plate.report' as MessageKey)} />
       <p className="rf-quiet">{i18n.tSafe('export.previewNote' as MessageKey)}</p>
       {state.export.scenarioId && (
         <p className="rf-quiet">

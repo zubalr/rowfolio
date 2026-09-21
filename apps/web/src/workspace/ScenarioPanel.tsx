@@ -60,9 +60,9 @@ export function ScenarioPanel() {
           {i18n.tSafe('scenario.question' as MessageKey)}
         </Button>
         {scenario && (
-          <Button variant="secondary" onClick={() => controller.resetScenario()}>
+          <button type="button" className="rf-linkbtn" onClick={() => controller.resetScenario()}>
             {i18n.tSafe('action.reset' as MessageKey)}
-          </Button>
+          </button>
         )}
       </div>
       {scenario && (

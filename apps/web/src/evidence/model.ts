@@ -91,7 +91,7 @@ export function subjectTransformIds(subject: EvidenceSubject): string[] {
  */
 export function spanTokens(selection: RowSelection): string[] {
   return selection.spans.map((span) =>
-    span.start === span.end ? `R${span.start}` : `R${span.start}–R${span.end}`,
+    span.start === span.end ? `R${span.start}` : `R${span.start}-R${span.end}`,
   );
 }
 

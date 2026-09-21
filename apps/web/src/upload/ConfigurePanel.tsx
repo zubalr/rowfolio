@@ -118,9 +118,9 @@ export function ConfigurePanel({
               </bdi>
             </Button>
           ))}
-          <Button variant="secondary" onClick={onCancel} data-testid="configure-cancel">
+          <button type="button" className="rf-linkbtn" onClick={onCancel} disabled={busy} data-testid="configure-cancel">
             {i18n.t("action.cancel")}
-          </Button>
+          </button>
         </div>
       </Section>
     );
@@ -198,7 +198,7 @@ export function ConfigurePanel({
       ) : null}
 
       {inspection ? (
-        <Section title={i18n.t("upload.range")} headingLevel={3}>
+        <Section title={i18n.t("upload.preview")} headingLevel={3}>
           {preview && preview.rowNumbers.length > 0 ? (
             <>
               <div className="rf-upload__preview" data-testid="upload-preview">
@@ -264,9 +264,9 @@ export function ConfigurePanel({
         >
           {i18n.t("action.approve")}
         </Button>
-        <Button variant="secondary" onClick={onCancel} data-testid="configure-cancel">
+        <button type="button" className="rf-linkbtn" onClick={onCancel} data-testid="configure-cancel">
           {i18n.t("action.cancel")}
-        </Button>
+        </button>
       </div>
     </div>
   );

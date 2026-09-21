@@ -16,6 +16,7 @@ import { ChartStage } from './ChartStage.tsx';
 import { ScenarioPanel } from './ScenarioPanel.tsx';
 import { EvidencePanel } from './EvidencePanel.tsx';
 import { ReviewPanel } from './ReviewPanel.tsx';
+import { Plate } from './Plate.tsx';
 import { ExportDialog } from '../briefing/ExportDialog.tsx';
 import { LazyMotion, MotionConfig, domAnimation } from 'motion/react';
 import { formatScope } from '../evidence/model.ts';
@@ -167,19 +168,19 @@ export function WorkspaceScreen({ navigateLanding }: { navigateLanding: () => vo
               >
                 {i18n.tSafe('action.prepare' as MessageKey)}
               </Button>
-              <Button variant="secondary" onClick={() => controller.replay()}>
+              <button type="button" className="rf-linkbtn" onClick={() => controller.replay()}>
                 {i18n.tSafe('action.replay' as MessageKey)}
-              </Button>
+              </button>
             </>
           )}
-          <Button
-            variant="secondary"
-            icon="close"
+          <button
+            type="button"
+            className="rf-linkbtn"
             onClick={() => void controller.clearSession().then(navigateLanding)}
             data-testid="clear-session-btn"
           >
             {i18n.tSafe('action.clear' as MessageKey)}
-          </Button>
+          </button>
           <LanguageToggle />
         </nav>
         <input
@@ -248,9 +249,9 @@ function SessionBanner({ state }: { state: SessionState }) {
               {i18n.tSafe('action.retry' as MessageKey)}
             </Button>
           ) : null}
-          <Button variant="secondary" onClick={() => controller.cancelWork('user')} data-testid="banner-back">
+          <button type="button" className="rf-linkbtn" onClick={() => controller.cancelWork('user')} data-testid="banner-back">
             {i18n.tSafe('action.back' as MessageKey)}
-          </Button>
+          </button>
         </span>
       </div>
     );
@@ -316,15 +317,20 @@ function PhaseBody({
         );
       }
       return (
-        <section className="rf-idle">
-          <h1 className="rf-idle-title">{i18n.tSafe('workspace.title' as MessageKey)}</h1>
+        <Plate
+          index="01"
+          name={i18n.tSafe('plate.upload' as MessageKey)}
+          title={i18n.tSafe('workspace.title' as MessageKey)}
+          headingLevel={1}
+          className="rf-idle"
+        >
           <p className="rf-quiet">{i18n.tSafe('upload.drop' as MessageKey)}</p>
           <div className="rf-idle-actions">
             <Button variant="primary" icon="table" onClick={() => void controller.useSample()} data-testid="open-demo-cta">
               {i18n.tSafe('action.tryDemo' as MessageKey)}
             </Button>
           </div>
-        </section>
+        </Plate>
       );
     }
 
@@ -332,17 +338,23 @@ function PhaseBody({
     case 'profiling':
     case 'analyzing':
       return (
-        <Status
-          kind="loading"
+        <Plate
+          index="02"
+          name={i18n.tSafe('plate.checks' as MessageKey)}
           title={i18n.tSafe('a11y.processing' as MessageKey)}
-          stages={stageList(i18n)}
-          currentStage={state.pending?.stage ?? 'preflight'}
-          actions={
-            <Button variant="secondary" onClick={() => controller.cancelWork('user')}>
-              {i18n.tSafe('action.cancel' as MessageKey)}
-            </Button>
-          }
-        />
+        >
+          <Status
+            kind="loading"
+            title={i18n.tSafe('a11y.processing' as MessageKey)}
+            stages={stageList(i18n)}
+            currentStage={state.pending?.stage ?? 'preflight'}
+            actions={
+              <button type="button" className="rf-linkbtn" onClick={() => controller.cancelWork('user')}>
+                {i18n.tSafe('action.cancel' as MessageKey)}
+              </button>
+            }
+          />
+        </Plate>
       );
 
     case 'needsReview':
@@ -369,18 +381,32 @@ function PhaseBody({
               })}
             </p>
           </header>
-          <KpiStrip snapshot={active.snapshot} />
-          <FindingList snapshot={active.snapshot} />
-          <ChartStage snapshot={active.snapshot} />
-          <ScenarioPanel />
+          <Plate
+            index="03"
+            name={i18n.tSafe('plate.findings' as MessageKey)}
+            title={i18n.tSafe('workspace.findings' as MessageKey)}
+            testId="findings-plate"
+          >
+            <KpiStrip snapshot={active.snapshot} />
+            <FindingList snapshot={active.snapshot} />
+            <ScenarioPanel />
+          </Plate>
+          <Plate
+            index="03"
+            name={i18n.tSafe('plate.findings' as MessageKey)}
+            title={i18n.tSafe('workspace.overview' as MessageKey)}
+            testId="overview-plate"
+          >
+            <ChartStage snapshot={active.snapshot} />
+          </Plate>
           {state.phase === 'exporting' && (
             <Status
               kind="loading"
               title={i18n.tSafe('export.package' as MessageKey)}
               actions={
-                <Button variant="secondary" onClick={() => controller.cancelExport()}>
+                <button type="button" className="rf-linkbtn" onClick={() => controller.cancelExport()}>
                   {i18n.tSafe('action.cancel' as MessageKey)}
-                </Button>
+                </button>
               }
             />
           )}

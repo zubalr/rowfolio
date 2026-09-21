@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import type { QualityIssue } from '@rowfolio/contracts';
-import { Button, Section } from '@rowfolio/ui';
+import { Button } from '@rowfolio/ui';
 import type { MessageKey } from '@rowfolio/i18n';
 import { useI18n, useServices, useSessionState } from '../app/context.tsx';
+import { Plate } from './Plate.tsx';
 
 const ACTION_LABEL: Record<QualityIssue['action'], MessageKey> = {
   'exclude-row': 'quality.duplicate' as MessageKey,
@@ -15,6 +16,7 @@ const ACTION_LABEL: Record<QualityIssue['action'], MessageKey> = {
 /**
  * Needs-review panel — proposed normalizations require explicit approval.
  * The committed plan is exactly the checked set; nothing is auto-approved.
+ * Renders on the `02 CHECKS` plate.
  */
 export function ReviewPanel() {
   const i18n = useI18n();
@@ -36,9 +38,11 @@ export function ReviewPanel() {
   };
 
   return (
-    <Section
+    <Plate
+      index="02"
+      name={i18n.tSafe('plate.checks' as MessageKey)}
       title={i18n.tSafe('quality.preview' as MessageKey)}
-      meta={i18n.tSafe('quality.issues' as MessageKey) + `: ${issues.length}`}
+      note={`${i18n.tSafe('quality.issues' as MessageKey)}: ${i18n.formatInteger(issues.length)}`}
     >
       <p className="rf-quiet">{i18n.tSafe('upload.duplicateWarning' as MessageKey)}</p>
       <ul className="rf-review-list">
@@ -62,7 +66,7 @@ export function ReviewPanel() {
       </ul>
       {disclosed.length > 0 && (
         <p className="rf-quiet">
-          {i18n.tSafe('quality.unresolved' as MessageKey)}: {disclosed.length} · {i18n.tSafe('quality.noImputation' as MessageKey)}
+          {i18n.tSafe('quality.unresolved' as MessageKey)}: {i18n.formatInteger(disclosed.length)} · {i18n.tSafe('quality.noImputation' as MessageKey)}
         </p>
       )}
       <div className="rf-review-actions">
@@ -74,10 +78,10 @@ export function ReviewPanel() {
         >
           {i18n.tSafe('action.approve' as MessageKey)}
         </Button>
-        <Button variant="secondary" onClick={() => controller.cancelWork('review rejected')}>
+        <button type="button" className="rf-linkbtn" onClick={() => controller.cancelWork('review rejected')}>
           {i18n.tSafe('action.back' as MessageKey)}
-        </Button>
+        </button>
       </div>
-    </Section>
+    </Plate>
   );
 }

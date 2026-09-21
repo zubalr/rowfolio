@@ -8,32 +8,15 @@
   flex-direction: column;
   gap: var(--rf-space-5);
   max-inline-size: 56rem;
-  /* Content stages carry the ruled ledger — faint 32px cell grid. */
-  background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--rf-ink) 4%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--rf-ink) 4%, transparent) 1px, transparent 1px);
-  background-size: 32px 32px;
 }
 
-.rf-upload__title {
-  font-size: 32px;
-  line-height: 1.25;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-}
-
-html[lang="ar"] .rf-upload__title {
-  font-size: 30px;
-  line-height: 1.55;
-  letter-spacing: normal;
-}
-
-/* --- dropzone ------------------------------------------------------------ */
+/* --- dropzone ------------------------------------------------------------
+   * The drop target is a control, not a plate — the dashed hairline is its
+   * affordance and it sits transparent inside the upload plate. */
 
 .rf-upload__drop {
   border: 1px dashed var(--rf-divider);
   border-radius: var(--rf-radius-panel);
-  background: var(--rf-bg-raised);
   padding: var(--rf-space-7) var(--rf-space-6);
   display: flex;
   flex-direction: column;
@@ -47,7 +30,7 @@ html[lang="ar"] .rf-upload__title {
 
 .rf-upload__drop--active {
   border-color: var(--rf-accent);
-  background: var(--rf-surface);
+  background: color-mix(in srgb, var(--rf-accent) 4%, transparent);
 }
 
 .rf-upload__drop:focus-within {
@@ -355,9 +338,14 @@ html[lang="ar"] .rf-upload__issue-detail {
 
 /* --- action row ------------------------------------------------------------ */
 
+/* --- action row ------------------------------------------------------------
+ * One real action per surface: the primary button leads; every quiet action
+   * is a mono underlined link, never a second button. */
+
 .rf-upload__actions {
   display: flex;
-  gap: var(--rf-space-3);
+  align-items: center;
+  gap: var(--rf-space-4);
   flex-wrap: wrap;
   padding-block-start: var(--rf-space-4);
   border-block-start: 1px solid var(--rf-divider);
@@ -370,9 +358,5 @@ html[lang="ar"] .rf-upload__issue-detail {
 @media (max-width: 767px) {
   .rf-upload__drop {
     padding: var(--rf-space-6) var(--rf-space-4);
-  }
-  .rf-upload__title {
-    font-size: 24px;
-    line-height: 1.33;
   }
 }

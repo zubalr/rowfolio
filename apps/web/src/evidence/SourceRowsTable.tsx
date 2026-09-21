@@ -19,11 +19,11 @@ import {
   type RowSelection,
 } from "@rowfolio/contracts";
 import type { I18n, MessageKey } from "@rowfolio/i18n";
-import { Bidi, Button, cx } from "@rowfolio/ui";
+import { Bidi, cx } from "@rowfolio/ui";
 import { rowIdToSourceRow } from "./model.ts";
 import type { EvidencePage, EvidenceServices } from "./types.ts";
 
-const ELLIPSIS = "—";
+const ELLIPSIS = "·";
 
 interface SourceRowsTableProps {
   table: NormalizedTable;
@@ -132,12 +132,12 @@ export function SourceRowsTable({
       <div
         className="rf-evidence__rows-scroll"
         role="group"
-        aria-label={`${i18n.t("evidence.sourceRows")} — ${selection.id}`}
+        aria-label={`${i18n.t("evidence.sourceRows")} · ${selection.id}`}
         tabIndex={0}
       >
         <table className="rf-table rf-evidence__table">
           <caption className="rf-visually-hidden">
-            {i18n.t("evidence.sourceRows")} — {i18n.plural("count.records", total)}
+            {i18n.t("evidence.sourceRows")} · {i18n.plural("count.records", total)}
           </caption>
           <thead>
             <tr>
@@ -213,9 +213,9 @@ export function SourceRowsTable({
           })}
         </span>
         {canLoadMore ? (
-          <Button variant="secondary" onClick={loadMore}>
+          <button type="button" className="rf-linkbtn" onClick={loadMore}>
             {i18n.t("action.moreRows")}
-          </Button>
+          </button>
         ) : null}
         {excludedRowNumbers.length > 0 ? (
           <span className="rf-evidence__pager-status rf-evidence__pager-status--excluded">
