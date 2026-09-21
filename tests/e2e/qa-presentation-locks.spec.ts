@@ -149,17 +149,45 @@ test.describe("P1 — autoplay, transport, and hold", () => {
     const before = await stepIndicator(page);
     await page.evaluate(() => {
       Object.defineProperty(document, "visibilityState", { get: () => "hidden", configurable: true });
+      Object.defineProperty(document, "hidden", { get: () => true, configurable: true });
       document.dispatchEvent(new Event("visibilitychange"));
     });
     await page.waitForTimeout(14_000);
     expect(await stepIndicator(page)).toBe(before); // paused while hidden
     await page.evaluate(() => {
       Object.defineProperty(document, "visibilityState", { get: () => "visible", configurable: true });
+      Object.defineProperty(document, "hidden", { get: () => false, configurable: true });
       document.dispatchEvent(new Event("visibilitychange"));
     });
     await page.waitForTimeout(14_000);
     // No auto-resume: step must not have advanced without Play.
     expect(await stepIndicator(page)).toBe(before);
+  });
+
+  test("step hashes stay in sync through manual nav + history traversal", async ({ page }) => {
+    await page.goto("/");
+    await presRegion(page);
+    // Freeze autoplay so only hash nav moves the deck.
+    await page.locator("button").filter({ hasText: /Pause|إيقاف/ }).first().click();
+    // Steps are replaceState'd (no per-step history spam). The desync vector is
+    // a manually-assigned or link-driven hash entry — those ARE real entries.
+    await page.evaluate(() => {
+      window.location.hash = "#/pres-ch=2";
+    });
+    await page.waitForTimeout(600);
+    const atTwo = await stepIndicator(page);
+    expect(atTwo).toContain("3"); // 0-based hash → 1-based display
+
+    await page.goBack();
+    await page.waitForTimeout(600);
+    const afterBack = await stepIndicator(page);
+    expect(afterBack).not.toBe(atTwo); // deck moved with the URL, not stale
+    const hashNow = await page.evaluate(() => window.location.hash);
+    expect(afterBack).toContain(String(hashNow.includes("pres-ch=") ? Number(hashNow.split("pres-ch=")[1]) + 1 : 1));
+
+    await page.goForward();
+    await page.waitForTimeout(600);
+    expect(await stepIndicator(page)).toBe(atTwo);
   });
 });
 
@@ -239,21 +267,17 @@ test.describe("P4 — copy hygiene", () => {
 test.describe("P5 — downloads produce real files", () => {
   test("landing download affordances deliver a real .pptx/.xlsx", async ({ page }) => {
     await page.goto("/");
-    // Drive to the final scene quickly via chapter hash or next clicks.
-    await page.goto("/#/pres-ch=3").catch(() => {});
-    const dlButton = page
-      .locator("button, a")
-      .filter({ hasText: /Download.*(PowerPoint|pptx)|Download.*(Excel|xlsx)|تنزيل/ })
-      .first();
-    if ((await dlButton.count()) === 0) {
-      test.skip(true, "no download affordance on landing yet — expected pre-revamp");
-      return;
+    for (const testid of ["output-download-pptx", "output-download-xlsx"]) {
+      const btn = page.locator(`[data-testid="${testid}"]`);
+      await expect(btn, `${testid} present`).toBeVisible({ timeout: 15_000 });
+      const [download] = await Promise.all([
+        page.waitForEvent("download", { timeout: 90_000 }),
+        btn.click(),
+      ]);
+      const name = download.suggestedFilename();
+      expect(/\.(pptx|xlsx)$/.test(name), `expected real file, got: ${name}`).toBe(true);
+      await page.goBack({ waitUntil: "load" }).catch(() => {});
+      await page.goto("/");
     }
-    const [download] = await Promise.all([
-      page.waitForEvent("download", { timeout: 60_000 }),
-      dlButton.click(),
-    ]);
-    const name = download.suggestedFilename();
-    expect(/\.(pptx|xlsx)$/.test(name), `expected real file, got: ${name}`).toBe(true);
   });
 });
