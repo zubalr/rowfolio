@@ -1,0 +1,215 @@
+/**
+ * MiniReport styles — owned by the component (imported by MiniReport.tsx).
+ * Every selector is scoped under `.rf-mini` so it outranks the same-named
+ * rules in landing/spread.css at any stylesheet order; landing keeps its
+ * copy, this file is the live one for every MiniReport mount.
+ *
+ * Readability floor (presentation contract r2): finding title >= 15px,
+ * stat values >= 14px, labels/captions/provenance >= 12px — at every
+ * width and locale. Bar marks resolve their percent height against a
+ * dedicated track that excludes the value label, so the rendered px
+ * ratio is the true data ratio on a shared baseline.
+ */
+
+.rf-mini {
+  margin: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--rf-surface);
+  border: 1px solid var(--rf-rule);
+  overflow: hidden;
+  container-type: inline-size;
+}
+.rf-mini .rf-mini__mast { position: relative; padding: 10px 12px 0; }
+.rf-mini .rf-mini__tick {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 10px;
+  width: 3px;
+  height: 12px;
+  background: var(--rf-attention);
+}
+.rf-mini .rf-mini__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.32;
+  letter-spacing: -0.005em;
+}
+.rf-mini .rf-mini__sub {
+  margin: 3px 0 0;
+  font-family: var(--rf-font-mono);
+  font-size: 12px;
+  color: var(--rf-muted);
+}
+html[lang="ar"] .rf-mini .rf-mini__sub { font-family: var(--rf-font-body); font-size: 12.5px; }
+.rf-mini .rf-mini__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px 0;
+}
+.rf-mini .rf-mini__metrics {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rf-mini .rf-mini__metrics li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+  min-width: 0;
+}
+.rf-mini .rf-mini__dot { width: 5px; height: 5px; background: var(--rf-data); flex: none; align-self: center; }
+.rf-mini .rf-mini__mname { color: var(--rf-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rf-mini .rf-mini__mval {
+  margin-inline-start: auto;
+  font-family: var(--rf-font-mono);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--rf-ink);
+  flex: none;
+}
+.rf-mini .rf-mini__viz { flex: 1; min-height: 0; display: flex; flex-direction: column; margin-top: 8px; }
+.rf-mini .rf-mini__chart {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 8%;
+  border-block-end: 1px solid var(--rf-rule);
+  padding: 0 6px;
+}
+.rf-mini .rf-mini__group { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.rf-mini .rf-mini__bars { flex: 1; min-height: 0; display: flex; align-items: flex-end; gap: 6px; }
+.rf-mini .rf-mini__barcell {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+  min-width: 0;
+}
+.rf-mini .rf-mini__barval {
+  flex: none;
+  font-family: var(--rf-font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--rf-ink);
+  text-align: center;
+  white-space: nowrap;
+  padding-bottom: 3px;
+}
+/* The mark's dedicated track: the bar's percent height resolves here,
+   never against the cell that also carries the value label. */
+.rf-mini .rf-mini__bartrack {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: block;
+}
+.rf-mini .rf-mini__bar {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: block;
+  border-radius: 1px 1px 0 0;
+}
+/* series hues match the real slide marks: cobalt observed, muted target */
+.rf-mini .rf-mini__bar--observed { background: var(--rf-data); }
+.rf-mini .rf-mini__bar--target { background: var(--rf-muted); }
+.rf-mini .rf-mini__bar--scenario { background: var(--rf-scenario); }
+.rf-mini .rf-mini__bar--attention { background: var(--rf-attention); }
+.rf-mini .rf-mini__cat {
+  font-family: var(--rf-font-mono);
+  font-size: 12px;
+  color: var(--rf-muted);
+  text-align: center;
+  padding-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rf-mini .rf-mini__chartcap {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 6px 0 0;
+  font-family: var(--rf-font-mono);
+  font-size: 12px;
+}
+.rf-mini .rf-mini__charttitle { color: var(--rf-ink); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rf-mini .rf-mini__chartmeta { color: var(--rf-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html[lang="ar"] .rf-mini .rf-mini__barval, html[lang="ar"] .rf-mini .rf-mini__cat,
+html[lang="ar"] .rf-mini .rf-mini__chartcap, html[lang="ar"] .rf-mini .rf-mini__mval {
+  font-family: var(--rf-font-body);
+}
+html[lang="ar"] .rf-mini .rf-mini__barval, html[lang="ar"] .rf-mini .rf-mini__cat,
+html[lang="ar"] .rf-mini .rf-mini__chartcap {
+  font-size: 12.5px;
+}
+.rf-mini .rf-mini__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 12px 8px;
+  border-block-start: 1px solid var(--rf-rule);
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--rf-muted);
+}
+.rf-mini .rf-mini__scope { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rf-mini .rf-mini__folio { font-family: var(--rf-font-mono); font-variant-numeric: tabular-nums; flex: none; }
+/* workbook figure */
+.rf-mini .rf-mini__file {
+  margin: 4px 0 0;
+  font-family: var(--rf-font-mono);
+  font-size: 12px;
+  color: var(--rf-data);
+}
+.rf-mini .rf-mini__rows { margin: 2px 0 0; font-size: 12px; color: var(--rf-muted); }
+.rf-mini .rf-mini__sheets {
+  list-style: none;
+  margin: 8px 12px 0;
+  padding: 8px 0 0;
+  border-block-start: 1px solid var(--rf-rule);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+}
+.rf-mini .rf-mini__sheets li {
+  padding-inline-start: 10px;
+  border-inline-start: 2px solid var(--rf-rule);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 760px) {
+  .rf-mini .rf-mini__metrics { gap: 3px; }
+}
+
+/* Small plates get a recomposed interior, not a squeezed one: on narrow
+   cards the figure keeps real track height while the plate carries
+   title + key stats + labeled chart + scope — the contract's small-plate
+   anatomy. Extra metric rows are dropped (never clipped) because the
+   complete table lives in the exported deck. */
+@container (max-width: 480px) {
+  .rf-mini .rf-mini__mast { padding: 8px 10px 0; }
+  .rf-mini .rf-mini__body { padding: 6px 10px 0; }
+  .rf-mini .rf-mini__metrics { gap: 3px; }
+  .rf-mini .rf-mini__metrics li:nth-child(n + 3) { display: none; }
+  .rf-mini .rf-mini__viz { margin-top: 5px; }
+  .rf-mini .rf-mini__chart { padding: 0 3px; }
+  .rf-mini .rf-mini__barval { padding-bottom: 1px; line-height: 1.15; }
+  .rf-mini .rf-mini__chartcap { margin-top: 4px; }
+  .rf-mini .rf-mini__foot { padding: 5px 10px 6px; margin-top: 4px; }
+}

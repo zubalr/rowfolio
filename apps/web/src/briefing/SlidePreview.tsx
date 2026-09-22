@@ -23,6 +23,7 @@ import {
   scopeText,
 } from '@rowfolio/export-pptx';
 import type { ReactElement } from 'react';
+import './slide-preview.css';
 
 export interface SlidePreviewProps {
   model: ExportModel;
@@ -70,10 +71,14 @@ function MiniChart({ model, chart }: { model: ExportModel; chart: ChartSpec }): 
               return (
                 <span className="rf-sp__barcell" key={series.id}>
                   <span className="rf-sp__barval">{raw == null ? '' : chartValue(raw, chart)}</span>
-                  <span
-                    className={`rf-sp__bar ${SERIES_CLASS[series.semantic] ?? 'rf-sp__bar--observed'}`}
-                    style={{ height: `${height}%` }}
-                  />
+                  {/* The value label lives outside the track, so the mark's
+                      percent height resolves against the track alone. */}
+                  <span className="rf-sp__bartrack">
+                    <span
+                      className={`rf-sp__bar ${SERIES_CLASS[series.semantic] ?? 'rf-sp__bar--observed'}`}
+                      style={{ height: `${height}%` }}
+                    />
+                  </span>
                 </span>
               );
             })}

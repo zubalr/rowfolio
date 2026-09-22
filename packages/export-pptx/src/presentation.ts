@@ -50,8 +50,11 @@ export const buildPresentation: BuildPresentation = async (
 ): Promise<BuiltArtifact> => {
   progress('model', 0.05);
   assertExportModel(model);
-  if (model.slides.length !== 6) {
-    throw new ExportPptxError('invalid-model', `expected six slide descriptors, got ${model.slides.length}`);
+  // Six pages when a scenario is committed, five without — the scenario
+  // page is omitted rather than shipped with nothing to say.
+  const expectedSlides = model.scenario !== null && model.scenario.status === 'defined' ? 6 : 5;
+  if (model.slides.length !== expectedSlides) {
+    throw new ExportPptxError('invalid-model', `expected ${expectedSlides} slide descriptors, got ${model.slides.length}`);
   }
 
   const pptx = new PptxGenJS();
@@ -93,7 +96,7 @@ export const buildPresentation: BuildPresentation = async (
       isSample: sample,
     };
     renderSlide(ctx);
-    progress('charts', 0.2 + (0.6 * (index + 1)) / 6);
+    progress('charts', 0.2 + (0.6 * (index + 1)) / model.slides.length);
   });
 
   progress('package', null);

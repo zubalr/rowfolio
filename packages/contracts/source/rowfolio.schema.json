@@ -1493,7 +1493,7 @@
           "items": {
             "$ref": "#/$defs/SlideModel"
           },
-          "minItems": 6,
+          "minItems": 5,
           "maxItems": 6
         },
         "sheets": {
