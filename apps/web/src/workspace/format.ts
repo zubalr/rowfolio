@@ -54,7 +54,12 @@ export function formatPercentAbs(
  * a currency badge falls back to its ISO code. Ratios already carry the %
  * sign inside the formatted value, so their badge is redundant noise.
  */
-export function metricUnitLabel(unit: Unit): string | null {
+/** Engine-emitted unit labels that carry catalog translations. */
+const UNIT_LABEL_KEYS: Record<string, string> = {
+  records: 'unit.records',
+};
+
+export function metricUnitLabel(unit: Unit, labeler?: (key: string) => string): string | null {
   switch (unit.kind) {
     case 'currency':
       return unit.label === 'unit' || unit.label === '' ? unit.currency : unit.label;
@@ -63,7 +68,10 @@ export function metricUnitLabel(unit: Unit): string | null {
       return null;
     default: {
       const label = unit.label.trim();
-      return label === '' || label === 'unit' || label === 'fraction' ? null : label;
+      if (label === '' || label === 'unit' || label === 'fraction') return null;
+      const key = UNIT_LABEL_KEYS[label];
+      if (key !== undefined && labeler !== undefined) return labeler(key);
+      return label;
     }
   }
 }

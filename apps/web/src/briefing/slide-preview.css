@@ -494,3 +494,6 @@ html[lang="ar"] .rf-sp__card-line--mono { font-family: var(--rf-font-body); }
   color: var(--rf-text-muted);
   font-variant-numeric: tabular-nums;
 }
+
+.rf-sp__tech { margin-top: 0.4em; font-size: 0.85em; color: var(--rf-text-muted); }
+.rf-sp__tech summary { cursor: pointer; }

@@ -16,6 +16,7 @@
 import PptxGenJS from 'pptxgenjs';
 import { assertExportModel, DESIGN_TOKENS, sha256Hex } from '@rowfolio/contracts';
 import type { ExportArtifact, ExportModel } from '@rowfolio/contracts';
+import { exportFileName } from '@rowfolio/export-model';
 import { isSampleModel, renderSlide, type LayoutContext } from './layouts.ts';
 
 /**
@@ -108,7 +109,7 @@ export const buildPresentation: BuildPresentation = async (
       exportId: model.exportId,
       format: 'pptx',
       mime: MIME,
-      filename: `rowfolio-${model.exportId}.pptx`,
+      filename: exportFileName(model, 'pptx'),
       byteLength: bytes.byteLength,
       sha256,
       binarySlot: 'deck',

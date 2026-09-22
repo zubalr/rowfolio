@@ -115,8 +115,11 @@ function EvidenceBody({
     <div className="rf-evidence">
       <div className="rf-evidence-hash">
         <span className="rf-evidence-label">{i18n.tSafe('evidence.hash' as MessageKey)}</span>
-        <code className="rf-hash" dir="ltr">{sourceHash}</code>
-        <span className="rf-quiet">{i18n.tSafe('evidence.hashNote' as MessageKey)}</span>
+        <details className="rf-evidence-hash__tech">
+          <summary>{i18n.tSafe('common.technicalDetails' as MessageKey)}</summary>
+          <code className="rf-hash" dir="ltr">{sourceHash}</code>
+          <span className="rf-quiet">{i18n.tSafe('evidence.hashNote' as MessageKey)}</span>
+        </details>
       </div>
 
       {proofs.length === 0 && <p>{i18n.tSafe('empty.noSelection' as MessageKey)}</p>}

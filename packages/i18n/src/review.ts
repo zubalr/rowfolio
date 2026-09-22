@@ -95,8 +95,8 @@ const FLAGS: readonly TerminologyFlag[] = Object.freeze<TerminologyFlag[]>([
     },
     {
       key: "evidence.hashNote",
-      arabicText: "تعرّف محتوى الملف، ولا تثبت صحة بياناته التجارية.",
-      concern: "«تعرّف» ('identifies') is terse; confirm the tamyiz-style phrasing reads naturally.",
+      arabicText: "يؤكد الملف الذي أنتج هذا التقرير، ولا يتحقق من الأرقام التجارية.",
+      concern: "«يؤكد الملف» phrasing for the fingerprint disclaimer; confirm it reads naturally to a native reader.",
       suggestion: null,
       severity: "needs-native-review",
     },

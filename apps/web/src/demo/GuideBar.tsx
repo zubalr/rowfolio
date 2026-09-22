@@ -5,13 +5,12 @@
  * The bar never steals focus: step captions are announced through a polite
  * live region, buttons keep their own focus, and Escape exits while
  * preserving results. All labels come from the shared v1.0.0 catalogs —
- * the "next" affordance names the destination step rather than inventing
- * an untranslated string (a dedicated `action.next` key is requested from
- * the i18n owner as a follow-up).
+ * the "next" affordance names the destination step through the shared
+ * `action.next` key, which interpolates that step's translated caption.
  */
 import { useEffect, useState } from "react";
 import { Button, VisuallyHidden } from "@rowfolio/ui";
-import type { I18n } from "@rowfolio/i18n";
+import type { I18n, MessageKey } from "@rowfolio/i18n";
 import { landingCopy, type CopyKey } from "../landing/copy.ts";
 import type { DemoController, GuideState } from "./controller.ts";
 import { GUIDE_STEPS } from "./controller.ts";
@@ -104,7 +103,9 @@ export function GuideBar({ controller, i18n, onOpenWorkspace, skipLabel }: Guide
           onClick={() => controller.next()}
           disabled={atLast}
         >
-          {nextStep ? i18n.tSafe(nextStep.captionKey) : i18n.tSafe("action.close")}
+          {nextStep
+            ? i18n.tSafe("action.next" as MessageKey, { step: i18n.tSafe(nextStep.captionKey) })
+            : i18n.tSafe("action.close")}
         </Button>
         <Button variant="secondary" onClick={() => void controller.replay()}>
           {i18n.tSafe("action.replay")}

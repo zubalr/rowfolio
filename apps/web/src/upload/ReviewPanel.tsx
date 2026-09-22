@@ -7,7 +7,7 @@
  * plainly what the table can and cannot support.
  */
 import { Button, Icon, Section } from "@rowfolio/ui";
-import type { I18n } from "@rowfolio/i18n";
+import type { I18n, MessageKey } from "@rowfolio/i18n";
 import type { Column, QualityIssue, RawTable } from "@rowfolio/contracts";
 import type { SourceInspection } from "@rowfolio/ingest";
 import type { UploadDecisions, UploadSelection } from "./types.ts";
@@ -75,8 +75,10 @@ function ColumnConfirm({
         <bdi dir="auto" className="rf-upload__issue-title">
           {column.label}
         </bdi>
-        <bdi dir="ltr" className="rf-upload__badge">
-          {column.type}
+        <bdi dir="auto" className="rf-upload__badge">
+          {i18n.has(`column.type.${column.type}` as MessageKey)
+            ? i18n.tSafe(`column.type.${column.type}` as MessageKey)
+            : column.type}
         </bdi>
         <select
           aria-label={column.label}
@@ -88,8 +90,12 @@ function ColumnConfirm({
           data-testid={`col-select-${column.id}`}
         >
           <option value="unconfirmed">{i18n.t("common.unknown")}</option>
-          <option value="proposed">{column.type}</option>
-          <option value="text">text</option>
+          <option value="proposed">
+            {i18n.has(`column.type.${column.type}` as MessageKey)
+              ? i18n.tSafe(`column.type.${column.type}` as MessageKey)
+              : column.type}
+          </option>
+          <option value="text">{i18n.tSafe("column.type.text" as MessageKey)}</option>
         </select>
       </div>
       <span className="rf-upload__meta">{hint}</span>

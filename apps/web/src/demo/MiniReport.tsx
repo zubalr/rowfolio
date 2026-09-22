@@ -11,7 +11,7 @@
  * the workbook figure — real sheet names, not a shrunken card.
  */
 import type { ExportModel, Metric, SlideModel } from "@rowfolio/contracts";
-import { exportUnitLabel, periodLabel } from "@rowfolio/export-model";
+import { exportFileName, exportUnitLabel, localizeDigits, periodLabel } from "@rowfolio/export-model";
 import {
   formatCompact,
   formatInteger,
@@ -60,13 +60,13 @@ export function MiniReport({ model, slide }: MiniReportProps): ReactElement {
   const domainMax =
     chart === undefined ? 1 : Math.max(1, ...chart.points.flatMap((p) => chart.series.map((s) => Number(p.values[s.id] ?? 0))));
   const chartTitle =
-    chart === undefined ? "" : hasLabel(chart.titleKey) ? label(model.locale, chart.titleKey) : chart.titleKey;
+    chart === undefined ? "" : hasLabel(chart.titleKey) ? label(model.locale, chart.titleKey) : label(model.locale, "common.metric");
   const chartMeta =
     chart === undefined
       ? ""
       : [
-          chart.series.map((s) => (hasLabel(s.labelKey) ? label(model.locale, s.labelKey) : s.id)).join(" / "),
-          exportUnitLabel(chart.unit),
+          chart.series.map((s) => (hasLabel(s.labelKey) ? label(model.locale, s.labelKey) : label(model.locale, "common.metric"))).join(" / "),
+          exportUnitLabel(chart.unit, (k) => label(model.locale, k)),
           periodLabel(chart.scope.periodStart, chart.scope.periodEnd, model.locale, model.numberingSystem),
         ]
           .filter((bit) => bit !== "")
@@ -92,7 +92,7 @@ export function MiniReport({ model, slide }: MiniReportProps): ReactElement {
               <span className="rf-mini__dot" aria-hidden="true" />
               <span className="rf-mini__mname">{metricDisplayName(model.locale, metric, model.metrics)}</span>
               <span className="rf-mini__mval">
-                {metric.value === null ? "" : formatMetricValue(metric.value, metric.unit)}
+                {metric.value === null ? "" : formatMetricValue(metric.value, metric.unit, (k) => label(model.locale, k), model.numberingSystem)}
               </span>
             </li>
           ))}
@@ -112,8 +112,8 @@ export function MiniReport({ model, slide }: MiniReportProps): ReactElement {
                             {raw == null
                               ? ""
                               : chart.unit.kind === "currency"
-                                ? `${exportUnitLabel(chart.unit)} ${formatCompact(raw)}`.trim()
-                                : formatMetricValue(raw, chart.unit)}
+                                ? `${exportUnitLabel(chart.unit, (k) => label(model.locale, k))} ${formatCompact(raw, model.numberingSystem)}`.trim()
+                                : formatMetricValue(raw, chart.unit, (k) => label(model.locale, k), model.numberingSystem)}
                           </span>
                           {/* The value label lives outside the track, so the
                               mark's percent height resolves against the
@@ -129,7 +129,7 @@ export function MiniReport({ model, slide }: MiniReportProps): ReactElement {
                     })}
                   </div>
                   <span className="rf-mini__cat">
-                    {hasLabel(point.labelKey) ? label(model.locale, point.labelKey) : point.key}
+                    {hasLabel(point.labelKey) ? label(model.locale, point.labelKey) : label(model.locale, "common.metric")}
                   </span>
                 </div>
               ))}
@@ -161,12 +161,12 @@ export function WorkbookMini({ model }: WorkbookMiniProps): ReactElement {
       <header className="rf-mini__mast">
         <span className="rf-mini__tick" aria-hidden="true" />
         <p className="rf-mini__title">{model.slides[0]?.title ?? label(model.locale, "export.title")}</p>
-        <p className="rf-mini__file" dir="ltr" title={`rowfolio-${model.exportId}.xlsx`}>
-          {model.exportId.length > 20 ? `rowfolio-${model.exportId.slice(0, 20)}….xlsx` : `rowfolio-${model.exportId}.xlsx`}
+        <p className="rf-mini__file" dir="ltr" title={exportFileName(model, "xlsx")}>
+          {exportFileName(model, "xlsx")}
         </p>
         <p className="rf-mini__rows">
-          {formatInteger(String(model.qualitySummary.retainedRows))} /{" "}
-          {formatInteger(String(model.qualitySummary.rawRows))} {label(model.locale, "common.rows")}
+          {localizeDigits(formatInteger(String(model.qualitySummary.retainedRows)), model.numberingSystem)} /{" "}
+          {localizeDigits(formatInteger(String(model.qualitySummary.rawRows)), model.numberingSystem)} {label(model.locale, "common.rows")}
         </p>
       </header>
       <ul className="rf-mini__sheets">

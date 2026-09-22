@@ -33,7 +33,7 @@ export function KpiStrip({ snapshot }: { snapshot: AnalysisSnapshot }) {
             key={metric.id}
             label={period === null ? baseLabel : `${baseLabel} · ${period}`}
             value={formatMetricValue(i18n, metric)}
-            unit={displayUnit(metric)}
+            unit={displayUnit(metric, i18n)}
             status={metric.status}
             reasonLabel={metric.reasonKey ? i18n.tSafe(metric.reasonKey as MessageKey) : undefined}
             size={index === 0 ? 'feature' : 'rail'}
@@ -70,8 +70,8 @@ function headlineMetrics(snapshot: AnalysisSnapshot): Metric[] {
  * ("records"), minutes. Ratios already carry % in the formatted value and
  * placeholder labels ("unit"/"fraction") carry nothing — both suppressed.
  */
-function displayUnit(metric: Metric): Metric['unit'] | undefined {
-  const label = metricUnitLabel(metric.unit);
+function displayUnit(metric: Metric, i18n: ReturnType<typeof useI18n>): Metric['unit'] | undefined {
+  const label = metricUnitLabel(metric.unit, (k) => i18n.tSafe(k as MessageKey));
   return label === null ? undefined : { ...metric.unit, label };
 }
 

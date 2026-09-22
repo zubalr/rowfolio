@@ -150,10 +150,14 @@ export function WorkspaceScreen({ navigateLanding }: { navigateLanding: () => vo
   // language switch + an accessible menu for everything secondary.
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const toggleRef = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
     if (!menuOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMenuOpen(false);
+      if (e.key === 'Escape') {
+        setMenuOpen(false);
+        toggleRef.current?.focus();
+      }
     };
     const onPointer = (e: PointerEvent) => {
       if (menuRef.current !== null && !menuRef.current.contains(e.target as Node)) {
@@ -250,6 +254,7 @@ export function WorkspaceScreen({ navigateLanding }: { navigateLanding: () => vo
           <div className="rf-mastmore" ref={menuRef}>
             <button
               type="button"
+              ref={toggleRef}
               className="rf-linkbtn"
               aria-expanded={menuOpen}
               aria-controls="rf-mastmenu"
