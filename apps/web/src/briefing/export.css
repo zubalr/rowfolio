@@ -5,6 +5,12 @@
  * 190px thumbnail still reads like a report, not glyph soup.
  */
 
+/* Fixed-width export dialog: the preview grid must not reflow the dialog
+   between the model-build and ready states. */
+.rf-dialog--export {
+  inline-size: min(620px, calc(100vw - 2 * var(--rf-gutter)));
+}
+
 .rf-export-outline {
   list-style: none;
   margin: var(--rf-space-3) 0 0;

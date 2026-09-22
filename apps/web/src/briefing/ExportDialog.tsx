@@ -36,6 +36,7 @@ export function ExportDialog() {
       onClose={() => controller.closeExport()}
       title={i18n.tSafe('export.title' as MessageKey)}
       closeLabel={i18n.tSafe('action.close' as MessageKey)}
+      className="rf-dialog--export"
       footer={
         ex.building ? (
           <button type="button" className="rf-linkbtn" onClick={() => controller.cancelExport()}>

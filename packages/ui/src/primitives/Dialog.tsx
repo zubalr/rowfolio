@@ -42,6 +42,8 @@ export interface DialogProps {
   footer?: ReactNode;
   /** Stable test hook — only where needed. */
   testId?: string;
+  /** Extra class on the <dialog> element (layout modifiers like a fixed width). */
+  className?: string;
   children?: ReactNode;
 }
 
@@ -55,6 +57,7 @@ export function Dialog({
   placement = "center",
   footer,
   testId,
+  className,
   children,
 }: DialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -131,6 +134,7 @@ export function Dialog({
       className={cx(
         "rf-dialog",
         placement === "drawer" && "rf-dialog--drawer",
+        className,
       )}
       data-rf-surface={surface === "ink" ? "ink" : undefined}
       aria-labelledby={titleId}

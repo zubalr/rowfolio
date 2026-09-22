@@ -338,7 +338,14 @@ html[lang='ar'] .rf-stage-scope {
 
 /* Inside the overview plate, the chart grid separates from the hero by one
    hairline instead of card-on-card nesting. */
-.rf-plate .rf-charts {
+.rf-plate .rf-stage-body {
+  margin: 0;
+  padding-block-start: var(--rf-space-4);
+  color: var(--rf-text);
+  max-width: 62ch;
+}
+
+.rf-charts {
   border-block-start: 1px solid var(--rf-divider);
   padding-block-start: var(--rf-space-4);
   gap: var(--rf-space-5);
