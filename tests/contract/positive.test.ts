@@ -28,6 +28,8 @@ describe('positive fixtures — structural schema', () => {
     ['ScenarioResult', 'scenario-result.example.json'],
     ['ExportModel', 'export-model.en.example.json'],
     ['ExportModel', 'export-model.ar.example.json'],
+    ['ExportModel', 'export-model.en.default.example.json'],
+    ['ExportModel', 'export-model.ar.default.example.json'],
     ['SampleManifest', 'sample_manifest.json'],
   ] as const)('%s fixture matches its schema', (type, name) => {
     expect(matchesSchema(type, fixture(name))).toBe(true);
@@ -55,6 +57,8 @@ describe('positive fixtures — full contract validation', () => {
   it('export models (EN + AR) validate standalone — they embed their own table', () => {
     expect(checkContract('ExportModel', fixture<ExportModel>('export-model.en.example.json'))).toEqual([]);
     expect(checkContract('ExportModel', fixture<ExportModel>('export-model.ar.example.json'))).toEqual([]);
+    expect(checkContract('ExportModel', fixture<ExportModel>('export-model.en.default.example.json'))).toEqual([]);
+    expect(checkContract('ExportModel', fixture<ExportModel>('export-model.ar.default.example.json'))).toEqual([]);
   });
 
   it('sample manifest reconciles', () => {

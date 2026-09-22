@@ -13,7 +13,6 @@
 import type { ExportModel, Metric, SlideModel } from "@rowfolio/contracts";
 import { exportFileName, exportUnitLabel, localizeDigits, periodLabel } from "@rowfolio/export-model";
 import {
-  formatCompact,
   formatInteger,
   formatMetricValue,
   hasLabel,
@@ -78,7 +77,7 @@ export function MiniReport({ model, slide }: MiniReportProps): ReactElement {
       className="rf-mini"
       data-kind={slide.kind}
       data-slide={slide.id}
-      aria-label={`${slide.title} · ${index}/${model.slides.length}`}
+      aria-label={`${slide.title} · ${localizeDigits(`${index}/${model.slides.length}`, model.numberingSystem)}`}
     >
       <header className="rf-mini__mast">
         <span className="rf-mini__tick" aria-hidden="true" />
@@ -108,16 +107,23 @@ export function MiniReport({ model, slide }: MiniReportProps): ReactElement {
                       const h = raw == null ? 0 : Math.max(0, Math.min(100, (Number(raw) / domainMax) * 100));
                       return (
                         <span className="rf-mini__barcell" key={series.id}>
+                          {/* Direct labels: the series name and its value sit
+                              on top of each mark, so every bar says what it
+                              is without decoding a legend. */}
+                          <span className="rf-mini__barname">
+                            {hasLabel(series.labelKey) ? label(model.locale, series.labelKey) : label(model.locale, "common.metric")}
+                          </span>
                           <span className="rf-mini__barval">
                             {raw == null
                               ? ""
                               : chart.unit.kind === "currency"
-                                ? `${exportUnitLabel(chart.unit, (k) => label(model.locale, k))} ${formatCompact(raw, model.numberingSystem)}`.trim()
+                                ? `${exportUnitLabel(chart.unit, (k) => label(model.locale, k))} ${localizeDigits(formatInteger(String(raw)), model.numberingSystem)}`.trim()
                                 : formatMetricValue(raw, chart.unit, (k) => label(model.locale, k), model.numberingSystem)}
                           </span>
-                          {/* The value label lives outside the track, so the
-                              mark's percent height resolves against the
-                              track alone — the bar scales, never its cell. */}
+                          {/* The labels live outside the track, so the mark's
+                              percent height resolves against the track alone
+                              anchored to the shared zero baseline — the bar
+                              scales, never its cell. */}
                           <span className="rf-mini__bartrack">
                             <span
                               className={`rf-mini__bar rf-mini__bar--${series.semantic}`}
@@ -146,7 +152,7 @@ export function MiniReport({ model, slide }: MiniReportProps): ReactElement {
           <span className="rf-mini__scope">{scopeText(model.locale, finding.scope, model.numberingSystem)}</span>
         )}
         <span className="rf-mini__folio">
-          {index} / {model.slides.length}
+          {localizeDigits(`${index} / ${model.slides.length}`, model.numberingSystem)}
         </span>
       </footer>
     </figure>

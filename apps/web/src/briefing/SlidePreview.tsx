@@ -20,7 +20,9 @@ import {
   hasLabel,
   label,
   metricDisplayName,
+  qualityTrackMetrics,
   scopeText,
+  spanTokensForModel,
 } from '@rowfolio/export-pptx';
 import type { ReactElement } from 'react';
 import './slide-preview.css';
@@ -263,9 +265,16 @@ function ScenarioBody({ model, metrics, chart }: { model: ExportModel; metrics: 
   );
 }
 
-function QualityBody({ model, metrics, chart }: { model: ExportModel; metrics: Metric[]; chart?: ChartSpec | undefined }): ReactElement {
+/**
+ * Quality page — mirrors layoutQuality: the three check-count tracks resolved
+ * from the deck's own id space (cobalt/slate/amber fills against a shared
+ * scale), beside the reconciliation card (resolved / unresolved / issues +
+ * the no-imputation note). Generic uploads without those check metrics show
+ * the card alone — exactly what the deck carries.
+ */
+function QualityBody({ model, metricById }: { model: ExportModel; metricById: ReadonlyMap<string, Metric> }): ReactElement {
   const q = model.qualitySummary;
-  const tracks = metrics.slice(0, 3);
+  const tracks = qualityTrackMetrics(metricById);
   const peak = Math.max(1, ...tracks.map((m) => Number(m.value ?? '0')));
   return (
     <div className="rf-sp__split">
@@ -277,18 +286,12 @@ function QualityBody({ model, metrics, chart }: { model: ExportModel; metrics: M
             </p>
             <div className="rf-sp__rail" dir="ltr">
               <span
-                className="rf-sp__rail-fill"
+                className="rf-sp__rail-fill rf-sp__rail-fill--problem"
                 style={{ inlineSize: `${Math.max(3, (Number(metric.value ?? '0') / peak) * 100)}%` }}
               />
             </div>
           </div>
         ))}
-        {chart !== undefined && tracks.length === 0 && (
-          <>
-            <MiniChart model={model} chart={chart} />
-            <ChartCaption model={model} chart={chart} />
-          </>
-        )}
       </div>
       <div className="rf-sp__card">
         <p className="rf-sp__card-label">{label(model.locale, 'quality.reconciliation')}</p>
@@ -303,13 +306,39 @@ function QualityBody({ model, metrics, chart }: { model: ExportModel; metrics: M
         <p className="rf-sp__card-line rf-sp__card-line--muted">
           {label(model.locale, 'quality.issues')} <b>{localizeDigits(formatInteger(String(q.issueCount)), model.numberingSystem)}</b>
         </p>
+        <p className="rf-sp__card-line rf-sp__card-line--muted">
+          {label(model.locale, 'quality.noImputation')}
+        </p>
       </div>
     </div>
   );
 }
 
+/**
+ * Method page — mirrors layoutMethodology: source card (workbook, sheet,
+ * retained rows, the row-span tokens, then limitation lines) beside the
+ * verified column (provenance proof names resolved to their metric labels
+ * and formatted values), closing with the no-imputation note.
+ */
 function MethodologyBody({ model, nav }: { model: ExportModel; nav: boolean }): ReactElement {
   const ref = model.table.sourceRef;
+  const spans = spanTokensForModel(model);
+  const limits = [...new Set(model.findings.flatMap((f) => f.limitations))]
+    .filter((key) => hasLabel(key))
+    .slice(0, 3);
+  if (!limits.includes('limitations.noForecast') && hasLabel('limitations.noForecast')) {
+    limits.push('limitations.noForecast');
+  }
+  const verified = model.provenance.slice(0, 2).map((proof) => {
+    const metric = model.metrics.find((m) => m.provenanceId === proof.id);
+    const name = metric !== undefined && hasLabel(metric.labelKey)
+      ? label(model.locale, metric.labelKey)
+      : label(model.locale, 'evidence.calculation');
+    const shown = metric !== undefined && metric.value !== null
+      ? formatMetricValue(metric.value, metric.unit, (k) => label(model.locale, k), model.numberingSystem)
+      : (proof.result ?? '');
+    return { id: proof.id, text: `${name} = ${shown}` };
+  });
   return (
     <div className="rf-sp__split">
       <div className="rf-sp__card">
@@ -322,6 +351,11 @@ function MethodologyBody({ model, nav }: { model: ExportModel; nav: boolean }): 
           {localizeDigits(formatInteger(String(model.qualitySummary.retainedRows)), model.numberingSystem)} / {localizeDigits(formatInteger(String(model.qualitySummary.rawRows)), model.numberingSystem)}{' '}
           {label(model.locale, 'common.rows')}
         </p>
+        {spans !== null && (
+          <p className="rf-sp__card-line rf-sp__card-line--muted">
+            {label(model.locale, 'evidence.sourceRows')}: {spans}
+          </p>
+        )}
         {nav ? (
           <p className="rf-sp__tech rf-sp__card-line rf-sp__card-line--muted">{label(model.locale, 'common.technicalDetails')}</p>
         ) : (
@@ -333,6 +367,12 @@ function MethodologyBody({ model, nav }: { model: ExportModel; nav: boolean }): 
       </div>
       <div className="rf-sp__text">
         <p className="rf-sp__kicker rf-sp__kicker--verified">{label(model.locale, 'common.verified')}</p>
+        {verified.map((line) => (
+          <p className="rf-sp__card-line" key={line.id}>{line.text}</p>
+        ))}
+        {limits.map((key) => (
+          <p className="rf-sp__card-line rf-sp__card-line--muted" key={key}>{label(model.locale, key)}</p>
+        ))}
         <p className="rf-sp__card-line rf-sp__card-line--muted">{label(model.locale, 'quality.noImputation')}</p>
       </div>
     </div>
@@ -367,7 +407,7 @@ export function SlidePreview({ model, slide, className, nav = false }: SlidePrev
       body = <ScenarioBody model={model} metrics={metrics} chart={chart} />;
       break;
     case 'quality':
-      body = <QualityBody model={model} metrics={metrics} chart={chart} />;
+      body = <QualityBody model={model} metricById={metricById} />;
       break;
     default:
       body = <MethodologyBody model={model} nav={nav} />;
@@ -380,7 +420,7 @@ export function SlidePreview({ model, slide, className, nav = false }: SlidePrev
       className={`rf-sp${className ? ` ${className}` : ''}`}
       data-kind={slide.kind}
       data-slide={slide.id}
-      aria-label={nav ? undefined : `${slide.title} · ${index}/${model.slides.length}`}
+      aria-label={nav ? undefined : `${slide.title} · ${localizeDigits(`${index}/${model.slides.length}`, model.numberingSystem)}`}
       aria-hidden={nav || undefined}
     >
       <header className="rf-sp__mast">
@@ -391,7 +431,7 @@ export function SlidePreview({ model, slide, className, nav = false }: SlidePrev
       <div className="rf-sp__body">{body}</div>
       <footer className="rf-sp__foot">
         <span className="rf-sp__folio">
-          {index} / {model.slides.length}
+          {localizeDigits(`${index} / ${model.slides.length}`, model.numberingSystem)}
         </span>
       </footer>
     </figure>

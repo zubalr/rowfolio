@@ -63,7 +63,9 @@ describe('golden parity', () => {
 
   it('keeps EN/AR numeric parity with separate compositions', () => {
     const en = buildExportModel(snapshot, table, scenario, 'en', 'latn', CREATED);
-    const ar = buildExportModel(snapshot, table, scenario, 'ar', 'latn', CREATED);
+    // Production builds the AR model with Arabic-Indic numbering — the test
+    // composes the same pair the app produces.
+    const ar = buildExportModel(snapshot, table, scenario, 'ar', 'arab', CREATED);
     expect(ar.slides.map((s) => [s.title, s.subtitle])).toEqual(
       goldenAr.slides.map((s) => [s.title, s.subtitle]),
     );

@@ -1,7 +1,7 @@
 /**
- * Export dialog chrome — outline grid and download-link provenance.
+ * Export dialog chrome — dialog width and download-link provenance.
  * The slide/workbook preview styles (.rf-sp-*) live in slide-preview.css,
- * imported by SlidePreview.tsx itself.
+ * and the viewer pane/rail styles (.rf-rv-*) in report-viewer.css.
  */
 
 /* Fixed-width export dialog: the preview grid must not reflow the dialog
@@ -10,73 +10,26 @@
   inline-size: min(620px, calc(100vw - 2 * var(--rf-gutter)));
 }
 
-/* Reading pane above the rail — the selected deliverable at real size. */
-.rf-export-pane {
-  margin-block-start: var(--rf-space-3);
-}
-.rf-export-pane:focus-visible {
-  outline: 2px solid var(--rf-accent);
-  outline-offset: 2px;
-}
-
-.rf-export-outline {
-  list-style: none;
-  margin: var(--rf-space-3) 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
-  gap: var(--rf-space-3);
-}
-
-/* Thumbnail tabs: inert slide figures inside real buttons — the button
-   carries the accessible name, focus ring, and the selected mark. */
-.rf-export-pick {
-  display: block;
-  inline-size: 100%;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  text-align: inherit;
-}
-.rf-export-pick .rf-sp {
-  border-color: var(--rf-divider);
-  transition: border-color 120ms ease, box-shadow 120ms ease;
-}
-.rf-export-pick:hover .rf-sp {
-  border-color: var(--rf-muted);
-}
-.rf-export-pick:focus-visible {
-  outline: 2px solid var(--rf-accent);
-  outline-offset: 2px;
-}
-.rf-export-pick--on .rf-sp {
-  border-color: var(--rf-accent);
-  box-shadow: 0 0 0 1px var(--rf-accent);
-}
-
 /* Provenance lines under each download link — hashed filenames stay
    de-emphasized: muted, mono, middle-truncated by the caller. */
 .rf-export-link__meta {
   font-family: var(--rf-font-mono);
   font-variant-numeric: tabular-nums;
   font-size: 12px;
-  color: var(--rf-text-muted);
+  color: var(--rf-muted);
   overflow-wrap: anywhere;
 }
 html[lang="ar"] .rf-export-link__meta { font-family: var(--rf-font-body); }
 
-@media (max-width: 479px) {
-  .rf-export-outline {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+/* Breathing room between the preview notes and the shared viewer. */
+.rf-export-preview > .rf-rv {
+  margin-block-start: var(--rf-space-3);
 }
 
 /* Diagnostics under a download link — collapsible, same muted treatment. */
 .rf-export-link__tech {
   font-size: 12px;
-  color: var(--rf-text-muted);
+  color: var(--rf-muted);
 }
 .rf-export-link__tech summary {
   cursor: pointer;
