@@ -54,6 +54,11 @@ html[lang="ar"] .rf-lead__kicker {
 
 .rf-lead__title {
   margin: 0;
+  /* line-height 1.08 sits tighter than the glyphs' painted extent — the
+     first line's ink overhangs the element's top and the last line's
+     descender its bottom. Padding reserves that room inside the box so
+     glyph ink never lands outside the element's rect. */
+  padding-block: 0.15em 0.11em;
   font-size: 40px;
   font-weight: 700;
   letter-spacing: -0.015em;
