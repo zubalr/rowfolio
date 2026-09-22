@@ -75,78 +75,74 @@ html[lang="ar"] .rf-mini .rf-mini__sub { font-size: 12.5px; }
   flex: none;
 }
 .rf-mini .rf-mini__viz { flex: 1; min-height: 0; display: flex; flex-direction: column; margin-top: 8px; }
+/* Horizontal bars: width encodes the value against a tinted full-domain
+   track, so the unfilled remainder reads as distance-to-max at any size.
+   The chart region is LTR — the left edge is the shared zero baseline. */
 .rf-mini .rf-mini__chart {
   flex: 1;
   min-height: 0;
   display: flex;
-  gap: 8%;
-  border-block-end: 1px solid var(--rf-ink);
-  padding: 0 6px;
-}
-.rf-mini .rf-mini__group { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.rf-mini .rf-mini__bars { flex: 1; min-height: 0; display: flex; align-items: flex-end; gap: 10px; }
-.rf-mini .rf-mini__barcell {
-  flex: 1;
-  height: 100%;
-  display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  gap: 10px;
+  border-inline-start: 1px solid var(--rf-ink);
+  padding: 0 2px 0 6px;
+}
+.rf-mini .rf-mini__group { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.rf-mini .rf-mini__bars { display: flex; flex-direction: column; gap: 8px; }
+.rf-mini .rf-mini__barcell {
+  display: flex;
   align-items: center;
+  gap: 8px;
+  inline-size: 100%;
   min-width: 0;
 }
 /* Direct series label — every bar names itself, no legend needed. */
 .rf-mini .rf-mini__barname {
-  flex: none;
+  flex: 0 0 auto;
+  min-inline-size: 4.5em;
   font-size: 12px;
   font-weight: 600;
   color: var(--rf-muted);
-  text-align: center;
+  text-align: start;
   line-height: 1.2;
-  max-inline-size: 100%;
   overflow-wrap: break-word;
 }
 .rf-mini .rf-mini__barval {
-  flex: none;
+  flex: 0 0 auto;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--rf-ink);
-  text-align: center;
+  text-align: end;
   line-height: 1.2;
-  padding-bottom: 3px;
-  max-inline-size: 100%;
   overflow-wrap: break-word;
 }
-/* The mark's dedicated track: the bar's percent height resolves here,
-   never against the cell that also carries the labels. Narrower than the
-   cell and centered — the marks read as distinct columns, not slabs. */
+/* The full-domain track stays tinted so the fill's share — and the
+   remainder it leaves — are both visible. */
 .rf-mini .rf-mini__bartrack {
   flex: 1;
-  min-height: 0;
-  position: relative;
+  min-width: 0;
   display: block;
-  inline-size: min(54px, 64%);
+  block-size: 10px;
+  background: var(--rf-cobalt-tint, var(--rf-surface-cool));
+  border-radius: 1px;
 }
 .rf-mini .rf-mini__bar {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
   display: block;
-  border-radius: 1px 1px 0 0;
+  block-size: 100%;
+  border-radius: 1px;
 }
 /* series hues match the real slide marks: cobalt observed, gray-soft
-   target baseline, cobalt-tint scenario, negative attention. */
+   target baseline, scenario mark, negative attention. */
 .rf-mini .rf-mini__bar--observed { background: var(--rf-cobalt, var(--rf-data)); }
 .rf-mini .rf-mini__bar--target { background: var(--rf-gray-soft, var(--rf-muted)); }
-.rf-mini .rf-mini__bar--scenario { background: var(--rf-cobalt-tint, var(--rf-scenario)); }
+.rf-mini .rf-mini__bar--scenario { background: var(--rf-scenario, var(--rf-cobalt-ink)); }
 .rf-mini .rf-mini__bar--attention { background: var(--rf-negative, var(--rf-attention)); }
 .rf-mini .rf-mini__cat {
   font-size: 12px;
   color: var(--rf-muted);
-  text-align: center;
-  padding-top: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-align: start;
+  padding-inline-start: calc(4.5em + 8px);
+  overflow-wrap: break-word;
 }
 .rf-mini .rf-mini__chartcap {
   display: flex;
@@ -219,8 +215,8 @@ html[lang="ar"] .rf-mini .rf-mini__sheets li, html[lang="ar"] .rf-mini .rf-mini_
   .rf-mini .rf-mini__metrics { gap: 3px; }
   .rf-mini .rf-mini__metrics li:nth-child(n + 3) { display: none; }
   .rf-mini .rf-mini__viz { margin-top: 5px; }
-  .rf-mini .rf-mini__chart { padding: 0 3px; }
-  .rf-mini .rf-mini__barval { padding-bottom: 1px; line-height: 1.15; }
+  .rf-mini .rf-mini__chart { padding: 0 2px 0 4px; }
+  .rf-mini .rf-mini__barval { line-height: 1.15; }
   .rf-mini .rf-mini__chartcap { margin-top: 4px; }
   .rf-mini .rf-mini__foot { padding: 5px 10px 6px; margin-top: 4px; }
 }

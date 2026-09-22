@@ -57,10 +57,13 @@ const AR_MONTHS = [
 ];
 
 const ARABIC_DIGITS = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+// Arabic renders thousands with ٬ and decimals with ٫ — Latin separators
+// left inside otherwise-localized numbers read as a mix on the surface.
+const ARABIC_SEPARATORS: Record<string, string> = { ',': '٬', '.': '٫' };
 
 export function localizeDigits(text: string, numbering: 'latn' | 'arab'): string {
   if (numbering === 'latn') return text;
-  return text.replace(/[0-9]/g, (d) => (ARABIC_DIGITS[Number(d)] as string));
+  return text.replace(/[0-9]|,|\./g, (c) => (ARABIC_DIGITS[Number(c)] as string) ?? ARABIC_SEPARATORS[c] ?? c);
 }
 
 /** `2026-06-01..2026-06-30` → `June 2026` (locale-composed, numbering-aware). */
