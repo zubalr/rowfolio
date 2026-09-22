@@ -136,6 +136,7 @@ export function LinePlot({ ctx }: { ctx: PlotContext }) {
             x1={layout.plotWidth}
             unit={model.spec.unit}
             formatters={ctx.formatters}
+            t={ctx.strings.t}
           />
           {layout.paths.map((path) => (
             <path
