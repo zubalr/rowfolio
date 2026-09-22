@@ -1,6 +1,6 @@
 /**
  * LandingApp — the broadsheet entry: a hairline-framed page whose first
- * viewport is the spread (lead column + the three numbered plates running
+ * viewport is the spread (lead column + the single captioned stage running
  * the annotator loop in SpreadStage), then the finished-output plates with
  * real previews and downloads, then the own-file invitation.
  *
@@ -131,7 +131,7 @@ export function LandingApp({ i18n }: LandingAppProps) {
               <div className="rf-plate">
                 <header className="rf-plate__label">
                   <i aria-hidden="true" />
-                  <span className="rf-plate__num">04</span>
+                  <span className="rf-plate__num">05</span>
                   {landingCopy(i18n.locale, "plate.report")}
                 </header>
                 <div className="rf-plate__body rf-output__preview">
@@ -146,7 +146,7 @@ export function LandingApp({ i18n }: LandingAppProps) {
               <div className="rf-plate">
                 <header className="rf-plate__label">
                   <i aria-hidden="true" />
-                  <span className="rf-plate__num">05</span>
+                  <span className="rf-plate__num">06</span>
                   {i18n.localeName(otherLocale)}
                 </header>
                 <div className="rf-plate__body rf-output__preview" dir={otherLocale === "ar" ? "rtl" : "ltr"}>
@@ -159,7 +159,7 @@ export function LandingApp({ i18n }: LandingAppProps) {
               <div className="rf-plate">
                 <header className="rf-plate__label">
                   <i aria-hidden="true" />
-                  <span className="rf-plate__num">06</span>
+                  <span className="rf-plate__num">07</span>
                   {landingCopy(i18n.locale, "pres.workbook.title")}
                 </header>
                 <div className="rf-plate__body rf-output__preview">

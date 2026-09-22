@@ -13,15 +13,22 @@
 import type { Locale } from "@rowfolio/i18n";
 
 export type CopyKey =
+  | "beat.checks"
   | "beat.findings"
   | "beat.report"
+  | "ch.chart"
+  | "ch.checks"
+  | "ch.report"
+  | "ch.workbook"
   | "cur.usd"
   | "data.rows.kept"
   | "data.rows.read"
+  | "find.actualCat"
   | "find.caption"
   | "find.orders"
   | "find.regions"
   | "find.scale"
+  | "find.targetCat"
   | "flag.blank"
   | "flag.dup"
   | "guide.context.briefing"
@@ -111,9 +118,6 @@ export type CopyKey =
   | "lead.ctaNote"
   | "lead.kicker"
   | "lead.standfirst"
-  | "lead.statCaption"
-  | "lead.statInline"
-  | "lead.statValue"
   | "lead.title.accent"
   | "lead.title.post"
   | "lead.title.pre"
@@ -177,15 +181,22 @@ export type CopyKey =
 const COPY: Record<CopyKey, Record<Locale, string>> = {
   /* Broadsheet spread — new keys for the landing redesign (PR redesign/landing-demo).
      AR strings are authored here for review; nothing below is contract-pinned. */
+  "beat.checks": { en: "Rows that fail a check stay marked. Nothing is silently filled.", ar: "الصفوف التي لا تجتاز الفحص تبقى معلّمة. لا يُملأ أي شيء بصمت." },
   "beat.findings": { en: "The checks turn those rows into findings: what moved, and by how much.", ar: "تحوّل الفحوصات تلك الصفوف إلى نتائج: ما الذي تحرّك وبأي قدر." },
+  "ch.chart": { en: "Chart", ar: "الرسم" },
+  "ch.checks": { en: "Checks", ar: "الفحص" },
+  "ch.report": { en: "Report", ar: "التقرير" },
+  "ch.workbook": { en: "Workbook", ar: "المصنف" },
   "beat.report": { en: "The findings land in a finished report: slides and a workbook, ready to edit.", ar: "تصل النتائج إلى تقرير جاهز: شرائح وملف عمل جاهزان للتحرير." },
   "cur.usd": { en: "USD {n}", ar: "{n} دولار" },
   "data.rows.kept": { en: "{raw} → {kept} rows", ar: "{raw} → {kept} صفًا" },
   "data.rows.read": { en: "{n} rows read", ar: "قُرئت {n} صفًا" },
+  "find.actualCat": { en: "Actual", ar: "الفعلي" },
   "find.caption": { en: "{region} · June 2026 · actual vs target, USD", ar: "{region} · يونيو ٢٠٢٦ · الفعلي مقابل المستهدف بالدولار" },
   "find.orders": { en: "Orders {change}", ar: "الطلبات {change}" },
   "find.regions": { en: "{n} regions within {pct} of plan", ar: "{n} مناطق ضمن {pct} من المستهدف" },
   "find.scale": { en: "share of target", ar: "نسبة إلى المستهدف" },
+  "find.targetCat": { en: "Target", ar: "المستهدف" },
   "flag.blank": { en: "Left blank, not filled", ar: "تُركت فارغة ولم تُملأ" },
   "flag.dup": { en: "Duplicate row excluded", ar: "استُبعد صف مكرر" },
   "guide.context.briefing": { en: "The briefing writes the same figures into slides and a workbook you can edit.", ar: "تكتب الإحاطة الأرقام نفسها في شرائح وملف عمل يمكنك تحريره." },
@@ -273,9 +284,6 @@ const COPY: Record<CopyKey, Record<Locale, string>> = {
   "lead.ctaNote": { en: "Runs locally. No upload.", ar: "يعمل محليًا. بلا رفع." },
   "lead.kicker": { en: "Rowfolio · in-browser report builder", ar: "روفوليو · منشئ تقارير داخل المتصفح" },
   "lead.standfirst": { en: "Drop in a CSV or XLSX. Rowfolio flags what needs attention, draws every figure from named source rows, and produces a report you can edit in PowerPoint and Excel. Your file never leaves this tab.", ar: "أدرج ملف CSV أو XLSX. يُعلّم روفوليو ما يحتاج إلى انتباه، ويرسم كل رقم من صفوف المصدر المسمّاة، وينتج تقريرًا يمكنك تحريره في PowerPoint وExcel. لا يغادر ملفك هذا التبويب أبدًا." },
-  "lead.statCaption": { en: "North region revenue, June 2026, against a USD 1,000,000 target", ar: "إيراد منطقة الشمال في يونيو ٢٠٢٦، مقابل مستهدف قدره ١٬٠٠٠٬٠٠٠ دولار" },
-  "lead.statInline": { en: "USD {rev} against a USD {target} target", ar: "{rev} دولار مقابل مستهدف قدره {target} دولار" },
-  "lead.statValue": { en: "USD {n}", ar: "{n} دولار" },
   "lead.title.accent": { en: "checked", ar: "مفحوص" },
   "lead.title.post": { en: " and explained.", ar: " ومشروح." },
   "lead.title.pre": { en: "Your spreadsheet, ", ar: "جدولك، " },
@@ -337,7 +345,7 @@ const COPY: Record<CopyKey, Record<Locale, string>> = {
   "export.slide.5": { en: "What changed in the data", ar: "ما الذي تغيّر في البيانات؟" },
   "export.slide.6": { en: "Inspect before acting", ar: "تحقّق قبل اتخاذ القرار" },
   "rep.wbFormats": { en: "Editable .pptx and .xlsx", ar: "قابل للتحرير بصيغتي ‎.pptx و‎.xlsx" },
-  "spread.label": { en: "Animated example: data, findings, report", ar: "مثال متحرك: البيانات والنتائج والتقرير" },
+  "spread.label": { en: "Example walkthrough: workbook, checks, chart, report", ar: "جولة في مثال: المصنف والفحص والرسم والتقرير" },
 };
 
 export function landingCopy(locale: Locale, key: CopyKey, params?: Record<string, string | number>): string {
