@@ -303,23 +303,29 @@ describe('deck structure', () => {
     expect(slide2).toContain('USD 6.00m');
   });
 
-  it('renders an honest empty state when no scenario is defined', async () => {
+  it('omits the scenario slide entirely when no scenario is committed', async () => {
     for (const locale of ['en', 'ar'] as const) {
       const model = buildExportModel(snapshot, table, null, locale, 'latn', CREATED);
       const artifact = await buildPresentation(model, () => undefined);
       const entries = unzip(new Uint8Array(artifact.bytes));
-      const slide4 = textOf(entries, 'ppt/slides/slide4.xml');
-      // No committed scenario: the panel names that accurately rather
-      // than implying the columns are missing, and the data table has
-      // 2,400 usable rows, so the no-data line must not appear.
-      if (locale === 'en') {
-        expect(slide4).toContain('No scenario is committed for this report.');
-        expect(slide4).toContain('What if operating costs change?');
-        expect(slide4).not.toContain('No usable rows');
-      } else {
-        expect(slide4).toContain('لم يُعتمد أي سيناريو');
-        expect(slide4).not.toContain('قابلة للاستخدام');
+      const slideNames = [...entries.keys()].filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n));
+      expect(slideNames.length).toBe(5);
+      // No slide may ship the placeholder line; the quality page moves up
+      // into slide four's slot.
+      for (const name of slideNames) {
+        const xml = textOf(entries, name);
+        expect(xml).not.toContain('No scenario is committed');
+        expect(xml).not.toContain('لم يُعتمد أي سيناريو');
       }
+      const slide4 = textOf(entries, 'ppt/slides/slide4.xml');
+      if (locale === 'en') {
+        expect(slide4).toContain('Duplicate rows');
+      } else {
+        expect(slide4).toContain('صفوف مكررة');
+      }
+      // Folios count the real deck size.
+      const slide5 = textOf(entries, 'ppt/slides/slide5.xml');
+      expect(slide5).toContain('>5 / 5<');
     }
   });
 

@@ -22,6 +22,7 @@ import {
   scopeText,
 } from "@rowfolio/export-pptx";
 import type { ReactElement } from "react";
+import "./mini-report.css";
 
 export interface MiniReportProps {
   readonly model: ExportModel;
@@ -114,10 +115,15 @@ export function MiniReport({ model, slide }: MiniReportProps): ReactElement {
                                 ? `${exportUnitLabel(chart.unit)} ${formatCompact(raw)}`.trim()
                                 : formatMetricValue(raw, chart.unit)}
                           </span>
-                          <span
-                            className={`rf-mini__bar rf-mini__bar--${series.semantic}`}
-                            style={{ height: `${h}%` }}
-                          />
+                          {/* The value label lives outside the track, so the
+                              mark's percent height resolves against the
+                              track alone — the bar scales, never its cell. */}
+                          <span className="rf-mini__bartrack">
+                            <span
+                              className={`rf-mini__bar rf-mini__bar--${series.semantic}`}
+                              style={{ height: `${h}%` }}
+                            />
+                          </span>
                         </span>
                       );
                     })}

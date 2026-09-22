@@ -86,16 +86,15 @@ describe('golden parity', () => {
 });
 
 describe('fallbacks and validation', () => {
-  it('falls back without a scenario: scenario slide in unavailable state', () => {
+  it('omits the scenario slide when no scenario is committed', () => {
     const model = buildExportModel(snapshot, table, null, 'en', 'latn', CREATED);
     expect(model.scenario).toBeNull();
     expect(model.exportId).toBe(`export-${snapshot.id}-en-baseline`);
     expect(model.charts.some((c) => c.id === 'chart-scenario')).toBe(false);
-    // Slide four keeps its scenario identity; the unavailable state is a
-    // designed limitations rendering, not a different slide kind.
-    const slide4 = model.slides[3];
-    expect(slide4?.kind).toBe('scenario');
-    expect(slide4?.chartIds).toEqual([]);
+    // A scenario with nothing to say is left out of the deck rather than
+    // shipped as an empty slide; quality and methodology move up a page.
+    expect(model.slides).toHaveLength(5);
+    expect(model.slides.map((s) => s.kind)).toEqual(['summary', 'kpis', 'finding', 'quality', 'methodology']);
     expect(checkExportModel(model, { snapshot, table, sourceHash: snapshot.sourceHash })).toEqual([]);
   });
 

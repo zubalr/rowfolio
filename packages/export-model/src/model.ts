@@ -173,13 +173,29 @@ const SHEET_NAMES: Record<Locale, [string, string, string, string, string]> = {
   ar: ['الملخص التنفيذي', 'البيانات المنقحة', 'جودة البيانات', 'المؤشرات', 'المنهجية'],
 };
 
+/**
+ * Copy tables are indexed by slide kind, not by deck position — a deck
+ * without a committed scenario omits its scenario slide, shifting the
+ * positions of the quality and methodology pages behind it.
+ */
+const KIND_COPY_INDEX: Record<SlideModel['kind'], number> = {
+  summary: 0,
+  kpis: 1,
+  finding: 2,
+  scenario: 3,
+  quality: 4,
+  methodology: 5,
+  descriptive: 2,
+};
+
 function slideCopy(
-  index: number,
+  kind: SlideModel['kind'],
   locale: Locale,
   numbering: 'latn' | 'arab',
   snapshot: AnalysisSnapshot,
   isSample: boolean,
 ): SlideCopy {
+  const index = KIND_COPY_INDEX[kind];
   if (isSample) {
     // Period resolves through the model's numbering system so the subtitle's
     // digits match the rest of the deck (يونيو 2026 vs يونيو ٢٠٢٦).
@@ -373,6 +389,10 @@ export function buildExportModel(
 
   const scopeText = scopeLabel(snapshot, locale, numberingSystem);
   const recordsNote = `records:${snapshot.qualitySummary.retainedRows}/${snapshot.qualitySummary.rawRows}`;
+  // A scenario the user never committed (or one the engine could not
+  // define) has nothing to say on a slide — the page is omitted rather
+  // than shipped as a designed empty state.
+  const committedScenario = scenario !== null && scenario.status === 'defined' ? scenario : null;
 
   const slideDefs: Array<{
     kind: SlideModel['kind'];
@@ -406,15 +426,15 @@ export function buildExportModel(
         ? [`finding:${leadFinding.id}`, `rule:${leadFinding.ruleId}`]
         : ['no eligible findings'],
     },
-    {
-      kind: 'scenario',
-      metricIds: isSample ? ['june-margin', 'scenario-margin', 'scenario-contribution'] : scenarioMetricIds,
-      findingIds: [],
-      chartIds: chart !== null ? [chart.id] : [],
-      notes: scenario !== null && scenario.status === 'defined'
-        ? [`scenario:${scenario.costChange}`, `baseline:${scenario.baselineAnalysisId}`]
-        : [`scenario unavailable: ${scenario?.reasonKey ?? 'no scenario'}`],
-    },
+    ...(committedScenario !== null
+      ? [{
+        kind: 'scenario' as const,
+        metricIds: isSample ? ['june-margin', 'scenario-margin', 'scenario-contribution'] : scenarioMetricIds,
+        findingIds: [] as string[],
+        chartIds: chart !== null ? [chart.id] : [],
+        notes: [`scenario:${committedScenario.costChange}`, `baseline:${committedScenario.baselineAnalysisId}`],
+      }]
+      : []),
     {
       kind: 'quality',
       metricIds: [],
@@ -444,7 +464,7 @@ export function buildExportModel(
   ];
 
   const slides: SlideModel[] = slideDefs.map((def, index) => {
-    const copy = slideCopy(index, locale, numberingSystem, snapshot, isSample);
+    const copy = slideCopy(def.kind, locale, numberingSystem, snapshot, isSample);
     return {
       id: `slide-${index + 1}`,
       kind: def.kind,

@@ -754,7 +754,13 @@ export function checkExportModel(value: unknown, ctx: SemanticContext = {}): Con
   void sheetIds;
 
   uniqueIds(model.slides, 'slide', '/slides', issues);
-  if (model.slides.length !== 6) issues.push(issue('semantic', 'slides.count', '/slides', `expected exactly six slides, got ${model.slides.length}`));
+  // The scenario page exists only for a committed scenario — a section
+  // with nothing to say is omitted from the deck, never shipped empty.
+  const scenarioCommitted = model.scenario !== null && model.scenario.status === 'defined';
+  const expectedSlides = scenarioCommitted ? 6 : 5;
+  if (model.slides.length !== expectedSlides) issues.push(issue('semantic', 'slides.count', '/slides', `expected ${expectedSlides} slides for ${scenarioCommitted ? 'a committed' : 'no committed'} scenario, got ${model.slides.length}`));
+  const scenarioSlides = model.slides.filter((s) => s.kind === 'scenario').length;
+  if (scenarioSlides !== (scenarioCommitted ? 1 : 0)) issues.push(issue('semantic', 'slides.scenario', '/slides', `expected ${scenarioCommitted ? 'exactly one' : 'no'} scenario slide, got ${scenarioSlides}`));
 
   const metricSet = new Set([...model.metrics.map((m) => m.id), ...(model.scenario?.metrics ?? []).map((m) => m.id)]);
   const findingSet = new Set(model.findings.map((f) => f.id));
