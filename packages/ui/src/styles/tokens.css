@@ -6,30 +6,37 @@
  */
 
 :root {
-  /* Palette (contract) */
-  --rf-ink: #10191E;
-  --rf-paper: #F5F7F8;
+  /* Palette (contract v3) */
+  --rf-ink: #0E1B2E;
+  --rf-paper: #F4F6F9;
   --rf-surface: #FFFFFF;
+  --rf-surface-cool: #E9EFF7;
   --rf-muted: #54666E;
-  --rf-rule: #D9E0E4;
+  --rf-rule: #DCE3EA;
   --rf-data: #2B50E8;
   --rf-data-tint-30: #C6D1FF;
-  --rf-attention: #E04E1A;
+  --rf-cobalt: #2B50E8;
+  --rf-cobalt-ink: #1D3BB4;
+  --rf-cobalt-tint: #E7EDFD;
+  --rf-attention: #A33224;
   --rf-negative: #A33224;
   --rf-positive: #0E8F7E;
+  --rf-teal: #0E8F7E;
+  --rf-gray: #66788A;
+  --rf-gray-soft: #C9D3DE;
   --rf-positive-text: #116B63;
   --rf-scenario: #B96F00;
   --rf-scenario-text: #946000;
 
   /* On-ink tints — dark evidence surface only */
   --rf-ink-text: #FFFFFF;
-  --rf-ink-muted: #AEC2CB;
+  --rf-ink-muted: #93A9C0;
   --rf-ink-data: #A8BCFF;
-  --rf-ink-attention: #F0926C;
+  --rf-ink-attention: #D98373;
   --rf-ink-positive: #74C6B8;
   --rf-ink-scenario: #F0B45C;
-  --rf-ink-rule: #3A4A53;
-  --rf-ink-surface: #1E3846;
+  --rf-ink-rule: #31475F;
+  --rf-ink-surface: #16283F;
 
   /* Semantic aliases (light theme) */
   --rf-text: var(--rf-ink);
