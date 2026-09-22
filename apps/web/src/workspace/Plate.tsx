@@ -59,17 +59,17 @@ export function Plate({
   const Heading = `h${headingLevel}` as const;
   return (
     <section
-      className={cx("rf-plate", className)}
+      className={cx("rf-wplate", className)}
       aria-labelledby={titleId}
       data-testid={testId}
     >
-      <header className="rf-plate__head">
+      <header className="rf-wplate__head">
         <PlateLabel index={index} name={name} />
-        <Heading className="rf-plate__title" id={titleId}>
+        <Heading className="rf-wplate__title" id={titleId}>
           {title}
         </Heading>
         {note !== undefined && note !== null ? (
-          <p className="rf-plate__note">{note}</p>
+          <p className="rf-wplate__note">{note}</p>
         ) : null}
       </header>
       {children}

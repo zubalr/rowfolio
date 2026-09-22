@@ -30,16 +30,16 @@ export function ChartStage({ snapshot }: { snapshot: AnalysisSnapshot }) {
   const localization = chartLocalization(i18n);
 
   return (
-    <div className="rf-stage" id="overview">
+    <div className="rf-wstage" id="overview">
       {chartless && selected !== null ? (
-        <div className="rf-stage-panel">
-          <header className="rf-stage-head">
-            <div className="rf-stage-titles">
-              <p className="rf-stage-eyebrow">
+        <div className="rf-wstage-panel">
+          <header className="rf-wstage-head">
+            <div className="rf-wstage-titles">
+              <p className="rf-wstage-eyebrow">
                 {i18n.tSafe('a11y.selectedFinding' as MessageKey)}
               </p>
-              <h3 className="rf-stage-title">{findingTitle(i18n, selected)}</h3>
-              <p className="rf-stage-scope">{formatScope(i18n, selected.scope)}</p>
+              <h3 className="rf-wstage-title">{findingTitle(i18n, selected)}</h3>
+              <p className="rf-wstage-scope">{formatScope(i18n, selected.scope)}</p>
             </div>
             <EvidenceChip
               findingId={selected.id}
@@ -47,23 +47,23 @@ export function ChartStage({ snapshot }: { snapshot: AnalysisSnapshot }) {
               onOpen={() => controller.openEvidence(selected.id)}
             />
           </header>
-          <p className="rf-stage-body">{findingBody(i18n, snapshot, selected)}</p>
+          <p className="rf-wstage-body">{findingBody(i18n, snapshot, selected)}</p>
         </div>
       ) : hero === null ? null : (
-        <div className="rf-stage-panel">
-          <header className="rf-stage-head">
-            <div className="rf-stage-titles">
+        <div className="rf-wstage-panel">
+          <header className="rf-wstage-head">
+            <div className="rf-wstage-titles">
               {heroFinding === null ? null : (
-                <p className="rf-stage-eyebrow">
+                <p className="rf-wstage-eyebrow">
                   {i18n.tSafe('a11y.selectedFinding' as MessageKey)}
                 </p>
               )}
-              <h3 className="rf-stage-title">
+              <h3 className="rf-wstage-title">
                 {heroFinding === null
                   ? i18n.tSafe(hero.titleKey as MessageKey)
                   : findingTitle(i18n, heroFinding)}
               </h3>
-              <p className="rf-stage-scope">{formatScope(i18n, hero.scope)}</p>
+              <p className="rf-wstage-scope">{formatScope(i18n, hero.scope)}</p>
             </div>
             {heroFinding === null ? null : (
               <EvidenceChip

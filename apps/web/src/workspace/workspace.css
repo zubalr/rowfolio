@@ -8,14 +8,14 @@
 /* ---------- Plate grammar ------------------------------------------------- */
 
 /* The plate: one white surface, one hairline, panel radius, no shadow. */
-/* The landing spread positions decorative `.rf-plate` frames absolutely on the
+/* The landing spread positions decorative `.rf-wplate` frames absolutely on the
    bare class; product plates inside the workspace always stay in flow. */
-.rf-workspace .rf-plate {
+.rf-workspace .rf-wplate {
   position: static;
   overflow: visible;
 }
 
-.rf-plate {
+.rf-wplate {
   background: var(--rf-surface);
   border: 1px solid var(--rf-rule);
   border-radius: var(--rf-radius-panel);
@@ -23,11 +23,11 @@
   min-width: 0;
 }
 
-.rf-plate__head {
+.rf-wplate__head {
   margin-block-end: var(--rf-space-4);
 }
 
-.rf-plate__title {
+.rf-wplate__title {
   margin: var(--rf-space-2) 0 0;
   font-size: 24px;
   line-height: 1.3;
@@ -35,14 +35,14 @@
   letter-spacing: -0.01em;
 }
 
-html[lang="ar"] .rf-plate__title {
+html[lang="ar"] .rf-wplate__title {
   font-size: 22px;
   line-height: 1.55;
   letter-spacing: normal;
 }
 
 /* The one-line "what am I seeing" that precedes each plate's data. */
-.rf-plate__note {
+.rf-wplate__note {
   margin: var(--rf-space-2) 0 0;
   color: var(--rf-text-muted);
   font-size: 14px;
@@ -50,7 +50,7 @@ html[lang="ar"] .rf-plate__title {
   max-width: 64ch;
 }
 
-html[lang="ar"] .rf-plate__note {
+html[lang="ar"] .rf-wplate__note {
   font-size: 15px;
 }
 
@@ -99,16 +99,16 @@ html[lang="ar"] .rf-plate-label__name {
 
 /* Divider-led sections inside a plate: the hairline stays but tightens, and
    the section title steps down under the plate's own heading. */
-.rf-plate .rf-section {
+.rf-wplate .rf-section {
   margin-block-start: var(--rf-space-4);
   padding-block-start: var(--rf-space-4);
 }
 
-.rf-plate .rf-section__title {
+.rf-wplate .rf-section__title {
   font-size: 19px;
 }
 
-html[lang="ar"] .rf-plate .rf-section__title {
+html[lang="ar"] .rf-wplate .rf-section__title {
   font-size: 20px;
 }
 
@@ -165,18 +165,18 @@ html[lang="ar"] .rf-linkbtn {
 
 /* ---------- Stage ---------------------------------------------------------- */
 
-.rf-stage {
+.rf-wstage {
   display: grid;
   gap: var(--rf-space-5);
 }
 
 /* The hero stage lives inside the overview plate — a named head, then the
    figure with no card chrome of its own. */
-.rf-stage-panel {
+.rf-wstage-panel {
   color: var(--rf-text);
 }
 
-.rf-stage-head {
+.rf-wstage-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -184,13 +184,13 @@ html[lang="ar"] .rf-linkbtn {
   margin-block-end: var(--rf-space-4);
 }
 
-.rf-stage-titles {
+.rf-wstage-titles {
   min-width: 0;
 }
 
 /* The stage eyebrow is a quiet mono micro-label (Latin); Arabic keeps the
    body stack. */
-.rf-stage-eyebrow {
+.rf-wstage-eyebrow {
   margin: 0 0 var(--rf-space-1);
   font-family: var(--rf-font-mono);
   font-size: var(--rf-plate-label-size);
@@ -200,13 +200,13 @@ html[lang="ar"] .rf-linkbtn {
   color: var(--rf-text-muted);
 }
 
-html[lang='ar'] .rf-stage-eyebrow {
+html[lang='ar'] .rf-wstage-eyebrow {
   font-family: var(--rf-font-body);
   font-size: 13px;
   letter-spacing: normal;
 }
 
-.rf-stage-title {
+.rf-wstage-title {
   margin: 0;
   font-size: 19px;
   line-height: 1.3;
@@ -214,37 +214,37 @@ html[lang='ar'] .rf-stage-eyebrow {
   letter-spacing: -0.01em;
 }
 
-html[lang='ar'] .rf-stage-title {
+html[lang='ar'] .rf-wstage-title {
   font-size: 20px;
   letter-spacing: normal;
 }
 
-.rf-stage-scope {
+.rf-wstage-scope {
   margin: var(--rf-space-1) 0 0;
   font-size: 12px;
   color: var(--rf-text-muted);
 }
 
-html[lang='ar'] .rf-stage-scope {
+html[lang='ar'] .rf-wstage-scope {
   font-size: 13px;
 }
 
 /* Chart title/summary inside the stage stay quiet — the stage head names
    the finding; the chart block only needs its axes and marks. */
-.rf-stage-panel .rf-chart__title {
+.rf-wstage-panel .rf-chart__title {
   font-size: 14px;
   color: var(--rf-text-muted);
   font-weight: 500;
   letter-spacing: normal;
 }
 
-.rf-stage-panel .rf-chart__summary {
+.rf-wstage-panel .rf-chart__summary {
   color: var(--rf-text-muted);
 }
 
 /* When the hero chart left the grid, the remaining pair sit side by side —
    the app stylesheet only promotes a lone first chart to full width. */
-.rf-stage .rf-charts--paired > *:first-child {
+.rf-wstage .rf-charts--paired > *:first-child {
   grid-column: auto;
 }
 
@@ -338,7 +338,7 @@ html[lang='ar'] .rf-stage-scope {
 
 /* Inside the overview plate, the chart grid separates from the hero by one
    hairline instead of card-on-card nesting. */
-.rf-plate .rf-stage-body {
+.rf-wplate .rf-wstage-body {
   margin: 0;
   padding-block-start: var(--rf-space-4);
   color: var(--rf-text);
@@ -353,7 +353,7 @@ html[lang='ar'] .rf-stage-scope {
 
 /* Stat blocks sit on the plate; finding rows follow, ruled by their own
    hairlines. */
-.rf-plate .rf-findings {
+.rf-wplate .rf-findings {
   margin-block-start: var(--rf-space-4);
 }
 
@@ -377,7 +377,7 @@ html[lang='ar'] .rf-stage-scope {
 }
 
 @media (max-width: 640px) {
-  .rf-stage-head {
+  .rf-wstage-head {
     flex-direction: column;
     align-items: stretch;
   }
@@ -395,14 +395,14 @@ html[lang='ar'] .rf-stage-scope {
     align-self: flex-start;
   }
 
-  .rf-plate {
+  .rf-wplate {
     padding: var(--rf-space-4) var(--rf-space-3);
   }
 }
 
 /* Small screens: the stage may horizontally overflow before the chart
    measure loop settles — clip rather than push the page. */
-.rf-stage-panel .rf-chart-plot {
+.rf-wstage-panel .rf-chart-plot {
   overflow-x: clip;
 }
 
