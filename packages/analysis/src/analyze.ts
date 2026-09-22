@@ -255,7 +255,11 @@ function genericFindings(
       },
       rank: { classPriority: 3, coverage: '1', magnitude: String(table.qualityIssues.length) },
       chartId: 'chart-quality',
-      limitations: ['limitations.missingRetained'],
+      // The missing-scores caveat is only true when missing cells exist:
+      // with zero missing issues it must not render as a warning clause.
+      limitations: table.qualityIssues.some((q) => q.kind === 'missing')
+        ? ['limitations.missingRetained']
+        : [],
     });
   }
   const totals = metrics.filter((m) => m.id.startsWith('total-'));
