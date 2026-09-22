@@ -4,8 +4,10 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { RawCell, RawTable } from '../../../packages/contracts/src/index.ts';
-import { checkRawTable } from '../../../packages/contracts/src/index.ts';
+import { checkAnalysisSnapshot, checkNormalizedTable, checkRawTable } from '../../../packages/contracts/src/index.ts';
+import { analyze } from '../../../packages/analysis/src/index.ts';
 import { inspectSource, parseSource } from '../../../packages/ingest/src/index.ts';
+import { normalizeTable, profileTable } from '../../../packages/normalize/src/index.ts';
 import { expectIngestError, fixtureBytes, toArrayBuffer } from './helpers.ts';
 
 const OPTS = { allowHiddenSheet: false };
@@ -54,6 +56,46 @@ describe('csv: basics', () => {
     const rows = [...new Set(t.cells.map((c) => c.row))].sort((a, b) => a - b);
     expect(rows).toEqual([1, 2, 3, 4, 7]);
     expect(t.sourceRef.range.lastRow).toBe(7);
+  });
+
+  it('never counts a skipped blank line as a record', async () => {
+    // header L1, data L2-L9, blank L10, data L11-L16: 14 records, 1 blank line
+    const lines = ['h1,h2,h3,h4,h5,h6'];
+    for (let i = 0; i < 8; i += 1) lines.push(`r${i},a,b,c,d,e`);
+    lines.push('');
+    for (let i = 8; i < 14; i += 1) lines.push(`r${i},a,b,c,d,e`);
+    const bytes = new TextEncoder().encode(`${lines.join('\n')}\n`);
+    const raw = await parseSource(toArrayBuffer(bytes), 'blank-mid.csv', OPTS, NOOP);
+    // The blank stays inside the physical range — the last record ends L16.
+    expect(raw.sourceRef.range.lastRow).toBe(16);
+    expect(raw.warnings).toContain('ingest.warn.csv-blank-records-skipped');
+
+    // No missing/duplicate issues may name the blank row.
+    const profile = profileTable(raw);
+    expect(profile.issues.filter((q) => q.sourceRow === 10)).toEqual([]);
+
+    // The blank materializes no normalized row.
+    const table = normalizeTable(raw, { issueIds: [], columns: [], useUnverifiedFormulaCaches: [] });
+    expect(table.rows).toHaveLength(14);
+    expect(table.rows.map((r) => r.sourceRow)).not.toContain(10);
+    expect(checkNormalizedTable(table)).toEqual([]);
+
+    // The summary counts real records, not physical lines.
+    const snapshot = analyze(table, {
+      version: '1.0.0',
+      confirmedScope: {
+        tableId: raw.id,
+        periodStart: null,
+        periodEnd: null,
+        regions: [],
+        complete: true,
+        coverageNoteKey: 'coverage.allSource',
+      },
+      samplePolicyId: null,
+    });
+    expect(checkAnalysisSnapshot(snapshot)).toEqual([]);
+    expect(snapshot.qualitySummary.rawRows).toBe(14);
+    expect(snapshot.qualitySummary.retainedRows).toBe(14);
   });
 });
 

@@ -34,12 +34,8 @@ export function ErrorSurface({ i18n, failure, hasPrior, onRetry, onDismiss }: Er
           </>
         }
       >
-        <span className="rf-upload__meta">
+        <span className="rf-upload__meta" data-testid="upload-error-detail" data-error-detail={failure.detail}>
           {i18n.t("upload.types")}
-          {" · "}
-          <code className="rf-upload__code" data-testid="upload-error-detail">
-            {failure.detail}
-          </code>
         </span>
       </Status>
       {hasPrior ? (
