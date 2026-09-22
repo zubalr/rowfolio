@@ -11,7 +11,7 @@
  * the workbook figure — real sheet names, not a shrunken card.
  */
 import type { ExportModel, Metric, SlideModel } from "@rowfolio/contracts";
-import { exportFileName, exportUnitLabel, localizeDigits, periodLabel } from "@rowfolio/export-model";
+import { exportFileName, exportUnitLabel, localizeDigits } from "@rowfolio/export-model";
 import {
   formatInteger,
   formatMetricValue,
@@ -60,17 +60,6 @@ export function MiniReport({ model, slide }: MiniReportProps): ReactElement {
     chart === undefined ? 1 : Math.max(1, ...chart.points.flatMap((p) => chart.series.map((s) => Number(p.values[s.id] ?? 0))));
   const chartTitle =
     chart === undefined ? "" : hasLabel(chart.titleKey) ? label(model.locale, chart.titleKey) : label(model.locale, "common.metric");
-  const chartMeta =
-    chart === undefined
-      ? ""
-      : [
-          chart.series.map((s) => (hasLabel(s.labelKey) ? label(model.locale, s.labelKey) : label(model.locale, "common.metric"))).join(" / "),
-          exportUnitLabel(chart.unit, (k) => label(model.locale, k)),
-          periodLabel(chart.scope.periodStart, chart.scope.periodEnd, model.locale, model.numberingSystem),
-        ]
-          .filter((bit) => bit !== "")
-          .join(" · ");
-
   return (
     <figure
       dir={rtl ? "rtl" : "ltr"}
@@ -101,6 +90,11 @@ export function MiniReport({ model, slide }: MiniReportProps): ReactElement {
             <div className="rf-mini__chart" dir="ltr" role="img" aria-label={chartTitle}>
               {chart.points.slice(0, 4).map((point) => (
                 <div className="rf-mini__group" key={point.key}>
+                  {/* Point category heads its series rows — a real layout row,
+                      never an absolutely-placed label under the bars. */}
+                  <span className="rf-mini__cat">
+                    {hasLabel(point.labelKey) ? label(model.locale, point.labelKey) : label(model.locale, "common.metric")}
+                  </span>
                   <div className="rf-mini__bars">
                     {chart.series.map((series) => {
                       const raw = point.values[series.id];
@@ -135,15 +129,11 @@ export function MiniReport({ model, slide }: MiniReportProps): ReactElement {
                       );
                     })}
                   </div>
-                  <span className="rf-mini__cat">
-                    {hasLabel(point.labelKey) ? label(model.locale, point.labelKey) : label(model.locale, "common.metric")}
-                  </span>
                 </div>
               ))}
             </div>
             <p className="rf-mini__chartcap">
               <span className="rf-mini__charttitle">{chartTitle}</span>
-              <span className="rf-mini__chartmeta">{chartMeta}</span>
             </p>
           </div>
         )}

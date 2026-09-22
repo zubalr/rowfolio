@@ -74,21 +74,22 @@ html[lang="ar"] .rf-mini .rf-mini__sub { font-size: 12.5px; }
   color: var(--rf-ink);
   flex: none;
 }
-.rf-mini .rf-mini__viz { flex: 1; min-height: 0; display: flex; flex-direction: column; margin-top: 8px; }
+.rf-mini .rf-mini__viz { flex: 1; min-height: 0; display: flex; flex-direction: column; margin-top: 8px; overflow: hidden; }
 /* Horizontal bars: width encodes the value against a tinted full-domain
    track, so the unfilled remainder reads as distance-to-max at any size.
-   The chart region is LTR — the left edge is the shared zero baseline. */
+   The chart region is LTR — the left edge is the shared zero baseline.
+   The chart never shrinks inside the viz: if the card is too small the
+   trailing caption clips, never the bars or their labels. */
 .rf-mini .rf-mini__chart {
-  flex: 1;
-  min-height: 0;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
   border-inline-start: 1px solid var(--rf-ink);
   padding: 0 2px 0 6px;
 }
-.rf-mini .rf-mini__group { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.rf-mini .rf-mini__bars { display: flex; flex-direction: column; gap: 8px; }
+.rf-mini .rf-mini__group { flex: 0 0 auto; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.rf-mini .rf-mini__bars { flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; }
 .rf-mini .rf-mini__barcell {
   display: flex;
   align-items: center;
@@ -137,11 +138,13 @@ html[lang="ar"] .rf-mini .rf-mini__sub { font-size: 12.5px; }
 .rf-mini .rf-mini__bar--target { background: var(--rf-gray-soft, var(--rf-muted)); }
 .rf-mini .rf-mini__bar--scenario { background: var(--rf-scenario, var(--rf-cobalt-ink)); }
 .rf-mini .rf-mini__bar--attention { background: var(--rf-negative, var(--rf-attention)); }
+/* Point category heading sits above its series rows inside the group —
+   a real flex row, so it can never overlap or slide under the bars. */
 .rf-mini .rf-mini__cat {
+  flex: 0 0 auto;
   font-size: 12px;
   color: var(--rf-muted);
   text-align: start;
-  padding-inline-start: calc(4.5em + 8px);
   overflow-wrap: break-word;
 }
 .rf-mini .rf-mini__chartcap {
@@ -152,7 +155,6 @@ html[lang="ar"] .rf-mini .rf-mini__sub { font-size: 12.5px; }
   font-size: 12px;
 }
 .rf-mini .rf-mini__charttitle { color: var(--rf-ink); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.rf-mini .rf-mini__chartmeta { color: var(--rf-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 html[lang="ar"] .rf-mini .rf-mini__barval, html[lang="ar"] .rf-mini .rf-mini__cat,
 html[lang="ar"] .rf-mini .rf-mini__chartcap {
   font-size: 12.5px;
@@ -204,6 +206,16 @@ html[lang="ar"] .rf-mini .rf-mini__sheets li, html[lang="ar"] .rf-mini .rf-mini_
   .rf-mini .rf-mini__metrics { gap: 3px; }
 }
 
+/* Wide plates: the stats pair up two-across so the chart keeps real height
+   instead of the caption being squeezed off the card. */
+@container (min-width: 481px) {
+  .rf-mini .rf-mini__metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+  }
+}
+
 /* Small plates get a recomposed interior, not a squeezed one: on narrow
    cards the figure keeps real track height while the plate carries
    title + key stats + labeled chart + scope — the contract's small-plate
@@ -214,11 +226,15 @@ html[lang="ar"] .rf-mini .rf-mini__sheets li, html[lang="ar"] .rf-mini .rf-mini_
   .rf-mini .rf-mini__body { padding: 6px 10px 0; }
   .rf-mini .rf-mini__metrics { gap: 3px; }
   .rf-mini .rf-mini__metrics li:nth-child(n + 3) { display: none; }
-  .rf-mini .rf-mini__viz { margin-top: 5px; }
-  .rf-mini .rf-mini__chart { padding: 0 2px 0 4px; }
+  .rf-mini .rf-mini__viz { margin-top: 4px; }
+  .rf-mini .rf-mini__chart { padding: 0 2px 0 4px; gap: 6px; }
+  .rf-mini .rf-mini__bars { gap: 6px; }
+  .rf-mini .rf-mini__group { gap: 3px; }
   .rf-mini .rf-mini__barval { line-height: 1.15; }
-  .rf-mini .rf-mini__chartcap { margin-top: 4px; }
-  .rf-mini .rf-mini__foot { padding: 5px 10px 6px; margin-top: 4px; }
+  /* the caption duplicates the row labels + foot scope — drop it on
+     small plates before any meaning-bearing text would clip */
+  .rf-mini .rf-mini__chartcap { display: none; }
+  .rf-mini .rf-mini__foot { padding: 4px 10px 5px; margin-top: 3px; }
 }
 
 /* Landing output tiles (.rf-output__preview): required text never
