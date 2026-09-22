@@ -485,10 +485,11 @@ export function buildExportModel(
       : []),
     {
       kind: 'quality',
-      metricIds: [],
+      // The trio the deck draws is the slide's own metric set, so every
+      // preview surface that renders slide.metricIds shows the same
+      // counts the native page carries.
+      metricIds: ['quality-duplicate', 'quality-category', 'quality-missing'],
       findingIds: qualityFinding !== undefined ? [qualityFinding.id] : [],
-      // Quality evidence lives in the workbook and the finding's ledger;
-      // the slide stays a readable summary without a chart reference.
       chartIds: [],
       notes: [
         ...(qualityFinding !== undefined ? [`finding:${qualityFinding.id}`] : []),

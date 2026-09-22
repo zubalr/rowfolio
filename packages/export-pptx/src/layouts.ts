@@ -411,21 +411,37 @@ export function chartBox(
   });
 }
 
-function spanTokens(ctx: LayoutContext, maxSpans = 3): string | null {
-  for (const proof of ctx.model.provenance) {
+/**
+ * Row-span tokens for the first provenance chain that carries selections —
+ * the "Source rows: 1802–1901" line on the method page. Exported so the
+ * in-app preview resolves the identical tokens (same proof, same cap,
+ * same digit localization).
+ */
+export function spanTokensForModel(model: ExportModel, maxSpans = 3): string | null {
+  for (const proof of model.provenance) {
     if (proof.selections.length === 0) continue;
     const tokens: string[] = [];
-    let total = 0;
     for (const selection of proof.selections) {
       for (const span of selection.spans) {
-        total += 1;
-        if (tokens.length < maxSpans) tokens.push(localizeDigits(`${span.start}–${span.end}`, ctx.model.numberingSystem));
+        if (tokens.length < maxSpans) tokens.push(localizeDigits(`${span.start}–${span.end}`, model.numberingSystem));
       }
     }
-    void total;
     if (tokens.length > 0) return tokens.join(', ');
   }
   return null;
+}
+
+function spanTokens(ctx: LayoutContext, maxSpans = 3): string | null {
+  return spanTokensForModel(ctx.model, maxSpans);
+}
+
+/** Track metrics the quality page draws — the three check counts, resolved
+ * from the same id space the deck uses (`metricById`). Exported so the
+ * in-app preview renders the identical trio. */
+export function qualityTrackMetrics(metricById: ReadonlyMap<string, Metric>): Metric[] {
+  return (['quality-duplicate', 'quality-category', 'quality-missing'] as const)
+    .map((id) => metricById.get(id))
+    .filter((m): m is Metric => m !== undefined);
 }
 
 function coverageLine(ctx: LayoutContext): string | null {
@@ -733,9 +749,7 @@ function layoutScenario(ctx: LayoutContext): void {
 
 function layoutQuality(ctx: LayoutContext): void {
   const { model, locale, slide } = ctx;
-  const trio = (['quality-duplicate', 'quality-category', 'quality-missing'] as const)
-    .map((id) => ctx.metricById.get(id))
-    .filter((m) => m !== undefined) as Metric[];
+  const trio = qualityTrackMetrics(ctx.metricById);
   const counts = trio.map((m) => Number(m.value ?? '0'));
   const peak = Math.max(1, ...counts);
   trio.forEach((metric, i) => {
@@ -747,7 +761,8 @@ function layoutQuality(ctx: LayoutContext): void {
     ], { x: LEFT_X, y, w: LEFT_W, h: 0.5, fontSize: 16, color: INK });
     // Track bar shows the shared scale; the filled bar reads against it.
     bar(ctx, `q-track-${i}`, LEFT_X, y + 0.52, LEFT_W, 0.26, RULE);
-    bar(ctx, `q-bar-${i}`, LEFT_X, y + 0.52, (LEFT_W * count) / peak, 0.26, i === 0 ? COBALT : i === 1 ? SLATE : AMBER);
+    // All three counts are data problems — the negative role marks them.
+    bar(ctx, `q-bar-${i}`, LEFT_X, y + 0.52, (LEFT_W * count) / peak, 0.26, RED);
   });
   const { issueCount, resolved, unresolved } = model.qualitySummary;
   ctx.deck.addShape('roundRect', {

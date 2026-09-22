@@ -61,7 +61,9 @@ export const buildPresentation: BuildPresentation = async (
   const pptx = new PptxGenJS();
   pptx.defineLayout({ name: 'WIDE', width: 13.333, height: 7.5 });
   pptx.layout = 'WIDE';
-  pptx.author = 'Rowfolio';
+  // Document properties carry the factual author credit — no employer claim.
+  pptx.author = 'Zubair Jashim';
+  pptx.subject = 'Computer Science graduate, Qatar University';
   pptx.title = model.slides[0]?.title ?? 'Rowfolio briefing';
 
   const rtl = model.locale === 'ar';

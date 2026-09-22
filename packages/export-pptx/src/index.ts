@@ -18,3 +18,6 @@ export {
   formatPercent,
   formatPp,
 } from './format.ts';
+// Shared slide-composition helpers: the in-app preview mirrors the deck
+// layout-for-layout, so both resolve the same track metrics and row spans.
+export { qualityTrackMetrics, spanTokensForModel } from './layouts.ts';
