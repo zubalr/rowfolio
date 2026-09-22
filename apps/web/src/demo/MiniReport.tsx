@@ -107,11 +107,22 @@ export function MiniReport({ model, slide }: MiniReportProps): ReactElement {
                       const h = raw == null ? 0 : Math.max(0, Math.min(100, (Number(raw) / domainMax) * 100));
                       return (
                         <span className="rf-mini__barcell" key={series.id}>
-                          {/* Direct labels: the series name and its value sit
-                              on top of each mark, so every bar says what it
-                              is without decoding a legend. */}
+                          {/* Direct labels: the series name on the left, its
+                              value on the right — every mark reads without
+                              decoding a legend. */}
                           <span className="rf-mini__barname">
                             {hasLabel(series.labelKey) ? label(model.locale, series.labelKey) : label(model.locale, "common.metric")}
+                          </span>
+                          {/* Width encodes the value: the tinted track always
+                              spans the full domain and the fill covers the
+                              value's share of it — the unfilled remainder IS
+                              the distance from the domain max, anchored to a
+                              shared zero baseline (chart region is LTR). */}
+                          <span className="rf-mini__bartrack">
+                            <span
+                              className={`rf-mini__bar rf-mini__bar--${series.semantic}`}
+                              style={{ inlineSize: `${h}%` }}
+                            />
                           </span>
                           <span className="rf-mini__barval">
                             {raw == null
@@ -119,16 +130,6 @@ export function MiniReport({ model, slide }: MiniReportProps): ReactElement {
                               : chart.unit.kind === "currency"
                                 ? `${exportUnitLabel(chart.unit, (k) => label(model.locale, k))} ${localizeDigits(formatInteger(String(raw)), model.numberingSystem)}`.trim()
                                 : formatMetricValue(raw, chart.unit, (k) => label(model.locale, k), model.numberingSystem)}
-                          </span>
-                          {/* The labels live outside the track, so the mark's
-                              percent height resolves against the track alone
-                              anchored to the shared zero baseline — the bar
-                              scales, never its cell. */}
-                          <span className="rf-mini__bartrack">
-                            <span
-                              className={`rf-mini__bar rf-mini__bar--${series.semantic}`}
-                              style={{ height: `${h}%` }}
-                            />
                           </span>
                         </span>
                       );
