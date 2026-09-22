@@ -41,11 +41,13 @@ export function ChartStage({ snapshot }: { snapshot: AnalysisSnapshot }) {
               <h3 className="rf-wstage-title">{findingTitle(i18n, selected)}</h3>
               <p className="rf-wstage-scope">{formatScope(i18n, selected.scope)}</p>
             </div>
-            <EvidenceChip
-              findingId={selected.id}
-              hidden={state.evidenceFindingId === selected.id}
-              onOpen={() => controller.openEvidence(selected.id)}
-            />
+            {selected.provenanceIds.length > 0 && (
+              <EvidenceChip
+                findingId={selected.id}
+                hidden={state.evidenceFindingId === selected.id}
+                onOpen={() => controller.openEvidence(selected.id)}
+              />
+            )}
           </header>
           <p className="rf-wstage-body">{findingBody(i18n, snapshot, selected)}</p>
         </div>
@@ -65,7 +67,7 @@ export function ChartStage({ snapshot }: { snapshot: AnalysisSnapshot }) {
               </h3>
               <p className="rf-wstage-scope">{formatScope(i18n, hero.scope)}</p>
             </div>
-            {heroFinding === null ? null : (
+            {heroFinding === null || heroFinding.provenanceIds.length === 0 ? null : (
               <EvidenceChip
                 findingId={heroFinding.id}
                 hidden={state.evidenceFindingId === heroFinding.id}
