@@ -18,7 +18,7 @@ import {
   significantDigits,
 } from '@rowfolio/contracts';
 import type { ExportArtifact, ExportModel } from '@rowfolio/contracts';
-import { exportUnitLabel, localizeDigits } from '@rowfolio/export-model';
+import { exportFileName, exportUnitLabel, localizeDigits } from '@rowfolio/export-model';
 import { hasSheetLabel, sheetLabel } from './labels.ts';
 
 /**
@@ -120,8 +120,9 @@ function metricNoteText(value: string): string {
 
 const GROUP_COUNT = new Intl.NumberFormat('en-US', { useGrouping: true });
 
-function formatCount(value: number): string {
-  return GROUP_COUNT.format(Math.trunc(value));
+function formatCount(value: number, numbering?: 'latn' | 'arab'): string {
+  const text = GROUP_COUNT.format(Math.trunc(value));
+  return numbering === undefined ? text : localizeDigits(text, numbering);
 }
 
 /** Cost-change fraction to whole percent: `0.08` → `8%`. */
@@ -468,7 +469,7 @@ export const buildWorkbook = async (
         valueCell.note = metricNoteText(metric.value);
       }
     }
-    row.getCell(3).value = exportUnitLabel(metric.unit);
+    row.getCell(3).value = exportUnitLabel(metric.unit, (key) => sheetLabel(locale, key));
     const coverageKey = metric.scope.coverageNoteKey;
     const coverageText = localizeDigits(
       `${sheetLabel(locale, 'coverage.eligible')
@@ -524,49 +525,55 @@ export const buildWorkbook = async (
 
   // ---- Data Quality ----------------------------------------------------------
   const quality = get('quality');
+  const issueHeaders = [
+    'table.issue', 'table.kind', 'table.row', 'table.field', 'table.original',
+    'table.normalized', 'table.status', 'table.action', 'table.approval',
+  ].map((key) => sheetLabel(locale, key));
+  const enumLabel = (prefix: string, id: string): string => {
+    const key = `${prefix}.${id}`;
+    return hasSheetLabel(key) ? sheetLabel(locale, key) : id;
+  };
   quality.columns = [
-    { header: 'Issue', key: 'issue', width: 24 },
-    { header: 'Kind', key: 'kind', width: 14 },
-    { header: 'Row', key: 'row', width: 10 },
-    { header: 'Field', key: 'field', width: 18 },
-    { header: 'Original', key: 'original', width: 20 },
-    { header: 'Normalized', key: 'normalized', width: 20 },
-    { header: 'Status', key: 'status', width: 12 },
-    { header: 'Action', key: 'action', width: 14 },
-    { header: 'Approval', key: 'approval', width: 16 },
+    { header: issueHeaders[0]!, key: 'issue', width: 24 },
+    { header: issueHeaders[1]!, key: 'kind', width: 14 },
+    { header: issueHeaders[2]!, key: 'row', width: 10 },
+    { header: issueHeaders[3]!, key: 'field', width: 18 },
+    { header: issueHeaders[4]!, key: 'original', width: 20 },
+    { header: issueHeaders[5]!, key: 'normalized', width: 20 },
+    { header: issueHeaders[6]!, key: 'status', width: 12 },
+    { header: issueHeaders[7]!, key: 'action', width: 14 },
+    { header: issueHeaders[8]!, key: 'approval', width: 16 },
   ];
-  for (const issue of model.table.qualityIssues) {
+  model.table.qualityIssues.forEach((issue, index) => {
     quality.addRow({
-      issue: issue.id,
-      kind: issue.kind,
+      issue: formatCount(index + 1, model.numberingSystem),
+      kind: enumLabel('quality.kind', issue.kind),
       row: issue.sourceRow,
       field: issue.fieldId ?? '',
       original: issue.original ?? '',
       normalized: issue.normalized ?? '',
-      status: issue.status,
-      action: issue.action,
-      approval: issue.approval,
+      status: enumLabel('quality.status', issue.status),
+      action: enumLabel('quality.action', issue.action),
+      approval: enumLabel('quality.approval', issue.approval),
     });
-  }
+  });
   quality.addTable({
     name: TABLE_NAMES['quality'] as string,
     ref: `A1:I${model.table.qualityIssues.length + 1}`,
     headerRow: true,
     totalsRow: false,
     style: { theme: 'TableStyleMedium2', showRowStripes: true },
-    columns: ['Issue', 'Kind', 'Row', 'Field', 'Original', 'Normalized', 'Status', 'Action', 'Approval'].map(
-      (name) => ({ name, filterButton: true }),
-    ),
+    columns: issueHeaders.map((name) => ({ name, filterButton: true })),
     rows: [],
   });
   styleHeaderRow(quality.getRow(1), 9);
   quality.autoFilter = { from: 'A1', to: `I${model.table.qualityIssues.length + 1}` };
   quality.pageSetup.printArea = `A1:I${model.table.qualityIssues.length + 1}`;
   // Restrained emphasis: unresolved rows read red, nothing else shouts.
-  quality.eachRow((row, n) => {
-    if (n === 1) return;
-    if (row.getCell(7).value === 'unresolved') {
-      row.getCell(7).font = { color: { argb: ADVERSE_ARGB }, bold: true };
+  model.table.qualityIssues.forEach((issue, index) => {
+    if (issue.status === 'unresolved') {
+      const cell = quality.getRow(index + 2).getCell(7);
+      cell.font = { color: { argb: ADVERSE_ARGB }, bold: true };
     }
   });
 
@@ -577,24 +584,27 @@ export const buildWorkbook = async (
   // The pair must stay within ~74 units of portrait width or the detail
   // column spills onto its own page.
   method.columns = [{ width: 36 }, { width: 38 }];
+  // Human-readable rows first; identifiers and engine internals sit under
+  // a clearly marked diagnostics block below them.
   const methodRows: Array<[string, string]> = [
-    ['Policy', '1.0.0'],
-    ['Analysis', model.analysisId],
-    ['Source hash', model.sourceHash],
-    ['Table revision', model.table.normalizationRevision],
-    ['Template', '1.0.0'],
+    [sheetLabel(locale, 'method.scope'), `${model.scope.periodStart ?? 'all'}..${model.scope.periodEnd ?? 'all'}`],
+    [sheetLabel(locale, 'evidence.hash'), model.sourceHash],
+    [sheetLabel(locale, 'method.limits'), sheetLabel(locale, 'method.noForecast')],
+    [sheetLabel(locale, 'sheet.diagnostics'), ''],
+    [sheetLabel(locale, 'method.policy'), '1.0.0'],
+    [sheetLabel(locale, 'method.analysis'), model.analysisId],
+    [sheetLabel(locale, 'method.revision'), model.table.normalizationRevision],
+    [sheetLabel(locale, 'method.template'), '1.0.0'],
     ['Locale', `${model.locale} / ${model.numberingSystem}`],
-    ['Precision', '40 / ROUND_HALF_UP'],
-    ['Scope', `${model.scope.periodStart ?? 'all'}..${model.scope.periodEnd ?? 'all'}`],
+    [sheetLabel(locale, 'method.precision'), sheetLabel(locale, 'method.precision.halfUp')],
   ];
   for (const proof of model.provenance) {
     const spans = proof.selections.map((s) => s.spans.map((span) => `${span.start}-${span.end}`).join(',')).join(';');
     methodRows.push([
-      `Proof ${proof.id}`,
+      sheetLabel(locale, 'method.proof').replace('{id}', proof.id),
       `${JSON.stringify(proof.expression)} = ${proof.result ?? proof.reasonKey}${spans === '' ? '' : ` [${spans}]`}`,
     ]);
   }
-  methodRows.push(['Limits', 'No forecast or causal claim. Cached results are authoritative; recalculation on open is an aid.']);
   methodRows.forEach(([label, detail], i) => {
     const row = method.getRow(i + 1);
     row.getCell(1).value = label;
@@ -638,7 +648,7 @@ export const buildWorkbook = async (
       exportId: model.exportId,
       format: 'xlsx',
       mime: MIME,
-      filename: `rowfolio-${model.exportId}.xlsx`,
+      filename: exportFileName(model, 'xlsx'),
       byteLength: bytes.byteLength,
       sha256,
       binarySlot: 'workbook',

@@ -14,7 +14,7 @@ import type {
   NormalizedTable,
   ScenarioResult,
 } from '../../../packages/contracts/src/index.ts';
-import { buildExportModel } from '../../../packages/export-model/src/index.ts';
+import { buildExportModel, exportFileName } from '../../../packages/export-model/src/index.ts';
 import {
   assertSafeSheetName,
   buildWorkbook,
@@ -123,7 +123,7 @@ async function buildEn(): Promise<{ bytes: Uint8Array; model: ExportModel }> {
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   );
   expect(artifact.metadata.byteLength).toBe(artifact.bytes.byteLength);
-  expect(artifact.metadata.filename).toBe(`rowfolio-${model.exportId}.xlsx`);
+  expect(artifact.metadata.filename).toBe(exportFileName(model, 'xlsx'));
   const { createHash } = await import('node:crypto');
   expect(artifact.metadata.sha256).toBe(createHash('sha256').update(Buffer.from(artifact.bytes)).digest('hex'));
   return { bytes: new Uint8Array(artifact.bytes), model };

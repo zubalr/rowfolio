@@ -2,13 +2,25 @@
  * Display formatting for exact model decimals.
  *
  * Formatting is presentation only: every string derives from the model's
- * canonical decimal without rounding beyond the stated display scale, and
- * numerals stay Latin in both locales (matching the established deck
- * composition). Charts and notes always carry the exact values.
+ * canonical decimal without rounding beyond the stated display scale.
+ * Digits honor the model's numbering system (Latin or Eastern Arabic);
+ * compact `k`/`m`/`pp` shorthand is Latin-only — Arabic numbering keeps
+ * full grouped digits and cataloged unit words. Charts and notes always
+ * carry the exact values.
  */
 import { isDecimal } from '@rowfolio/contracts';
-import { exportUnitLabel } from '@rowfolio/export-model';
+import { exportUnitLabel, localizeDigits } from '@rowfolio/export-model';
 import type { Unit } from '@rowfolio/contracts';
+
+/** Numbering system for artifact digits; 'latn' default keeps Latin numerals. */
+export type Numbering = 'latn' | 'arab';
+
+/** Resolves a catalog unit label (e.g. unit.records) for the artifact locale. */
+export type UnitLabeler = (key: string) => string;
+
+function dig(text: string, numbering?: Numbering): string {
+  return numbering === undefined || numbering === 'latn' ? text : localizeDigits(text, numbering);
+}
 
 const GROUP = new Intl.NumberFormat('en-US', { useGrouping: true });
 
@@ -30,8 +42,9 @@ export function formatFull(value: string): string {
 }
 
 /** Compact millions/thousands: `6000000.00` → `6.00m`. Scale is display only. */
-export function formatCompact(value: string): string {
+export function formatCompact(value: string, numbering?: Numbering): string {
   if (!isDecimal(value)) return value;
+  if (numbering === 'arab') return dig(formatFull(value), numbering);
   const sign = signOf(value);
   const [int] = digitsOf(value).split('.');
   const magnitude = (int as string).replace(/^0+/, '').length;
@@ -92,27 +105,28 @@ export function formatPercent(value: string): string {
  * Percentage-point values are stored pre-multiplied (`-6` means −6pp),
  * so display groups the value and appends the unit without scaling.
  */
-export function formatPp(value: string): string {
+export function formatPp(value: string, labeler?: UnitLabeler, numbering?: Numbering): string {
   if (!isDecimal(value)) return value;
-  return `${formatFull(value)}pp`;
+  if (labeler === undefined) return `${formatFull(value)}pp`;
+  return `${dig(formatFull(value), numbering)} ${labeler('unit.pp')}`;
 }
 
 /** Unit-aware display for a metric value. Null stays explicitly unavailable. */
-export function formatMetricValue(value: string | null, unit: Unit): string {
+export function formatMetricValue(value: string | null, unit: Unit, labeler?: UnitLabeler, numbering?: Numbering): string {
   if (value === null) return '—';
-  const unitLabel = exportUnitLabel(unit);
+  const unitLabel = exportUnitLabel(unit, labeler);
   switch (unit.kind) {
     case 'currency':
-      return `${unitLabel} ${formatFull(value)}`.trim();
+      return `${unitLabel} ${dig(formatFull(value), numbering)}`.trim();
     case 'ratio':
-      return formatPercent(value);
+      return dig(formatPercent(value), numbering);
     case 'percentage-point':
-      return formatPp(value);
+      return formatPp(value, labeler, numbering);
     case 'count':
     case 'minutes':
     case 'score':
-      return `${formatInteger(value)} ${unitLabel}`.trim();
+      return `${dig(formatInteger(value), numbering)} ${unitLabel}`.trim();
     default:
-      return formatFull(value);
+      return dig(formatFull(value), numbering);
   }
 }

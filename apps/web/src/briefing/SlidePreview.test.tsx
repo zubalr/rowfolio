@@ -8,6 +8,7 @@ import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createElement } from 'react';
 import type { ExportModel } from '@rowfolio/contracts';
+import { exportFileName } from '@rowfolio/export-model';
 import { label, scopeText } from '@rowfolio/export-pptx';
 import { SlidePreview, WorkbookPreview } from './SlidePreview.tsx';
 import enFixture from '../../../../tests/contract/fixtures/export-model.en.example.json';
@@ -97,8 +98,7 @@ describe('SlidePreview parity with ExportModel', () => {
     for (const sheet of EN.sheets) {
       expect(html).toContain(`>${sheet.name}<`);
     }
-    expect(html).toContain(`rowfolio-${EN.exportId.slice(0, 20)}`);
-    expect(html).toContain('….xlsx');
+    expect(html).toContain(exportFileName(EN, 'xlsx'));
   });
 
   it('renders an Arabic workbook list with Arabic sheet names', () => {

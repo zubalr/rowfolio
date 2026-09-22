@@ -12,6 +12,13 @@ function truncateMiddle(value: string, head = 30, tail = 14): string {
   return value.length <= head + tail + 1 ? value : `${value.slice(0, head)}…${value.slice(-tail)}`;
 }
 
+/** Human size: `45120` → `44.1 KB`, `1200000` → `1.1 MB`. */
+function formatBytes(i18n: ReturnType<typeof useI18n>, bytes: number): string {
+  if (bytes >= 1_000_000) return `${i18n.formatNumber(bytes / 1_000_000, { maxFractionDigits: 1 })} MB`;
+  if (bytes >= 1_000) return `${i18n.formatNumber(bytes / 1_000, { maxFractionDigits: 1 })} KB`;
+  return `${i18n.formatInteger(bytes)} B`;
+}
+
 const FORMAT_LABEL: Record<ExportFormat, MessageKey> = {
   xlsx: 'action.saveWorkbook' as MessageKey,
   pptx: 'action.saveDeck' as MessageKey,
@@ -75,8 +82,14 @@ export function ExportDialog() {
                   {i18n.tSafe(FORMAT_LABEL[format])}
                 </a>
                 <span className="rf-export-link__meta" dir="ltr" title={entry.artifact.filename}>
-                  {truncateMiddle(entry.artifact.filename)} · {formatInteger(i18n, entry.artifact.byteLength)} B · sha256 {entry.artifact.sha256.slice(0, 12)}…
+                  {truncateMiddle(entry.artifact.filename)} · {formatBytes(i18n, entry.artifact.byteLength)}
                 </span>
+                <details className="rf-export-link__tech">
+                  <summary>{i18n.tSafe('common.technicalDetails' as MessageKey)}</summary>
+                  <span dir="ltr">
+                    {entry.artifact.filename} · {formatInteger(i18n, entry.artifact.byteLength)} B · sha256 {entry.artifact.sha256.slice(0, 12)}…
+                  </span>
+                </details>
               </div>
             );
           })}

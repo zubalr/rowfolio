@@ -82,7 +82,7 @@ export function periodLabel(start: string | null, end: string | null, locale: Lo
  * Mirrors the workspace badge rule (`metricUnitLabel`) with a populated
  * unit column: suppression returns `''` where the app hides the badge.
  */
-export function exportUnitLabel(unit: Unit): string {
+export function exportUnitLabel(unit: Unit, labeler?: (key: string) => string): string {
   switch (unit.kind) {
     case 'currency':
       return unit.label === 'unit' || unit.label === '' ? (unit.currency ?? '') : unit.label;
@@ -90,9 +90,57 @@ export function exportUnitLabel(unit: Unit): string {
       return '%';
     default: {
       const label = unit.label.trim();
-      return label === 'unit' || label === 'fraction' ? '' : label;
+      if (label === 'unit' || label === 'fraction') return '';
+      const key = UNIT_LABEL_KEYS[label];
+      if (key !== undefined && labeler !== undefined) return labeler(key);
+      return label;
     }
   }
+}
+
+/**
+ * Engine-emitted unit labels that have catalog translations. Everything
+ * else passes through as user data (units come from the workbook itself).
+ */
+const UNIT_LABEL_KEYS: Record<string, string> = {
+  records: 'unit.records',
+};
+
+/**
+ * Catalog key for a placeholder-free unit label, or null when the unit
+ * label is user data / suppressed. Callers with a locale table resolve
+ * the key; those without one get the raw label via exportUnitLabel.
+ */
+export function unitLabelKey(unit: Unit): string | null {
+  const key = UNIT_LABEL_KEYS[unit.label.trim()];
+  return key ?? null;
+}
+
+/** Lowercase ASCII slug for user-facing filenames; empty → 'report'. */
+function fileSlug(value: string): string {
+  const slug = value
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/\.(xlsx|xls|csv)$/i, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40);
+  return slug === '' ? 'report' : slug;
+}
+
+/**
+ * User-facing artifact filename: workbook name + period + locale,
+ * e.g. `rowfolio-sample-operations-june-2026-en.xlsx`. The internal
+ * exportId stays out of filenames — it belongs to diagnostics, not to
+ * something a reader keeps.
+ */
+export function exportFileName(model: ExportModel, ext: 'xlsx' | 'pptx'): string {
+  const name = fileSlug(model.table.sourceRef.workbookName);
+  const start = model.scope.periodStart;
+  const period = start === null ? 'all-periods' : start.slice(0, 7);
+  const scenario = model.scenario !== null && model.scenario.status === 'defined' ? '-scenario' : '';
+  return `rowfolio-${name}-${period}${scenario}-${model.locale}.${ext}`;
 }
 
 /**

@@ -1,4 +1,4 @@
-import { useRef, type ChangeEvent } from 'react';
+import { useRef, useState, type ChangeEvent } from 'react';
 import { Button } from '@rowfolio/ui';
 import { useI18n, useServices } from './context.tsx';
 import type { MessageKey } from '@rowfolio/i18n';
@@ -76,20 +76,27 @@ export function Landing({ onNavigateWorkspace }: LandingProps) {
 export function LanguageToggle() {
   const i18n = useI18n();
   const other = i18n.getState().locale === 'ar' ? 'en' : 'ar';
+  const [announcement, setAnnouncement] = useState('');
   return (
-    <Button
-      variant="secondary"
-      onClick={() => {
-        i18n.setLocale(other);
-        if (typeof history !== 'undefined') {
-          // Keep the hash route: rewriting to a bare path would drop
-          // `#/workspace` and bounce a reload back to the landing.
-          history.replaceState(null, '', (other === 'ar' ? '/ar/' : '/') + window.location.hash);
-        }
-      }}
-    >
-      {i18n.localeName(other)}
-    </Button>
+    <>
+      <Button
+        variant="secondary"
+        lang={other}
+        aria-label={i18n.localeName(other)}
+        onClick={() => {
+          i18n.setLocale(other);
+          setAnnouncement(i18n.t('language.changed'));
+          if (typeof history !== 'undefined') {
+            // Keep the hash route: rewriting to a bare path would drop
+            // `#/workspace` and bounce a reload back to the landing.
+            history.replaceState(null, '', (other === 'ar' ? '/ar/' : '/') + window.location.hash);
+          }
+        }}
+      >
+        {i18n.localeName(other)}
+      </Button>
+      <span role="status" className="rf-visually-hidden">{announcement}</span>
+    </>
   );
 }
 

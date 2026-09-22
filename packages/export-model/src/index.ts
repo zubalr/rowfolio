@@ -8,7 +8,9 @@
 export {
   baselineMarginOf,
   buildExportModel,
+  exportFileName,
   exportUnitLabel,
+  unitLabelKey,
   isSampleModel,
   localizeDigits,
   numericParity,

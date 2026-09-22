@@ -132,7 +132,7 @@ export function SourceRowsTable({
       <div
         className="rf-evidence__rows-scroll"
         role="group"
-        aria-label={`${i18n.t("evidence.sourceRows")} · ${selection.id}`}
+        aria-label={i18n.t("evidence.sourceRows")}
         tabIndex={0}
       >
         <table className="rf-table rf-evidence__table">
@@ -173,6 +173,7 @@ export function SourceRowsTable({
                         title={rowIssues.map((q) => i18n.tSafe(q.messageKey as MessageKey)).join(" · ")}
                       >
                         ●
+                        <span className="rf-visually-hidden">{i18n.t("evidence.flagged")}</span>
                       </span>
                     ) : null}
                   </th>
@@ -207,9 +208,9 @@ export function SourceRowsTable({
       <div className="rf-evidence__pager">
         <span className="rf-evidence__pager-status">
           {i18n.t("evidence.more", {
-            start: 1,
-            end: rows.length,
-            total,
+            start: i18n.formatInteger(1),
+            end: i18n.formatInteger(rows.length),
+            total: i18n.formatInteger(total),
           })}
         </span>
         {canLoadMore ? (

@@ -165,9 +165,9 @@ function InputsList({
                   <Bidi dir="ltr" className="rf-evidence__num">
                     {formatted}
                   </Bidi>
-                  {metricUnitLabel(m.unit) !== null ? (
+                  {metricUnitLabel(m.unit, (k) => i18n.tSafe(k as MessageKey)) !== null ? (
                     <Bidi dir="ltr" className="rf-evidence__unit">
-                      {metricUnitLabel(m.unit)}
+                      {metricUnitLabel(m.unit, (k) => i18n.tSafe(k as MessageKey))}
                     </Bidi>
                   ) : null}
                 </>
@@ -198,7 +198,6 @@ function TransformList({ issues, i18n }: { issues: readonly QualityIssue[]; i18n
         <li key={q.id} className="rf-evidence__transform">
           <Bidi dir="ltr" className="rf-evidence__id">
             R{q.sourceRow}
-            {q.fieldId !== null ? `:${q.fieldId}` : ""}
           </Bidi>
           <span className="rf-evidence__change">
             {q.original !== null ? (
@@ -331,14 +330,11 @@ export function EvidencePanel({
         <Section
           key={selection.id}
           title={i18n.t("evidence.sourceRows")}
-          ariaLabel={`${i18n.t("evidence.sourceRows")} · ${selection.id}`}
+          ariaLabel={i18n.t("evidence.sourceRows")}
           headingLevel={3}
           className="rf-evidence__section"
         >
           <div className="rf-evidence__selection-head">
-            <Bidi dir="ltr" className="rf-evidence__id">
-              {selection.id}
-            </Bidi>
             <span className="rf-evidence__spans">
               {selection.spans.map((span) => (
                 <Bidi dir="ltr" className="rf-evidence__num" key={`${span.start}-${span.end}`}>
@@ -395,16 +391,21 @@ export function EvidencePanel({
               </Bidi>
             </dd>
           </div>
-          <div>
-            <dt>SHA-256</dt>
-            <dd>
-              <Bidi dir="ltr" className="rf-evidence__hash">
-                {sourceRef.sourceHash}
-              </Bidi>
-            </dd>
-          </div>
         </dl>
-        <p className="rf-evidence__hash-note">{i18n.t("evidence.hashNote")}</p>
+        <details className="rf-evidence__tech">
+          <summary>{i18n.t("common.technicalDetails")}</summary>
+          <dl className="rf-evidence__fingerprint-grid">
+            <div>
+              <dt>SHA-256</dt>
+              <dd>
+                <Bidi dir="ltr" className="rf-evidence__hash">
+                  {sourceRef.sourceHash}
+                </Bidi>
+              </dd>
+            </div>
+          </dl>
+          <p className="rf-evidence__hash-note">{i18n.t("evidence.hashNote")}</p>
+        </details>
       </footer>
     </div>
   );

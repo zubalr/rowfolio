@@ -71,9 +71,9 @@ function MetricOperand({ metricId, ctx }: { metricId: string; ctx: TraceContext 
           ·
         </span>
       )}
-      {metricUnitLabel(metric.unit) !== null ? (
+      {metricUnitLabel(metric.unit, (k) => i18n.tSafe(k as MessageKey)) !== null ? (
         <Bidi dir="ltr" className="rf-evidence__unit">
-          {metricUnitLabel(metric.unit)}
+          {metricUnitLabel(metric.unit, (k) => i18n.tSafe(k as MessageKey))}
         </Bidi>
       ) : null}
     </span>
