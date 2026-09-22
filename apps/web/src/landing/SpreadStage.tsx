@@ -1,8 +1,9 @@
 /**
  * SpreadStage — the broadsheet spread: one demonstration in the first
- * viewport. A fixed frame runs WORKBOOK → CHECKS → CHART → REPORT as a
- * ~14.4s annotator loop, settles on the finished report for a ≥2.5s hold,
- * then crossfades inside the frame back to a clean workbook restart.
+ * viewport, watch-first. A fixed frame runs RESULT → WORKBOOK → CHECKS →
+ * COMPARE → REPORT as a ~30.5s annotator loop: the finished report opens
+ * and closes the loop, so the wrap seam lands inside one continuous hold
+ * and never blinks. The mechanism is explained after the result is seen.
  *
  * Real content only: the table rows are verbatim `sample_operations.csv`
  * physical rows (`LANDING_TRUTH.excerpt` plus the fixture's real duplicate
@@ -21,24 +22,37 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import type { I18n } from "@rowfolio/i18n";
 import { LoopClock, type LoopClockState } from "../demo/loopClock.ts";
 import { MiniReport } from "../demo/MiniReport.tsx";
+import { exportFileName } from "@rowfolio/export-model";
 import { landingCopy, type CopyKey } from "./copy.ts";
+import type { IntentDownload } from "./pendingUpload.ts";
 import { LANDING_TRUTH } from "./previewTruth.ts";
 import { SAMPLE_EXPORT_MODEL, findingSlide } from "./sampleExportModel.ts";
 import { useReducedMotion } from "./useReducedMotion.ts";
 import "./spread.css";
 
-/** One loop: workbook 0→3.4s, checks →6.7s, chart →10s, report → restart. */
-export const LOOP_MS = 14400;
-/** Chapter boundaries within the loop (workbook, checks, chart, report). */
-export const CHAPTER_T = [0, 3400, 6700, 10000] as const;
+/** One loop = 27s: result 0→2s, workbook →5s, checks →9s, chart →13.5s,
+ *  finding →17s, report + settled hold → restart (contract v3 §5). */
+export const LOOP_MS = 27000;
+/** Chapter boundaries: result, workbook, checks, chart, finding, report. */
+export const CHAPTER_T = [0, 2000, 5000, 9000, 13500, 17000] as const;
 /** Seek targets — each lands inside its chapter's settled window. */
-export const CHAPTER_SEEK = [900, 4300, 7700, 11000] as const;
-/** The report scene is fully in at REPORT_IN_T; the settled hold runs to
- *  RESTART_T — 3.0s, above the contract's 2.5s minimum. */
-export const REPORT_IN_T = 10500;
-export const RESTART_T = 13600;
+export const CHAPTER_SEEK = [1000, 3200, 6600, 11000, 14800, 20000] as const;
+/** The report scene is fully landed at REPORT_IN_T; the hold then runs to
+ *  the loop wrap — ~8.9s, well above the 3.5s contract minimum. */
+export const REPORT_IN_T = 18100;
 /** Frozen t under prefers-reduced-motion — inside the settled report hold. */
-export const HOLD_T = 11000;
+export const HOLD_T = 21000;
+
+/**
+ * Whether an explicit reveal action must scroll. Only the scene's
+ * beginning matters: a clipped or fully off-screen frame top means the
+ * beat's start is invisible and must be brought back. Anything already
+ * revealing its beginning is left alone — autoplay never scrolls, and
+ * user chrome never hijacks a position the reader chose.
+ */
+export function stageNeedsReveal(frameTop: number, viewportHeight: number): boolean {
+  return frameTop < 0 || frameTop >= viewportHeight;
+}
 
 const clamp01 = (v: number): number => (v < 0 ? 0 : v > 1 ? 1 : v);
 const eo = (p: number): number => 1 - Math.pow(1 - p, 3);
@@ -125,23 +139,36 @@ const REGION_SHARES: readonly { region: string; share: number }[] = LANDING_TRUT
   .filter((r) => r.region !== "North")
   .map((r) => ({ region: r.region, share: Number(r.revenue) / Number(r.targetRevenue) }));
 
-/** Visible one-sentence caption per chapter (also the live region). */
+/** Visible one-sentence caption per beat (also the live region). */
 const CAPTION_KEYS: readonly CopyKey[] = [
+  "beat.result",
   "guide.context.intro",
   "beat.checks",
+  "beat.chart",
   "beat.findings",
-  "beat.report",
+  "beat.final",
 ];
-/** Named chapter buttons — the transport's seek targets. */
+/* The transport names four chapters (director specimen): WORKBOOK, CHECKS,
+ * CHART, REPORT. The opening RESULT glimpse replays via the Replay button;
+ * the FINDING beat shares the CHART tab — it is the chart's own continuation.
+ */
 const CHAPTER_KEYS: readonly CopyKey[] = ["ch.workbook", "ch.checks", "ch.chart", "ch.report"];
+/** Seek target per tab — into each chapter's settled window. */
+const CHAPTER_TAB_SEEK: readonly number[] = [CHAPTER_SEEK[1], CHAPTER_SEEK[2], CHAPTER_SEEK[3], CHAPTER_SEEK[5]];
+/** beatIndex → active tab: the result glimpse and the finding beat both
+ *  mark the tab that owns their content (REPORT and CHART). */
+const BEAT_TO_TAB = [3, 0, 1, 2, 2, 3] as const;
 
 export interface SpreadStageProps {
   readonly i18n: I18n;
-  /** Single primary action — opens the product on the prepared example. */
+  /** Opens the product on the prepared example (the quiet secondary CTA
+   *  and the report scene's own action). */
   readonly onOpen: () => void;
+  /** The report scene's download action — fires the real export intent. */
+  readonly onDownload: (format: IntentDownload) => void;
 }
 
-export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
+export function SpreadStage({ i18n, onOpen, onDownload }: SpreadStageProps) {
   const reduced = useReducedMotion();
   const clock = useMemo(
     () => new LoopClock({ loopMs: LOOP_MS, prefersReducedMotion: () => reduced }),
@@ -201,7 +228,13 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
   useEffect(() => {
     const onVis = () => clock.notifyVisibility(!document.hidden);
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") clock.pause();
+      if (event.key !== "Escape") return;
+      clock.pause();
+      // same no-truncation rule as the pause path — see snapReveal.
+      const el = frameRef.current;
+      if (el !== null && stageNeedsReveal(el.getBoundingClientRect().top, window.innerHeight)) {
+        el.scrollIntoView({ block: "start", behavior: "auto" });
+      }
     };
     document.addEventListener("visibilitychange", onVis);
     document.addEventListener("keydown", onKey);
@@ -237,43 +270,49 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
     });
 
   // ---- timeline ----------------------------------------------------
-  const sheetIn = seg(t, 100, 800);
-  const sweep = lin(t, 1100, 2400);
-  const vrOn = t >= 1100 && t <= 2800;
+  // The report is opaque at t=0 (the loop opens on the result) and opaque
+  // again through the wrap — the seam hides inside one continuous hold.
+  const reportOp = clamp01(1 - lin(t, 1700, 2400) + lin(t, 16400, 17100));
+  const sheetIn = seg(t, 1700, 2400);
+  const sweep = lin(t, 2700, 4000);
+  const vrOn = t >= 2700 && t <= 4400;
 
-  // CHECKS marks dissolve while covered, so the in-frame restart reveals a
-  // clean workbook instead of stale strikes.
-  const markOut = 1 - lin(t, 12000, 12800);
-  const sp = seg(t, 3500, 3900) * markOut;
-  const rp = seg(t, 3700, 4100) * markOut;
-  const f1 = seg(t, 3900, 4200) * markOut;
-  const f2 = seg(t, 4050, 4350) * markOut;
-  const checksDone = t >= 4300 && t < 12000;
+  // CHECKS marks dissolve under the incoming chart cover so nothing stale
+  // remains when the loop comes back around.
+  const markOut = 1 - lin(t, 9000, 9700);
+  const sp = seg(t, 5300, 5700) * markOut;
+  const rp = seg(t, 5500, 5900) * markOut;
+  const f1 = seg(t, 5700, 6000) * markOut;
+  const f2 = seg(t, 5900, 6200) * markOut;
+  const checksDone = t >= 6300 && t < 9000;
 
-  // CHART — the observed bar grows to its true share of the target on a
-  // shared baseline; the scene crossfades out only as the report lands.
-  const chartOp = Math.max(0, lin(t, 6700, 7400) - lin(t, 9900, 10600));
+  // CHART (bars draw) then FINDING (sentence + stat assemble) share one
+  // scene: the observed bar grows to its true share of the target on a
+  // shared baseline, then the deltas and the share scale land on top.
+  const chartOp = Math.max(0, lin(t, 8600, 9300) - lin(t, 16400, 17100));
   const shareNorth = Number(truth.northJune.revenue) / Number(truth.northJune.targetRevenue);
-  const tgtP = seg(t, 7200, 7700);
-  const barP = seg(t, 7700, 8400);
-  const tgtValIn = seg(t, 7600, 7900);
-  const obsValIn = seg(t, 8300, 8600);
-  const deltaShown = -Number(truth.northJune.targetGapRatio) * seg(t, 8500, 9000);
-  const deltaP = seg(t, 8700, 8900);
-  const ordersShown = Number(truth.northJune.ordersChangeRatio) * seg(t, 9000, 9400);
+  const tgtP = seg(t, 9400, 9900);
+  const barP = seg(t, 10000, 10800);
+  const tgtValIn = seg(t, 9800, 10200);
+  const obsValIn = seg(t, 10600, 11000);
+  const deltaShown = -Number(truth.northJune.targetGapRatio) * seg(t, 13700, 14400);
+  const deltaP = seg(t, 13800, 14000);
+  const ordersShown = Number(truth.northJune.ordersChangeRatio) * seg(t, 14300, 15000);
   // The chip stays invisible until the count has resolved — an early
   // "+0.0%" reads as the wrong sign before the count-up lands.
-  const ordersP = seg(t, 9350, 9500);
-  const arrowIn = lin(t, 9000, 9450);
+  const ordersP = seg(t, 15100, 15300);
+  const arrowIn = lin(t, 14300, 14900);
 
-  // REPORT — real MiniReport content is mounted from t=0 (never a blank
-  // scene); the opaque hold runs REPORT_IN_T → RESTART_T.
-  const reportOp = Math.max(0, lin(t, 9900, 10600) - lin(t, 13600, 14400));
-  const stamp = seg(t, 10100, 10350);
-  const chartIn = seg(t, 10200, 10750);
-  const noteIn = seg(t, 10500, 10900);
-  const footIn = seg(t, 10700, 11100);
-  const wbIn = seg(t, 10800, 11400);
+  // REPORT — mounted from t=0 so it is never blank; the opening leg is
+  // already formed while the return leg plays the land animation and then
+  // fades its real actions in for the persistent hold.
+  const firstLeg = t < 2400;
+  const stamp = firstLeg ? 1 : seg(t, 17000, 17400);
+  const chartIn = firstLeg ? 1 : seg(t, 17150, 17700);
+  const noteIn = firstLeg ? 1 : seg(t, 17350, 17800);
+  const footIn = firstLeg ? 1 : seg(t, 17500, 18000);
+  const wbIn = firstLeg ? 1 : seg(t, 17600, 18200);
+  const actIn = seg(t, 18000, 18800);
 
   const rowCountText = checksDone
     ? landingCopy(locale, "data.rows.kept", {
@@ -282,24 +321,56 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
       })
     : landingCopy(locale, "data.rows.read", { n: i18n.formatInteger(truth.dataset.rawRecords) });
 
-  const beatIndex = t < CHAPTER_T[1]! ? 0 : t < CHAPTER_T[2]! ? 1 : t < CHAPTER_T[3]! ? 2 : 3;
-  const railFill = CHAPTER_T.map((start, i) =>
-    lin(t, start, i === CHAPTER_T.length - 1 ? LOOP_MS : CHAPTER_T[i + 1]!),
-  );
+  const beatIndex =
+    t < CHAPTER_T[1]! ? 0
+    : t < CHAPTER_T[2]! ? 1
+    : t < CHAPTER_T[3]! ? 2
+    : t < CHAPTER_T[4]! ? 3
+    : t < CHAPTER_T[5]! ? 4
+    : 5;
+  const tabIndex = BEAT_TO_TAB[beatIndex]!;
+  // One fill per tab across the beats that tab owns: workbook 2-5s, checks
+  // 5-9s, chart+finding 9-17s, report 0-2s then 17s to the wrap.
+  const railFill = [
+    lin(t, 2000, 5000),
+    lin(t, 5000, 9000),
+    lin(t, 9000, 17000),
+    t < 2000 ? lin(t, 0, 2000) : lin(t, 17000, LOOP_MS),
+  ];
 
   const sheetCovered = chartOp > 0.95 || reportOp > 0.95;
   const chartHidden = chartOp <= 0.02 || reportOp > 0.95;
   const reportHidden = reportOp <= 0.02;
 
+  // Every explicit reveal action routes here: chapter tap, Replay, Play
+  // after Pause, and the hero's "Watch the walkthrough". block:"start" —
+  // never "nearest" — so the scene's beginning always lands visible; a
+  // frame already revealing it is left where the reader put it.
+  const revealStage = () => {
+    const el = frameRef.current;
+    if (el === null || !stageNeedsReveal(el.getBoundingClientRect().top, window.innerHeight)) {
+      return;
+    }
+    el.scrollIntoView({ block: "start", behavior: reduced ? "auto" : "smooth" });
+  };
+
+  // A pause (button, frame tap, or Escape) must never truncate a reveal
+  // scroll that is still in flight — if the scene's beginning is clipped,
+  // the paused frame snaps to it instead of stranding mid-scroll.
+  const snapReveal = () => {
+    const el = frameRef.current;
+    if (el !== null && stageNeedsReveal(el.getBoundingClientRect().top, window.innerHeight)) {
+      el.scrollIntoView({ block: "start", behavior: "auto" });
+    }
+  };
+
   const seekChapter = (i: number) => {
     if (reduced) {
-      setManualT(CHAPTER_SEEK[i]!);
+      setManualT(CHAPTER_TAB_SEEK[i]!);
     } else {
-      clock.seek(CHAPTER_SEEK[i]!);
+      clock.seek(CHAPTER_TAB_SEEK[i]!);
     }
-    // A chapter tap must reveal the chapter — on phone the frame may be
-    // scrolled past, so bring it back into view without hijacking position.
-    frameRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    revealStage();
   };
 
   const onReplay = () => {
@@ -308,7 +379,25 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
     } else {
       clock.replay();
     }
-    frameRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    revealStage();
+  };
+
+  const onToggle = () => {
+    const resuming = state.status !== "playing";
+    clock.toggle();
+    if (resuming) {
+      revealStage();
+    } else {
+      snapReveal();
+    }
+  };
+
+  const watchDemo = () => {
+    // Primary CTA: play the loop from the top and reveal the stage. Under
+    // reduced-motion the finished report is already on screen — just
+    // scroll to it; chapter taps stay the manual review path.
+    if (!reduced) clock.replay();
+    revealStage();
   };
 
   const playing = state.status === "playing";
@@ -324,12 +413,14 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
         </h1>
         <p className="rf-lead__stand">{landingCopy(locale, "lead.standfirst")}</p>
         <div className="rf-lead__cta">
-          <button type="button" className="rf-cta" data-testid="cta-explore" onClick={onOpen}>
+          <button type="button" className="rf-cta" data-testid="cta-explore" onClick={watchDemo}>
             {landingCopy(locale, "lead.cta")}
+          </button>
+          <button type="button" className="rf-cta rf-cta--quiet" data-testid="cta-workspace" onClick={onOpen}>
+            {landingCopy(locale, "lead.cta2")}
           </button>
           <span className="rf-lead__ctanote">{landingCopy(locale, "lead.ctaNote")}</span>
         </div>
-        <p className="rf-lead__small">{landingCopy(locale, "lead.context")}</p>
       </div>
 
       <div className="rf-stage" ref={stageRef}>
@@ -341,20 +432,23 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
           tabIndex={0}
           onPointerDown={(event) => {
             if (event.button !== 0) return;
-            clock.toggle();
+            onToggle();
           }}
           onKeyDown={(event) => {
             if (event.key === " " || event.key === "Enter") {
               event.preventDefault();
-              clock.toggle();
+              onToggle();
             }
           }}
         >
-          {/* WORKBOOK + CHECKS — the sheet is the loop's bottom layer, so
-              the restart crossfade lands back on a clean workbook. */}
-          <div
-            ref={bodyRef}
-            className="rf-scene rf-scene--sheet"
+          {/* scenes hold the crossfading beats; the bar below reserves real
+              clearance so the transport never overlays the artifact */}
+          <div className="rf-stage__scenes">
+            {/* WORKBOOK + CHECKS — the sheet is the loop's bottom layer, so
+                the restart crossfade lands back on a clean workbook. */}
+            <div
+              ref={bodyRef}
+              className="rf-scene rf-scene--sheet"
             aria-hidden={sheetCovered}
             style={{ opacity: sheetIn, transform: `translateY(${10 * (1 - sheetIn)}px)` }}
           >
@@ -414,7 +508,7 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
               className="rf-vrule"
               aria-hidden="true"
               style={{
-                opacity: vrOn ? (t < 2400 ? 1 : 1 - lin(t, 2400, 2800)) : 0,
+                opacity: vrOn ? (t < 3900 ? 1 : 1 - lin(t, 3900, 4400)) : 0,
                 top: meas === null ? 40 : meas.gridTop,
                 bottom: "auto",
                 height: meas === null ? 0 : meas.gridH,
@@ -546,65 +640,111 @@ export function SpreadStage({ i18n, onOpen }: SpreadStageProps) {
               })}
             </p>
             <div className="rf-wbstrip">
-              <p className="rf-wbstrip__title">{model.slides[0]!.title}</p>
-              <p className="rf-wbstrip__tabs">{model.sheets.map((s) => s.name).join(" · ")}</p>
-              <p className="rf-wbstrip__dl">{landingCopy(locale, "rep.wbFormats")}</p>
+              <div className="rf-wbstrip__meta">
+                <p className="rf-wbstrip__title">{model.slides[0]!.title}</p>
+                <p className="rf-wbstrip__tabs">{model.sheets.map((s) => s.name).join(" · ")}</p>
+                <p className="rf-wbstrip__dl" dir="ltr">
+                  {exportFileName(model, "pptx")} · {exportFileName(model, "xlsx")}
+                </p>
+              </div>
+              {/* the persistent report carries its own real actions — they
+                  are inert until fully faded in and never steal the frame
+                  toggle (stopPropagation at each gesture layer) */}
+              <div
+                className="rf-rep__actions"
+                style={{ opacity: actIn, pointerEvents: actIn > 0.95 ? "auto" : "none" }}
+              >
+                <button
+                  type="button"
+                  className="rf-act"
+                  tabIndex={actIn > 0.95 ? 0 : -1}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onOpen();
+                  }}
+                >
+                  {landingCopy(locale, "lead.cta2")}
+                </button>
+                <button
+                  type="button"
+                  className="rf-act rf-act--quiet"
+                  tabIndex={actIn > 0.95 ? 0 : -1}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onDownload("pptx");
+                  }}
+                >
+                  {landingCopy(locale, "rep.download")}
+                </button>
+              </div>
+            </div>
+          </div>
+          </div>
+
+          {/* the in-stage bottom bar: the visible per-chapter caption
+              (doubling as the live region) above the ONE transport strip —
+              named chapters, pause/play, replay, ≥44px targets. Bar clicks
+              must not read as a frame tap, so gestures stop here. */}
+          <div
+            className="rf-stage__bar"
+            onPointerDown={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.stopPropagation()}
+          >
+            <p className="rf-stage__cap" role="status" aria-live="polite">
+              {landingCopy(locale, CAPTION_KEYS[beatIndex]!)}
+            </p>
+            <div className="rf-transport" role="group" aria-label={landingCopy(locale, "spread.label")}>
+              {!reduced && (
+                <button
+                  type="button"
+                  className="rf-tplay"
+                  aria-pressed={playing}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onToggle();
+                  }}
+                >
+                  <svg className="rf-tplay__ic" viewBox="0 0 10 10" aria-hidden="true">
+                    {playing ? (
+                      <path d="M2 1h2.2v8H2zM5.8 1H8v8H5.8z" fill="currentColor" />
+                    ) : (
+                      <path d="M2.5 1 8.5 5 2.5 9z" fill="currentColor" />
+                    )}
+                  </svg>
+                  {landingCopy(locale, playing ? "pres.pause" : "pres.play")}
+                </button>
+              )}
+              {CHAPTER_KEYS.map((key, i) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`rf-tch${tabIndex === i ? " rf-tch--on" : ""}`}
+                  aria-current={tabIndex === i ? "true" : undefined}
+                  onClick={() => seekChapter(i)}
+                >
+                  <span className="rf-tch__name">{landingCopy(locale, key)}</span>
+                  <i className="rf-tch__fill" aria-hidden="true">
+                    <i style={{ transform: `scaleX(${railFill[i]!})` }} />
+                  </i>
+                </button>
+              ))}
+              <button type="button" className="rf-treplay" onClick={onReplay}>
+                <svg className="rf-treplay__ic" viewBox="0 0 11 11" aria-hidden="true">
+                  <path d="M5.5 1a4.5 4.5 0 1 1-4.24 3M1.5 1v3h3" fill="none" stroke="currentColor" strokeWidth="1.3" />
+                </svg>
+                {landingCopy(locale, "pres.replay")}
+              </button>
             </div>
           </div>
         </div>
 
-        {/* the visible per-chapter caption doubles as the live region */}
-        <p className="rf-stage__cap" role="status" aria-live="polite">
-          {landingCopy(locale, CAPTION_KEYS[beatIndex]!)}
-        </p>
-
-        {/* transport — named chapters, pause/play, replay; ≥44px targets */}
-        <div className="rf-transport" role="group" aria-label={landingCopy(locale, "spread.label")}>
-          {CHAPTER_KEYS.map((key, i) => (
-            <button
-              key={key}
-              type="button"
-              className={`rf-tch${beatIndex === i ? " rf-tch--on" : ""}`}
-              aria-current={beatIndex === i ? "true" : undefined}
-              onClick={() => seekChapter(i)}
-            >
-              <span className="rf-tch__num" aria-hidden="true">
-                {i18n.formatInteger(0)}
-                {i18n.formatInteger(i + 1)}
-              </span>
-              <span className="rf-tch__name">{landingCopy(locale, key)}</span>
-              <i className="rf-tch__fill" aria-hidden="true">
-                <i style={{ transform: `scaleX(${railFill[i]!})` }} />
-              </i>
-            </button>
-          ))}
-          {!reduced && (
-            <button
-              type="button"
-              className="rf-tplay"
-              aria-pressed={playing}
-              onClick={(event) => {
-                event.stopPropagation();
-                clock.toggle();
-              }}
-            >
-              <svg className="rf-tplay__ic" viewBox="0 0 10 10" aria-hidden="true">
-                {playing ? (
-                  <path d="M2 1h2.2v8H2zM5.8 1H8v8H5.8z" fill="currentColor" />
-                ) : (
-                  <path d="M2.5 1 8.5 5 2.5 9z" fill="currentColor" />
-                )}
-              </svg>
-              {landingCopy(locale, playing ? "pres.pause" : "pres.play")}
-            </button>
-          )}
-          <button type="button" className="rf-treplay" onClick={onReplay}>
-            <svg className="rf-treplay__ic" viewBox="0 0 11 11" aria-hidden="true">
-              <path d="M5.5 1a4.5 4.5 0 1 1-4.24 3M1.5 1v3h3" fill="none" stroke="currentColor" strokeWidth="1.3" />
-            </svg>
-            {landingCopy(locale, "pres.replay")}
-          </button>
-        </div>
+        {/* the honest disclosure stays quiet and sits next to the example
+            it describes — not inside the hero's action row */}
+        <p className="rf-stage__disc">{landingCopy(locale, "lead.context")}</p>
       </div>
     </section>
   );
