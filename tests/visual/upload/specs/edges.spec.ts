@@ -39,7 +39,8 @@ test.describe("edge cases", () => {
     await feed(page, fixturePath("encrypted-entries.xlsx"));
     const error = page.getByTestId("upload-error");
     await expect(error).toBeVisible();
-    await expect(page.getByTestId("upload-error-detail")).toContainText("zip.encrypted-entry");
+    await expect(page.getByTestId("upload-error-detail")).toHaveAttribute("data-error-detail", "zip.encrypted-entry");
+    await expect(error).not.toContainText("zip.encrypted-entry");
     await shot(page, info, "11-error-encrypted");
   });
 

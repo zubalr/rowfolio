@@ -69,11 +69,11 @@ export function topFindings(findings: readonly Finding[], limit = 3): Finding[] 
 }
 
 export function qualitySummaryOf(table: NormalizedTable): AnalysisSnapshot['qualitySummary'] {
-  const { range, headerRow } = table.sourceRef;
-  const span = range.lastRow - range.firstRow + 1;
-  const rawRows = span - (headerRow >= range.firstRow && headerRow <= range.lastRow ? 1 : 0);
+  const excludedRows = table.qualityIssues.filter(
+    (q) => q.action === 'exclude-row' && q.status === 'resolved',
+  ).length;
   return {
-    rawRows,
+    rawRows: table.rows.length + excludedRows,
     retainedRows: table.rows.length,
     issueCount: table.qualityIssues.length,
     resolved: table.qualityIssues.filter((q) => q.status === 'resolved').length,

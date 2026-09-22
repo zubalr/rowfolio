@@ -609,8 +609,10 @@ export function checkAnalysisSnapshot(value: unknown, ctx: SemanticContext = {})
 
 function reconcileQualitySummary(summary: AnalysisSnapshot['qualitySummary'], table: NormalizedTable, issues: ContractIssue[]): void {
   const base = '/qualitySummary';
-  const { range, headerRow } = table.sourceRef;
-  const expectedRaw = range.lastRow - range.firstRow + 1 - (headerRow >= range.firstRow && headerRow <= range.lastRow ? 1 : 0);
+  const excludedRows = table.qualityIssues.filter(
+    (q) => q.action === 'exclude-row' && q.status === 'resolved',
+  ).length;
+  const expectedRaw = table.rows.length + excludedRows;
   if (summary.rawRows !== expectedRaw) {
     issues.push(issue('semantic', 'qualitySummary.rawRows', pointer(base, 'rawRows'), `rawRows ${summary.rawRows} ≠ ${expectedRaw} source data rows in range`));
   }

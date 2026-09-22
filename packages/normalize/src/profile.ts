@@ -89,11 +89,17 @@ export function readHeaders(raw: RawTable, index?: CellIndex): HeaderCell[] {
   return out;
 }
 
+/**
+ * Data rows present below the header: a physical line counts as a record
+ * only when it produced at least one cell, so blank or skipped lines never
+ * materialize a row (or one missing issue per column).
+ */
 export function dataRows(raw: RawTable): number[] {
-  const { firstRow, lastRow } = raw.sourceRef.range;
-  const rows: number[] = [];
-  for (let r = Math.max(firstRow, raw.sourceRef.headerRow + 1); r <= lastRow; r += 1) rows.push(r);
-  return rows;
+  const present = new Set<number>();
+  for (const cell of raw.cells) {
+    if (cell.row > raw.sourceRef.headerRow) present.add(cell.row);
+  }
+  return [...present].sort((a, b) => a - b);
 }
 
 export function cellText(cell: RawCell | undefined): string | null {
