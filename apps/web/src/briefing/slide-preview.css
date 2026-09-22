@@ -497,3 +497,86 @@ html[lang="ar"] .rf-sp__card-line--mono { font-family: var(--rf-font-body); }
 
 .rf-sp__tech { margin-top: 0.4em; font-size: 0.85em; color: var(--rf-text-muted); }
 .rf-sp__tech summary { cursor: pointer; }
+
+/* ------------------------------------------------------------------ */
+/* Reading pane — the export dialog's selected page at real reading     */
+/* size. Content sets the height (no fixed aspect => nothing clips      */
+/* vertically); the type scale is steeper so a ~300px pane still reads  */
+/* at >=10px effective. Thumbnails keep the .rf-sp defaults above.      */
+/* ------------------------------------------------------------------ */
+.rf-sp--pane {
+  aspect-ratio: auto;
+}
+
+.rf-sp--pane > * {
+  font-size: clamp(10px, 5.5cqw, 1rem);
+}
+
+/* Pane-narrow recompose: the split drops to one column so the chart keeps
+   real width and every caption wraps instead of ellipsizing, and the KPI
+   row stacks so no figure truncates. */
+@container (max-width: 430px) {
+  .rf-sp--pane .rf-sp__split {
+    grid-template-columns: 1fr;
+    gap: 0.9em;
+  }
+  .rf-sp--pane .rf-sp__kpi-row {
+    grid-auto-flow: row;
+    gap: 0.5em;
+  }
+  .rf-sp--pane .rf-sp__kpi {
+    border-inline-start: none;
+    padding-inline-start: 0;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.5em;
+  }
+  .rf-sp--pane .rf-sp__cat,
+  .rf-sp--pane .rf-sp__chart-title,
+  .rf-sp--pane .rf-sp__chart-meta,
+  .rf-sp--pane .rf-sp__sheets li,
+  .rf-sp--pane .rf-sp__kpi .rf-sp__metric-value {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: break-word;
+  }
+  .rf-sp--pane .rf-sp__chart {
+    min-height: 4.5em;
+  }
+}
+
+/* Thumbnails stay navigation marks, not squeezed slides: under ~430px of
+   card width the data table and chart caption step out so the masthead +
+   headline figures still compose inside the fixed page aspect instead of
+   clipping past the card edge. */
+@container (max-width: 430px) {
+  .rf-sp:not(.rf-sp--pane) .rf-sp__table,
+  .rf-sp:not(.rf-sp--pane) .rf-sp__chart-caption {
+    display: none;
+  }
+  .rf-sp:not(.rf-sp--pane) .rf-sp__metrics li:nth-child(n + 4) {
+    display: none;
+  }
+}
+
+/* Tiniest marks (~rail cells at 320px): text column only, two metric rows —
+   the point is a recognisable page tab, not a crop that spills its body. */
+@container (max-width: 200px) {
+  .rf-sp:not(.rf-sp--pane) .rf-sp__visual {
+    display: none;
+  }
+  .rf-sp:not(.rf-sp--pane) .rf-sp__split {
+    grid-template-columns: 1fr;
+  }
+  .rf-sp:not(.rf-sp--pane) .rf-sp__metrics li:nth-child(n + 3) {
+    display: none;
+  }
+  .rf-sp:not(.rf-sp--pane) .rf-sp__sheets li:nth-child(n + 4) {
+    display: none;
+  }
+  .rf-sp:not(.rf-sp--pane) .rf-sp__card,
+  .rf-sp:not(.rf-sp--pane) .rf-sp__scope {
+    display: none;
+  }
+}

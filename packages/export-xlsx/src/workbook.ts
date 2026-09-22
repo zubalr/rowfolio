@@ -588,9 +588,9 @@ export const buildWorkbook = async (
   // a clearly marked diagnostics block below them.
   const methodRows: Array<[string, string]> = [
     [sheetLabel(locale, 'method.scope'), `${model.scope.periodStart ?? 'all'}..${model.scope.periodEnd ?? 'all'}`],
-    [sheetLabel(locale, 'evidence.hash'), model.sourceHash],
     [sheetLabel(locale, 'method.limits'), sheetLabel(locale, 'method.noForecast')],
     [sheetLabel(locale, 'sheet.diagnostics'), ''],
+    [sheetLabel(locale, 'evidence.hash'), model.sourceHash],
     [sheetLabel(locale, 'method.policy'), '1.0.0'],
     [sheetLabel(locale, 'method.analysis'), model.analysisId],
     [sheetLabel(locale, 'method.revision'), model.table.normalizationRevision],

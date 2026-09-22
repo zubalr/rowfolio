@@ -29,6 +29,12 @@ export interface SlidePreviewProps {
   model: ExportModel;
   slide: SlideModel;
   className?: string;
+  /**
+   * Renders the figure as inert navigation chrome (a picker thumbnail):
+   * hidden from assistive tech and stripped of interactive elements —
+   * callers wrap it in the button/tab that carries the accessible name.
+   */
+  nav?: boolean;
 }
 
 export interface WorkbookPreviewProps {
@@ -302,7 +308,7 @@ function QualityBody({ model, metrics, chart }: { model: ExportModel; metrics: M
   );
 }
 
-function MethodologyBody({ model }: { model: ExportModel }): ReactElement {
+function MethodologyBody({ model, nav }: { model: ExportModel; nav: boolean }): ReactElement {
   const ref = model.table.sourceRef;
   return (
     <div className="rf-sp__split">
@@ -316,10 +322,14 @@ function MethodologyBody({ model }: { model: ExportModel }): ReactElement {
           {localizeDigits(formatInteger(String(model.qualitySummary.retainedRows)), model.numberingSystem)} / {localizeDigits(formatInteger(String(model.qualitySummary.rawRows)), model.numberingSystem)}{' '}
           {label(model.locale, 'common.rows')}
         </p>
-        <details className="rf-sp__tech">
-          <summary>{label(model.locale, 'common.technicalDetails')}</summary>
-          <p className="rf-sp__card-line rf-sp__card-line--mono">{model.sourceHash.slice(0, 12)}</p>
-        </details>
+        {nav ? (
+          <p className="rf-sp__tech rf-sp__card-line rf-sp__card-line--muted">{label(model.locale, 'common.technicalDetails')}</p>
+        ) : (
+          <details className="rf-sp__tech">
+            <summary>{label(model.locale, 'common.technicalDetails')}</summary>
+            <p className="rf-sp__card-line rf-sp__card-line--mono">{model.sourceHash.slice(0, 12)}</p>
+          </details>
+        )}
       </div>
       <div className="rf-sp__text">
         <p className="rf-sp__kicker rf-sp__kicker--verified">{label(model.locale, 'common.verified')}</p>
@@ -329,7 +339,7 @@ function MethodologyBody({ model }: { model: ExportModel }): ReactElement {
   );
 }
 
-export function SlidePreview({ model, slide, className }: SlidePreviewProps): ReactElement {
+export function SlidePreview({ model, slide, className, nav = false }: SlidePreviewProps): ReactElement {
   const rtl = model.locale === 'ar';
   // Scenario metrics live on the scenario result, not model.metrics — the
   // deck resolves them there too (cost/contribution/margin).
@@ -360,7 +370,7 @@ export function SlidePreview({ model, slide, className }: SlidePreviewProps): Re
       body = <QualityBody model={model} metrics={metrics} chart={chart} />;
       break;
     default:
-      body = <MethodologyBody model={model} />;
+      body = <MethodologyBody model={model} nav={nav} />;
       break;
   }
 
@@ -370,7 +380,8 @@ export function SlidePreview({ model, slide, className }: SlidePreviewProps): Re
       className={`rf-sp${className ? ` ${className}` : ''}`}
       data-kind={slide.kind}
       data-slide={slide.id}
-      aria-label={`${slide.title} · ${index}/${model.slides.length}`}
+      aria-label={nav ? undefined : `${slide.title} · ${index}/${model.slides.length}`}
+      aria-hidden={nav || undefined}
     >
       <header className="rf-sp__mast">
         <span className="rf-sp__tick" aria-hidden="true" />

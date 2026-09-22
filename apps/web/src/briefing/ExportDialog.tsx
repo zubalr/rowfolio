@@ -1,5 +1,7 @@
+import { useRef, useState, type KeyboardEvent } from 'react';
 import { Dialog, Status } from '@rowfolio/ui';
 import type { MessageKey } from '@rowfolio/i18n';
+import { exportFileName, localizeDigits } from '@rowfolio/export-model';
 import { useI18n, useServices, useSessionState } from '../app/context.tsx';
 import { formatInteger } from '../workspace/format.ts';
 import { PlateLabel } from '../workspace/Plate.tsx';
@@ -99,10 +101,43 @@ export function ExportDialog() {
   );
 }
 
-/** Deliverable preview — real slide pages + the workbook sheet list. */
+/**
+ * Deliverable preview — a tab-strip of slide thumbnails that are
+ * NAVIGATION ONLY: selecting one fills the reading pane above with that
+ * page at real reading size. Arrow keys move between thumbnails (roving
+ * focus, automatic activation); the workbook sheet list rides as the
+ * last thumbnail.
+ */
 function ModelPreview({ state }: { state: ReturnType<typeof useSessionState> }) {
   const i18n = useI18n();
   const model = state.export.model;
+  const [selected, setSelected] = useState(0);
+  const tabsRef = useRef<Array<HTMLButtonElement | null>>([]);
+  const total = (model?.slides.length ?? 0) + 1;
+  const current = Math.min(selected, Math.max(0, total - 1));
+  const workbookTab = current === total - 1;
+
+  const activate = (index: number) => {
+    setSelected(index);
+    tabsRef.current[index]?.focus();
+  };
+  const onTabKeyDown = (event: KeyboardEvent<HTMLOListElement>) => {
+    const rtl = (model?.locale ?? i18n.getState().locale) === 'ar';
+    const forward = rtl ? 'ArrowLeft' : 'ArrowRight';
+    const back = rtl ? 'ArrowRight' : 'ArrowLeft';
+    let next: number | null = null;
+    if (event.key === forward) next = (current + 1) % total;
+    else if (event.key === back) next = (current - 1 + total) % total;
+    else if (event.key === 'ArrowDown') next = (current + 1) % total;
+    else if (event.key === 'ArrowUp') next = (current - 1 + total) % total;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = total - 1;
+    if (next !== null) {
+      event.preventDefault();
+      activate(next);
+    }
+  };
+
   return (
     <div className="rf-export-preview">
       <PlateLabel index="04" name={i18n.tSafe('plate.report' as MessageKey)} />
@@ -118,16 +153,62 @@ function ModelPreview({ state }: { state: ReturnType<typeof useSessionState> }) 
         {i18n.tSafe('export.locale' as MessageKey)}: {i18n.localeName(state.export.locale ?? i18n.getState().locale)}
       </p>
       {model && (
-        <ol className="rf-export-outline">
-          {model.slides.map((slide) => (
-            <li key={slide.id}>
-              <SlidePreview model={model} slide={slide} />
+        <div className="rf-export-stage">
+          <div
+            className="rf-export-pane"
+            role="tabpanel"
+            id="rf-export-pane"
+            aria-labelledby={`rf-export-tab-${current}`}
+            tabIndex={0}
+          >
+            {workbookTab ? (
+              <WorkbookPreview model={model} className="rf-sp--pane" />
+            ) : (
+              <SlidePreview model={model} slide={model.slides[current]!} className="rf-sp--pane" />
+            )}
+          </div>
+          <ol
+            className="rf-export-outline"
+            role="tablist"
+            aria-label={i18n.tSafe('export.preview' as MessageKey)}
+            onKeyDown={onTabKeyDown}
+          >
+            {model.slides.map((slide, index) => (
+              <li key={slide.id}>
+                <button
+                  type="button"
+                  role="tab"
+                  id={`rf-export-tab-${index}`}
+                  aria-selected={index === current}
+                  aria-controls="rf-export-pane"
+                  tabIndex={index === current ? 0 : -1}
+                  className={`rf-export-pick${index === current ? ' rf-export-pick--on' : ''}`}
+                  aria-label={`${slide.title} · ${localizeDigits(`${index + 1}/${model.slides.length + 1}`, model.numberingSystem)}`}
+                  onClick={() => setSelected(index)}
+                  ref={(el) => { tabsRef.current[index] = el; }}
+                >
+                  <SlidePreview model={model} slide={slide} nav />
+                </button>
+              </li>
+            ))}
+            <li>
+              <button
+                type="button"
+                role="tab"
+                id={`rf-export-tab-${model.slides.length}`}
+                aria-selected={workbookTab}
+                aria-controls="rf-export-pane"
+                tabIndex={workbookTab ? 0 : -1}
+                className={`rf-export-pick${workbookTab ? ' rf-export-pick--on' : ''}`}
+                aria-label={exportFileName(model, 'xlsx')}
+                onClick={() => setSelected(model.slides.length)}
+                ref={(el) => { tabsRef.current[model.slides.length] = el; }}
+              >
+                <WorkbookPreview model={model} />
+              </button>
             </li>
-          ))}
-          <li>
-            <WorkbookPreview model={model} />
-          </li>
-        </ol>
+          </ol>
+        </div>
       )}
     </div>
   );

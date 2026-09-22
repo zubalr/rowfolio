@@ -213,3 +213,21 @@ html[lang="ar"] .rf-mini .rf-mini__chartcap {
   .rf-mini .rf-mini__chartcap { margin-top: 4px; }
   .rf-mini .rf-mini__foot { padding: 5px 10px 6px; margin-top: 4px; }
 }
+
+/* Landing output tiles (.rf-output__preview): required text never
+   ellipsizes — metric names and chart metadata wrap to a second line and
+   the figure band yields the extra height (flex column, viz min-height:0).
+   Scoped here only; every other .rf-mini mount keeps the nowrap chrome. */
+.rf-output__preview .rf-mini .rf-mini__mname {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: break-word;
+}
+.rf-output__preview .rf-mini .rf-mini__charttitle,
+.rf-output__preview .rf-mini .rf-mini__chartmeta {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: break-word;
+}
