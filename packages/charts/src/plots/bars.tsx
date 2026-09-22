@@ -144,6 +144,7 @@ export function BarsPlot({ ctx, variant }: { ctx: PlotContext; variant: BarsVari
             x1={layout.plotWidth}
             unit={model.spec.unit}
             formatters={ctx.formatters}
+            t={ctx.strings.t}
           />
           <line
             x1={0}

@@ -264,9 +264,9 @@ export function TargetBarsPlot({ ctx }: { ctx: PlotContext }) {
               </div>
             );
           })}
-          {unitAxisLabel(model.spec.unit) !== null ? (
+          {unitAxisLabel(model.spec.unit, t) !== null ? (
             <div className="rf-chart-hunit" dir="ltr">
-              {unitAxisLabel(model.spec.unit)}
+              {unitAxisLabel(model.spec.unit, t)}
             </div>
           ) : null}
         </div>

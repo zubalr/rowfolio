@@ -147,6 +147,7 @@ export function ScenarioBarsPlot({ ctx }: { ctx: PlotContext }) {
             x1={layout.plotWidth}
             unit={model.spec.unit}
             formatters={ctx.formatters}
+            t={ctx.strings.t}
           />
           <line x1={0} x2={layout.plotWidth} y1={layout.zeroY} y2={layout.zeroY} className="rf-chart-zero" />
           {model.points.map((p, i) => {

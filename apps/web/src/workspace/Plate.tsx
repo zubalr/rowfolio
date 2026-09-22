@@ -13,12 +13,15 @@
  */
 import { useId, type ReactNode } from "react";
 import { cx } from "@rowfolio/ui";
+import { localizeDigits } from "@rowfolio/export-model";
+import { useI18n } from "../app/context.tsx";
 
 export function PlateLabel({ index, name }: { index: string; name: string }) {
+  const i18n = useI18n();
   return (
     <span className="rf-plate-label">
       <bdi dir="ltr" className="rf-plate-label__num">
-        {index}
+        {localizeDigits(index, i18n.numberingSystem)}
       </bdi>
       <span className="rf-plate-label__rule" aria-hidden="true" />
       <span className="rf-plate-label__name">{name}</span>

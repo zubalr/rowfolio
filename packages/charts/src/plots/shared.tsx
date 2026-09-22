@@ -34,8 +34,14 @@ export function paintFor(semantic: ResolvedSeries["semantic"]): {
   }
 }
 
-/** Short axis caption for the declared unit; null when the unit is opaque. */
-export function unitAxisLabel(unit: Unit): string | null {
+/** Engine-emitted unit labels that carry catalog translations. */
+const UNIT_LABEL_KEYS: Record<string, string> = {
+  records: "unit.records",
+};
+
+/** Short axis caption for the declared unit; null when the unit is opaque.
+ *  Pass `t` so engine labels with catalog keys ("records") localize. */
+export function unitAxisLabel(unit: Unit, t?: (key: string) => string): string | null {
   switch (unit.kind) {
     case "currency":
       return unit.currency;
@@ -45,8 +51,12 @@ export function unitAxisLabel(unit: Unit): string | null {
       return "pp";
     case "unknown":
       return null;
-    default:
-      return unit.label;
+    default: {
+      const label = unit.label.trim();
+      if (label === "" || label === "unit" || label === "fraction") return null;
+      const key = UNIT_LABEL_KEYS[label];
+      return key !== undefined && t !== undefined ? t(key) : label;
+    }
   }
 }
 
@@ -68,8 +78,10 @@ export function ValueGrid(props: {
   x1: number;
   unit: Unit;
   formatters: ChartFormatters;
+  /** Message lookup for localizable unit labels (e.g. "records"). */
+  t?: (key: string) => string;
 }) {
-  const { ticks, yOf, x0, x1, unit, formatters } = props;
+  const { ticks, yOf, x0, x1, unit, formatters, t } = props;
   return (
     <g className="rf-chart-grid" aria-hidden="true">
       {ticks.map((tick) => {
@@ -89,9 +101,9 @@ export function ValueGrid(props: {
           </g>
         );
       })}
-      {unitAxisLabel(unit) !== null ? (
+      {unitAxisLabel(unit, t) !== null ? (
         <text x={x0 - 8} y={12} textAnchor="end" className="rf-chart-unit">
-          {unitAxisLabel(unit)}
+          {unitAxisLabel(unit, t)}
         </text>
       ) : null}
     </g>
