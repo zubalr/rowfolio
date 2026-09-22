@@ -13,12 +13,16 @@
 import type { Locale } from "@rowfolio/i18n";
 
 export type CopyKey =
+  | "beat.chart"
   | "beat.checks"
+  | "beat.final"
   | "beat.findings"
-  | "beat.report"
+  | "beat.result"
   | "ch.chart"
   | "ch.checks"
+  | "ch.finding"
   | "ch.report"
+  | "ch.result"
   | "ch.workbook"
   | "cur.usd"
   | "data.rows.kept"
@@ -50,7 +54,6 @@ export type CopyKey =
   | "pres.output.body"
   | "pres.output.slides"
   | "pres.output.title"
-  | "pres.output.workbook"
   | "pres.pause"
   | "pres.play"
   | "pres.previous"
@@ -115,6 +118,7 @@ export type CopyKey =
   | "landing.specimen.note"
   | "lead.context"
   | "lead.cta"
+  | "lead.cta2"
   | "lead.ctaNote"
   | "lead.kicker"
   | "lead.standfirst"
@@ -171,7 +175,7 @@ export type CopyKey =
   | "pres.task.request"
   | "pres.task.requestTitle"
   | "pres.workbook.title"
-  | "rep.wbFormats"
+  | "rep.download"
   | "scenario.assumed"
   | "spread.label"
   | "scenario.contributionLabel"
@@ -181,13 +185,17 @@ export type CopyKey =
 const COPY: Record<CopyKey, Record<Locale, string>> = {
   /* Broadsheet spread — new keys for the landing redesign (PR redesign/landing-demo).
      AR strings are authored here for review; nothing below is contract-pinned. */
-  "beat.checks": { en: "Rows that fail a check stay marked. Nothing is silently filled.", ar: "الصفوف التي لا تجتاز الفحص تبقى معلّمة. لا يُملأ أي شيء بصمت." },
-  "beat.findings": { en: "The checks turn those rows into findings: what moved, and by how much.", ar: "تحوّل الفحوصات تلك الصفوف إلى نتائج: ما الذي تحرّك وبأي قدر." },
+  "beat.chart": { en: "The bars draw to scale: actual against target on one shared baseline.", ar: "تُرسم الأعمدة بمقياس حقيقي: الفعلي مقابل المستهدف على خط أساس واحد." },
+  "beat.checks": { en: "Two rows share an order number, so the later one is excluded; a survey cell stays blank.", ar: "يتشارك صفّان رقم طلب واحدًا فيُستبعد اللاحق؛ وتبقى خلية الاستبيان فارغة." },
+  "beat.findings": { en: "Revenue sits 11.9% under target even as orders rose 8.0%.", ar: "الإيراد أدنى من المستهدف بنسبة ١١٫٩٪ رغم ارتفاع الطلبات ٨٫٠٪." },
   "ch.chart": { en: "Chart", ar: "الرسم" },
   "ch.checks": { en: "Checks", ar: "الفحص" },
+  "ch.finding": { en: "Finding", ar: "الاستنتاج" },
   "ch.report": { en: "Report", ar: "التقرير" },
+  "ch.result": { en: "Result", ar: "النتيجة" },
   "ch.workbook": { en: "Workbook", ar: "المصنف" },
-  "beat.report": { en: "The findings land in a finished report: slides and a workbook, ready to edit.", ar: "تصل النتائج إلى تقرير جاهز: شرائح وملف عمل جاهزان للتحرير." },
+  "beat.final": { en: "The report stays ready: open it in the workspace, or take the file with you.", ar: "يبقى التقرير جاهزًا: افتحه في مساحة العمل أو خذ الملف معك." },
+  "beat.result": { en: "The finished report first: this is what a spreadsheet becomes.", ar: "التقرير الجاهز أولًا: هذا ما يصبح عليه الجدول." },
   "cur.usd": { en: "USD {n}", ar: "{n} دولار" },
   "data.rows.kept": { en: "{raw} → {kept} rows", ar: "{raw} → {kept} صفوف" },
   "data.rows.read": { en: "{n} rows read", ar: "قُرئت {n} من الصفوف" },
@@ -216,9 +224,8 @@ const COPY: Record<CopyKey, Record<Locale, string>> = {
   "pres.invite.title": { en: "Try it with your own file.", ar: "جرّبه على ملفك الخاص." },
   "pres.next": { en: "Next", ar: "التالي" },
   "pres.output.body": { en: "This is what the example produces: a report you can open in PowerPoint and a workbook you can keep editing in Excel.", ar: "هذا ما ينتجه المثال: تقرير يمكن فتحه في PowerPoint وملف عمل يمكنك متابعة تحريره في Excel." },
-  "pres.output.slides": { en: "{n} slides", ar: "{n} شرائح" },
+  "pres.output.slides": { en: "{n} slides + workbook", ar: "{n} شرائح + ملف عمل" },
   "pres.output.title": { en: "The finished output", ar: "المخرجات الجاهزة" },
-  "pres.output.workbook": { en: "Workbook", ar: "ملف العمل" },
   "pres.pause": { en: "Pause", ar: "إيقاف مؤقت" },
   "pres.play": { en: "Play", ar: "تشغيل" },
   "pres.previous": { en: "Previous", ar: "السابق" },
@@ -280,13 +287,14 @@ const COPY: Record<CopyKey, Record<Locale, string>> = {
   "pres.artifact.chart": { en: "Chart", ar: "الرسم" },
   "pres.artifact.report": { en: "Report", ar: "التقرير" },
   "lead.context": { en: "Shown with an example workbook: June 2026 operations for a fictional six-region service business.", ar: "معروض بملف عمل نموذجي: عمليات يونيو ٢٠٢٦ لشركة خدمات افتراضية بست مناطق." },
-  "lead.cta": { en: "Open Rowfolio", ar: "افتح روفوليو" },
+  "lead.cta": { en: "Watch the walkthrough", ar: "شاهد الجولة" },
+  "lead.cta2": { en: "Open the example workspace", ar: "افتح مساحة عمل المثال" },
   "lead.ctaNote": { en: "Runs locally. No upload.", ar: "يعمل محليًا. بلا رفع." },
   "lead.kicker": { en: "Rowfolio · in-browser report builder", ar: "روفوليو · منشئ تقارير داخل المتصفح" },
-  "lead.standfirst": { en: "Drop in a CSV or XLSX. Rowfolio marks duplicate and missing data, traces every figure to the rows behind it, and produces a report you can edit in PowerPoint and Excel. Your file never leaves this tab.", ar: "أدرج ملف CSV أو XLSX. يُعلّم روفوليو البيانات المكررة والمفقودة، ويرسم كل رقم من صفوف المصدر المسمّاة، وينتج تقريرًا يمكنك تحريره في PowerPoint وExcel. لا يغادر ملفك هذا التبويب أبدًا." },
-  "lead.title.accent": { en: "checked", ar: "مفحوص" },
-  "lead.title.post": { en: " and explained.", ar: " ومشروح." },
-  "lead.title.pre": { en: "Your spreadsheet, ", ar: "جدولك، " },
+  "lead.standfirst": { en: "Check your data, explain the numbers, and create an editable PowerPoint and Excel workbook. Your file never leaves this tab.", ar: "افحص بياناتك، واشرح الأرقام، وأنشئ عرض PowerPoint وملف عمل Excel قابلين للتحرير. لا يغادر ملفك هذا التبويب أبدًا." },
+  "lead.title.accent": { en: "presentation", ar: "عرض تقديمي" },
+  "lead.title.post": { en: ".", ar: "۔" },
+  "lead.title.pre": { en: "From spreadsheet to ", ar: "من جدول إلى " },
   "nav.tag": { en: "in-browser report builder", ar: "منشئ تقارير داخل المتصفح" },
   "plate.data": { en: "Data", ar: "البيانات" },
   "plate.findings": { en: "Findings", ar: "النتائج" },
@@ -344,8 +352,8 @@ const COPY: Record<CopyKey, Record<Locale, string>> = {
   "export.slide.4": { en: "Test a cost assumption", ar: "اختبر افتراضاً للتكاليف" },
   "export.slide.5": { en: "What changed in the data", ar: "ما الذي تغيّر في البيانات؟" },
   "export.slide.6": { en: "Inspect before acting", ar: "تحقّق قبل اتخاذ القرار" },
-  "rep.wbFormats": { en: "Editable .pptx and .xlsx", ar: "قابل للتحرير بصيغتي ‎.pptx و‎.xlsx" },
-  "spread.label": { en: "Example walkthrough: workbook, checks, chart, report", ar: "جولة في مثال: المصنف والفحص والرسم والتقرير" },
+  "rep.download": { en: "Download .pptx", ar: "نزّل ‎.pptx" },
+  "spread.label": { en: "Example walkthrough: result, workbook, checks, chart, finding, report", ar: "جولة في مثال: النتيجة والمصنف والفحص والرسم والاستنتاج والتقرير" },
 };
 
 export function landingCopy(locale: Locale, key: CopyKey, params?: Record<string, string | number>): string {

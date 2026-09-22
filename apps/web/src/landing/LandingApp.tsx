@@ -10,13 +10,14 @@
  * workspace intent seam. Nothing touches `window` at module scope — the
  * entry stays prerender-safe.
  */
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button, Icon, SkipLink } from "@rowfolio/ui";
 import type { I18n } from "@rowfolio/i18n";
 import { landingCopy } from "./copy.ts";
 import { SpreadStage } from "./SpreadStage.tsx";
-import { SAMPLE_EXPORT_MODEL, findingSlide } from "./sampleExportModel.ts";
-import { MiniReport, WorkbookMini } from "../demo/MiniReport.tsx";
+import { SAMPLE_EXPORT_MODEL } from "./sampleExportModel.ts";
+import { ReportViewer } from "../briefing/ReportViewer.tsx";
+import { downloadExport } from "../briefing/download.ts";
 import { persistLocaleChoice } from "./i18n.ts";
 import { siblingLocaleHref, workspaceHref, navigateToWorkspace } from "./routes.ts";
 import { setWorkspaceIntent, type IntentDownload } from "./pendingUpload.ts";
@@ -39,9 +40,18 @@ export function LandingApp({ i18n }: LandingAppProps) {
     setWorkspaceIntent({ kind: "sample" });
     window.location.hash = workspaceHref();
   };
-  const download = (format: IntentDownload) => {
-    setWorkspaceIntent({ kind: "sample", download: format });
-    navigateToWorkspace();
+  // Downloads are real and in place: the same writers the workspace export
+  // pipeline runs produce the bytes here, saved under the canonical
+  // exportFileName — a download button downloads, nothing else.
+  const [exporting, setExporting] = useState<IntentDownload | null>(null);
+  const download = async (format: IntentDownload) => {
+    if (exporting !== null) return;
+    setExporting(format);
+    try {
+      await downloadExport(viewModel, format);
+    } finally {
+      setExporting(null);
+    }
   };
   const pickUpload = () => uploadInput.current?.click();
   const onFileChosen = (file: File | undefined) => {
@@ -56,12 +66,19 @@ export function LandingApp({ i18n }: LandingAppProps) {
   const otherLocale = i18n.locale === "ar" ? "en" : "ar";
   const altModel = SAMPLE_EXPORT_MODEL[otherLocale];
 
+  // The output section is ONE report viewer — the shared ReportViewer the
+  // export dialog uses — never a grid of equal-weight identical previews.
+  // The other locale's artifact appears only when its labeled variant is
+  // picked.
+  const [altView, setAltView] = useState(false);
+  const viewModel = altView ? altModel : model;
+  const viewLocale = altView ? otherLocale : i18n.locale;
+
   return (
     // `.rf-landing-root` scopes the landing's chrome rules so they cannot
     // leak onto the app-shell masthead when both stylesheets are loaded.
     <div className="rf-landing-root">
       <SkipLink targetId="#main">{i18n.t("a11y.skip")}</SkipLink>
-      <div className="rf-frame" aria-hidden="true" />
 
       <header className="rf-masthead">
         <a className="rf-brand" href={i18n.locale === "ar" ? "/ar/" : "/"}>
@@ -111,8 +128,8 @@ export function LandingApp({ i18n }: LandingAppProps) {
       </header>
 
       <main id="main">
-        {/* The spread IS the first screen: lead column + annotator plates. */}
-        <SpreadStage i18n={i18n} onOpen={exploreSample} />
+        {/* The spread IS the first screen: slim hero + the one stage. */}
+        <SpreadStage i18n={i18n} onOpen={exploreSample} onDownload={download} />
 
         {/* The finished output — real previews of the real artifacts. */}
         <section className="rf-output" aria-labelledby="rf-output-title">
@@ -126,54 +143,42 @@ export function LandingApp({ i18n }: LandingAppProps) {
             </h2>
             <p className="rf-output__body">{landingCopy(i18n.locale, "pres.output.body")}</p>
           </header>
-          <div className="rf-output__previews">
-            <figure className="rf-output__fig">
-              <div className="rf-plate">
-                <header className="rf-plate__label">
-                  <i aria-hidden="true" />
-                  <span className="rf-plate__num">05</span>
-                  {landingCopy(i18n.locale, "plate.report")}
-                </header>
-                <div className="rf-plate__body rf-output__preview">
-                  <MiniReport model={model} slide={findingSlide(model)} />
-                </div>
-              </div>
-              <figcaption className="rf-output__cap">
-                {i18n.localeName(i18n.locale)} · {landingCopy(i18n.locale, "pres.output.slides", { n: model.slides.length })}
-              </figcaption>
-            </figure>
-            <figure className="rf-output__fig">
-              <div className="rf-plate">
-                <header className="rf-plate__label">
-                  <i aria-hidden="true" />
-                  <span className="rf-plate__num">06</span>
-                  {i18n.localeName(otherLocale)}
-                </header>
-                <div className="rf-plate__body rf-output__preview" dir={otherLocale === "ar" ? "rtl" : "ltr"}>
-                  <MiniReport model={altModel} slide={findingSlide(altModel)} />
-                </div>
-              </div>
-              <figcaption className="rf-output__cap">{i18n.localeName(otherLocale)}</figcaption>
-            </figure>
-            <figure className="rf-output__fig rf-output__fig--book">
-              <div className="rf-plate">
-                <header className="rf-plate__label">
-                  <i aria-hidden="true" />
-                  <span className="rf-plate__num">07</span>
-                  {landingCopy(i18n.locale, "pres.workbook.title")}
-                </header>
-                <div className="rf-plate__body rf-output__preview">
-                  <WorkbookMini model={model} />
-                </div>
-              </div>
-              <figcaption className="rf-output__cap">{landingCopy(i18n.locale, "pres.output.workbook")}</figcaption>
-            </figure>
+          <div className="rf-output__viewer">
+            <div dir={viewLocale === "ar" ? "rtl" : "ltr"} lang={viewLocale}>
+              <ReportViewer model={viewModel} />
+            </div>
+            <p className="rf-output__cap">
+              {i18n.localeName(viewLocale)} ·{" "}
+              {landingCopy(i18n.locale, "pres.output.slides", {
+                n: i18n.formatInteger(viewModel.slides.length),
+              })} ·{" "}
+              <button
+                type="button"
+                className="rf-opane rf-opane--alt"
+                aria-pressed={altView}
+                onClick={() => setAltView((v) => !v)}
+              >
+                {i18n.localeName(otherLocale)}
+              </button>
+            </p>
           </div>
           <div className="rf-output__actions">
-            <Button variant="primary" icon="download" onClick={() => download("pptx")} data-testid="output-download-pptx">
+            <Button
+              variant="primary"
+              icon="download"
+              disabled={exporting !== null}
+              onClick={() => void download("pptx")}
+              data-testid="output-download-pptx"
+            >
               {landingCopy(i18n.locale, "pres.downloadPptx")}
             </Button>
-            <Button variant="secondary" icon="download" onClick={() => download("xlsx")} data-testid="output-download-xlsx">
+            <Button
+              variant="secondary"
+              icon="download"
+              disabled={exporting !== null}
+              onClick={() => void download("xlsx")}
+              data-testid="output-download-xlsx"
+            >
               {landingCopy(i18n.locale, "pres.downloadXlsx")}
             </Button>
           </div>
