@@ -52,10 +52,8 @@ export type CopyKey =
   | "pres.invite.title"
   | "pres.next"
   | "pres.output.body"
-  | "pres.output.nav"
   | "pres.output.slides"
   | "pres.output.title"
-  | "pres.output.workbook"
   | "pres.pause"
   | "pres.play"
   | "pres.previous"
@@ -66,12 +64,6 @@ export type CopyKey =
   | "pres.uploadHelp"
   | "pres.useOwn"
   | "pres.watch"
-  | "pane.costs"
-  | "pane.finding"
-  | "pane.glance"
-  | "pane.method"
-  | "pane.quality"
-  | "pane.summary"
   | "walk.build.chartNote"
   | "walk.check.blankNote"
   | "walk.check.dupNote"
@@ -184,7 +176,6 @@ export type CopyKey =
   | "pres.task.requestTitle"
   | "pres.workbook.title"
   | "rep.download"
-  | "rep.wbFormats"
   | "scenario.assumed"
   | "spread.label"
   | "scenario.contributionLabel"
@@ -233,10 +224,8 @@ const COPY: Record<CopyKey, Record<Locale, string>> = {
   "pres.invite.title": { en: "Try it with your own file.", ar: "جرّبه على ملفك الخاص." },
   "pres.next": { en: "Next", ar: "التالي" },
   "pres.output.body": { en: "This is what the example produces: a report you can open in PowerPoint and a workbook you can keep editing in Excel.", ar: "هذا ما ينتجه المثال: تقرير يمكن فتحه في PowerPoint وملف عمل يمكنك متابعة تحريره في Excel." },
-  "pres.output.nav": { en: "Report pages", ar: "صفحات التقرير" },
   "pres.output.slides": { en: "{n} slides + workbook", ar: "{n} شرائح + ملف عمل" },
   "pres.output.title": { en: "The finished output", ar: "المخرجات الجاهزة" },
-  "pres.output.workbook": { en: "Workbook", ar: "ملف العمل" },
   "pres.pause": { en: "Pause", ar: "إيقاف مؤقت" },
   "pres.play": { en: "Play", ar: "تشغيل" },
   "pres.previous": { en: "Previous", ar: "السابق" },
@@ -363,14 +352,7 @@ const COPY: Record<CopyKey, Record<Locale, string>> = {
   "export.slide.4": { en: "Test a cost assumption", ar: "اختبر افتراضاً للتكاليف" },
   "export.slide.5": { en: "What changed in the data", ar: "ما الذي تغيّر في البيانات؟" },
   "export.slide.6": { en: "Inspect before acting", ar: "تحقّق قبل اتخاذ القرار" },
-  "rep.wbFormats": { en: "Editable .pptx and .xlsx", ar: "قابل للتحرير بصيغتي ‎.pptx و‎.xlsx" },
   "rep.download": { en: "Download .pptx", ar: "نزّل ‎.pptx" },
-  "pane.summary": { en: "Summary", ar: "الملخّص" },
-  "pane.glance": { en: "At a glance", ar: "لمحة سريعة" },
-  "pane.finding": { en: "Finding", ar: "الاستنتاج" },
-  "pane.costs": { en: "Costs", ar: "التكاليف" },
-  "pane.quality": { en: "Data quality", ar: "جودة البيانات" },
-  "pane.method": { en: "Source + method", ar: "المصدر والمنهجية" },
   "spread.label": { en: "Example walkthrough: result, workbook, checks, chart, finding, report", ar: "جولة في مثال: النتيجة والمصنف والفحص والرسم والاستنتاج والتقرير" },
 };
 

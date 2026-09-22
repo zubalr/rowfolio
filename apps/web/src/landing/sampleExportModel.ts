@@ -6,8 +6,8 @@
  * deck cannot drift from the downloadable artifact.
  */
 import type { ExportModel, SlideModel } from "@rowfolio/contracts";
-import modelEnJson from "../../../../tests/contract/fixtures/export-model.en.example.json";
-import modelArJson from "../../../../tests/contract/fixtures/export-model.ar.example.json";
+import modelEnJson from "../../../../tests/contract/fixtures/export-model.en.default.example.json";
+import modelArJson from "../../../../tests/contract/fixtures/export-model.ar.default.example.json";
 
 export const SAMPLE_EXPORT_MODEL: Record<"en" | "ar", ExportModel> = {
   en: modelEnJson as unknown as ExportModel,

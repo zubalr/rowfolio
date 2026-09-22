@@ -476,7 +476,9 @@ html[dir="rtl"] .rf-strike { transform-origin: right center; }
   position: absolute;
   inset-inline: 10px;
   top: 12px;
-  bottom: 92px; /* provenance note + wbstrip claim the bottom of the scene */
+  /* the provenance note gets its own 20px lane between slide and wbstrip
+     so the mini's folio never paints over it */
+  bottom: 110px;
 }
 /* the stamp/land beat: drive the mini report's parts from the scene's --vars */
 .rf-scene--rep .rf-mini__mast { opacity: var(--stamp, 1); }
@@ -489,7 +491,8 @@ html[dir="rtl"] .rf-strike { transform-origin: right center; }
   position: absolute;
   inset-inline-end: 14px;
   inset-inline-start: 14px;
-  bottom: 100px;
+  bottom: 89px;
+  line-height: 19px;
   text-align: end;
   margin: 0;
   /* row references are technical data — mono stays here */
@@ -586,7 +589,7 @@ html[lang="ar"] .rf-wbstrip__tabs { font-family: var(--rf-font-body); font-size:
   /* one strip, wrapped: the four chapter tabs fill row one; pause/play
      and replay share row two — every control stays visible and ≥44px */
   .rf-transport { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .rf-tch { grid-column: span 1; order: 1; padding: 0 6px; min-inline-size: 0; font-size: 12px; }
+  .rf-tch { grid-column: span 1; order: 1; padding: 0 4px; min-inline-size: 0; font-size: 12px; letter-spacing: 0.04em; }
   html[lang="ar"] .rf-tch { font-size: 12.5px; }
   .rf-tplay { grid-column: span 2; order: 2; font-size: 12.5px; padding: 0 8px; border-block-start: 1px solid var(--rf-rule); }
   .rf-treplay { grid-column: span 2; order: 3; font-size: 12.5px; padding: 0 8px; border-block-start: 1px solid var(--rf-rule); }
@@ -602,9 +605,12 @@ html[lang="ar"] .rf-wbstrip__tabs { font-family: var(--rf-font-body); font-size:
 
   /* the report interior recomposes for the width — the workbook strip
      keeps only its actions so they stay reachable */
-  .rf-rep__slide { bottom: 70px; }
+  .rf-rep__slide { bottom: 84px; top: 8px; }
+  /* the scene drops the slide's subtitle line so the stat list + chart
+     keep real height inside the small frame */
+  .rf-scene--rep .rf-mini__sub { display: none; }
   .rf-rep__note {
-    bottom: 66px;
+    bottom: 60px;
     inset-inline-end: 10px;
     inset-inline-start: 10px;
     text-align: start;
@@ -615,6 +621,7 @@ html[lang="ar"] .rf-wbstrip__tabs { font-family: var(--rf-font-body); font-size:
   .rf-wbstrip__meta { display: none; }
   .rf-rep__actions { flex: 1; }
   .rf-act { flex: 1; min-block-size: 44px; }
+  .rf-act { white-space: normal; line-height: 1.25; padding-block: 8px; }
 
   /* the share-scale row stacks so neither label ever clips */
   .rf-rticks { display: block; margin-block-start: 8px; }
@@ -627,4 +634,17 @@ html[lang="ar"] .rf-wbstrip__tabs { font-family: var(--rf-font-body); font-size:
   /* chrome compresses to one row; the hero keeps headline + one sentence
      + actions so the stage's top edge lands in the first ~340px */
   .rf-lead__kicker { display: none; }
+}
+
+@media (max-width: 360px) {
+  /* the five-column sheet would clip the frame at 320 — the survey column
+     is the least critical, so it drops; its blank-cell mark measures 0x0
+     and the check flags above the table still narrate it */
+  .rf-col-survey { display: none; }
+
+  /* "WORKBOOK" caps at 12px w600 exceeds a strict quarter of a 296px
+     frame — the tabs share space by weight, never by shrinking the font
+     below the 12px floor or clipping the label */
+  .rf-transport { grid-template-columns: 1.3fr 1fr 1fr 1.1fr; }
+  .rf-tch { letter-spacing: 0.01em; padding-inline: 2px; }
 }

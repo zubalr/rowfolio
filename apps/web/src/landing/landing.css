@@ -126,49 +126,26 @@ html[lang="ar"] .rf-secmark {
   max-inline-size: 68ch;
 }
 
-/* ONE report viewer: the pane holds a real artifact at reading size —
-   the second framed surface the contract allows — and text tabs navigate
-   the deck's pages. Never a grid of equal-weight boxes. */
+/* ONE report viewer: the shared ReportViewer holds a real artifact at
+   reading size — the second framed surface the contract allows — with a
+   thumbnail rail. Never a grid of equal-weight boxes. */
 .rf-output__viewer {
   margin-block-start: var(--rf-space-5);
   max-inline-size: 880px;
 }
 
-.rf-output__pane {
-  border: 1px solid var(--rf-rule);
-  background: var(--rf-surface);
-}
-
-/* MiniReport self-frames; the explicit height keeps the chart column
-   honest at every width */
-.rf-output__pane .rf-mini { height: clamp(420px, 44vw, 560px); }
-.rf-output__pane .rf-mini--book { height: auto; min-height: 0; }
-
-.rf-output__nav {
-  display: flex;
-  flex-wrap: wrap;
-  margin-block-start: var(--rf-space-1);
-  border-block-start: 1px solid var(--rf-rule);
-}
-
-.rf-opane {
-  min-height: 44px;
-  padding: 0 12px;
+/* the other locale's artifact appears only as this labeled variant — an
+   inline link in the caption, never a third equal box */
+.rf-opane--alt {
   background: none;
   border: none;
-  border-block-end: 2px solid transparent;
+  padding: 0;
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--rf-muted);
+  font: inherit;
+  color: var(--rf-cobalt);
 }
-html[lang="ar"] .rf-opane { font-size: 13px; letter-spacing: normal; text-transform: none; }
-.rf-opane:hover { color: var(--rf-ink); }
-.rf-opane--on { color: var(--rf-ink); border-block-end-color: var(--rf-cobalt); }
-.rf-opane--alt { margin-inline-start: auto; color: var(--rf-cobalt); text-transform: none; letter-spacing: normal; }
-.rf-opane:focus-visible { outline: 2px solid var(--rf-focus); outline-offset: -2px; }
+.rf-opane--alt:hover { text-decoration: underline; }
+.rf-opane--alt:focus-visible { outline: 2px solid var(--rf-focus); outline-offset: 1px; }
 
 .rf-output__cap {
   margin-block-start: var(--rf-space-2);

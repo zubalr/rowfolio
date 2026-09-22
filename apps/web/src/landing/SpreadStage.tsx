@@ -22,7 +22,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import type { I18n } from "@rowfolio/i18n";
 import { LoopClock, type LoopClockState } from "../demo/loopClock.ts";
 import { MiniReport } from "../demo/MiniReport.tsx";
-import { exportFileName } from "@rowfolio/export-model";
+import { exportFileName } from "../briefing/download.ts";
 import { landingCopy, type CopyKey } from "./copy.ts";
 import type { IntentDownload } from "./pendingUpload.ts";
 import { LANDING_TRUTH } from "./previewTruth.ts";
