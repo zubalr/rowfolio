@@ -37,6 +37,12 @@ function FindingCard({
   const i18n = useI18n();
   const { controller } = useServices();
   const selected = useSessionState().selectedFindingId === finding.id;
+  const missingOpen = snapshot.metrics.some(
+    (m) => m.id === 'quality-missing' && m.value !== null && Number(m.value) !== 0,
+  );
+  const limitations = finding.limitations.filter(
+    (key) => key !== 'limitations.missingRetained' || missingOpen,
+  );
 
   return (
     <li
@@ -51,9 +57,9 @@ function FindingCard({
       >
         <span className="rf-finding-title">{findingTitle(i18n, finding)}</span>
         <span className="rf-finding-body">{findingBody(i18n, snapshot, finding)}</span>
-        {finding.limitations.length > 0 && (
+        {limitations.length > 0 && (
           <span className="rf-finding-limits">
-            {finding.limitations.map((key) => (
+            {limitations.map((key) => (
               <span key={key} className="rf-limitation">{i18n.tSafe(key as MessageKey)}</span>
             ))}
           </span>

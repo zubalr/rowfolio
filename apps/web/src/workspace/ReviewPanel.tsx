@@ -26,6 +26,7 @@ export function ReviewPanel() {
   const columns = pending?.proposedColumns ?? [];
   const actionable = issues.filter((i) => i.action !== 'none');
   const disclosed = issues.filter((i) => i.action === 'none');
+  const missing = disclosed.filter((i) => i.kind === 'missing');
   const [checked, setChecked] = useState<ReadonlySet<string>>(() => new Set(actionable.map((i) => i.id)));
 
   const toggle = (id: string) => {
@@ -66,7 +67,8 @@ export function ReviewPanel() {
       </ul>
       {disclosed.length > 0 && (
         <p className="rf-quiet">
-          {i18n.tSafe('quality.unresolved' as MessageKey)}: {i18n.formatInteger(disclosed.length)} · {i18n.tSafe('quality.noImputation' as MessageKey)}
+          {i18n.tSafe('quality.unresolved' as MessageKey)}: {i18n.formatInteger(disclosed.length)}
+          {missing.length > 0 ? ` · ${i18n.tSafe('quality.noImputation' as MessageKey)}` : ''}
         </p>
       )}
       <div className="rf-review-actions">
