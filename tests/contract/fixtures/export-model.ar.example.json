@@ -4,7 +4,7 @@
   "analysisId": "analysis-a645db6d54cee88e2aa3",
   "sourceHash": "f0d6d06e934b1eef01d839d071ec7dcdc6d9d47b58ccf556c4eb44f92adb3f5e",
   "locale": "ar",
-  "numberingSystem": "latn",
+  "numberingSystem": "arab",
   "createdAt": "2026-09-20T00:00:00Z",
   "templateVersion": "1.0.0",
   "scope": {
@@ -46267,14 +46267,14 @@
       "id": "slide-1",
       "kind": "summary",
       "title": "تقرير العمليات الشهري",
-      "subtitle": "تحليل المثال · يونيو 2026",
+      "subtitle": "تحليل المثال · يونيو ٢٠٢٦",
       "metricIds": [],
       "findingIds": [
         "finding-north-target"
       ],
       "chartIds": [],
       "notes": [
-        "scope:يونيو 2026",
+        "scope:يونيو ٢٠٢٦",
         "records:2400/2417",
         "example analysis"
       ]
@@ -46283,7 +46283,7 @@
       "id": "slide-2",
       "kind": "kpis",
       "title": "يونيو في لمحة",
-      "subtitle": "تحليل المثال · يونيو 2026",
+      "subtitle": "تحليل المثال · يونيو ٢٠٢٦",
       "metricIds": [
         "june-revenue",
         "june-operating-cost",
@@ -46293,14 +46293,14 @@
       "findingIds": [],
       "chartIds": [],
       "notes": [
-        "scope:يونيو 2026"
+        "scope:يونيو ٢٠٢٦"
       ]
     },
     {
       "id": "slide-3",
       "kind": "finding",
       "title": "الطلبات ارتفعت ٨٫٠٪ والإيراد أدنى من المستهدف بنسبة ١١٫٩٪.",
-      "subtitle": "تحليل المثال · يونيو 2026",
+      "subtitle": "تحليل المثال · يونيو ٢٠٢٦",
       "metricIds": [
         "north-june-revenue",
         "north-june-target",
@@ -46322,7 +46322,7 @@
       "id": "slide-4",
       "kind": "scenario",
       "title": "غيّر تكاليف التشغيل",
-      "subtitle": "تحليل المثال · يونيو 2026",
+      "subtitle": "تحليل المثال · يونيو ٢٠٢٦",
       "metricIds": [
         "june-margin",
         "scenario-margin",
@@ -46341,7 +46341,7 @@
       "id": "slide-5",
       "kind": "quality",
       "title": "ما الذي تغيّر في البيانات؟",
-      "subtitle": "تحليل المثال · يونيو 2026",
+      "subtitle": "تحليل المثال · يونيو ٢٠٢٦",
       "metricIds": [],
       "findingIds": [
         "finding-quality"
@@ -46358,7 +46358,7 @@
       "id": "slide-6",
       "kind": "methodology",
       "title": "تحقّق قبل اتخاذ القرار",
-      "subtitle": "تحليل المثال · يونيو 2026",
+      "subtitle": "تحليل المثال · يونيو ٢٠٢٦",
       "metricIds": [],
       "findingIds": [],
       "chartIds": [],
