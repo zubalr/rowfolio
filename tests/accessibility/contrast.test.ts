@@ -7,8 +7,8 @@
  * Rules:
  * - Normal text WCAG AA: >= 4.5:1
  * - Large text (>=18pt or >=14pt bold) / graphical objects: >= 3.0:1
- * - Attention (#E04E1A) on Paper (#F5F7F8) ratio is 3.62:1 (prohibited for normal text,
- *   only permitted for large display numerals or nontext markers).
+ * - Attention shares the negative role (#A33224) since contract v3 retired the
+ *   vermilion accent; it is now text-safe on Paper at ~7:1.
  */
 import { describe, expect, it } from "vitest";
 import { DESIGN_TOKENS } from "../../packages/contracts/src/index.ts";
@@ -114,9 +114,8 @@ describe("WCAG 2.2 AA token contrast ratios", () => {
     expect(ratio).toBeGreaterThanOrEqual(6.0);
   });
 
-  it("attention on paper passes large text/graphical object AA (>=3:1) but fails normal text (<4.5:1)", () => {
+  it("attention (negative role) on paper passes normal text AA (>=4.5:1)", () => {
     const ratio = contrastRatio(colorRgb.attention, colorRgb.paper);
-    expect(ratio).toBeGreaterThanOrEqual(3.0);
-    expect(ratio).toBeLessThan(4.5);
+    expect(ratio).toBeGreaterThanOrEqual(4.5);
   });
 });
