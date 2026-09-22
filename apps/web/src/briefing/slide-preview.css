@@ -512,6 +512,23 @@ html[lang="ar"] .rf-sp__card-line--mono { font-family: var(--rf-font-body); }
   font-size: clamp(10px, 5.5cqw, 1rem);
 }
 
+/* Small print keeps the 10px reading floor: at ~240px panes the 5.5cqw
+   base makes 0.85em land at 9.89px. */
+.rf-sp--pane .rf-sp__scope,
+.rf-sp--pane .rf-sp__card-label,
+.rf-sp--pane .rf-sp__folio,
+.rf-sp--pane .rf-sp__tech,
+.rf-sp--pane .rf-sp__subtitle,
+.rf-sp--pane .rf-sp__chart-meta {
+  font-size: max(10px, 0.85em);
+}
+
+/* 1.15 leaves glyph ink overflowing the line box (~2px at 390px panes);
+   1.3 contains it. */
+.rf-sp--pane .rf-sp__title {
+  line-height: 1.3;
+}
+
 /* Pane-narrow recompose: the split drops to one column so the chart keeps
    real width and every caption wraps instead of ellipsizing, and the KPI
    row stacks so no figure truncates. */
