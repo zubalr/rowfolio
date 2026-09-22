@@ -27,7 +27,7 @@ const CATALOG: Record<FixtureLocale, Record<string, string>> = {
       "North, June: actual 881,000 USD against a target of 1,000,000 USD.",
     "chart.north.title": "Actual revenue against target",
     "chart.quality.summary":
-      "17 duplicate rows and seven category cells were resolved; five optional values remain missing.",
+      "17 duplicate rows and seven category cells were resolved; five optional values are left empty.",
     "chart.quality.title": "Data quality, with the limits visible",
     "chart.scenario.summary":
       "With operating costs up 8% and revenue fixed, margin moves from 25% to 19%.",
@@ -74,7 +74,7 @@ const CATALOG: Record<FixtureLocale, Record<string, string>> = {
       "الشمال في يونيو: إيرادات فعلية قدرها ٨٨١٬٠٠٠ دولار مقابل مستهدف قدره ١٬٠٠٠٬٠٠٠ دولار.",
     "chart.north.title": "الإيرادات الفعلية مقابل المستهدف",
     "chart.quality.summary":
-      "عولجت ١٧ حالة تكرار للصفوف و٧ خلايا فئات؛ ولا تزال ٥ قيم اختيارية مفقودة.",
+      "عولجت ١٧ حالة تكرار للصفوف و٧ خلايا فئات؛ وتُركت ٥ قيم اختيارية فارغة.",
     "chart.quality.title": "جودة البيانات مع توضيح الحدود",
     "chart.scenario.summary":
       "عند زيادة تكاليف التشغيل بنسبة ٨٪ وثبات الإيرادات، يتغيّر الهامش من ٢٥٪ إلى ١٩٪.",

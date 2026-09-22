@@ -127,6 +127,7 @@
     "evidence.title": [],
     "evidence.transformations": [],
     "export.charts": [],
+    "export.colophon": [],
     "export.includesScenario": [
       "change"
     ],
