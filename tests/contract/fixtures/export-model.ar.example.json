@@ -46342,7 +46342,11 @@
       "kind": "quality",
       "title": "ما الذي تغيّر في البيانات؟",
       "subtitle": "تحليل المثال · يونيو ٢٠٢٦",
-      "metricIds": [],
+      "metricIds": [
+        "quality-duplicate",
+        "quality-category",
+        "quality-missing"
+      ],
       "findingIds": [
         "finding-quality"
       ],

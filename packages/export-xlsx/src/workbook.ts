@@ -202,7 +202,10 @@ export const buildWorkbook = async (
   for (const sheet of model.sheets) assertSafeSheetName(sheet.name);
 
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'Rowfolio';
+  // Document properties carry the factual author credit — no employer claim.
+  workbook.creator = 'Zubair Jashim';
+  workbook.lastModifiedBy = 'Zubair Jashim';
+  workbook.description = 'Computer Science graduate, Qatar University';
   workbook.created = new Date(model.createdAt);
   workbook.modified = new Date(model.createdAt);
 
