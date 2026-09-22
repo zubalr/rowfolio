@@ -393,11 +393,17 @@ export function SpreadStage({ i18n, onOpen, onDownload }: SpreadStageProps) {
   };
 
   const watchDemo = () => {
-    // Primary CTA: play the loop from the top and reveal the stage. Under
-    // reduced-motion the finished report is already on screen — just
-    // scroll to it; chapter taps stay the manual review path.
-    if (!reduced) clock.replay();
-    revealStage();
+    // Primary CTA: play the loop from the top and bring the stage to the
+    // viewport top — unlike a chapter tap it scrolls even when the frame
+    // is partly in view, since its whole job is revealing the demo. Under
+    // reduced-motion the clock never runs, so the CTA seeks to the result
+    // glimpse — the finished composite — before pinning the stage.
+    if (reduced) {
+      setManualT(CHAPTER_SEEK[0]!);
+    } else {
+      clock.replay();
+    }
+    frameRef.current?.scrollIntoView({ block: "start", behavior: reduced ? "auto" : "smooth" });
   };
 
   const playing = state.status === "playing";
