@@ -163,6 +163,19 @@ describe('rule evaluation', () => {
       .toEqual([]);
   });
 
+  it('gates the missing-scores caveat on missing cells actually existing', () => {
+    const noMissing: NormalizedTable = {
+      ...table,
+      qualityIssues: table.qualityIssues.filter((q) => q.kind !== 'missing'),
+    };
+    const clean = analyze(noMissing, { ...OPTIONS, samplePolicyId: null });
+    expect(clean.findings.find((f) => f.id === 'finding-quality')?.limitations)
+      .not.toContain('limitations.missingRetained');
+    const withMissing = analyze(table, { ...OPTIONS, samplePolicyId: null });
+    expect(withMissing.findings.find((f) => f.id === 'finding-quality')?.limitations)
+      .toContain('limitations.missingRetained');
+  });
+
   it('keeps generic tables descriptive: no sample pack without a policy id', () => {
     expect(hasSampleColumns(table)).toBe(true);
     const generic = analyze(table, { ...OPTIONS, samplePolicyId: null });

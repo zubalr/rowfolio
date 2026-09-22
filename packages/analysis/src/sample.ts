@@ -595,7 +595,9 @@ export function buildSamplePack(unboundTable: NormalizedTable, scope: Scope): Sa
       scope: qualityScope,
       rank: { classPriority: 3, coverage: '1', magnitude: String(table.qualityIssues.length) },
       chartId: 'chart-quality',
-      limitations: ['limitations.missingRetained'],
+      limitations: table.qualityIssues.some((q) => q.kind === 'missing')
+        ? ['limitations.missingRetained']
+        : [],
     });
   }
 

@@ -306,9 +306,13 @@ function QualityBody({ model, metricById }: { model: ExportModel; metricById: Re
         <p className="rf-sp__card-line rf-sp__card-line--muted">
           {label(model.locale, 'quality.issues')} <b>{localizeDigits(formatInteger(String(q.issueCount)), model.numberingSystem)}</b>
         </p>
-        <p className="rf-sp__card-line rf-sp__card-line--muted">
-          {label(model.locale, 'quality.noImputation')}
-        </p>
+        {/* Deck parity: the no-imputation note only renders when missing
+            cells exist — zero missing must not read as a warning. */}
+        {Number(tracks.find((m) => m.id === 'quality-missing')?.value ?? '0') > 0 && (
+          <p className="rf-sp__card-line rf-sp__card-line--muted">
+            {label(model.locale, 'quality.noImputation')}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -373,7 +377,9 @@ function MethodologyBody({ model, nav }: { model: ExportModel; nav: boolean }): 
         {limits.map((key) => (
           <p className="rf-sp__card-line rf-sp__card-line--muted" key={key}>{label(model.locale, key)}</p>
         ))}
-        <p className="rf-sp__card-line rf-sp__card-line--muted">{label(model.locale, 'quality.noImputation')}</p>
+        {model.findings.some((f) => f.limitations.includes('limitations.missingRetained')) && (
+          <p className="rf-sp__card-line rf-sp__card-line--muted">{label(model.locale, 'quality.noImputation')}</p>
+        )}
       </div>
     </div>
   );

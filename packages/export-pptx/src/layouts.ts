@@ -778,7 +778,11 @@ function layoutQuality(ctx: LayoutContext): void {
     { text: localizeDigits(formatInteger(String(unresolved)), ctx.model.numberingSystem), options: { bold: true, breakLine: true, paraSpaceAfter: 12 } },
     { text: `${label(locale, 'quality.issues')}  `, options: { fontSize: SMALL_SIZE, color: GRAY } },
     { text: localizeDigits(formatInteger(String(issueCount)), ctx.model.numberingSystem), options: { fontSize: SMALL_SIZE, color: INK, bold: true, breakLine: true, paraSpaceAfter: 10 } },
-    { text: label(locale, 'quality.noImputation'), options: { fontSize: FOOT_SIZE, color: GRAY } },
+    // The no-imputation note is only true when missing cells exist — with
+    // zero missing issues the clause must not read as a warning.
+    ...(Number(trio.find((m) => m.id === 'quality-missing')?.value ?? '0') > 0
+      ? [{ text: label(locale, 'quality.noImputation'), options: { fontSize: FOOT_SIZE, color: GRAY } }]
+      : []),
   ], { x: RIGHT_X + 0.25, y: BODY_Y + 0.3, w: RIGHT_W - 0.5, h: 2.5, fontSize: BODY_SIZE, color: INK, valign: 'top' });
 }
 
