@@ -59,14 +59,16 @@ function FindingCard({
           </span>
         )}
       </button>
-      <button
-        type="button"
-        className="rf-linkbtn"
-        onClick={onEvidence}
-        data-testid="view-evidence-btn"
-      >
-        {i18n.tSafe('action.showWhy' as MessageKey)}
-      </button>
+      {finding.provenanceIds.length > 0 && (
+        <button
+          type="button"
+          className="rf-linkbtn"
+          onClick={onEvidence}
+          data-testid="view-evidence-btn"
+        >
+          {i18n.tSafe('action.showWhy' as MessageKey)}
+        </button>
+      )}
     </li>
   );
 }
