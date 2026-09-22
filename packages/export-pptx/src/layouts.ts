@@ -23,7 +23,7 @@ import type {
   Metric,
   SlideModel,
 } from '@rowfolio/contracts';
-import { exportUnitLabel, periodLabel } from '@rowfolio/export-model';
+import { exportUnitLabel, localizeDigits, periodLabel } from '@rowfolio/export-model';
 import { ExportPptxError } from './presentation.ts';
 import { hasLabel, label, metricDisplayName, scopeText } from './labels.ts';
 import {
@@ -167,7 +167,7 @@ function chrome(ctx: LayoutContext): void {
     });
   }
   const index = Number(slide.id.replace('slide-', '')) || 0;
-  deck.addText([{ text: `${index} / ${ctx.model.slides.length}`, options: { rtlMode: false, fontFace: FONT } }], {
+  deck.addText([{ text: localizeDigits(`${index} / ${ctx.model.slides.length}`, ctx.model.numberingSystem), options: { rtlMode: false, fontFace: FONT } }], {
     x: mx(ctx, 11.2, 1.58), y: FOOT_Y, w: 1.58, h: 0.4,
     fontSize: FOOT_SIZE, fontFace: FONT, color: GRAY, align: ea(ctx),
     objectName: `${slide.id}-folio`,
@@ -206,7 +206,7 @@ function findingSpanTokens(ctx: LayoutContext, finding: Finding): string | null 
     const proof = ctx.model.provenance.find((p) => p.id === proofId);
     for (const selection of proof?.selections ?? []) {
       for (const span of selection.spans) {
-        const token = `${span.start}–${span.end}`;
+        const token = localizeDigits(`${span.start}–${span.end}`, ctx.model.numberingSystem);
         if (seen.has(token)) continue;
         seen.add(token);
         if (tokens.length < 2) tokens.push(token);
@@ -214,7 +214,10 @@ function findingSpanTokens(ctx: LayoutContext, finding: Finding): string | null 
     }
   }
   if (tokens.length === 0) return null;
-  return seen.size > tokens.length ? `${tokens.join(', ')} +${seen.size - tokens.length}` : tokens.join(', ');
+  const joined = tokens.join(', ');
+  return seen.size > tokens.length
+    ? `${joined} ${localizeDigits(`+${seen.size - tokens.length}`, ctx.model.numberingSystem)}`
+    : joined;
 }
 
 /**
@@ -416,7 +419,7 @@ function spanTokens(ctx: LayoutContext, maxSpans = 3): string | null {
     for (const selection of proof.selections) {
       for (const span of selection.spans) {
         total += 1;
-        if (tokens.length < maxSpans) tokens.push(`${span.start}–${span.end}`);
+        if (tokens.length < maxSpans) tokens.push(localizeDigits(`${span.start}–${span.end}`, ctx.model.numberingSystem));
       }
     }
     void total;
@@ -495,14 +498,14 @@ function layoutSummary(ctx: LayoutContext): void {
     x: RIGHT_X, y: 2.22, w: RIGHT_W, h: 0.3, fontSize: FOOT_SIZE, color: GRAY,
   });
   bar(ctx, 'lineage-raw', RIGHT_X, 2.5, RIGHT_W, 0.4, RULE);
-  textBox(ctx, 'lineage-raw-value', [{ text: formatInteger(String(rawRows)) }], {
+  textBox(ctx, 'lineage-raw-value', [{ text: localizeDigits(formatInteger(String(rawRows)), ctx.model.numberingSystem) }], {
     x: RIGHT_X, y: 2.56, w: RIGHT_W - 0.1, h: 0.3, fontSize: FOOT_SIZE, color: INK, align: ea(ctx),
   });
   textBox(ctx, 'lineage-kept-label', [{ text: label(locale, 'common.retained') }], {
     x: RIGHT_X, y: 3.14, w: RIGHT_W, h: 0.3, fontSize: FOOT_SIZE, color: GRAY,
   });
   bar(ctx, 'lineage-kept', RIGHT_X, 3.42, keptW, 0.4, COBALT);
-  textBox(ctx, 'lineage-kept-value', [{ text: formatInteger(String(retainedRows)) }], {
+  textBox(ctx, 'lineage-kept-value', [{ text: localizeDigits(formatInteger(String(retainedRows)), ctx.model.numberingSystem) }], {
     x: RIGHT_X, y: 3.48, w: RIGHT_W - 0.1, h: 0.3, fontSize: FOOT_SIZE, color: INK, align: ea(ctx),
   });
   const disclosure = ctx.isSample ? label(locale, 'common.prepared') : label(locale, 'common.local');
@@ -571,7 +574,7 @@ function layoutKpis(ctx: LayoutContext): void {
     objectName: `${slide.id}-table`,
   });
   if (model.scenario !== null && model.scenario.status === 'defined') {
-    const line = label(locale, 'export.includesScenario').replace('{change}', formatPercent(model.scenario.costChange).replace('.0%', '%'));
+    const line = label(locale, 'export.includesScenario').replace('{change}', localizeDigits(formatPercent(model.scenario.costChange).replace('.0%', '%'), ctx.model.numberingSystem));
     textBox(ctx, 'scenario-label', [{ text: line }], {
       x: LEFT_X, y: 6.3, w: 12.23, h: 0.4, fontSize: SMALL_SIZE, color: AMBER,
     });
@@ -740,7 +743,7 @@ function layoutQuality(ctx: LayoutContext): void {
     const y = BODY_Y + i * 0.95;
     textBox(ctx, `q-label-${i}`, [
       { text: `${hasLabel(metric.labelKey) ? label(locale, metric.labelKey) : metric.id}  `, options: { color: GRAY } },
-      { text: formatInteger(metric.value ?? '0'), options: { color: INK, bold: true } },
+      { text: localizeDigits(formatInteger(metric.value ?? '0'), ctx.model.numberingSystem), options: { color: INK, bold: true } },
     ], { x: LEFT_X, y, w: LEFT_W, h: 0.5, fontSize: 16, color: INK });
     // Track bar shows the shared scale; the filled bar reads against it.
     bar(ctx, `q-track-${i}`, LEFT_X, y + 0.52, LEFT_W, 0.26, RULE);
@@ -755,11 +758,11 @@ function layoutQuality(ctx: LayoutContext): void {
   textBox(ctx, 'reconcile', [
     { text: label(locale, 'quality.reconciliation'), options: { fontSize: FOOT_SIZE, bold: true, color: GRAY, breakLine: true, paraSpaceAfter: 12 } },
     { text: `${label(locale, 'quality.resolved')}  `, options: { color: GRAY } },
-    { text: formatInteger(String(resolved)), options: { bold: true, color: TEAL, breakLine: true, paraSpaceAfter: 8 } },
+    { text: localizeDigits(formatInteger(String(resolved)), ctx.model.numberingSystem), options: { bold: true, color: TEAL, breakLine: true, paraSpaceAfter: 8 } },
     { text: `${label(locale, 'quality.unresolved')}  `, options: { color: GRAY } },
-    { text: formatInteger(String(unresolved)), options: { bold: true, breakLine: true, paraSpaceAfter: 12 } },
+    { text: localizeDigits(formatInteger(String(unresolved)), ctx.model.numberingSystem), options: { bold: true, breakLine: true, paraSpaceAfter: 12 } },
     { text: `${label(locale, 'quality.issues')}  `, options: { fontSize: SMALL_SIZE, color: GRAY } },
-    { text: formatInteger(String(issueCount)), options: { fontSize: SMALL_SIZE, color: INK, bold: true, breakLine: true, paraSpaceAfter: 10 } },
+    { text: localizeDigits(formatInteger(String(issueCount)), ctx.model.numberingSystem), options: { fontSize: SMALL_SIZE, color: INK, bold: true, breakLine: true, paraSpaceAfter: 10 } },
     { text: label(locale, 'quality.noImputation'), options: { fontSize: FOOT_SIZE, color: GRAY } },
   ], { x: RIGHT_X + 0.25, y: BODY_Y + 0.3, w: RIGHT_W - 0.5, h: 2.5, fontSize: BODY_SIZE, color: INK, valign: 'top' });
 }
@@ -775,9 +778,8 @@ function layoutMethodology(ctx: LayoutContext): void {
     { text: label(locale, 'common.source'), options: { bold: true, fontSize: FOOT_SIZE, color: GRAY, breakLine: true, paraSpaceAfter: 8 } },
     { text: ref.workbookName, options: { breakLine: true } },
     { text: `${label(locale, 'common.sheet')}: ${ref.sheetName}`, options: { breakLine: true } },
-    { text: `${label(locale, 'evidence.hash')}: ${model.sourceHash.slice(0, 12)}`, options: { breakLine: true } },
     {
-      text: `${formatInteger(String(model.qualitySummary.retainedRows))} / ${formatInteger(String(model.qualitySummary.rawRows))} ${label(locale, 'common.rows')}`,
+      text: `${localizeDigits(formatInteger(String(model.qualitySummary.retainedRows)), ctx.model.numberingSystem)} / ${localizeDigits(formatInteger(String(model.qualitySummary.rawRows)), ctx.model.numberingSystem)} ${label(locale, 'common.rows')}`,
       options: { breakLine: true },
     },
   ];
