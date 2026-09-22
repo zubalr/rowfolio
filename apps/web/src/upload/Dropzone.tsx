@@ -78,29 +78,21 @@ export function Dropzone({ i18n, onFile, hasPrior, disabled }: DropzoneProps) {
       <p className="rf-upload__meta" data-testid="upload-limits">
         {i18n.t("upload.types")}
       </p>
-      {/* Limit labels are schema-vocabulary tokens in mono; numerals are
-          formatted in the active numbering system. */}
       <ul className="rf-upload__limits">
         <li>
-          <bdi dir="ltr" className="rf-mono">
-            bytes
-          </bdi>
+          <span>{i18n.t("upload.limit.fileSize")}</span>
           <bdi dir="ltr" className="rf-mono">
             ≤ {i18n.formatInteger(limits.compressedBytes / 1048576)} MiB
           </bdi>
         </li>
         <li>
-          <bdi dir="ltr" className="rf-mono">
-            rows
-          </bdi>
+          <span>{i18n.t("upload.limit.rows")}</span>
           <bdi dir="ltr" className="rf-mono">
             ≤ {i18n.formatInteger(limits.rowsIncludingHeader)}
           </bdi>
         </li>
         <li>
-          <bdi dir="ltr" className="rf-mono">
-            columns
-          </bdi>
+          <span>{i18n.t("upload.limit.columns")}</span>
           <bdi dir="ltr" className="rf-mono">
             ≤ {i18n.formatInteger(limits.columns)}
           </bdi>

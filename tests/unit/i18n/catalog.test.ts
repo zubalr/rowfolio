@@ -32,10 +32,10 @@ describe("catalog contract identity", () => {
     // Hashes of the authoritative contract copies in the implementation
     // package; changing a catalog means a coordinated contract change.
     expect(sha256(join(LOCALES_DIR, "en.json"))).toBe(
-      "995c338e6612b2720e212fc0ca8a31307fcd6f3e6ac34a2721d8b331cac0e448",
+      "70fbaa72a271d55d55bd5e13ba33301970fe6f5730c7238585aedd235f6f725d",
     );
     expect(sha256(join(LOCALES_DIR, "ar.json"))).toBe(
-      "3ebefdf54de2df36d70ab0f964c6aaeede9a6821f92bb9bc2095282fbc0ecbcf",
+      "837da5e4500dca2d27d860120a21438c91844dc80b062afe86b1d6e749891810",
     );
   });
 
@@ -47,9 +47,9 @@ describe("catalog contract identity", () => {
     }
   });
 
-  it("contains 263 keys per locale", () => {
-    expect(Object.keys(enCatalogJson)).toHaveLength(263);
-    expect(Object.keys(arCatalogJson)).toHaveLength(263);
+  it("contains 266 keys per locale", () => {
+    expect(Object.keys(enCatalogJson)).toHaveLength(266);
+    expect(Object.keys(arCatalogJson)).toHaveLength(266);
   });
 });
 

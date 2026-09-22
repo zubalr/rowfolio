@@ -304,12 +304,15 @@ export function EvidencePanel({
                   contextProofs={bundle.snapshot.provenance}
                   i18n={i18n}
                 />
-                <p className="rf-evidence__method">
-                  {i18n.t("common.method")}:{" "}
-                  <Bidi dir="ltr" className="rf-evidence__id">
-                    {proof.precision}-digit · {proof.rounding} · policy {proof.policyVersion}
-                  </Bidi>
-                </p>
+                <div className="rf-evidence__method">
+                  {i18n.t("common.method")}: {i18n.t("method.precision.halfUp")}
+                  <details className="rf-evidence__tech">
+                    <summary>{i18n.t("common.technicalDetails")}</summary>
+                    <Bidi dir="ltr" className="rf-evidence__id">
+                      {proof.precision}-digit · {proof.rounding} · policy {proof.policyVersion}
+                    </Bidi>
+                  </details>
+                </div>
               </article>
             );
           })}
