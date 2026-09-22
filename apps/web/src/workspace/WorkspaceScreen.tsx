@@ -128,6 +128,62 @@ export function WorkspaceScreen({ navigateLanding }: { navigateLanding: () => vo
 
   const busy = state.phase === 'reading' || state.phase === 'profiling' || state.phase === 'analyzing' || state.phase === 'exporting';
 
+  const onUploadClick = () => {
+    if (state.phase === 'idle' && features.UploadFlow) {
+      // Focus the mounted upload surface rather than opening a parallel
+      // picker — one upload path, one review UX.
+      const drop = document.querySelector<HTMLElement>('[data-testid="upload-dropzone"] input[type="file"], .rf-upload input[type="file"]');
+      drop?.focus();
+      drop?.click();
+    } else {
+      fileRef.current?.click();
+    }
+  };
+  const onPrepareClick = () => {
+    controller.openExport();
+    void controller.prepareExport();
+  };
+  const onClearClick = () => void controller.clearSession().then(navigateLanding);
+  const onReplayClick = () => controller.replay();
+
+  // Compact masthead bar (<=640px): one primary action + the always-visible
+  // language switch + an accessible menu for everything secondary.
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    const onPointer = (e: PointerEvent) => {
+      if (menuRef.current !== null && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('pointerdown', onPointer);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('pointerdown', onPointer);
+    };
+  }, [menuOpen]);
+
+  const menuItem = (
+    label: MessageKey,
+    onClick: () => void,
+  ) => (
+    <button
+      type="button"
+      className="rf-linkbtn rf-mastmenu__item"
+      onClick={() => {
+        setMenuOpen(false);
+        onClick();
+      }}
+    >
+      {i18n.tSafe(label)}
+    </button>
+  );
+
   return (
     <LazyMotion features={domAnimation}>
       <MotionConfig reducedMotion="user">
@@ -140,17 +196,7 @@ export function WorkspaceScreen({ navigateLanding }: { navigateLanding: () => vo
           <Button
             variant="secondary"
             icon="upload"
-            onClick={() => {
-              if (state.phase === 'idle' && features.UploadFlow) {
-                // Focus the mounted upload surface rather than opening a
-                // parallel picker — one upload path, one review UX.
-                const drop = document.querySelector<HTMLElement>('[data-testid="upload-dropzone"] input[type="file"], .rf-upload input[type="file"]');
-                drop?.focus();
-                drop?.click();
-              } else {
-                fileRef.current?.click();
-              }
-            }}
+            onClick={onUploadClick}
             disabled={busy}
           >
             {i18n.tSafe('action.upload' as MessageKey)}
@@ -160,15 +206,12 @@ export function WorkspaceScreen({ navigateLanding }: { navigateLanding: () => vo
               <Button
                 variant="primary"
                 icon="download"
-                onClick={() => {
-                  controller.openExport();
-                  void controller.prepareExport();
-                }}
+                onClick={onPrepareClick}
                 data-testid="export-prepare-btn"
               >
                 {i18n.tSafe('action.prepare' as MessageKey)}
               </Button>
-              <button type="button" className="rf-linkbtn" onClick={() => controller.replay()}>
+              <button type="button" className="rf-linkbtn" onClick={onReplayClick}>
                 {i18n.tSafe('action.replay' as MessageKey)}
               </button>
             </>
@@ -176,13 +219,54 @@ export function WorkspaceScreen({ navigateLanding }: { navigateLanding: () => vo
           <button
             type="button"
             className="rf-linkbtn"
-            onClick={() => void controller.clearSession().then(navigateLanding)}
+            onClick={onClearClick}
             data-testid="clear-session-btn"
           >
             {i18n.tSafe('action.clear' as MessageKey)}
           </button>
           <LanguageToggle />
         </nav>
+        <div className="rf-mastbar">
+          {state.phase === 'ready' ? (
+            <Button
+              variant="primary"
+              icon="download"
+              onClick={onPrepareClick}
+              data-testid="export-prepare-btn"
+            >
+              {i18n.tSafe('action.prepare' as MessageKey)}
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              icon="upload"
+              onClick={onUploadClick}
+              disabled={busy}
+            >
+              {i18n.tSafe('action.uploadCompact' as MessageKey)}
+            </Button>
+          )}
+          <LanguageToggle />
+          <div className="rf-mastmore" ref={menuRef}>
+            <button
+              type="button"
+              className="rf-linkbtn"
+              aria-expanded={menuOpen}
+              aria-controls="rf-mastmenu"
+              aria-haspopup="true"
+              onClick={() => setMenuOpen((v) => !v)}
+            >
+              {i18n.tSafe('nav.menu' as MessageKey)}
+            </button>
+            {menuOpen && (
+              <div id="rf-mastmenu" className="rf-mastmenu" role="group" aria-label={i18n.tSafe('nav.menu' as MessageKey)}>
+                {state.phase === 'ready' && menuItem('action.upload' as MessageKey, onUploadClick)}
+                {state.phase === 'ready' && menuItem('action.replay' as MessageKey, onReplayClick)}
+                {menuItem('action.clear' as MessageKey, onClearClick)}
+              </div>
+            )}
+          </div>
+        </div>
         <input
           ref={fileRef}
           type="file"

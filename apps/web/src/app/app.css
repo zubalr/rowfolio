@@ -40,30 +40,52 @@
   flex-wrap: wrap;
 }
 
-/* Narrow masthead: brand pins the first row; the toolbar drops to a
-   single scrollable second row — never a ragged wrap around the wordmark.
-   A minmax(0,…) track is the hard floor: the nav cannot widen the page. */
+/* Compact masthead bar — one main action + visible locale + menu.
+   Hidden above the narrow breakpoint where the full nav fits. */
+.rf-mastbar {
+  display: none;
+}
+
+/* Narrow masthead: the full nav (which overflowed to a scrollable row and
+   pushed the language switch off-screen) is replaced by a compact bar —
+   primary action + language toggle + a "More" menu. No horizontal scroll;
+   every control stays reachable at 320px. */
 @media (max-width: 640px) {
   .rf-workspace .rf-masthead {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    row-gap: var(--rf-space-3);
+    gap: var(--rf-space-2);
     padding-block: var(--rf-space-3);
-    inline-size: 100%;
-    max-inline-size: 100%;
-    min-inline-size: 0;
-    box-sizing: border-box;
   }
-  .rf-mastnav {
-    min-inline-size: 0;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    justify-content: flex-start;
-    padding-block-end: var(--rf-space-1);
-    scrollbar-width: none;
-  }
-  .rf-mastnav::-webkit-scrollbar {
+  .rf-workspace .rf-mastnav {
     display: none;
+  }
+  .rf-mastbar {
+    display: flex;
+    align-items: center;
+    gap: var(--rf-space-2);
+    min-inline-size: 0;
+  }
+  .rf-mastmore {
+    position: relative;
+  }
+  .rf-mastmenu {
+    position: absolute;
+    inset-block-start: calc(100% + var(--rf-space-2));
+    inset-inline-end: 0;
+    z-index: 60;
+    min-inline-size: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    background: var(--rf-bg-raised);
+    border: 1px solid var(--rf-divider);
+    border-radius: var(--rf-radius-control);
+    box-shadow: 0 8px 24px rgb(16 25 30 / 0.14);
+    padding: var(--rf-space-1);
+  }
+  .rf-mastmenu__item {
+    text-align: start;
+    padding: var(--rf-space-3) var(--rf-space-3);
+    min-block-size: 44px;
   }
 }
 

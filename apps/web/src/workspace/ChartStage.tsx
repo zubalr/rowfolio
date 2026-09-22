@@ -5,7 +5,7 @@ import { useI18n, useServices, useSessionState } from '../app/context.tsx';
 import type { MessageKey } from '@rowfolio/i18n';
 import { chartFinding, emphasisKeyFor, heroChart } from './stageModel.ts';
 import { EvidenceChip } from './EvidenceChip.tsx';
-import { findingTitle } from './findingCopy.ts';
+import { findingBody, findingTitle } from './findingCopy.ts';
 import { formatScope } from '../evidence/model.ts';
 
 /**
@@ -20,15 +20,36 @@ export function ChartStage({ snapshot }: { snapshot: AnalysisSnapshot }) {
   const { controller } = useServices();
   const state = useSessionState();
   const selected = snapshot.findings.find((f) => f.id === state.selectedFindingId) ?? null;
-  const hero = heroChart(snapshot, selected);
+  // A selected finding with no chart (e.g. the descriptive overview) must not
+  // fall back to another finding's chart — show the finding itself.
+  const chartless = selected !== null && selected.chartId === null;
+  const hero = chartless ? null : heroChart(snapshot, selected);
   const heroFinding = hero === null ? null : (chartFinding(snapshot, hero.id) ?? selected);
   const restCharts =
-    hero === null ? snapshot.charts : snapshot.charts.filter((c) => c.id !== hero.id);
+    chartless || hero === null ? snapshot.charts : snapshot.charts.filter((c) => c.id !== hero.id);
   const localization = chartLocalization(i18n);
 
   return (
     <div className="rf-stage" id="overview">
-      {hero === null ? null : (
+      {chartless && selected !== null ? (
+        <div className="rf-stage-panel">
+          <header className="rf-stage-head">
+            <div className="rf-stage-titles">
+              <p className="rf-stage-eyebrow">
+                {i18n.tSafe('a11y.selectedFinding' as MessageKey)}
+              </p>
+              <h3 className="rf-stage-title">{findingTitle(i18n, selected)}</h3>
+              <p className="rf-stage-scope">{formatScope(i18n, selected.scope)}</p>
+            </div>
+            <EvidenceChip
+              findingId={selected.id}
+              hidden={state.evidenceFindingId === selected.id}
+              onOpen={() => controller.openEvidence(selected.id)}
+            />
+          </header>
+          <p className="rf-stage-body">{findingBody(i18n, snapshot, selected)}</p>
+        </div>
+      ) : hero === null ? null : (
         <div className="rf-stage-panel">
           <header className="rf-stage-head">
             <div className="rf-stage-titles">
