@@ -1,8 +1,10 @@
 /**
- * Broadsheet spread — production port of the Direction B trial onto the
- * shared token system (`--rf-*`). Three numbered plates + annotator loop
- * driven by demo/loopClock.ts; logical properties throughout so the
- * composition mirrors under html[dir="rtl"].
+ * Broadsheet spread — the first viewport is one demonstration: a fixed
+ * stage frame runs WORKBOOK → CHECKS → CHART → REPORT on demo/loopClock.ts,
+ * settles on the finished report, then crossfades in-frame back to a clean
+ * workbook. A visible caption line and a named chapter transport sit under
+ * the frame and never reflow between beats. Logical properties throughout
+ * so the composition mirrors under html[dir="rtl"].
  */
 
 /* --- page frame + masthead tag -------------------------------------- */
@@ -32,12 +34,11 @@ html[lang="ar"] .rf-masthead__tag {
 .rf-spread {
   display: grid;
   grid-template-columns: minmax(300px, 42%) minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr) auto;
   column-gap: var(--rf-space-5);
-  padding: var(--rf-space-4) var(--rf-space-5) 0;
+  padding: var(--rf-space-4) var(--rf-space-5) var(--rf-space-4);
   max-inline-size: 1360px;
   margin-inline: auto;
-  min-height: min(620px, calc(100svh - 120px));
+  min-height: min(640px, calc(100svh - 120px));
   position: relative;
 }
 
@@ -89,32 +90,6 @@ html[lang="ar"] .rf-lead__accent { transform: none; }
   max-inline-size: 56ch;
 }
 
-.rf-lead__stat {
-  margin-block-start: var(--rf-space-3);
-  padding-block-start: var(--rf-space-2);
-  border-block-start: 1px solid var(--rf-rule);
-  display: flex;
-  align-items: baseline;
-  gap: var(--rf-space-3);
-}
-.rf-lead__statnum {
-  font-size: clamp(26px, 2.4vw, 34px);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  font-variant-numeric: tabular-nums;
-  color: var(--rf-ink);
-  flex: none;
-}
-.rf-lead__statcap {
-  font-family: var(--rf-font-mono);
-  font-size: 11px;
-  color: var(--rf-muted);
-  max-inline-size: 34ch;
-  line-height: 1.45;
-}
-html[lang="ar"] .rf-lead__statcap { font-family: var(--rf-font-body); font-size: 12px; }
-.rf-lead__statinline { display: none; }
-
 .rf-lead__cta {
   margin-block-start: var(--rf-space-4);
   display: flex;
@@ -137,7 +112,7 @@ html[lang="ar"] .rf-lead__statcap { font-family: var(--rf-font-body); font-size:
 .rf-cta:focus-visible { outline: 2px solid var(--rf-focus); outline-offset: 2px; }
 .rf-lead__ctanote {
   font-family: var(--rf-font-mono);
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--rf-muted);
 }
 html[lang="ar"] .rf-lead__ctanote { font-family: var(--rf-font-body); font-size: 12.5px; }
@@ -145,115 +120,205 @@ html[lang="ar"] .rf-lead__ctanote { font-family: var(--rf-font-body); font-size:
 .rf-lead__small {
   margin: var(--rf-space-4) 0 0;
   font-family: var(--rf-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--rf-muted);
   line-height: 1.5;
   max-inline-size: 44ch;
 }
-html[lang="ar"] .rf-lead__small { font-family: var(--rf-font-body); font-size: 11px; }
+html[lang="ar"] .rf-lead__small { font-family: var(--rf-font-body); font-size: 12px; }
 
-/* --- plates ----------------------------------------------------------- */
-.rf-plates {
-  position: relative;
+/* --- the stage: fixed frame + stable caption + transport ---------------- */
+.rf-stage {
+  display: flex;
+  flex-direction: column;
   min-inline-size: 0;
-  outline: none;
 }
-.rf-plates:focus-visible { outline: 2px solid var(--rf-focus); outline-offset: 2px; }
-
-.rf-plate {
-  position: absolute;
+.rf-stage__frame {
+  position: relative;
+  flex: 1;
+  min-height: 0;
   background: var(--rf-surface);
   border: 1px solid var(--rf-rule);
   overflow: hidden;
+  outline: none;
 }
-.rf-plate__label {
-  height: 34px;
+.rf-stage__frame:focus-visible { outline: 2px solid var(--rf-focus); outline-offset: 2px; }
+
+/* one demonstration, one beat at a time — scenes stack in a fixed frame */
+.rf-scene {
+  position: absolute;
+  inset: 0;
+  padding: 14px 16px;
+  background: var(--rf-surface);
+  pointer-events: none;
+}
+.rf-scene--rep { padding: 0; }
+
+/* the caption is its own stable line: two lines reserved so the transport
+   beneath it never shifts between beats */
+.rf-stage__cap {
+  margin: var(--rf-space-2) 0 0;
+  min-block-size: 3em;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--rf-muted);
+}
+html[lang="ar"] .rf-stage__cap { font-size: 13.5px; }
+
+/* --- transport: named chapters + pause/play + replay --------------------- */
+.rf-transport {
+  display: flex;
+  align-items: stretch;
+  margin-block-start: var(--rf-space-2);
+  border: 1px solid var(--rf-rule);
+  background: var(--rf-surface);
+}
+.rf-tch {
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 0 14px;
-  border-block-end: 1px solid var(--rf-rule);
+  min-height: 44px;
+  padding: 0 10px;
+  background: none;
+  border: none;
+  border-inline-end: 1px solid var(--rf-rule);
+  cursor: pointer;
+  position: relative;
   font-family: var(--rf-font-mono);
-  font-size: var(--rf-plate-label-size);
-  font-weight: var(--rf-plate-label-weight);
-  letter-spacing: var(--rf-plate-label-tracking);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--rf-ink);
+  color: var(--rf-muted);
 }
-html[lang="ar"] .rf-plate__label {
+html[lang="ar"] .rf-tch {
   font-family: var(--rf-font-body);
   font-size: 12.5px;
-  font-weight: 600;
   letter-spacing: normal;
   text-transform: none;
 }
-.rf-plate__label > i { width: 24px; height: 2px; background: var(--rf-attention); flex: none; }
-.rf-plate__num { color: var(--rf-muted); font-variant-numeric: tabular-nums; }
-html[lang="ar"] .rf-plate__num { font-family: var(--rf-font-mono); }
+.rf-tch:hover { color: var(--rf-ink); }
+.rf-tch--on { color: var(--rf-ink); }
+.rf-tch__num { color: var(--rf-muted); font-variant-numeric: tabular-nums; }
+/* per-chapter progress — a fill along the button's bottom edge */
+.rf-tch__fill {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--rf-rule);
+  overflow: hidden;
+}
+.rf-tch__fill i {
+  display: block;
+  height: 100%;
+  background: var(--rf-ink);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+html[dir="rtl"] .rf-tch__fill i { transform-origin: right center; }
 
-.rf-plate__body { position: absolute; inset-inline: 0; top: 34px; bottom: 0; padding: 14px; }
-/* the trailing ~14px sits under REPORT — keep table content left of it */
-.rf-plate--data .rf-plate__body { padding: 10px; padding-inline-end: 26px; }
+.rf-tplay,
+.rf-treplay {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--rf-font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rf-muted);
+}
+html[lang="ar"] .rf-tplay,
+html[lang="ar"] .rf-treplay {
+  font-family: var(--rf-font-body);
+  font-size: 12.5px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+.rf-tplay:hover, .rf-treplay:hover { color: var(--rf-ink); }
+.rf-tplay__ic { width: 10px; height: 10px; }
+.rf-treplay__ic { width: 11px; height: 11px; }
+.rf-tch:focus-visible,
+.rf-tplay:focus-visible,
+.rf-treplay:focus-visible {
+  outline: 2px solid var(--rf-focus);
+  outline-offset: -2px;
+}
 
-/* layered spread via offset placement */
-.rf-plate--data { inset-inline-start: 0; top: 0; width: 46%; height: 55%; z-index: 1; }
-.rf-plate--find { inset-inline-start: 2%; top: 52%; width: 43%; height: 46%; z-index: 2; }
-.rf-plate--rep  { inset-inline-start: 44%; inset-inline-end: 0; top: 6%; height: 88%; z-index: 3; }
-
-/* --- DATA plate --------------------------------------------------------- */
-.rf-data__head { display: flex; align-items: center; gap: 8px; margin-block-end: 6px; }
-.rf-data__sheet { font-family: var(--rf-font-mono); font-size: 10.5px; color: var(--rf-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* --- WORKBOOK / CHECKS scene — the sheet -------------------------------- */
+.rf-scene--sheet { display: flex; flex-direction: column; }
+.rf-data__head { display: flex; align-items: center; gap: 8px; margin-block-end: 8px; }
+.rf-data__sheet { font-family: var(--rf-font-mono); font-size: 12px; color: var(--rf-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rf-filechip {
   display: inline-block;
   font-family: var(--rf-font-mono);
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--rf-ink);
   border: 1px solid var(--rf-rule);
   padding: 3px 9px;
   background: var(--rf-bg);
+  white-space: nowrap;
 }
 html[lang="ar"] .rf-data__sheet { font-family: var(--rf-font-body); }
 
-.rf-grid { width: 100%; border-collapse: collapse; }
+.rf-grid { width: 100%; border-collapse: collapse; margin-block-start: 4px; }
 .rf-grid th {
   font-family: var(--rf-font-mono);
-  font-size: 9.5px;
+  font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   color: var(--rf-muted);
   text-align: start;
-  padding: 0 5px 6px;
+  padding: 0 6px 7px;
   border-block-end: 1px solid var(--rf-rule);
   white-space: nowrap;
 }
-.rf-grid td {
+html[lang="ar"] .rf-grid th {
+  font-family: var(--rf-font-body);
   font-size: 12px;
+  letter-spacing: normal;
+}
+.rf-grid td {
+  font-size: 13px;
   color: var(--rf-ink);
-  padding: 4px 4px;
+  padding: 6px 6px;
   border-block-end: 1px solid var(--rf-rule);
   white-space: nowrap;
 }
 .rf-grid tr:last-child td { border-block-end: none; }
 .rf-grid .rf-num { text-align: end; font-variant-numeric: tabular-nums; }
 
-/* flags live in a strip under the plate head — the only band that is never
-   covered by the overlapping plates or the annotated rows themselves */
+/* check flags live above the table — the one band never covered by the
+   annotated cells themselves */
 .rf-data__flags {
   display: flex;
   flex-wrap: wrap;
-  gap: 3px 6px;
-  margin-block: 0 6px;
-  min-height: 22px;
+  gap: 4px 8px;
+  margin-block: 0 8px;
+  min-height: 26px;
 }
 .rf-data__foot {
-  margin-block-start: 10px;
+  margin-block-start: auto;
+  padding-block-start: 10px;
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.rf-rowcount { font-family: var(--rf-font-mono); font-size: 11px; color: var(--rf-muted); }
+.rf-rowcount { font-family: var(--rf-font-mono); font-size: 12px; color: var(--rf-muted); }
+html[lang="ar"] .rf-rowcount { font-family: var(--rf-font-body); }
 
 /* annotator */
 .rf-vrule {
@@ -286,47 +351,29 @@ html[dir="rtl"] .rf-strike { transform-origin: right center; }
 }
 .rf-flag {
   font-family: var(--rf-font-mono);
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--rf-attention);
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(224, 78, 26, 0.5);
-  padding: 2px 8px;
+  padding: 3px 9px;
   opacity: 0;
   white-space: nowrap;
   pointer-events: none;
 }
-html[lang="ar"] .rf-flag { font-family: var(--rf-font-body); font-size: 11px; }
+html[lang="ar"] .rf-flag { font-family: var(--rf-font-body); font-size: 12px; }
 
-/* ghost outlines shown until each plate's real content lands */
-.rf-ghost { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
-.rf-ghost i, .rf-ghost span { display: block; }
-.gf-head { position: absolute; top: 14px; inset-inline-start: 14px; width: 118px; height: 18px; border: 1px solid var(--rf-rule); border-radius: 3px; }
-.gf-plot { position: absolute; top: 56px; inset-inline-start: 14px; inset-inline-end: 44px; bottom: 56px; border-block-end: 1px solid var(--rf-rule); }
-.gf-tgt { position: absolute; inset-inline: 0; top: 8%; border-block-start: 1px dashed var(--rf-rule); }
-.gf-bar { position: absolute; inset-inline-start: 12%; bottom: 0; width: 30%; top: 8%; border: 1px solid var(--rf-rule); border-block-end: none; border-radius: 2px 2px 0 0; }
-.gf-ticks { position: absolute; inset-inline: 14px; bottom: 37px; height: 8px; border: 1px solid var(--rf-rule); border-radius: 4px; }
-.gf-cap { position: absolute; inset-inline-start: 14px; bottom: 9px; width: 140px; height: 9px; border: 1px solid var(--rf-rule); border-radius: 3px; }
-.rf-ghost--rep { inset: 14px; }
-.gr-kick { position: absolute; top: 2px; inset-inline-start: 0; width: 92px; height: 9px; border: 1px solid var(--rf-rule); border-radius: 3px; }
-.gr-title { position: absolute; top: 24px; inset-inline-start: 0; inset-inline-end: 22%; height: 18px; border: 1px solid var(--rf-rule); border-radius: 3px; }
-.gr-plot { position: absolute; top: 32%; inset-inline: 0; height: 38%; border-block-end: 1px solid var(--rf-rule); }
-.gr-tgt { position: absolute; inset-inline: 0; top: 8%; border-block-start: 1px dashed var(--rf-rule); }
-.gr-bar { position: absolute; inset-inline-start: 12%; bottom: 0; width: 30%; top: 8%; border: 1px solid var(--rf-rule); border-block-end: none; border-radius: 2px 2px 0 0; }
-.gr-note { position: absolute; inset-inline-end: 0; bottom: 26%; width: 108px; height: 9px; border: 1px solid var(--rf-rule); border-radius: 3px; }
-.gr-foot { position: absolute; inset-inline: 0; bottom: 21%; height: 9px; border-block-start: 1px solid var(--rf-rule); }
-.gr-wb { position: absolute; inset-inline: -14px; bottom: -14px; height: 76px; border-block-start: 1px solid var(--rf-rule); }
-
-/* --- FINDINGS plate ------------------------------------------------------ */
-.rf-fchips { display: flex; gap: 8px; margin-block-end: 8px; }
+/* --- CHART scene — actual vs target on a shared baseline ---------------- */
+.rf-scene--chart { display: flex; flex-direction: column; }
+.rf-fchips { display: flex; flex-wrap: wrap; gap: 8px; min-height: 28px; }
 .rf-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-family: var(--rf-font-mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
-  padding: 3px 9px;
+  padding: 4px 10px;
   border: 1px solid transparent;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
@@ -336,51 +383,68 @@ html[lang="ar"] .rf-flag { font-family: var(--rf-font-body); font-size: 11px; }
 .rf-chip--orders { color: var(--rf-positive); border-color: rgba(14, 143, 126, 0.45); }
 html[lang="ar"] .rf-chip { font-family: var(--rf-font-body); }
 
-.rf-fchart { position: absolute; top: 52px; inset-inline: 14px; bottom: 30px; }
-.rf-fchart__plot { position: absolute; top: 0; inset-inline: 0; inset-inline-end: 30px; bottom: 30px; border-block-end: 1px solid var(--rf-rule); }
-.rf-ftarget {
-  position: absolute;
-  inset-inline: 0;
-  top: 8%;
-  border-block-start: 1px dashed var(--rf-ink);
-  transform-origin: inline-start center;
-  transform-origin: right center;
+/* the plot is a grid of equal pairs: a value line over a bar lane that ends
+   on one shared baseline — the bar's % resolves against that lane only */
+.rf-chart__plot {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 14%;
+  padding: 6px 10% 0;
+  border-block-end: 1px solid var(--rf-rule);
 }
-.rf-ftarget span {
-  position: absolute;
-  inset-inline-start: 0;
-  top: -14px;
-  font-family: var(--rf-font-mono);
-  font-size: 10px;
-  color: var(--rf-ink);
+.rf-vpair {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
 }
-html[lang="ar"] .rf-ftarget span { font-family: var(--rf-font-body); }
-.rf-fbar { position: absolute; inset-inline-start: 12%; bottom: 0; width: 30%; top: 8%; }
-.rf-fbar i { position: absolute; inset-inline: 0; bottom: 0; height: 0%; background: var(--rf-data); }
-/* the value centers inside the bar's top — ink-on-cobalt, so it can never
-   clip against the bar edge or paint invisible ink on paper; the bar is
-   ≥70px wide at every viewport vs the ~67px EN / ~50px AR label */
-.rf-fbar-val {
-  position: absolute;
-  inset-inline: 0;
-  top: 3px;
+.rf-vbar-val {
+  align-self: end;
   text-align: center;
-  font-size: 10.5px;
-  font-weight: 700;
+  font-family: var(--rf-font-mono);
+  font-size: 13px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--rf-ink-text);
-  opacity: 0;
+  color: var(--rf-ink);
+  padding-block-end: 5px;
   white-space: nowrap;
 }
-.rf-rticks { position: absolute; inset-inline: 0; bottom: 0; height: 22px; display: flex; align-items: center; gap: 8px; }
+html[lang="ar"] .rf-vbar-val { font-family: var(--rf-font-body); }
+.rf-vbar {
+  align-self: end;
+  display: block;
+  width: 100%;
+  border-radius: 2px 2px 0 0;
+}
+.rf-vbar--observed { background: var(--rf-data); }
+.rf-vbar--target { background: var(--rf-muted); }
+.rf-vcats {
+  display: flex;
+  gap: 14%;
+  padding: 6px 10% 0;
+}
+.rf-vcats span {
+  flex: 1;
+  text-align: center;
+  font-family: var(--rf-font-mono);
+  font-size: 12px;
+  color: var(--rf-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html[lang="ar"] .rf-vcats span { font-family: var(--rf-font-body); font-size: 12.5px; }
+
+.rf-rticks { margin-block-start: 10px; display: flex; align-items: center; gap: 10px; }
 .rf-rticks__label, .rf-rticks__scale {
   font-family: var(--rf-font-mono);
-  font-size: 9.5px;
+  font-size: 12px;
   color: var(--rf-muted);
   flex: none;
 }
-html[lang="ar"] .rf-rticks__label, html[lang="ar"] .rf-rticks__scale { font-family: var(--rf-font-body); font-size: 10px; }
-.rf-rticks__track { position: relative; flex: 1; height: 8px; }
+html[lang="ar"] .rf-rticks__label, html[lang="ar"] .rf-rticks__scale { font-family: var(--rf-font-body); }
+.rf-rticks__track { position: relative; flex: 1; height: 8px; min-width: 40px; }
 .rf-rticks__band {
   position: absolute;
   top: -1px; bottom: -1px;
@@ -392,72 +456,73 @@ html[lang="ar"] .rf-rticks__label, html[lang="ar"] .rf-rticks__scale { font-fami
 .rf-rticks__tick { position: absolute; top: 0; width: 2px; height: 8px; background: var(--rf-positive); }
 .rf-rticks__tgt { position: absolute; top: -2px; width: 2px; height: 12px; background: var(--rf-ink); inset-inline-start: calc(100% / 1.1); }
 .rf-fcap {
-  position: absolute;
-  inset-inline-start: 14px;
-  bottom: 6px;
+  margin: var(--rf-space-2) 0 0;
   font-family: var(--rf-font-mono);
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--rf-muted);
 }
-html[lang="ar"] .rf-fcap { font-family: var(--rf-font-body); }
+html[lang="ar"] .rf-fcap { font-family: var(--rf-font-body); font-size: 12.5px; }
 
-/* --- REPORT plate -------------------------------------------------------- */
+/* --- REPORT scene -------------------------------------------------------- */
 .rf-rep__slide {
   position: absolute;
   inset-inline: 10px;
   top: 12px;
-  bottom: 78px; /* provenance note + wbstrip claim the bottom of the body */
+  bottom: 82px; /* provenance note + wbstrip claim the bottom of the scene */
 }
-/* the stamp/land beat: drive the mini report's parts from the plate's --vars */
-.rf-plate--rep .rf-mini__mast { opacity: var(--stamp, 1); }
-.rf-plate--rep .rf-mini__body {
+/* the stamp/land beat: drive the mini report's parts from the scene's --vars */
+.rf-scene--rep .rf-mini__mast { opacity: var(--stamp, 1); }
+.rf-scene--rep .rf-mini__body {
   opacity: var(--chart-in, 1);
   transform: translateY(calc((1 - var(--chart-in, 1)) * 8px));
 }
-.rf-plate--rep .rf-mini__foot { opacity: var(--foot-in, 1); }
+.rf-scene--rep .rf-mini__foot { opacity: var(--foot-in, 1); }
 .rf-rep__note {
   position: absolute;
   inset-inline-end: 14px;
   inset-inline-start: 14px;
-  bottom: 64px;
+  bottom: 70px;
   text-align: end;
   margin: 0;
   font-family: var(--rf-font-mono);
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--rf-muted);
   opacity: var(--note-in, 1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-html[lang="ar"] .rf-rep__note { font-family: var(--rf-font-body); font-size: 11px; }
+html[lang="ar"] .rf-rep__note { font-family: var(--rf-font-body); }
 .rf-wbstrip {
   position: absolute;
   inset-inline: 0;
   bottom: 0;
-  height: 56px;
+  height: 64px;
   border-block-start: 1px solid var(--rf-rule);
   background: var(--rf-bg);
   padding: 8px 14px;
   transform: translateY(calc((1 - var(--wb-in, 1)) * 100%));
 }
-.rf-wbstrip__title { margin: 0; font-size: 11.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rf-wbstrip__title { margin: 0; font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rf-wbstrip__tabs {
   margin: 3px 0 0;
   font-family: var(--rf-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--rf-muted);
-  line-height: 1.45;
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-html[lang="ar"] .rf-wbstrip__tabs { font-family: var(--rf-font-body); font-size: 10.5px; }
-.rf-wbstrip__dl { margin: 2px 0 0; font-family: var(--rf-font-mono); font-size: 10px; color: var(--rf-data); }
+html[lang="ar"] .rf-wbstrip__tabs { font-family: var(--rf-font-body); font-size: 11.5px; }
+.rf-wbstrip__dl { margin: 2px 0 0; font-family: var(--rf-font-mono); font-size: 11px; color: var(--rf-data); }
 html[lang="ar"] .rf-wbstrip__dl { font-family: var(--rf-font-body); }
 
-/* --- the report interior at plate scale (MiniReport) ----------------------
-   Real model strings at real reading sizes — the recomposed interior
-   keeps every meaningful label at ~11px+ and the title at body size,
-   instead of scaling a 16:9 slide's typography into illegibility. */
+/* --- the report interior at frame size (MiniReport) -----------------------
+   Real model strings at real reading sizes — the recomposed interior keeps
+   every label at ≥12px, stat values at ≥14px and the title ≥15px, instead
+   of scaling a 16:9 slide's typography into illegibility. */
 .rf-mini {
   margin: 0;
   height: 100%;
@@ -479,7 +544,7 @@ html[lang="ar"] .rf-wbstrip__dl { font-family: var(--rf-font-body); }
 }
 .rf-mini__title {
   margin: 0;
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 650;
   line-height: 1.32;
   letter-spacing: -0.005em;
@@ -487,10 +552,10 @@ html[lang="ar"] .rf-wbstrip__dl { font-family: var(--rf-font-body); }
 .rf-mini__sub {
   margin: 3px 0 0;
   font-family: var(--rf-font-mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--rf-muted);
 }
-html[lang="ar"] .rf-mini__sub { font-family: var(--rf-font-body); font-size: 11.5px; }
+html[lang="ar"] .rf-mini__sub { font-family: var(--rf-font-body); font-size: 12.5px; }
 .rf-mini__body {
   flex: 1;
   min-height: 0;
@@ -510,7 +575,7 @@ html[lang="ar"] .rf-mini__sub { font-family: var(--rf-font-body); font-size: 11.
   display: flex;
   align-items: baseline;
   gap: 6px;
-  font-size: 11.5px;
+  font-size: 13px;
   min-width: 0;
 }
 .rf-mini__dot { width: 5px; height: 5px; background: var(--rf-data); flex: none; align-self: center; }
@@ -518,6 +583,7 @@ html[lang="ar"] .rf-mini__sub { font-family: var(--rf-font-body); font-size: 11.
 .rf-mini__mval {
   margin-inline-start: auto;
   font-family: var(--rf-font-mono);
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
   color: var(--rf-ink);
   flex: none;
@@ -533,25 +599,26 @@ html[lang="ar"] .rf-mini__sub { font-family: var(--rf-font-body); font-size: 11.
 }
 .rf-mini__group { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .rf-mini__bars { flex: 1; min-height: 0; display: flex; align-items: flex-end; gap: 6px; }
+/* truth geometry: the bar's % must resolve against the bar lane alone, so
+   the cell is a grid of [value label][bar lane] — a flex column would
+   compress any bar taller than (cell − label) into identical pixel heights */
 .rf-mini__barcell {
   flex: 1;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: stretch;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   min-width: 0;
 }
 .rf-mini__barval {
   font-family: var(--rf-font-mono);
-  font-size: 10.5px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--rf-ink);
   text-align: center;
   white-space: nowrap;
   padding-bottom: 3px;
 }
-.rf-mini__bar { display: block; width: 100%; border-radius: 1px 1px 0 0; }
+.rf-mini__bar { display: block; width: 100%; border-radius: 1px 1px 0 0; align-self: end; }
 /* series hues match the real slide marks: cobalt observed, muted target */
 .rf-mini__bar--observed { background: var(--rf-data); }
 .rf-mini__bar--target { background: var(--rf-muted); }
@@ -559,7 +626,7 @@ html[lang="ar"] .rf-mini__sub { font-family: var(--rf-font-body); font-size: 11.
 .rf-mini__bar--attention { background: var(--rf-attention); }
 .rf-mini__cat {
   font-family: var(--rf-font-mono);
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--rf-muted);
   text-align: center;
   padding-top: 4px;
@@ -573,7 +640,7 @@ html[lang="ar"] .rf-mini__sub { font-family: var(--rf-font-body); font-size: 11.
   gap: 1px;
   margin: 6px 0 0;
   font-family: var(--rf-font-mono);
-  font-size: 10.5px;
+  font-size: 12px;
 }
 .rf-mini__charttitle { color: var(--rf-ink); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rf-mini__chartmeta { color: var(--rf-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -589,7 +656,7 @@ html[lang="ar"] .rf-mini__chartcap, html[lang="ar"] .rf-mini__mval {
   padding: 6px 12px 8px;
   border-block-start: 1px solid var(--rf-rule);
   margin-top: 6px;
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--rf-muted);
 }
 .rf-mini__scope { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -598,10 +665,10 @@ html[lang="ar"] .rf-mini__chartcap, html[lang="ar"] .rf-mini__mval {
 .rf-mini__file {
   margin: 4px 0 0;
   font-family: var(--rf-font-mono);
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--rf-data);
 }
-.rf-mini__rows { margin: 2px 0 0; font-size: 11px; color: var(--rf-muted); }
+.rf-mini__rows { margin: 2px 0 0; font-size: 12px; color: var(--rf-muted); }
 .rf-mini__sheets {
   list-style: none;
   margin: 8px 12px 0;
@@ -610,7 +677,7 @@ html[lang="ar"] .rf-mini__chartcap, html[lang="ar"] .rf-mini__mval {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  font-size: 12px;
+  font-size: 12.5px;
 }
 .rf-mini__sheets li {
   padding-inline-start: 10px;
@@ -620,87 +687,39 @@ html[lang="ar"] .rf-mini__chartcap, html[lang="ar"] .rf-mini__mval {
   text-overflow: ellipsis;
 }
 
-
-/* --- chapter rail -------------------------------------------------------- */
-.rf-rail {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: stretch;
-  border-block-start: 1px solid var(--rf-rule);
-  min-height: 34px;
+/* --- plate chrome (output section only — scoped so workspace plates and
+       the retired overlapping spread can never inherit it) --------------- */
+.rf-landing-root .rf-plate {
+  position: relative;
+  background: var(--rf-surface);
+  border: 1px solid var(--rf-rule);
+  overflow: hidden;
 }
-.rf-rmark {
-  flex: 1;
+.rf-landing-root .rf-plate__label {
+  height: 34px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 9px;
-  background: none;
-  border: none;
-  cursor: pointer;
+  gap: 8px;
+  padding: 0 14px;
+  border-block-end: 1px solid var(--rf-rule);
   font-family: var(--rf-font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
+  font-size: var(--rf-plate-label-size);
+  font-weight: var(--rf-plate-label-weight);
+  letter-spacing: var(--rf-plate-label-tracking);
   text-transform: uppercase;
-  color: var(--rf-muted);
+  color: var(--rf-ink);
 }
-html[lang="ar"] .rf-rmark {
+html[lang="ar"] .rf-landing-root .rf-plate__label {
   font-family: var(--rf-font-body);
+  font-size: 12.5px;
+  font-weight: 600;
   letter-spacing: normal;
   text-transform: none;
 }
-.rf-rmark i {
-  width: 26px;
-  height: 3px;
-  background: var(--rf-rule);
-  position: relative;
-  overflow: hidden;
-  flex: none;
-}
-.rf-rmark i::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--rf-ink);
-  transform: scaleX(var(--fill, 0));
-  transform-origin: left center;
-}
-html[dir="rtl"] .rf-rmark i::after { transform-origin: right center; }
-.rf-rmark--on { color: var(--rf-ink); }
-.rf-rmark:focus-visible, .rf-replay:focus-visible {
-  outline: 2px solid var(--rf-focus);
-  outline-offset: -2px;
-}
-.rf-replay {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--rf-font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--rf-muted);
-  background: none;
-  border: none;
-  border-inline-start: 1px solid var(--rf-rule);
-  padding: 0 20px;
-  cursor: pointer;
-}
-html[lang="ar"] .rf-replay { font-family: var(--rf-font-body); font-size: 12px; }
-.rf-replay:hover { color: var(--rf-ink); }
-.rf-replay__ic { width: 11px; height: 11px; }
-
-/* seam fade covers the plate region only — the page frame and masthead
-   stay put, so there is no full-viewport wash at the wrap */
-.rf-loopfade {
-  position: absolute;
-  inset: 0;
-  background: var(--rf-bg);
-  opacity: 0;
-  pointer-events: none;
-  z-index: 20;
-}
+.rf-landing-root .rf-plate__label > i { width: 24px; height: 2px; background: var(--rf-attention); flex: none; }
+.rf-landing-root .rf-plate__num { color: var(--rf-muted); font-variant-numeric: tabular-nums; }
+html[lang="ar"] .rf-landing-root .rf-plate__num { font-family: var(--rf-font-mono); }
+.rf-landing-root .rf-plate__body { padding: 14px; }
 
 /* --- composed narrow layouts -------------------------------------------- */
 @media (max-width: 760px) {
@@ -711,59 +730,58 @@ html[lang="ar"] .rf-replay { font-family: var(--rf-font-body); font-size: 12px; 
     display: block;
     min-height: 0;
     padding: var(--rf-space-4) var(--rf-space-4) 0;
-    padding-block-end: 76px;
   }
   .rf-lead { padding-block-start: var(--rf-space-2); }
   .rf-lead__title { font-size: clamp(32px, 10.4vw, 44px); line-height: 1.02; }
   .rf-lead__stand { font-size: 16px; }
-  .rf-lead__stat { display: none; }
-  .rf-lead__statinline {
-    display: block;
-    margin: var(--rf-space-3) 0 0;
-    font-family: var(--rf-font-mono);
-    font-size: 12px;
-    color: var(--rf-muted);
-  }
-  html[lang="ar"] .rf-lead__statinline { font-family: var(--rf-font-body); }
   .rf-lead__cta { margin-block-start: var(--rf-space-3); }
   .rf-cta { flex: 1; text-align: center; padding: 14px; }
   .rf-lead__ctanote { display: none; }
   .rf-lead__small { margin-block: var(--rf-space-3); }
 
-  .rf-plates { display: block; }
-  .rf-plate { position: relative; inset-inline: auto; top: auto; width: 100%; margin-block-end: 16px; }
-  .rf-plate--data { height: auto; min-height: 320px; }
-  /* stays relative at all widths: the absolute annotators (strike, ring,
-     vrule) must share the containing block their offsets are measured in */
-  .rf-plate--data .rf-plate__body { position: relative; padding: 14px; }
-  .rf-plate--find { height: 56vw; min-height: 208px; }
-  .rf-plate--rep { height: 64vw; min-height: 240px; }
+  /* phone is a designed composition: one beat per frame at reading size */
+  .rf-stage { margin-block-start: var(--rf-space-4); }
+  .rf-stage__frame { flex: none; height: min(520px, 62svh); min-height: 420px; }
+  .rf-stage__cap { font-size: 13.5px; }
 
-  /* mobile table: one excerpt row + the struck dup + the blank cell */
-  .rf-grid tbody tr:nth-child(3) { display: none; }
-  .rf-grid td { font-size: 12px; padding: 5px 2px; }
-  .rf-grid th { padding: 0 2px 6px; }
-
-  .rf-ghost--rep .gr-wb { display: none; }
-  .rf-plate--rep { height: auto; min-height: 400px; }
-  .rf-rep__slide { bottom: 34px; }
-  .rf-rep__note { bottom: 8px; inset-inline-end: 0; }
-  .rf-wbstrip { display: none; }
-  .rf-fchart { bottom: 30px; }
-  .rf-fchart__plot { inset-inline-end: 0; }
-  .rf-mini__metrics { gap: 3px; }
-
-  /* rail docks to the viewport bottom while the spread is on screen */
-  .rf-rail {
-    position: fixed;
-    inset-inline: 8px;
-    bottom: 8px;
-    z-index: 30;
-    min-height: 44px;
-    background: var(--rf-surface);
-    border: 1px solid var(--rf-rule);
+  /* the transport composes as a real control cluster — 4 chapters over a
+     pause/replay row, all ≥44px */
+  .rf-transport { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .rf-tch { gap: 4px; padding: 0 4px; font-size: 11px; letter-spacing: 0.03em; }
+  html[lang="ar"] .rf-tch { font-size: 12px; }
+  .rf-tch__num { display: none; }
+  .rf-tplay, .rf-treplay {
+    grid-column: span 2;
+    border-block-start: 1px solid var(--rf-rule);
+    font-size: 11.5px;
+    padding: 0 8px;
   }
-  .rf-rmark { gap: 5px; font-size: 10px; padding: 0 4px; }
-  .rf-rmark i { width: 14px; }
-  .rf-replay { padding: 0 10px; gap: 4px; font-size: 10px; }
+  .rf-treplay { border-inline-start: 1px solid var(--rf-rule); }
+
+  .rf-grid th { font-size: 10.5px; padding: 0 3px 6px; }
+  html[lang="ar"] .rf-grid th { font-size: 11.5px; }
+  .rf-grid td { font-size: 12px; padding: 5px 3px; }
+  /* filler rows only exist to fill the taller desktop frame */
+  .rf-grid tbody tr[data-filler] { display: none; }
+
+  /* the report interior recomposes for the width — two key stats, the
+     labeled chart and provenance; the workbook strip stays on desktop */
+  .rf-mini__metrics li:nth-child(n + 3) { display: none; }
+  .rf-rep__slide { bottom: 40px; }
+  .rf-rep__note {
+    bottom: 10px;
+    inset-inline-end: 10px;
+    inset-inline-start: 10px;
+    text-align: start;
+    white-space: normal;
+    text-overflow: clip;
+  }
+  .rf-wbstrip { display: none; }
+  .rf-mini__chartcap { display: none; }
+
+  /* the share-scale row stacks so neither label ever clips */
+  .rf-rticks { display: block; margin-block-start: 8px; }
+  .rf-rticks__label { display: block; }
+  .rf-rticks__track { display: block; margin-block: 6px 4px; }
+  .rf-rticks__scale { display: block; }
 }

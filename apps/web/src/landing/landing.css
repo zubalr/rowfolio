@@ -155,10 +155,10 @@ html[lang="ar"] .rf-secmark {
   position: static;
   padding: var(--rf-space-3);
 }
-/* the output figures run the same plate-scale interior as the spread's
-   REPORT plate — explicit height so the chart column has room to draw */
+/* the output figures run the same frame-scale interior as the stage's
+   REPORT scene — explicit height so the chart column has room to draw */
 .rf-output .rf-plate__body .rf-mini {
-  height: clamp(300px, 26vw, 380px);
+  height: clamp(360px, 30vw, 460px);
 }
 
 .rf-output__cap {
