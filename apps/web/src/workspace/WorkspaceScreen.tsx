@@ -465,8 +465,8 @@ function PhaseBody({
             </p>
             <p className="rf-quiet">
               {i18n.tSafe('workspace.records' as MessageKey, {
-                raw: String(active.snapshot.qualitySummary.rawRows),
-                clean: String(active.snapshot.qualitySummary.retainedRows),
+                raw: i18n.formatInteger(active.snapshot.qualitySummary.rawRows),
+                clean: i18n.formatInteger(active.snapshot.qualitySummary.retainedRows),
               })}
             </p>
           </header>
