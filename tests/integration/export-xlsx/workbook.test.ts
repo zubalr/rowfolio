@@ -455,3 +455,283 @@ describe('workbook structure', () => {
     expect(decoded.every((f) => !f.includes(`"${hostile}"`))).toBe(true);
   });
 });
+
+// --- bounded recalculation engine ------------------------------------------
+// Evaluates the exact formula grammar the writer emits (SUM/SUMIFS/IF/DATE,
+// sheet-qualified ranges, comparisons, arithmetic, &) over the packaged cell
+// grid, so formulas are verified against real data — not just their text.
+
+type CellGrid = Map<string, number | string>;
+type RangeRef = { sheet: string; c1: number; r1: number; c2: number; r2: number };
+type EvalVal = number | string | RangeRef;
+
+const colIndex = (letters: string): number =>
+  letters.split('').reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0);
+const colName = (index: number): string => {
+  let out = '';
+  for (let n = index; n > 0; n = Math.floor((n - 1) / 26)) out = String.fromCharCode(65 + ((n - 1) % 26)) + out;
+  return out;
+};
+const addrOf = (ref: string): [number, number] => {
+  const m = /^([A-Z]+)(\d+)$/.exec(ref.replace(/\$/g, ''));
+  if (m === null) throw new Error(`bad cell ref ${ref}`);
+  return [colIndex(m[1] as string), Number(m[2])];
+};
+
+function evalFormula(source: string, home: string, grids: ReadonlyMap<string, CellGrid>): number | string {
+  const tokens =
+    source.match(
+      /'[^']*'!|\$?[A-Z]+\$?\d+:\$?[A-Z]+\$?\d+|\$?[A-Z]+\$?\d+|"[^"]*"|\d+\.\d+|\d+|>=|<=|<>|>|<|=|\+|-|\*|\/|&|\(|\)|,|[A-Za-z_]+/g,
+    ) ?? [];
+  let pos = 0;
+  const peek = (): string | undefined => tokens[pos];
+  const num = (v: EvalVal): number => (typeof v === 'number' ? v : Number(v) || 0);
+  const cellAt = (sheet: string, addr: string): number | string | undefined => grids.get(sheet)?.get(addr);
+  const cellsOf = (r: RangeRef): Array<number | string | undefined> => {
+    const g = grids.get(r.sheet);
+    const out: Array<number | string | undefined> = [];
+    if (g === undefined) return out;
+    for (let rr = r.r1; rr <= r.r2; rr += 1) {
+      for (let cc = r.c1; cc <= r.c2; cc += 1) out.push(g.get(`${colName(cc)}${rr}`));
+    }
+    return out;
+  };
+  const refOf = (sheet: string, tok: string): EvalVal => {
+    const [a, b] = tok.split(':');
+    if (b === undefined) return cellAt(sheet, a.replace(/\$/g, '')) ?? 0;
+    const [c1, r1] = addrOf(a as string);
+    const [c2, r2] = addrOf(b);
+    return { sheet, c1, r1, c2, r2 };
+  };
+  const matches = (cell: number | string | undefined, criterion: EvalVal): boolean => {
+    if (typeof criterion === 'number') return cell === criterion;
+    const m = /^(>=|<=|<>|>|<|=)?(.*)$/.exec(String(criterion));
+    const op = m?.[1] ?? '=';
+    const rest = m?.[2] ?? '';
+    if (rest === '' || Number.isNaN(Number(rest))) {
+      return op === '=' && String(cell ?? '') === rest;
+    }
+    if (typeof cell !== 'number') return false;
+    const n = Number(rest);
+    switch (op) {
+      case '>=': return cell >= n;
+      case '<=': return cell <= n;
+      case '>': return cell > n;
+      case '<': return cell < n;
+      case '<>': return cell !== n;
+      default: return cell === n;
+    }
+  };
+  const call = (name: string, args: EvalVal[]): EvalVal => {
+    switch (name.toUpperCase()) {
+      case 'DATE':
+        return Math.round(Date.UTC(num(args[0] as EvalVal), num(args[1] as EvalVal) - 1, num(args[2] as EvalVal)) / 86400000) + 25569;
+      case 'IF':
+        return num(args[0] as EvalVal) !== 0 ? (args[1] as EvalVal) : ((args[2] as EvalVal) ?? '');
+      case 'SUM': {
+        let total = 0;
+        for (const a of args) {
+          for (const v of typeof a === 'object' ? cellsOf(a) : [a]) if (typeof v === 'number') total += v;
+        }
+        return total;
+      }
+      case 'SUMIFS': {
+        const sumRange = args[0] as RangeRef;
+        const sumCells = cellsOf(sumRange);
+        const pairs: Array<[RangeRef, EvalVal]> = [];
+        for (let i = 1; i + 1 < args.length; i += 2) pairs.push([args[i] as RangeRef, args[i + 1] as EvalVal]);
+        const critCells = pairs.map(([r]) => cellsOf(r));
+        let total = 0;
+        for (let i = 0; i < sumCells.length; i += 1) {
+          const ok = pairs.every(([, crit], p) => matches(critCells[p]?.[i], crit));
+          const v = sumCells[i];
+          if (ok && typeof v === 'number') total += v;
+        }
+        return total;
+      }
+      default:
+        throw new Error(`unsupported function ${name}`);
+    }
+  };
+  const parsePrimary = (): EvalVal => {
+    const t = tokens[pos++];
+    if (t === undefined) return 0;
+    if (t === '(') {
+      const v = parseConcat();
+      pos += 1; // ')'
+      return v;
+    }
+    if (t === '-') return -num(parsePrimary());
+    if (t.startsWith('"')) return t.slice(1, -1);
+    if (t.startsWith("'")) {
+      const sheet = t.slice(1).replace(/'!$/, '');
+      return refOf(sheet, tokens[pos++] as string);
+    }
+    if (/^[0-9]/.test(t)) return Number(t);
+    if (/^[A-Za-z_]+$/.test(t)) {
+      pos += 1; // '('
+      const args: EvalVal[] = [];
+      while (peek() !== ')') {
+        if (peek() === ',') pos += 1;
+        else args.push(parseConcat());
+      }
+      pos += 1; // ')'
+      return call(t, args);
+    }
+    return refOf(home, t);
+  };
+  const parseTerm = (): EvalVal => {
+    let v = parsePrimary();
+    while (peek() === '*' || peek() === '/') {
+      const op = tokens[pos++];
+      v = op === '*' ? num(v) * num(parsePrimary()) : num(v) / num(parsePrimary());
+    }
+    return v;
+  };
+  const parseArith = (): EvalVal => {
+    let v = parseTerm();
+    while (peek() === '+' || peek() === '-') {
+      const op = tokens[pos++];
+      v = op === '+' ? num(v) + num(parseTerm()) : num(v) - num(parseTerm());
+    }
+    return v;
+  };
+  const parseCmp = (): EvalVal => {
+    const v = parseArith();
+    const op = peek();
+    if (op === '>' || op === '<' || op === '>=' || op === '<=' || op === '=' || op === '<>') {
+      pos += 1;
+      const l = num(v);
+      const r = num(parseArith());
+      const ok =
+        op === '>' ? l > r : op === '<' ? l < r : op === '>=' ? l >= r : op === '<=' ? l <= r : op === '=' ? l === r : l !== r;
+      return ok ? 1 : 0;
+    }
+    return v;
+  };
+  const parseConcat = (): EvalVal => {
+    let v = parseCmp();
+    while (peek() === '&') {
+      pos += 1;
+      v = `${String(v as number | string)}${String(parseCmp() as number | string)}`;
+    }
+    return v;
+  };
+  const result = parseConcat();
+  if (typeof result === 'object') throw new Error('formula produced a bare range');
+  return result;
+}
+
+/** Cell grid per sheet name, resolved through workbook.xml + its rels. */
+function workbookGrids(entries: ReadonlyMap<string, Uint8Array>): {
+  grids: Map<string, CellGrid>;
+  pathByName: Map<string, string>;
+  sharedStrings: string[];
+} {
+  const stringsXml = textOf(entries, 'xl/sharedStrings.xml');
+  const sharedStrings = [...stringsXml.matchAll(/<si>([\s\S]*?)<\/si>/g)].map((m) =>
+    decodeXmlEntities([...m[1].matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map((t) => t[1]).join('')),
+  );
+  const rels = textOf(entries, 'xl/_rels/workbook.xml.rels');
+  const ridToTarget = new Map(
+    [...rels.matchAll(/Id="(rId\d+)"[^>]*Target="([^"]+)"/g)].map((m) => [m[1], m[2] as string]),
+  );
+  const wb = textOf(entries, 'xl/workbook.xml');
+  const pathByName = new Map<string, string>();
+  for (const m of wb.matchAll(/<sheet[^>]*name="([^"]+)"[^>]*r:id="(rId\d+)"/g)) {
+    const target = ridToTarget.get(m[2] as string);
+    if (target !== undefined) pathByName.set(decodeXmlEntities(m[1] as string), `xl/${target}`);
+  }
+  const grids = new Map<string, CellGrid>();
+  for (const [name, path] of pathByName) {
+    const xml = textOf(entries, path);
+    const grid: CellGrid = new Map();
+    for (const c of xml.matchAll(/<c r="([A-Z]+\d+)"([^>]*)>([\s\S]*?)<\/c>/g)) {
+      const v = /<v>([^<]*)<\/v>/.exec(c[3] as string)?.[1];
+      if (v === undefined) continue;
+      grid.set(c[1] as string, (c[2] as string).includes('t="s"') ? (sharedStrings[Number(v)] ?? '') : Number(v));
+    }
+    grids.set(name, grid);
+  }
+  return { grids, pathByName, sharedStrings };
+}
+
+describe('workbook formula recalculation', () => {
+  it('recalculates every emitted KPI formula to the model oracle over real serial dates', async () => {
+    for (const locale of ['en', 'ar'] as const) {
+      const model = buildExportModel(snapshot, table, scenario, locale, locale === 'ar' ? 'arab' : 'latn', CREATED);
+      const artifact = await buildWorkbook(model, () => undefined);
+      const entries = unzip(new Uint8Array(artifact.bytes));
+      const { grids, pathByName } = workbookGrids(entries);
+      const nameOf = (id: string): string =>
+        model.sheets.find((s) => s.id === id)?.name ?? id;
+
+      // Serial dates, not ISO shared strings: B is the sample's date column.
+      const cleanXml = textOf(entries, pathByName.get(nameOf('clean')) as string);
+      const dateCell = /<c r="B2"([^>]*)>([\s\S]*?)<\/c>/.exec(cleanXml);
+      expect(dateCell?.[0] ?? '').not.toContain('t="s"');
+      expect(Number(/<v>([^<]+)/.exec(dateCell?.[2] ?? '')?.[1]), 'B2 serial').toBeGreaterThan(40000);
+
+      const kpiName = nameOf('kpis');
+      const kpiXml = textOf(entries, pathByName.get(kpiName) as string);
+      // No bare whole-column SUMs; every summed metric is date-bounded.
+      expect(/\bSUM\(/.test(decodeXmlEntities(kpiXml)), 'unbounded SUM emitted').toBe(false);
+      const formulas = new Map<string, string>();
+      for (const c of kpiXml.matchAll(/<c r="([A-Z]+\d+)"[^>]*>([\s\S]*?)<\/c>/g)) {
+        const f = /<f[^>]*>([\s\S]*?)<\/f>/.exec(c[2] as string)?.[1];
+        if (f !== undefined) formulas.set(c[1] as string, decodeXmlEntities(f));
+      }
+      const dataMetrics = model.metrics.filter((m) => !m.id.startsWith('quality-'));
+      dataMetrics.forEach((metric, i) => {
+        const f = formulas.get(`B${i + 2}`);
+        if (f === undefined || metric.value === null) return;
+        const got = evalFormula(f, kpiName, grids);
+        expect(got, `${locale}/${metric.id}: ${f}`).toBeCloseTo(Number(metric.value), 6);
+      });
+    }
+  });
+
+  it('lands every proof link on its matching Methodology proof label', async () => {
+    for (const locale of ['en', 'ar'] as const) {
+      const model = buildExportModel(snapshot, table, scenario, locale, locale === 'ar' ? 'arab' : 'latn', CREATED);
+      const artifact = await buildWorkbook(model, () => undefined);
+      const entries = unzip(new Uint8Array(artifact.bytes));
+      const { grids, pathByName } = workbookGrids(entries);
+      const nameOf = (id: string): string => model.sheets.find((s) => s.id === id)?.name ?? id;
+      const methodGrid = grids.get(nameOf('methodology'));
+      const dataMetrics = model.metrics.filter((m) => !m.id.startsWith('quality-'));
+      const proofIds = new Set(model.provenance.map((p) => p.id));
+      const labelOf = (addr: string): string => {
+        const v = methodGrid?.get(addr);
+        return typeof v === 'string' ? v : '';
+      };
+      const labelFor = (id: string): string =>
+        (locale === 'ar' ? 'إثبات' : 'Proof') + ` ${id}`;
+
+      // KPI sheet: each metric row's A-cell link must land on THAT metric's proof.
+      const kpiXml = textOf(entries, pathByName.get(nameOf('kpis')) as string);
+      let kpiLinks = 0;
+      for (const m of kpiXml.matchAll(/<hyperlink ref="A(\d+)"[^>]*location="#[^!]+!A(\d+)"/g)) {
+        kpiLinks += 1;
+        const metric = dataMetrics[Number(m[1]) - 2];
+        expect(metric, `link at KPI row ${m[1]}`).toBeDefined();
+        const want = labelFor(metric?.provenanceId ?? '');
+        expect(labelOf(`A${m[2]}`), `${locale}/${metric?.id} -> A${m[2]}`).toBe(want);
+      }
+      expect(kpiLinks).toBeGreaterThan(0);
+
+      // Summary sheet: every link must land on some real proof label, never a
+      // fixed metadata row (the stale 9+i bug landed on Template/Locale).
+      const summaryXml = textOf(entries, pathByName.get(nameOf('summary')) as string);
+      const summaryLinks = [...summaryXml.matchAll(/<hyperlink ref="A\d+"[^>]*location="#[^!]+!A(\d+)"/g)];
+      expect(summaryLinks.length).toBeGreaterThan(0);
+      for (const m of summaryLinks) {
+        const text = labelOf(`A${m[1]}`);
+        expect(
+          [...proofIds].some((id) => text === labelFor(id)),
+          `${locale} summary link -> A${m[1]} (${text})`,
+        ).toBe(true);
+      }
+    }
+  });
+});
