@@ -242,23 +242,12 @@ html[lang="ar"] .rf-secmark {
 }
 
 @media (max-width: 360px) {
-  /* at 320 the unified CTA label cannot share the wordmark's row even as
-     a link (~170px + language + brand > 304px of content width) — the
-     nav wraps to a second row, where every control fits: GitHub, the
-     language link and the demoted CTA */
+  /* GitHub yields its spot below 361px — the nav's own row still can't
+     carry it beside the CTA label (it rejoins at 361+) */
   .rf-landing-root .rf-masthead {
-    flex-wrap: wrap;
-    row-gap: var(--rf-space-1);
     padding-inline: 8px;
     column-gap: 6px;
   }
-  .rf-landing-root .rf-nav {
-    flex-basis: 100%;
-    justify-content: flex-end;
-    gap: 4px var(--rf-space-3);
-  }
-  /* GitHub yields its spot to the demoted CTA below 361px (it joins the
-     row again at 361+, before the footer is reachable) */
   .rf-landing-root .rf-nav a[href^="https://github.com/zubalr/rowfolio"] { display: none; }
   .rf-landing-root .rf-brand { font-size: 16px; }
 }
@@ -268,11 +257,29 @@ html[lang="ar"] .rf-secmark {
      screen — keep wordmark + GitHub + language + the CTA visible */
   .rf-landing-root .rf-nav a[href="#how-it-works"] { display: none; }
 
-  /* "Open the example workspace" is ~210px of button chrome — the row
-     can't carry it beside the wordmark at phone widths. Demote the
-     masthead CTA to a text link (the specimen's phone pattern for a
-     secondary action); it stays a <button> with the 44px control
-     height, and GitHub + the language link stay on the single row. */
+  /* "Open the example workspace" is ~210px of button chrome — no row can
+     carry it beside the wordmark at phone widths. The nav takes its own
+     row so every masthead control holds a real ≥44px target in its own
+     layout space — no padding tricks, no negative margins, nothing
+     sitting under a neighbour's hit box. */
+  .rf-landing-root .rf-masthead {
+    flex-wrap: wrap;
+    row-gap: var(--rf-space-1);
+  }
+  .rf-landing-root .rf-brand {
+    min-block-size: var(--rf-control-height);
+  }
+  .rf-landing-root .rf-nav {
+    flex-basis: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    column-gap: var(--rf-space-2);
+  }
+  .rf-landing-root .rf-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--rf-control-height);
+  }
   .rf-landing-root .rf-masthead__ws {
     background: none;
     border-color: transparent;
@@ -282,28 +289,10 @@ html[lang="ar"] .rf-secmark {
     font-size: 13px;
     font-weight: 500;
     white-space: nowrap;
+    min-block-size: var(--rf-control-height);
   }
   .rf-landing-root .rf-masthead__ws:hover:not(:disabled) {
     border-color: transparent;
-  }
-  /* where even the demoted link cannot share the row, nav items drop to
-     a second line inside the nav instead of overflowing the page —
-     every control stays reachable */
-  .rf-landing-root .rf-nav {
-    flex-wrap: wrap;
-    row-gap: 0;
-    column-gap: var(--rf-space-3);
-  }
-  /* ≥44px hit areas on touch widths — transparent padding expands the
-     hit box while matching negative margins keep the line metrics */
-  .rf-landing-root .rf-nav a {
-    display: inline-block;
-    padding-block: 12px;
-    margin-block: -12px;
-  }
-  .rf-landing-root .rf-masthead__ws {
-    min-block-size: 44px;
-    margin-block: -6px;
   }
 }
 
