@@ -329,6 +329,34 @@ html[lang='ar'] .rf-wstage-scope {
   }
 }
 
+/* The strip lays on a bounded grid, not a flex basis: a nowrap figure +
+   unit that can't fit its cell must wrap to the next row rather than
+   paint over the neighbouring metric (measured collision at 768px:
+   "$1,000,000.00 USD" bled into the next value). auto-fit keeps every
+   item the same track width — no stretched last row. */
+.rf-workspace .rf-metric-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: var(--rf-space-5) var(--rf-space-6);
+}
+/* The feature metric still leads on a row of its own (its flex-basis is
+   inert under grid). */
+.rf-workspace .rf-metric--feature {
+  grid-column: 1 / -1;
+}
+/* The unit may drop below the figure before ever colliding. */
+.rf-workspace .rf-metric__value {
+  flex-wrap: wrap;
+}
+/* Rail figures step down a size tier sooner than the 767px primitive
+   breakpoint — the grid keeps ~300px cells well past tablet widths. */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .rf-workspace .rf-metric__value {
+    font-size: 30px;
+    line-height: 1.2;
+  }
+}
+
 /* KPI denominators — "97 / 100 records" under each headline number. */
 .rf-metric-scope {
   font-size: 12px;

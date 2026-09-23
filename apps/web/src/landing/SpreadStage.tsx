@@ -414,8 +414,12 @@ export function SpreadStage({ i18n, onOpen, onDownload }: SpreadStageProps) {
         <p className="rf-lead__kicker">{landingCopy(locale, "lead.kicker")}</p>
         <h1 className="rf-lead__title" id="rf-hero-title">
           {landingCopy(locale, "lead.title.pre")}
-          <em className="rf-lead__accent">{landingCopy(locale, "lead.title.accent")}</em>
-          {landingCopy(locale, "lead.title.post")}
+          {/* the accent + its terminal punctuation are one wrapping unit —
+              the period never orphans onto its own line */}
+          <span className="rf-lead__accline">
+            <em className="rf-lead__accent">{landingCopy(locale, "lead.title.accent")}</em>
+            {landingCopy(locale, "lead.title.post")}
+          </span>
         </h1>
         <p className="rf-lead__stand">{landingCopy(locale, "lead.standfirst")}</p>
         <div className="rf-lead__cta">
