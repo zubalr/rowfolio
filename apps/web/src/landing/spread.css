@@ -629,20 +629,27 @@ html[lang="ar"] .rf-wbstrip__tabs { font-family: var(--rf-font-body); font-size:
   /* filler rows only exist to fill the taller desktop frame */
   .rf-grid tbody tr[data-filler] { display: none; }
 
-  /* the report interior recomposes for the width — the workbook strip
-     keeps only its actions so they stay reachable */
-  .rf-rep__slide { bottom: 84px; top: 8px; }
+  /* the report interior becomes a real column at phone widths: the
+     provenance note is a normal-flow row between the miniature and the
+     workbook strip — a wrapped two-line note takes real space and can
+     never overlap the slide footer */
+  .rf-scene--rep { display: flex; flex-direction: column; }
+  .rf-scene--rep .rf-rep__slide {
+    position: static;
+    flex: 1;
+    min-block-size: 0;
+    margin: 8px 10px 0;
+  }
+  .rf-rep__note {
+    position: static;
+    margin: 6px 10px;
+    text-align: start;
+    white-space: normal;
+  }
+  .rf-scene--rep .rf-wbstrip { position: static; }
   /* the scene drops the slide's subtitle line so the stat list + chart
      keep real height inside the small frame */
   .rf-scene--rep .rf-mini__sub { display: none; }
-  .rf-rep__note {
-    bottom: 60px;
-    inset-inline-end: 10px;
-    inset-inline-start: 10px;
-    text-align: start;
-    white-space: normal;
-    text-overflow: clip;
-  }
 
   /* the share-scale row stacks so neither label ever clips */
   .rf-rticks { display: block; margin-block-start: 8px; }
@@ -669,9 +676,4 @@ html[lang="ar"] .rf-wbstrip__tabs { font-family: var(--rf-font-body); font-size:
   .rf-transport { grid-template-columns: 1.3fr 1fr 1fr 1.1fr; }
   .rf-tch { letter-spacing: 0.01em; padding-inline: 2px; }
 
-  /* the provenance note wraps to two lines at this width — sit it wholly
-     above the taller slim strip rather than clipping under it; the slide
-     gives back the difference */
-  .rf-rep__slide { bottom: 118px; }
-  .rf-rep__note { bottom: 80px; }
 }
