@@ -12,7 +12,7 @@ import {
   formatPercent,
   formatPp,
 } from '../../../packages/export-pptx/src/format.ts';
-import { hasLabel, label } from '../../../packages/export-pptx/src/labels.ts';
+import { hasLabel, label, unitLabel } from '../../../packages/export-pptx/src/labels.ts';
 
 describe('display formatting', () => {
   it('groups full values without changing them', () => {
@@ -54,6 +54,21 @@ describe('display formatting', () => {
     expect(formatMetricValue('-6', u('percentage-point', 'pp'))).toBe('-6pp');
     expect(formatMetricValue('1565', u('minutes', 'minutes'))).toBe('1,565 minutes');
     expect(formatMetricValue(null, u('currency', 'USD', 'USD'))).toBe('—');
+  });
+
+  it('inflects the records unit for the exact count it measures', () => {
+    const u = (kind: string, label: string, currency: string | null = null) =>
+      ({ kind, label, currency }) as const;
+    const en = (key: string, count?: number) => unitLabel('en', key, count);
+    const ar = (key: string, count?: number) => unitLabel('ar', key, count);
+    expect(formatMetricValue('1', u('count', 'records'), en)).toBe('1 record');
+    expect(formatMetricValue('0', u('count', 'records'), en)).toBe('0 records');
+    expect(formatMetricValue('17', u('count', 'records'), en)).toBe('17 records');
+    expect(formatMetricValue('1', u('count', 'records'), ar, 'arab')).toBe('١ سجل');
+    expect(formatMetricValue('5', u('count', 'records'), ar, 'arab')).toBe('٥ سجلات');
+    // User-data units and labeler-free calls keep the raw label verbatim.
+    expect(formatMetricValue('1', u('minutes', 'minutes'), en)).toBe('1 minutes');
+    expect(formatMetricValue('1', u('count', 'records'))).toBe('1 records');
   });
 });
 

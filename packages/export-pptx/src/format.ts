@@ -9,14 +9,14 @@
  * carry the exact values.
  */
 import { isDecimal } from '@rowfolio/contracts';
-import { exportUnitLabel, localizeDigits } from '@rowfolio/export-model';
+import { exportUnitLabel, localizeDigits, unitLabelKey } from '@rowfolio/export-model';
 import type { Unit } from '@rowfolio/contracts';
 
 /** Numbering system for artifact digits; 'latn' default keeps Latin numerals. */
 export type Numbering = 'latn' | 'arab';
 
-/** Resolves a catalog unit label (e.g. unit.records) for the artifact locale. */
-export type UnitLabeler = (key: string) => string;
+/** Resolves a catalog unit label (e.g. unit.records) for the artifact locale; `count` picks an inflected variant when the locale table declares one. */
+export type UnitLabeler = (key: string, count?: number) => string;
 
 function dig(text: string, numbering?: Numbering): string {
   return numbering === undefined || numbering === 'latn' ? text : localizeDigits(text, numbering);
@@ -111,6 +111,20 @@ export function formatPp(value: string, labeler?: UnitLabeler, numbering?: Numbe
   return `${dig(formatFull(value), numbering)} ${labeler('unit.pp')}`;
 }
 
+/**
+ * Unit label for a measured count: catalog-backed labels resolve through the
+ * labeler with the exact count so pluralized variants (`unit.records.one`)
+ * can apply; user-data and suppressed units keep `exportUnitLabel` verbatim.
+ */
+function countedUnitLabel(value: string, unit: Unit, labeler?: UnitLabeler): string {
+  const key = unitLabelKey(unit);
+  const count = Number(value);
+  if (key === null || labeler === undefined || !Number.isFinite(count)) {
+    return exportUnitLabel(unit, labeler);
+  }
+  return labeler(key, count);
+}
+
 /** Unit-aware display for a metric value. Null stays explicitly unavailable. */
 export function formatMetricValue(value: string | null, unit: Unit, labeler?: UnitLabeler, numbering?: Numbering): string {
   if (value === null) return '—';
@@ -125,7 +139,7 @@ export function formatMetricValue(value: string | null, unit: Unit, labeler?: Un
     case 'count':
     case 'minutes':
     case 'score':
-      return `${dig(formatInteger(value), numbering)} ${unitLabel}`.trim();
+      return `${dig(formatInteger(value), numbering)} ${countedUnitLabel(value, unit, labeler)}`.trim();
     default:
       return dig(formatFull(value), numbering);
   }

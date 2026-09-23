@@ -80,6 +80,7 @@ const STRINGS: Record<Locale, Record<string, string>> = {
     "common.metric": "Metric",
     "common.technicalDetails": "Technical details",
     "unit.records": "records",
+    "unit.records.one": "record",
     "unit.pp": "percentage points",
     "common.allRegions": "All regions",
     "common.rows": "Source rows",
@@ -189,6 +190,7 @@ const STRINGS: Record<Locale, Record<string, string>> = {
     "common.metric": "مقياس",
     "common.technicalDetails": "تفاصيل تقنية",
     "unit.records": "سجلات",
+    "unit.records.one": "سجل",
     "unit.pp": "نقاط مئوية",
     "common.allRegions": "جميع المناطق",
     "common.rows": "صفوف المصدر",
@@ -246,6 +248,25 @@ export function label(locale: Locale, key: string): string {
     throw new Error(`missing deck label for key ${JSON.stringify(key)} (${locale})`);
   }
   return value;
+}
+
+const PLURAL_RULES: Record<Locale, Intl.PluralRules> = {
+  en: new Intl.PluralRules('en'),
+  ar: new Intl.PluralRules('ar'),
+};
+
+/**
+ * Localized unit label inflected for `count`: a `<key>.<CLDR category>`
+ * variant wins when the table carries it (e.g. unit.records.one), else the
+ * base label stands, so every count without a declared form keeps the
+ * established wording.
+ */
+export function unitLabel(locale: Locale, key: string, count?: number): string {
+  if (count !== undefined) {
+    const variant = `${key}.${PLURAL_RULES[locale].select(count)}`;
+    if (hasLabel(variant)) return label(locale, variant);
+  }
+  return label(locale, key);
 }
 
 /** True when both locales carry the key. */
