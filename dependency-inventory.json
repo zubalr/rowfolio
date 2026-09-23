@@ -1634,7 +1634,9 @@
       "scope": "runtime",
       "integrity": "sha512-3l+rb15IOWtUhU0H5MFqES/T6Kh7abYwjosBey/vD6hDt8zoEffkSC5Ws5SGtgVw3gBx2NEbhTeSW1+kWkpyTQ==",
       "source": "npmjs",
-      "declaredIn": []
+      "declaredIn": [
+        "packages/export-xlsx"
+      ]
     },
     {
       "name": "keyv",

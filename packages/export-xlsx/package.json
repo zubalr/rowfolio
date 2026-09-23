@@ -12,6 +12,7 @@
   "dependencies": {
     "@rowfolio/contracts": "workspace:*",
     "@rowfolio/export-model": "workspace:*",
-    "exceljs": "4.4.0"
+    "exceljs": "4.4.0",
+    "jszip": "3.10.2"
   }
 }

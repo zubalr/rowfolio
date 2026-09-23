@@ -155,6 +155,52 @@ describe('workbook structure', () => {
     assertInternalLinksOnly(entries);
   });
 
+  it('emits table parts spanning the laid-out rows and schema-ordered drawings', async () => {
+    const { bytes } = await buildEn();
+    const entries = unzip(bytes);
+    // exceljs derives a table's ref from the rows passed to addTable, not from
+    // cells written via addRow — header-only refs made Excel strip the tables
+    // (and filters) in repair. Each part must cover its real range.
+    const tableXml = (name: string): string => {
+      const part = [...entries.keys()].find(
+        (n) => n.startsWith('xl/tables/') && textOf(entries, n).includes(`name="${name}"`),
+      );
+      expect(part, `table part ${name}`).toBeDefined();
+      return textOf(entries, part as string);
+    };
+    const refOf = (xml: string): string => /<table[^>]*\bref="([^"]+)"/.exec(xml)?.[1] ?? '';
+    const filterRefOf = (xml: string): string => /<autoFilter[^>]*\bref="([^"]+)"/.exec(xml)?.[1] ?? '';
+    const lastRow = (ref: string): number => Number(/(\d+)$/.exec(ref)?.[1]);
+
+    const clean = tableXml('CleanData');
+    expect(lastRow(refOf(clean))).toBe(table.rows.length + 1);
+    expect(filterRefOf(clean)).toBe(refOf(clean));
+
+    const quality = tableXml('DataQuality');
+    expect(lastRow(refOf(quality))).toBe(table.qualityIssues.length + 1);
+    expect(filterRefOf(quality)).toBe(refOf(quality));
+
+    const kpis = tableXml('KpiAnalysis');
+    expect(refOf(kpis)).toMatch(/^A1:D\d+$/);
+    expect(lastRow(refOf(kpis))).toBeGreaterThan(1);
+    expect(filterRefOf(kpis)).toBe(refOf(kpis));
+
+    const method = tableXml('Methodology');
+    // Headerless table: a valid range, never the A1:B0 collapse Excel rejected.
+    expect(refOf(method)).toMatch(/^A1:B[1-9]\d*$/);
+
+    // legacyDrawing (cell-note VML) must precede tableParts — exceljs emits it
+    // last, and strict parsers discard the entire sheet on that order.
+    for (const path of [...entries.keys()].filter((n) => /^xl\/worksheets\/sheet\d+\.xml$/.test(n))) {
+      const xml = textOf(entries, path);
+      const drawingAt = xml.indexOf('<legacyDrawing');
+      const partsAt = xml.indexOf('<tableParts');
+      if (drawingAt !== -1 && partsAt !== -1) {
+        expect(drawingAt, `${path}: legacyDrawing must precede tableParts`).toBeLessThan(partsAt);
+      }
+    }
+  });
+
   it('links KPI labels to their methodology proofs', async () => {
     const { bytes } = await buildEn();
     const entries = unzip(bytes);

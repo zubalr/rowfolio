@@ -27,9 +27,6 @@ fixture; `tests/helpers/inspect.test.ts` enforces the sizes.
 - `analysis/` — claims copied verbatim from the oracle vs. planted wrong metrics.
 - `csv/` — formula-injection, ragged rows, clean control.
 
-`fixtures/hostile/generated/` is reserved for the external bulk worker —
-absence is expected, not a gap.
-
 ## Regenerate / verify
 
 ```bash

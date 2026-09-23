@@ -105,14 +105,14 @@ test.describe("R2 — evidence drawer resolves composite proofs", () => {
     });
     await expect(page).toHaveURL(/#\/workspace/, { timeout: 15_000 });
 
-    // "Revenue sits 11.9% under target even as orders rose 8.0%." — the
+    // "North revenue sits under target even as orders climbed." — the
     // composite proof (10800−10000)/10000 regressed to "= Not defined" +
     // "Something went wrong." Its render doubles as the workspace-ready
     // marker (rejected heading copy "The briefing starts here" is
     // intentionally absent post-revamp).
     const card = page
       .locator(".rf-finding")
-      .filter({ hasText: "Revenue sits 11.9% under target even as orders rose 8.0%." })
+      .filter({ hasText: "North revenue sits under target even as orders climbed." })
       .first();
     await expect(card).toBeVisible({ timeout: 15_000 });
     await card.locator('[data-testid="view-evidence-btn"]').click();

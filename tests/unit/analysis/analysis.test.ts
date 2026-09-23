@@ -196,6 +196,28 @@ describe('rule evaluation', () => {
     expect(() => analyze(table, { ...OPTIONS, version: '2.0.0' } as AnalysisOptions))
       .toThrow(AnalysisError);
   });
+
+  it('recomputes downtime magnitudes when a duplicate source row is retained', () => {
+    // Source row 2411 duplicates canonical row 1242 (North, 2026-05-13,
+    // downtime 15). Retaining it lifts May North downtime 1194 -> 1209 and
+    // the period change 31.1% -> 29.5% — magnitudes must be recomputed, never
+    // pinned in copy.
+    const twin = table.rows.find((r) => r.sourceRow === 1242);
+    expect(twin?.values['downtime_minutes']).toBe('15');
+    const retained: NormalizedTable = {
+      ...table,
+      rows: [...table.rows, { ...(twin as typeof twin & object), id: 'S0:R2411', sourceRow: 2411 }],
+      qualityIssues: table.qualityIssues.map((q) =>
+        q.id === 'quality-duplicate-2411' ? { ...q, action: 'none' as const } : q),
+    };
+    const result = analyze(retained, OPTIONS);
+    const metric = (id: string) => result.metrics.find((m) => m.id === id)?.value;
+    expect(metric('north-may-downtime')).toBe('1209');
+    expect(metric('north-june-downtime')).toBe('1565');
+    const change = metric('north-downtime-change');
+    expect(change?.startsWith('0.294')).toBe(true);
+    expect(result.findings.some((f) => f.id === 'finding-north-downtime')).toBe(true);
+  });
 });
 
 describe('mechanics', () => {

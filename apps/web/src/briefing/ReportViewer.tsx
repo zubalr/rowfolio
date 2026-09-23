@@ -91,7 +91,7 @@ export function ReportViewer({ model, className }: ReportViewerProps) {
               aria-controls={paneId}
               tabIndex={index === current ? 0 : -1}
               className={`rf-rv__pick${index === current ? ' rf-rv__pick--on' : ''}`}
-              aria-label={`${slide.title} · ${localizeDigits(`${index + 1}/${model.slides.length + 1}`, model.numberingSystem)}`}
+              aria-label={`${slide.title} · ${localizeDigits(`${index + 1}/${model.slides.length}`, model.numberingSystem)}`}
               onClick={() => activate(index, false)}
               ref={(el) => { tabsRef.current[index] = el; }}
             >

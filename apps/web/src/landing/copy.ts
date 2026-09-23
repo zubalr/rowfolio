@@ -187,7 +187,7 @@ const COPY: Record<CopyKey, Record<Locale, string>> = {
      AR strings are authored here for review; nothing below is contract-pinned. */
   "beat.chart": { en: "The bars draw to scale: actual against target on one shared baseline.", ar: "تُرسم الأعمدة بمقياس حقيقي: الفعلي مقابل المستهدف على خط أساس واحد." },
   "beat.checks": { en: "Two rows share an order number, so the later one is excluded; a survey cell stays blank.", ar: "يتشارك صفّان رقم طلب واحدًا فيُستبعد اللاحق؛ وتبقى خلية الاستبيان فارغة." },
-  "beat.findings": { en: "Revenue sits 11.9% under target even as orders rose 8.0%.", ar: "الإيراد أدنى من المستهدف بنسبة ١١٫٩٪ رغم ارتفاع الطلبات ٨٫٠٪." },
+  "beat.findings": { en: "North revenue sits under target even as orders climbed.", ar: "إيرادات الشمال دون المستهدف رغم ارتفاع الطلبات." },
   "ch.chart": { en: "Chart", ar: "الرسم" },
   "ch.checks": { en: "Checks", ar: "الفحص" },
   "ch.finding": { en: "Finding", ar: "الاستنتاج" },
@@ -348,7 +348,7 @@ const COPY: Record<CopyKey, Record<Locale, string>> = {
   "scenario.observed": { en: "Observed baseline", ar: "خط الأساس المرصود" },
   "export.slide.1": { en: "From rows to a clear briefing", ar: "من الصفوف إلى إحاطة واضحة" },
   "export.slide.2": { en: "June at a glance", ar: "يونيو في لمحة" },
-  "export.slide.3": { en: "Orders rose 8.0%; revenue sits 11.9% under target.", ar: "الطلبات ارتفعت ٨٫٠٪ والإيراد أدنى من المستهدف بنسبة ١١٫٩٪." },
+  "export.slide.3": { en: "North revenue sits under target even as orders climbed.", ar: "إيرادات الشمال دون المستهدف رغم ارتفاع الطلبات." },
   "export.slide.4": { en: "Test a cost assumption", ar: "اختبر افتراضاً للتكاليف" },
   "export.slide.5": { en: "What changed in the data", ar: "ما الذي تغيّر في البيانات؟" },
   "export.slide.6": { en: "Inspect before acting", ar: "تحقّق قبل اتخاذ القرار" },
