@@ -146,7 +146,12 @@ describe('workbook structure', () => {
     }
     const cleanSheet = textOf(entries, 'xl/worksheets/sheet2.xml');
     expect(cleanSheet).toContain('ySplit="1"');
-    expect(cleanSheet).toContain('autoFilter');
+    // Filters live inside the table parts only: a worksheet-level autoFilter
+    // overlapping the table range is what Excel strips as broken content.
+    expect(cleanSheet).not.toContain('<autoFilter');
+    for (const path of [...entries.keys()].filter((n) => /^xl\/worksheets\/sheet\d+\.xml$/.test(n))) {
+      expect(textOf(entries, path), `${path}: no sheet-level autoFilter`).not.toContain('<autoFilter');
+    }
   });
 
   it('carries no external or unsafe references', async () => {
@@ -186,8 +191,11 @@ describe('workbook structure', () => {
     expect(filterRefOf(kpis)).toBe(refOf(kpis));
 
     const method = tableXml('Methodology');
-    // Headerless table: a valid range, never the A1:B0 collapse Excel rejected.
+    // A valid range, never the A1:B0 collapse Excel rejected — and a real
+    // header row so its autoFilter is legal in Excel's model.
     expect(refOf(method)).toMatch(/^A1:B[1-9]\d*$/);
+    expect(method).toContain('headerRowCount="1"');
+    expect(filterRefOf(method)).toBe(refOf(method));
 
     // legacyDrawing (cell-note VML) must precede tableParts — exceljs emits it
     // last, and strict parsers discard the entire sheet on that order.

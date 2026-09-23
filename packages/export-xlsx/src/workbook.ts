@@ -410,10 +410,6 @@ export const buildWorkbook = async (
     columns: headers.map((h) => ({ name: displayHeader(h), filterButton: true })),
     rows: [],
   });
-  clean.autoFilter = {
-    from: 'A1',
-    to: `${columnLetter(headers.length)}${model.table.rows.length + 1}`,
-  };
 
   progress('layout', 0.5);
 
@@ -519,7 +515,6 @@ export const buildWorkbook = async (
     rows: [],
   });
   styleHeaderRow(kpis.getRow(1), 4);
-  kpis.autoFilter = { from: 'A1', to: `D${kpis.rowCount}` };
   kpis.pageSetup.fitToPage = true;
   kpis.pageSetup.fitToWidth = 1;
   kpis.pageSetup.fitToHeight = 0;
@@ -571,7 +566,6 @@ export const buildWorkbook = async (
     rows: [],
   });
   styleHeaderRow(quality.getRow(1), 9);
-  quality.autoFilter = { from: 'A1', to: `I${model.table.qualityIssues.length + 1}` };
   quality.pageSetup.printArea = `A1:I${model.table.qualityIssues.length + 1}`;
   // Restrained emphasis: unresolved rows read red, nothing else shouts.
   model.table.qualityIssues.forEach((issue, index) => {
@@ -609,8 +603,12 @@ export const buildWorkbook = async (
       `${JSON.stringify(proof.expression)} = ${proof.result ?? proof.reasonKey}${spans === '' ? '' : ` [${spans}]`}`,
     ]);
   }
+  const methodHeaders = [sheetLabel(locale, 'table.field'), sheetLabel(locale, 'table.value')];
+  method.getRow(1).getCell(1).value = methodHeaders[0];
+  method.getRow(1).getCell(2).value = methodHeaders[1];
+  styleHeaderRow(method.getRow(1), 2);
   methodRows.forEach(([label, detail], i) => {
-    const row = method.getRow(i + 1);
+    const row = method.getRow(i + 2);
     row.getCell(1).value = label;
     row.getCell(1).font = { bold: true, color: { argb: MUTED_ARGB } };
     row.getCell(2).value = detail;
@@ -624,17 +622,17 @@ export const buildWorkbook = async (
   });
   method.addTable({
     name: TABLE_NAMES['methodology'] as string,
-    ref: `A1:B${methodRows.length}`,
-    headerRow: false,
+    ref: `A1:B${methodRows.length + 1}`,
+    headerRow: true,
     totalsRow: false,
     style: { theme: 'TableStyleMedium2', showRowStripes: false },
-    columns: [{ name: 'Item' }, { name: 'Detail' }],
+    columns: methodHeaders.map((name) => ({ name, filterButton: true })),
     rows: [],
   });
   method.pageSetup.fitToPage = true;
   method.pageSetup.fitToWidth = 1;
   method.pageSetup.fitToHeight = 0;
-  method.pageSetup.printArea = `A1:B${methodRows.length}`;
+  method.pageSetup.printArea = `A1:B${methodRows.length + 1}`;
   clean.pageSetup.printArea = `A1:${columnLetter(headers.length)}${model.table.rows.length + 1}`;
 
   progress('package', null);
@@ -645,7 +643,7 @@ export const buildWorkbook = async (
     [TABLE_NAMES['clean'] as string]: `A1:${columnLetter(headers.length)}${model.table.rows.length + 1}`,
     [TABLE_NAMES['quality'] as string]: `A1:I${model.table.qualityIssues.length + 1}`,
     [TABLE_NAMES['kpis'] as string]: `A1:D${kpis.rowCount}`,
-    [TABLE_NAMES['methodology'] as string]: `A1:B${methodRows.length}`,
+    [TABLE_NAMES['methodology'] as string]: `A1:B${methodRows.length + 1}`,
   });
   const view = repaired.byteOffset === 0 && repaired.byteLength === repaired.buffer.byteLength
     ? new Uint8Array(repaired.buffer as ArrayBuffer)
