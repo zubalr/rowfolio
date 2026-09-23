@@ -180,7 +180,7 @@ const SAMPLE_TITLES: Record<Locale, string[]> = {
   en: [
     'Monthly operations report',
     'June at a glance',
-    'North revenue sits under target even as orders climbed.',
+    'North revenue sits under target even as orders climbed',
     'Change operating costs',
     'What changed in the data',
     'Inspect before acting',
@@ -188,7 +188,7 @@ const SAMPLE_TITLES: Record<Locale, string[]> = {
   ar: [
     'تقرير العمليات الشهري',
     'يونيو في لمحة',
-    'إيرادات الشمال دون المستهدف رغم ارتفاع الطلبات.',
+    'إيرادات الشمال دون المستهدف رغم ارتفاع الطلبات',
     'غيّر تكاليف التشغيل',
     'ما الذي تغيّر في البيانات؟',
     'تحقّق قبل اتخاذ القرار',
@@ -197,7 +197,7 @@ const SAMPLE_TITLES: Record<Locale, string[]> = {
 
 const SAMPLE_SUBTITLE_PREFIX: Record<Locale, string> = {
   en: 'Example analysis',
-  ar: 'تحليل المثال',
+  ar: 'تحليل نموذجي',
 };
 
 const GENERIC_TITLES: Record<Locale, string[]> = {

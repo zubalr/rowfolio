@@ -219,7 +219,8 @@ html[lang="ar"] .rf-secmark {
 }
 
 @media (max-width: 767px) {
-  /* compressed chrome stays a single row — no second nav line */
+  /* compressed chrome — a single row while the label fits; ≤480 the nav
+     may wrap within itself and ≤360 it takes its own line */
   .rf-landing-root .rf-masthead {
     padding: var(--rf-space-1) var(--rf-space-3);
     gap: var(--rf-space-2);
@@ -241,12 +242,13 @@ html[lang="ar"] .rf-secmark {
 }
 
 @media (max-width: 360px) {
-  /* at 320 the chrome keeps wordmark + language + CTA; GitHub stays
-     reachable below the fold (footer) — a second row is not allowed */
+  /* GitHub yields its spot below 361px — the nav's own row still can't
+     carry it beside the CTA label (it rejoins at 361+) */
+  .rf-landing-root .rf-masthead {
+    padding-inline: 8px;
+    column-gap: 6px;
+  }
   .rf-landing-root .rf-nav a[href^="https://github.com/zubalr/rowfolio"] { display: none; }
-  .rf-landing-root .rf-masthead { padding-inline: 8px; gap: 6px; }
-  .rf-landing-root .rf-nav { gap: 4px 8px; }
-  .rf-landing-root .rf-masthead__ws { padding-inline: 8px; white-space: nowrap; }
   .rf-landing-root .rf-brand { font-size: 16px; }
 }
 
@@ -254,6 +256,44 @@ html[lang="ar"] .rf-secmark {
   /* the section anchor is redundant while the stage fills the first
      screen — keep wordmark + GitHub + language + the CTA visible */
   .rf-landing-root .rf-nav a[href="#how-it-works"] { display: none; }
+
+  /* "Open the example workspace" is ~210px of button chrome — no row can
+     carry it beside the wordmark at phone widths. The nav takes its own
+     row so every masthead control holds a real ≥44px target in its own
+     layout space — no padding tricks, no negative margins, nothing
+     sitting under a neighbour's hit box. */
+  .rf-landing-root .rf-masthead {
+    flex-wrap: wrap;
+    row-gap: var(--rf-space-1);
+  }
+  .rf-landing-root .rf-brand {
+    min-block-size: var(--rf-control-height);
+  }
+  .rf-landing-root .rf-nav {
+    flex-basis: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    column-gap: var(--rf-space-2);
+  }
+  .rf-landing-root .rf-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--rf-control-height);
+  }
+  .rf-landing-root .rf-masthead__ws {
+    background: none;
+    border-color: transparent;
+    box-shadow: none;
+    padding-inline: var(--rf-space-1);
+    color: var(--rf-cobalt);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    min-block-size: var(--rf-control-height);
+  }
+  .rf-landing-root .rf-masthead__ws:hover:not(:disabled) {
+    border-color: transparent;
+  }
 }
 
 /* Landing primary actions carry the cobalt primary-action role.

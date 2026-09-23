@@ -58,7 +58,7 @@ html[lang="ar"] .rf-lead__kicker {
      first line's ink overhangs the element's top and the last line's
      descender its bottom. Padding reserves that room inside the box so
      glyph ink never lands outside the element's rect. */
-  padding-block: 0.15em 0.11em;
+  padding-block: 0.15em 0.16em;
   font-size: 40px;
   font-weight: 700;
   letter-spacing: -0.015em;
@@ -74,6 +74,13 @@ html[lang="ar"] .rf-lead__kicker {
      so the accent's edge never clips (tan(8°) ≈ 0.14 × ~0.7em glyph
      height ≈ 0.10em) */
   padding-inline-end: 0.12em;
+  /* the glyphs also paint ~4px past the line box on the block axis —
+     measured scrollHeight 47 vs clientHeight 43 at 40px in BOTH locales
+     (AR is unskewed, so this is font overhang, not the shear). Reserve
+     it with block padding, then return the footprint with equal
+     negative margins so the line box keeps its metrics. */
+  padding-block: 0.13em 0.14em;
+  margin-block: -0.13em -0.14em;
 }
 html[lang="ar"] .rf-lead__accent { transform: none; }
 
@@ -572,25 +579,15 @@ html[lang="ar"] .rf-wbstrip__tabs { font-family: var(--rf-font-body); font-size:
 .rf-act:focus-visible { outline: 2px solid var(--rf-focus); outline-offset: 2px; }
 
 /* --- composed narrow layouts: phone is designed, not shrunk -------------- */
-@media (max-width: 760px) {
-  .rf-masthead__tag { display: none; }
-
-  .rf-spread {
-    padding: var(--rf-space-2) var(--rf-space-3) var(--rf-space-4);
-  }
+/* ≤960: structural compaction — the two-column hero stacks, the transport
+   re-grids so no control dangles on a wrapped flex row, and the workbook
+   strip sheds its meta column before it can squeeze to ellipses */
+@media (max-width: 960px) {
   .rf-lead {
     display: block;
   }
-  .rf-lead__title { font-size: 28px; line-height: 1.08; letter-spacing: -0.01em; }
-  .rf-lead__stand { font-size: 15px; margin-block-start: var(--rf-space-2); }
+  .rf-lead__stand { margin-block-start: var(--rf-space-2); }
   .rf-lead__cta { margin-block-start: var(--rf-space-2); }
-  .rf-lead__ctanote { display: none; }
-
-  /* the stage takes the full gutter-to-gutter width on phone */
-  .rf-stage { inline-size: auto; margin-block-start: var(--rf-space-3); }
-  .rf-stage__frame { block-size: min(500px, 58svh); min-block-size: 430px; }
-  .rf-stage__bar { padding: 0 10px; }
-  .rf-stage__cap { font-size: 14px; }
 
   /* one strip, wrapped: the four chapter tabs fill row one; pause/play
      and replay share row two — every control stays visible and ≥44px */
@@ -599,6 +596,29 @@ html[lang="ar"] .rf-wbstrip__tabs { font-family: var(--rf-font-body); font-size:
   html[lang="ar"] .rf-tch { font-size: 12.5px; }
   .rf-tplay { grid-column: span 2; order: 2; font-size: 12.5px; padding: 0 8px; border-block-start: 1px solid var(--rf-rule); }
   .rf-treplay { grid-column: span 2; order: 3; font-size: 12.5px; padding: 0 8px; border-block-start: 1px solid var(--rf-rule); }
+
+  .rf-wbstrip { min-height: 56px; padding: 6px 12px; }
+  .rf-wbstrip__meta { display: none; }
+  .rf-rep__actions { flex: 1; }
+  .rf-act { flex: 1; min-block-size: 44px; }
+  .rf-act { white-space: normal; line-height: 1.25; padding-block: 8px; }
+}
+
+@media (max-width: 760px) {
+  .rf-masthead__tag { display: none; }
+
+  .rf-spread {
+    padding: var(--rf-space-2) var(--rf-space-3) var(--rf-space-4);
+  }
+  .rf-lead__title { font-size: 28px; line-height: 1.08; letter-spacing: -0.01em; }
+  .rf-lead__stand { font-size: 15px; }
+  .rf-lead__ctanote { display: none; }
+
+  /* the stage takes the full gutter-to-gutter width on phone */
+  .rf-stage { inline-size: auto; margin-block-start: var(--rf-space-3); }
+  .rf-stage__frame { block-size: min(500px, 58svh); min-block-size: 430px; }
+  .rf-stage__bar { padding: 0 10px; }
+  .rf-stage__cap { font-size: 14px; }
 
   /* the chart value labels wrap under themselves at this width rather
      than clipping the figure */
@@ -623,11 +643,6 @@ html[lang="ar"] .rf-wbstrip__tabs { font-family: var(--rf-font-body); font-size:
     white-space: normal;
     text-overflow: clip;
   }
-  .rf-wbstrip { min-height: 56px; padding: 6px 12px; }
-  .rf-wbstrip__meta { display: none; }
-  .rf-rep__actions { flex: 1; }
-  .rf-act { flex: 1; min-block-size: 44px; }
-  .rf-act { white-space: normal; line-height: 1.25; padding-block: 8px; }
 
   /* the share-scale row stacks so neither label ever clips */
   .rf-rticks { display: block; margin-block-start: 8px; }
@@ -653,4 +668,10 @@ html[lang="ar"] .rf-wbstrip__tabs { font-family: var(--rf-font-body); font-size:
      below the 12px floor or clipping the label */
   .rf-transport { grid-template-columns: 1.3fr 1fr 1fr 1.1fr; }
   .rf-tch { letter-spacing: 0.01em; padding-inline: 2px; }
+
+  /* the provenance note wraps to two lines at this width — sit it wholly
+     above the taller slim strip rather than clipping under it; the slide
+     gives back the difference */
+  .rf-rep__slide { bottom: 118px; }
+  .rf-rep__note { bottom: 80px; }
 }

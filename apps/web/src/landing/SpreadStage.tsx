@@ -142,7 +142,7 @@ const REGION_SHARES: readonly { region: string; share: number }[] = LANDING_TRUT
 /** Visible one-sentence caption per beat (also the live region). */
 const CAPTION_KEYS: readonly CopyKey[] = [
   "beat.result",
-  "guide.context.intro",
+  "walk.step.start.caption",
   "beat.checks",
   "beat.chart",
   "beat.findings",
@@ -415,7 +415,6 @@ export function SpreadStage({ i18n, onOpen, onDownload }: SpreadStageProps) {
         <h1 className="rf-lead__title" id="rf-hero-title">
           {landingCopy(locale, "lead.title.pre")}
           <em className="rf-lead__accent">{landingCopy(locale, "lead.title.accent")}</em>
-          {landingCopy(locale, "lead.title.post")}
         </h1>
         <p className="rf-lead__stand">{landingCopy(locale, "lead.standfirst")}</p>
         <div className="rf-lead__cta">

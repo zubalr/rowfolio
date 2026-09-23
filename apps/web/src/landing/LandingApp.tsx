@@ -90,7 +90,7 @@ export function LandingApp({ i18n }: LandingAppProps) {
           {i18n.t("brand.name")}
         </a>
         <span className="rf-masthead__tag">{landingCopy(i18n.locale, "nav.tag")}</span>
-        <nav className="rf-nav" aria-label="Rowfolio">
+        <nav className="rf-nav" aria-label={i18n.t("brand.name")}>
           <a href="#how-it-works">{i18n.t("nav.demo")}</a>
           <a href="https://github.com/zubalr/rowfolio" rel="noopener noreferrer">
             {i18n.t("nav.github")}
@@ -136,7 +136,7 @@ export function LandingApp({ i18n }: LandingAppProps) {
           <header className="rf-output__head">
             <p className="rf-secmark">
               <i aria-hidden="true" />
-              {landingCopy(i18n.locale, "pres.output.title")}
+              {landingCopy(i18n.locale, "pres.output.mark")}
             </p>
             <h2 className="rf-output__title" id="rf-output-title">
               {landingCopy(i18n.locale, "pres.output.title")}
@@ -188,7 +188,7 @@ export function LandingApp({ i18n }: LandingAppProps) {
         <section className="rf-invite" aria-labelledby="rf-invite-title">
           <p className="rf-secmark">
             <i aria-hidden="true" />
-            {landingCopy(i18n.locale, "pres.useOwn")}
+            {landingCopy(i18n.locale, "pres.invite.eyebrow")}
           </p>
           <h2 className="rf-invite__title" id="rf-invite-title">
             {landingCopy(i18n.locale, "pres.invite.title")}

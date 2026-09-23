@@ -18,6 +18,13 @@
   border-block-end: 1px solid var(--rf-divider);
 }
 
+/* The workspace header spans the viewport edge-to-edge; its inline gutter
+   tracks the centered main column's content edge so the brand and the
+   end-side controls never touch the window chrome. */
+.rf-workspace .rf-masthead {
+  padding-inline: max(var(--rf-space-5), calc((100vw - var(--rf-max-width)) / 2 + var(--rf-space-5)));
+}
+
 .rf-brand {
   font-weight: 700;
   font-size: 18px;
@@ -61,7 +68,7 @@
   .rf-mastbar {
     display: flex;
     align-items: center;
-    gap: var(--rf-space-2);
+    gap: var(--rf-space-1);
     min-inline-size: 0;
   }
   .rf-mastmore {
@@ -251,6 +258,9 @@
   border-block-start: 1px solid var(--rf-divider);
   padding-block: var(--rf-space-5);
   padding-inline-start: var(--rf-space-3);
+  /* end-side room for the evidence action — it was flush against the
+     card's own edge */
+  padding-inline-end: var(--rf-space-3);
   border-radius: var(--rf-radius-control);
 }
 

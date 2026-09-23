@@ -234,7 +234,7 @@ describe('workbook structure', () => {
         expect(strings).toContain('Example analysis');
         expect(strings).toContain('Revenue');
         expect(strings).toContain('Change operating costs');
-        expect(strings).toContain('Includes the 8% operating-cost scenario.');
+        expect(strings).toContain('Includes the 8% operating-cost scenario');
       } else {
         expect(strings).toContain('تقرير العمليات الشهري');
         expect(strings).toContain('الإيرادات');
