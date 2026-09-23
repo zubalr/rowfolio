@@ -15,6 +15,7 @@ import {
   assertExportModel,
   DESIGN_TOKENS,
   isDecimal,
+  isValidDate,
   sha256Hex,
   significantDigits,
 } from '@rowfolio/contracts';
@@ -303,9 +304,30 @@ export const buildWorkbook = async (
     sheetLabel(locale, 'common.source'),
     `${model.table.sourceRef.workbookName}#${model.table.sourceRef.sheetName}`,
   );
-  // Proof row numbers in Methodology (8 fixed rows, then one per proof).
+  // Methodology rows: header at row 1, fixed rows next, then one per proof.
+  // Built before the KPI pass so proof links target the actual layout.
+  const methodRows: Array<[string, string]> = [
+    [sheetLabel(locale, 'method.scope'), `${model.scope.periodStart ?? 'all'}..${model.scope.periodEnd ?? 'all'}`],
+    [sheetLabel(locale, 'method.limits'), sheetLabel(locale, 'method.noForecast')],
+    [sheetLabel(locale, 'sheet.diagnostics'), ''],
+    [sheetLabel(locale, 'evidence.hash'), model.sourceHash],
+    [sheetLabel(locale, 'method.policy'), '1.0.0'],
+    [sheetLabel(locale, 'method.analysis'), model.analysisId],
+    [sheetLabel(locale, 'method.revision'), model.table.normalizationRevision],
+    [sheetLabel(locale, 'method.template'), '1.0.0'],
+    ['Locale', `${model.locale} / ${model.numberingSystem}`],
+    [sheetLabel(locale, 'method.precision'), sheetLabel(locale, 'method.precision.halfUp')],
+  ];
+  const proofStartIndex = methodRows.length;
+  for (const proof of model.provenance) {
+    const spans = proof.selections.map((s) => s.spans.map((span) => `${span.start}-${span.end}`).join(',')).join(';');
+    methodRows.push([
+      sheetLabel(locale, 'method.proof').replace('{id}', proof.id),
+      `${JSON.stringify(proof.expression)} = ${proof.result ?? proof.reasonKey}${spans === '' ? '' : ` [${spans}]`}`,
+    ]);
+  }
   const methodName = (byId.get('methodology')?.name ?? 'Methodology').replace(/'/g, "''");
-  const proofRowOf = new Map(model.provenance.map((p, i) => [p.id, 9 + i] as const));
+  const proofRowOf = new Map(model.provenance.map((p, i) => [p.id, proofStartIndex + i + 2] as const));
   const proofLink = (provenanceId: string): string | undefined => {
     const row = proofRowOf.get(provenanceId);
     return row === undefined ? undefined : `#'${methodName}'!A${row}`;
@@ -391,15 +413,26 @@ export const buildWorkbook = async (
   headers.forEach((h, i) => cleanLetters.set(h, columnLetter(i + 1)));
   const cleanName = (byId.get('clean')?.name ?? 'Cleaned Data').replace(/'/g, "''");
   model.table.rows.forEach((row) => {
-    const record: Record<string, string | number | boolean | null> = {};
+    const record: Record<string, string | number | boolean | Date | null> = {};
     for (const column of dataColumns) {
       const raw = row.values[column.id] ?? null;
-      record[column.id] = typeof raw === 'string' ? toCellValue(raw) : raw;
+      // Only canonical real-calendar dates become serials — malformed
+      // values (2026-02-31, arbitrary text) stay verbatim text rather
+      // than silently rolling or producing Invalid Date.
+      record[column.id] =
+        column.type === 'date' && typeof raw === 'string' && isValidDate(raw)
+          ? new Date(`${raw}T00:00:00Z`)
+          : typeof raw === 'string'
+            ? toCellValue(raw)
+            : raw;
     }
     record['source_sheet'] = model.table.sourceRef.sheetName;
     record['source_row'] = row.sourceRow;
     record['record_id'] = row.id;
-    clean.addRow(record);
+    const cleanRow = clean.addRow(record);
+    dataColumns.forEach((column, i) => {
+      if (column.type === 'date') cleanRow.getCell(i + 1).numFmt = 'yyyy-mm-dd';
+    });
   });
   clean.addTable({
     name: TABLE_NAMES['clean'] as string,
@@ -410,10 +443,6 @@ export const buildWorkbook = async (
     columns: headers.map((h) => ({ name: displayHeader(h), filterButton: true })),
     rows: [],
   });
-  clean.autoFilter = {
-    from: 'A1',
-    to: `${columnLetter(headers.length)}${model.table.rows.length + 1}`,
-  };
 
   progress('layout', 0.5);
 
@@ -429,12 +458,20 @@ export const buildWorkbook = async (
   ];
   const placements = new Map<string, KpiPlacement>();
   const lastCleanRow = model.table.rows.length + 1;
+  const dateField = dataColumns.find((c) => c.type === 'date')?.id;
+  const dateCol = dateField === undefined ? undefined : `${cleanLetters.get(dateField)}`;
   const sumFormula = (field: string): string =>
     `SUM('${cleanName}'!${cleanLetters.get(field)}2:${cleanLetters.get(field)}${lastCleanRow})`;
-  const sumIfsFormula = (field: string, region: string, start: [number, number, number], end: [number, number, number]): string => {
+  const sumPeriodFormula = (field: string, start: [number, number, number], end: [number, number, number]): string | null => {
+    if (dateCol === undefined) return null;
     const col = `${cleanLetters.get(field)}`;
-    const regionCol = `${cleanLetters.get('region')}`;
-    const dateCol = `${cleanLetters.get('date')}`;
+    return `SUMIFS('${cleanName}'!${col}2:${col}${lastCleanRow},'${cleanName}'!${dateCol}2:${dateCol}${lastCleanRow},">="&DATE(${start[0]},${start[1]},${start[2]}),'${cleanName}'!${dateCol}2:${dateCol}${lastCleanRow},"<"&DATE(${end[0]},${end[1]},${end[2]}))`;
+  };
+  const sumIfsFormula = (field: string, region: string, start: [number, number, number], end: [number, number, number]): string | null => {
+    if (dateCol === undefined) return null;
+    const col = `${cleanLetters.get(field)}`;
+    const regionCol = cleanLetters.get('region');
+    if (regionCol === undefined) return null;
     const criterion = escapeFormulaStringLiteral(region);
     return `SUMIFS('${cleanName}'!${col}2:${col}${lastCleanRow},'${cleanName}'!${regionCol}2:${regionCol}${lastCleanRow},"${criterion}",'${cleanName}'!${dateCol}2:${dateCol}${lastCleanRow},">="&DATE(${start[0]},${start[1]},${start[2]}),'${cleanName}'!${dateCol}2:${dateCol}${lastCleanRow},"<"&DATE(${end[0]},${end[1]},${end[2]}))`;
   };
@@ -501,7 +538,7 @@ export const buildWorkbook = async (
     if (typeof numeric !== 'number') continue;
     const formula = formulaForMetric(
       metric.id,
-      { sumFormula, sumIfsFormula, ymd, firstOfNextMonth },
+      { sumFormula, sumPeriodFormula, sumIfsFormula, ymd, firstOfNextMonth },
       model,
       placements,
     );
@@ -519,7 +556,6 @@ export const buildWorkbook = async (
     rows: [],
   });
   styleHeaderRow(kpis.getRow(1), 4);
-  kpis.autoFilter = { from: 'A1', to: `D${kpis.rowCount}` };
   kpis.pageSetup.fitToPage = true;
   kpis.pageSetup.fitToWidth = 1;
   kpis.pageSetup.fitToHeight = 0;
@@ -571,7 +607,6 @@ export const buildWorkbook = async (
     rows: [],
   });
   styleHeaderRow(quality.getRow(1), 9);
-  quality.autoFilter = { from: 'A1', to: `I${model.table.qualityIssues.length + 1}` };
   quality.pageSetup.printArea = `A1:I${model.table.qualityIssues.length + 1}`;
   // Restrained emphasis: unresolved rows read red, nothing else shouts.
   model.table.qualityIssues.forEach((issue, index) => {
@@ -588,29 +623,12 @@ export const buildWorkbook = async (
   // The pair must stay within ~74 units of portrait width or the detail
   // column spills onto its own page.
   method.columns = [{ width: 36 }, { width: 38 }];
-  // Human-readable rows first; identifiers and engine internals sit under
-  // a clearly marked diagnostics block below them.
-  const methodRows: Array<[string, string]> = [
-    [sheetLabel(locale, 'method.scope'), `${model.scope.periodStart ?? 'all'}..${model.scope.periodEnd ?? 'all'}`],
-    [sheetLabel(locale, 'method.limits'), sheetLabel(locale, 'method.noForecast')],
-    [sheetLabel(locale, 'sheet.diagnostics'), ''],
-    [sheetLabel(locale, 'evidence.hash'), model.sourceHash],
-    [sheetLabel(locale, 'method.policy'), '1.0.0'],
-    [sheetLabel(locale, 'method.analysis'), model.analysisId],
-    [sheetLabel(locale, 'method.revision'), model.table.normalizationRevision],
-    [sheetLabel(locale, 'method.template'), '1.0.0'],
-    ['Locale', `${model.locale} / ${model.numberingSystem}`],
-    [sheetLabel(locale, 'method.precision'), sheetLabel(locale, 'method.precision.halfUp')],
-  ];
-  for (const proof of model.provenance) {
-    const spans = proof.selections.map((s) => s.spans.map((span) => `${span.start}-${span.end}`).join(',')).join(';');
-    methodRows.push([
-      sheetLabel(locale, 'method.proof').replace('{id}', proof.id),
-      `${JSON.stringify(proof.expression)} = ${proof.result ?? proof.reasonKey}${spans === '' ? '' : ` [${spans}]`}`,
-    ]);
-  }
+  const methodHeaders = [sheetLabel(locale, 'table.field'), sheetLabel(locale, 'table.value')];
+  method.getRow(1).getCell(1).value = methodHeaders[0];
+  method.getRow(1).getCell(2).value = methodHeaders[1];
+  styleHeaderRow(method.getRow(1), 2);
   methodRows.forEach(([label, detail], i) => {
-    const row = method.getRow(i + 1);
+    const row = method.getRow(i + 2);
     row.getCell(1).value = label;
     row.getCell(1).font = { bold: true, color: { argb: MUTED_ARGB } };
     row.getCell(2).value = detail;
@@ -624,17 +642,17 @@ export const buildWorkbook = async (
   });
   method.addTable({
     name: TABLE_NAMES['methodology'] as string,
-    ref: `A1:B${methodRows.length}`,
-    headerRow: false,
+    ref: `A1:B${methodRows.length + 1}`,
+    headerRow: true,
     totalsRow: false,
     style: { theme: 'TableStyleMedium2', showRowStripes: false },
-    columns: [{ name: 'Item' }, { name: 'Detail' }],
+    columns: methodHeaders.map((name) => ({ name, filterButton: true })),
     rows: [],
   });
   method.pageSetup.fitToPage = true;
   method.pageSetup.fitToWidth = 1;
   method.pageSetup.fitToHeight = 0;
-  method.pageSetup.printArea = `A1:B${methodRows.length}`;
+  method.pageSetup.printArea = `A1:B${methodRows.length + 1}`;
   clean.pageSetup.printArea = `A1:${columnLetter(headers.length)}${model.table.rows.length + 1}`;
 
   progress('package', null);
@@ -645,7 +663,7 @@ export const buildWorkbook = async (
     [TABLE_NAMES['clean'] as string]: `A1:${columnLetter(headers.length)}${model.table.rows.length + 1}`,
     [TABLE_NAMES['quality'] as string]: `A1:I${model.table.qualityIssues.length + 1}`,
     [TABLE_NAMES['kpis'] as string]: `A1:D${kpis.rowCount}`,
-    [TABLE_NAMES['methodology'] as string]: `A1:B${methodRows.length}`,
+    [TABLE_NAMES['methodology'] as string]: `A1:B${methodRows.length + 1}`,
   });
   const view = repaired.byteOffset === 0 && repaired.byteLength === repaired.buffer.byteLength
     ? new Uint8Array(repaired.buffer as ArrayBuffer)
@@ -710,12 +728,17 @@ async function repairWorkbookXml(
 
 interface FormulaHelpers {
   readonly sumFormula: (field: string) => string;
+  readonly sumPeriodFormula: (
+    field: string,
+    start: [number, number, number],
+    end: [number, number, number],
+  ) => string | null;
   readonly sumIfsFormula: (
     field: string,
     region: string,
     start: [number, number, number],
     end: [number, number, number],
-  ) => string;
+  ) => string | null;
   readonly ymd: (iso: string) => [number, number, number];
   readonly firstOfNextMonth: (end: string) => [number, number, number];
 }
@@ -760,8 +783,11 @@ function formulaForMetric(
         helpers.firstOfNextMonth(scope.periodEnd),
       );
     }
-    if (regions.length === 0) return helpers.sumFormula(field);
+    if (regions.length === 0) {
+      return helpers.sumPeriodFormula(field, helpers.ymd(scope.periodStart), helpers.firstOfNextMonth(scope.periodEnd));
+    }
   }
+  if (field !== undefined && regions.length === 0) return helpers.sumFormula(field);
   switch (metricId) {
     case 'north-target-gap': {
       const rev = at('north-june-revenue');
