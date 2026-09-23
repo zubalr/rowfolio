@@ -71,8 +71,9 @@ html[lang="ar"] .rf-lead__kicker {
   display: inline-block;
   transform: skewX(-8deg);
   /* the shear extends the glyph past its inline box — reserve the room
-     so the accent's edge never clips */
-  padding-inline-end: 0.07em;
+     so the accent's edge never clips (tan(8°) ≈ 0.14 × ~0.7em glyph
+     height ≈ 0.10em) */
+  padding-inline-end: 0.12em;
 }
 html[lang="ar"] .rf-lead__accent { transform: none; }
 
