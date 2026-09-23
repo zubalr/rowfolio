@@ -76,9 +76,6 @@ html[lang="ar"] .rf-lead__kicker {
   padding-inline-end: 0.12em;
 }
 html[lang="ar"] .rf-lead__accent { transform: none; }
-/* accent + terminal punctuation wrap as one unit — the period never
-   orphans onto a line of its own */
-.rf-lead__accline { white-space: nowrap; }
 
 .rf-lead__stand {
   margin: 0 0 var(--rf-space-3);
