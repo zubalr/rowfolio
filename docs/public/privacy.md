@@ -17,8 +17,14 @@ contents.
 - **Local processing.** Parsing, analysis, scenarios and export generation
   run in your browser. Opening a spreadsheet does not send its contents — or
   its filename — anywhere.
-- **No analytics or telemetry.** The application loads no analytics, error
-  reporting, ad or remote-inference services, and ships no AI integration.
+- **Analytics limited to coarse pageviews.** The production site loads
+  Vercel Web Analytics only. It counts page visits on broad routes (home,
+  Arabic home, workspace) — before anything is sent, the page URL is reduced
+  to the site origin plus one of those route labels, so filenames, query
+  strings, row data and any identifier can never leave the browser. Custom
+  events are disabled entirely: no spreadsheet content, filenames, values or
+  usage details are ever collected. There is no other analytics, error
+  reporting, ad or remote-inference service, and no AI integration.
 - **Nothing persisted.** An analysis session lives in memory. Clearing the
   session or closing the tab ends it; the next visit starts empty. Only an
   interface preference (language and digit style) is kept in local storage.

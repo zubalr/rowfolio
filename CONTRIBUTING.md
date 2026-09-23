@@ -21,8 +21,12 @@ library (see `tooling/test/corpus/README.md`).
 ## Ground rules
 
 - **Local processing.** The product processes user spreadsheets in the
-  browser. Never introduce a runtime service, analytics, telemetry, accounts
-  or remote inference. There is no AI API key and no backend.
+  browser. Never introduce a runtime service, accounts or remote inference.
+  There is no AI API key and no backend. The one permitted exception is
+  Vercel Web Analytics on production builds only: coarse pageview counts
+  (`beforeSend` reduces every URL to origin + an allowlisted route token,
+  custom events are dropped). Never add telemetry, error reporting, or
+  custom analytics payloads.
 - **Numerical truth.** Analytical values cross package boundaries as finite
   decimal strings. Rounding happens only at named display/export boundaries.
   Source coordinates are one-based physical worksheet positions.

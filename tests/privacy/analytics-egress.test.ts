@@ -56,31 +56,38 @@ describe("analytics egress boundary", () => {
     expect(violations).toEqual([]);
   });
 
-  it("reduces every pageview URL to an allowlisted route token", () => {
-    const cases: Array<[string, string]> = [
-      ["https://rowfolio.example/", "/"],
-      ["https://rowfolio.example/ar/", "/ar"],
-      ["https://rowfolio.example/ar", "/ar"],
-      ["https://rowfolio.example/#/workspace", "/#/workspace"],
-      ["https://rowfolio.example/ar#/workspace", "/ar#/workspace"],
+  it("reduces every pageview URL to origin plus an allowlisted route", () => {
+    const cases: Array<[string, string | null]> = [
+      ["https://rowfolio.example/", "https://rowfolio.example/"],
+      ["https://rowfolio.example/ar/", "https://rowfolio.example/ar"],
+      ["https://rowfolio.example/ar", "https://rowfolio.example/ar"],
+      ["https://rowfolio.example/#/workspace", "https://rowfolio.example/#/workspace"],
+      ["https://rowfolio.example/ar#/workspace", "https://rowfolio.example/ar#/workspace"],
       // identifiers must never survive
-      ["https://rowfolio.example/?file=payroll.xlsx&session=abc123", "/"],
-      ["https://rowfolio.example/#/workspace?row=42&file=secret.csv", "/#/workspace"],
-      ["https://rowfolio.example/#/upload/payroll-2026.xlsx", "/#/"],
-      ["https://rowfolio.example/ar/?q=CANARY", "/ar"],
-      // non-http inputs collapse to the root token
-      ["blob:https://rowfolio.example/1111-2222", "/"],
-      ["not a url", "/"],
+      ["https://rowfolio.example/?file=payroll.xlsx&session=abc123", "https://rowfolio.example/"],
+      ["https://rowfolio.example/#/workspace?row=42&file=secret.csv", "https://rowfolio.example/#/workspace"],
+      ["https://rowfolio.example/#/upload/payroll-2026.xlsx", "https://rowfolio.example/#/"],
+      ["https://rowfolio.example/ar/?q=CANARY", "https://rowfolio.example/ar"],
+      // non-http inputs are dropped, never sent
+      ["blob:https://rowfolio.example/1111-2222", null],
+      ["not a url", null],
+      ["/ar", null],
     ];
     for (const [input, expected] of cases) {
       expect(normalizeAnalyticsUrl(input)).toBe(expected);
+    }
+    // the collector requires absolute https?:// URLs — every emitted value
+    // must match its pattern so beacons are accepted
+    for (const input of cases.map(([i]) => i)) {
+      const out = normalizeAnalyticsUrl(input);
+      if (out !== null) expect(out).toMatch(/^https?:\/\//);
     }
   });
 
   it("beforeSend emits only pageview events on allowlisted routes", () => {
     expect(
       analyticsBeforeSend({ type: "pageview", url: "https://x.test/ar/#/workspace?cell=A1" }),
-    ).toEqual({ type: "pageview", url: "/ar#/workspace" });
+    ).toEqual({ type: "pageview", url: "https://x.test/ar#/workspace" });
     // custom events are never sent — pageviews only
     expect(analyticsBeforeSend({ type: "event", url: "https://x.test/" })).toBeNull();
     // a URL carrying row-level data collapses to a static token
