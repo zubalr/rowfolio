@@ -58,7 +58,7 @@ html[lang="ar"] .rf-lead__kicker {
      first line's ink overhangs the element's top and the last line's
      descender its bottom. Padding reserves that room inside the box so
      glyph ink never lands outside the element's rect. */
-  padding-block: 0.15em 0.11em;
+  padding-block: 0.15em 0.16em;
   font-size: 40px;
   font-weight: 700;
   letter-spacing: -0.015em;
@@ -74,6 +74,13 @@ html[lang="ar"] .rf-lead__kicker {
      so the accent's edge never clips (tan(8°) ≈ 0.14 × ~0.7em glyph
      height ≈ 0.10em) */
   padding-inline-end: 0.12em;
+  /* the glyphs also paint ~4px past the line box on the block axis —
+     measured scrollHeight 47 vs clientHeight 43 at 40px in BOTH locales
+     (AR is unskewed, so this is font overhang, not the shear). Reserve
+     it with block padding, then return the footprint with equal
+     negative margins so the line box keeps its metrics. */
+  padding-block: 0.13em 0.14em;
+  margin-block: -0.13em -0.14em;
 }
 html[lang="ar"] .rf-lead__accent { transform: none; }
 

@@ -294,6 +294,17 @@ html[lang="ar"] .rf-secmark {
     row-gap: 0;
     column-gap: var(--rf-space-3);
   }
+  /* ≥44px hit areas on touch widths — transparent padding expands the
+     hit box while matching negative margins keep the line metrics */
+  .rf-landing-root .rf-nav a {
+    display: inline-block;
+    padding-block: 12px;
+    margin-block: -12px;
+  }
+  .rf-landing-root .rf-masthead__ws {
+    min-block-size: 44px;
+    margin-block: -6px;
+  }
 }
 
 /* Landing primary actions carry the cobalt primary-action role.
