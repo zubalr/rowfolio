@@ -46,7 +46,12 @@ Run everything with the commands in the [README](../../README.md#quick-start).
 
 ## Deliberately out of scope
 
-Accounts, cloud storage, backend processing, analytics, AI/LLM integration,
+Accounts, cloud storage, backend processing, AI/LLM integration,
 formula evaluation, forecasts, automatic joins across sheets, and PDF export.
+The only permitted network emission is Vercel Web Analytics on production —
+coarse pageview counts with URLs reduced to origin plus a route label before
+sending; no custom events and no spreadsheet data (see
+[privacy.md](privacy.md)). Only real page loads are counted: in-app hash
+transitions between `#/` and `#/workspace` are not tracked.
 See [privacy.md](privacy.md) for what this means for your data and
 [supported-formats.md](supported-formats.md) for format boundaries.

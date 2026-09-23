@@ -21,16 +21,16 @@ const CATALOG: Record<FixtureLocale, Record<string, string>> = {
     "a11y.chartTable": "Data table for this chart",
     "action.viewData": "View data table",
     "chart.downtime.summary":
-      "Downtime rose from 1,194 to 1,565 minutes across complete scheduled periods.",
+      "North downtime moved month over month across complete scheduled periods.",
     "chart.downtime.title": "North downtime, May to June",
     "chart.north.summary":
-      "North, June: actual 881,000 USD against a target of 1,000,000 USD.",
+      "North, June: actual revenue against its target.",
     "chart.north.title": "Actual revenue against target",
     "chart.quality.summary":
-      "17 duplicate rows and seven category cells were resolved; five optional values are left empty.",
+      "What was resolved, and what remains open.",
     "chart.quality.title": "Data quality, with the limits visible",
     "chart.scenario.summary":
-      "With operating costs up 8% and revenue fixed, margin moves from 25% to 19%.",
+      "Margin under the committed operating-cost scenario; revenue held fixed.",
     "chart.scenario.title": "Contribution margin under the cost scenario",
     "common.actual": "Actual",
     "common.allRegions": "All regions",
@@ -68,16 +68,16 @@ const CATALOG: Record<FixtureLocale, Record<string, string>> = {
     "a11y.chartTable": "جدول بيانات هذا المخطط",
     "action.viewData": "عرض جدول البيانات",
     "chart.downtime.summary":
-      "زاد وقت التوقف من ١٬١٩٤ إلى ١٬٥٦٥ دقيقة خلال فترتي تقارير مكتملتين.",
+      "تحرّك وقت التوقف في الشمال على مدى فترتي تقارير مكتملتين.",
     "chart.downtime.title": "وقت التوقف في الشمال من مايو إلى يونيو",
     "chart.north.summary":
-      "الشمال في يونيو: إيرادات فعلية قدرها ٨٨١٬٠٠٠ دولار مقابل مستهدف قدره ١٬٠٠٠٬٠٠٠ دولار.",
+      "الشمال في يونيو: الإيرادات الفعلية مقابل المستهدف.",
     "chart.north.title": "الإيرادات الفعلية مقابل المستهدف",
     "chart.quality.summary":
-      "عولجت ١٧ حالة تكرار للصفوف و٧ خلايا فئات؛ وتُركت ٥ قيم اختيارية فارغة.",
+      "صفوف وخلايا عولجت، وعناصر تبقى مفتوحة.",
     "chart.quality.title": "جودة البيانات مع توضيح الحدود",
     "chart.scenario.summary":
-      "عند زيادة تكاليف التشغيل بنسبة ٨٪ وثبات الإيرادات، يتغيّر الهامش من ٢٥٪ إلى ١٩٪.",
+      "الهامش في سيناريو تكاليف التشغيل المُطبَّق؛ والإيرادات ثابتة.",
     "chart.scenario.title": "هامش المساهمة التشغيلية في سيناريو التكاليف",
     "common.actual": "الفعلي",
     "common.allRegions": "جميع المناطق",

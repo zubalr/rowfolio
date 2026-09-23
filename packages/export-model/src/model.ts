@@ -180,7 +180,7 @@ const SAMPLE_TITLES: Record<Locale, string[]> = {
   en: [
     'Monthly operations report',
     'June at a glance',
-    'Orders rose 8.0%; revenue sits 11.9% under target.',
+    'North revenue sits under target even as orders climbed.',
     'Change operating costs',
     'What changed in the data',
     'Inspect before acting',
@@ -188,7 +188,7 @@ const SAMPLE_TITLES: Record<Locale, string[]> = {
   ar: [
     'تقرير العمليات الشهري',
     'يونيو في لمحة',
-    'الطلبات ارتفعت ٨٫٠٪ والإيراد أدنى من المستهدف بنسبة ١١٫٩٪.',
+    'إيرادات الشمال دون المستهدف رغم ارتفاع الطلبات.',
     'غيّر تكاليف التشغيل',
     'ما الذي تغيّر في البيانات؟',
     'تحقّق قبل اتخاذ القرار',

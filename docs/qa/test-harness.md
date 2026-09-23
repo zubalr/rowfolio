@@ -16,9 +16,6 @@ here is deterministic and dependency-light — the checks must prove they
 | `fixtures/hostile/` | Bounded synthetic hostile fixtures + `manifest.json` + deterministic generator |
 | `docs/qa/test-harness.md` | This document |
 
-Reserved paths owned by the external bulk worker — do not create them:
-`fixtures/hostile/generated/`, `tooling/test/corpus/`.
-
 ## Commands
 
 ```bash

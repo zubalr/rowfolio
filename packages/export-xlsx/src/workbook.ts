@@ -10,6 +10,7 @@
  * are ever copied.
  */
 import ExcelJS from 'exceljs';
+import JSZip from 'jszip';
 import {
   assertExportModel,
   DESIGN_TOKENS,
@@ -640,9 +641,15 @@ export const buildWorkbook = async (
   // writeBuffer resolves to a byte array (Uint8Array in browsers); the
   // metadata travels in the message while these bytes travel out of band.
   const raw = (await workbook.xlsx.writeBuffer()) as unknown as Uint8Array;
-  const view = raw.byteOffset === 0 && raw.byteLength === raw.buffer.byteLength
-    ? new Uint8Array(raw.buffer as ArrayBuffer)
-    : new Uint8Array(raw.buffer as ArrayBuffer, raw.byteOffset, raw.byteLength);
+  const repaired = await repairWorkbookXml(raw, {
+    [TABLE_NAMES['clean'] as string]: `A1:${columnLetter(headers.length)}${model.table.rows.length + 1}`,
+    [TABLE_NAMES['quality'] as string]: `A1:I${model.table.qualityIssues.length + 1}`,
+    [TABLE_NAMES['kpis'] as string]: `A1:D${kpis.rowCount}`,
+    [TABLE_NAMES['methodology'] as string]: `A1:B${methodRows.length}`,
+  });
+  const view = repaired.byteOffset === 0 && repaired.byteLength === repaired.buffer.byteLength
+    ? new Uint8Array(repaired.buffer as ArrayBuffer)
+    : new Uint8Array(repaired.buffer as ArrayBuffer, repaired.byteOffset, repaired.byteLength);
   const bytes = view.slice().buffer;
   const sha256 = await sha256Hex(new Uint8Array(bytes));
   progress('ready', 1);
@@ -659,6 +666,47 @@ export const buildWorkbook = async (
     bytes,
   };
 };
+
+/**
+ * Post-package repairs for exceljs 4.4 output defects.
+ *
+ * 1. A table part's emitted ref is derived from the `rows` array passed to
+ *    `addTable`, not from cells already laid out with `addRow`/`getRow` — so
+ *    every table ref covers only its header (or nothing, when headerRow is
+ *    off). Excel's repair drops the tables and their filters. Rewrite each
+ *    table part's ref — and its internal autoFilter ref — to the range the
+ *    writer actually laid out.
+ * 2. `legacyDrawing` (the VML payload for cell notes) is emitted after
+ *    `tableParts`, violating the worksheet schema order; strict parsers
+ *    discard the whole sheet. Move those nodes ahead of `tableParts`.
+ */
+async function repairWorkbookXml(
+  buffer: Uint8Array,
+  tableRefs: Record<string, string>,
+): Promise<Uint8Array> {
+  const zip = await JSZip.loadAsync(buffer);
+  const tablePaths = Object.keys(zip.files).filter((p) => /^xl\/tables\/table\d+\.xml$/.test(p));
+  for (const path of tablePaths) {
+    const file = zip.file(path);
+    if (file === null) continue;
+    const xml = await file.async('string');
+    const name = /<table[^>]*\bname="([^"]+)"/.exec(xml)?.[1];
+    const ref = name === undefined ? undefined : tableRefs[name];
+    if (ref === undefined) continue;
+    zip.file(path, xml.replace(/\bref="[^"]*"/g, `ref="${ref}"`));
+  }
+  const sheetPaths = Object.keys(zip.files).filter((p) => /^xl\/worksheets\/sheet\d+\.xml$/.test(p));
+  for (const path of sheetPaths) {
+    const file = zip.file(path);
+    if (file === null) continue;
+    const xml = await file.async('string');
+    const legacyNodes = xml.match(/<legacyDrawing[^/]*\/>/g) ?? [];
+    if (legacyNodes.length === 0 || !xml.includes('<tableParts')) continue;
+    const stripped = xml.replace(/<legacyDrawing[^/]*\/>/g, '');
+    zip.file(path, stripped.replace('<tableParts', `${legacyNodes.join('')}<tableParts`));
+  }
+  return zip.generateAsync({ type: 'uint8array' });
+}
 
 interface FormulaHelpers {
   readonly sumFormula: (field: string) => string;
