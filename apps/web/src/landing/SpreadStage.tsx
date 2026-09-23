@@ -142,7 +142,7 @@ const REGION_SHARES: readonly { region: string; share: number }[] = LANDING_TRUT
 /** Visible one-sentence caption per beat (also the live region). */
 const CAPTION_KEYS: readonly CopyKey[] = [
   "beat.result",
-  "guide.context.intro",
+  "walk.step.start.caption",
   "beat.checks",
   "beat.chart",
   "beat.findings",
