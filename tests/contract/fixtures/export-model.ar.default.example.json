@@ -45821,7 +45821,7 @@
       "id": "slide-1",
       "kind": "summary",
       "title": "تقرير العمليات الشهري",
-      "subtitle": "تحليل المثال · يونيو ٢٠٢٦",
+      "subtitle": "تحليل نموذجي · يونيو ٢٠٢٦",
       "metricIds": [],
       "findingIds": [
         "finding-north-target"
@@ -45837,7 +45837,7 @@
       "id": "slide-2",
       "kind": "kpis",
       "title": "يونيو في لمحة",
-      "subtitle": "تحليل المثال · يونيو ٢٠٢٦",
+      "subtitle": "تحليل نموذجي · يونيو ٢٠٢٦",
       "metricIds": [
         "june-revenue",
         "june-operating-cost",
@@ -45853,8 +45853,8 @@
     {
       "id": "slide-3",
       "kind": "finding",
-      "title": "إيرادات الشمال دون المستهدف رغم ارتفاع الطلبات.",
-      "subtitle": "تحليل المثال · يونيو ٢٠٢٦",
+      "title": "إيرادات الشمال دون المستهدف رغم ارتفاع الطلبات",
+      "subtitle": "تحليل نموذجي · يونيو ٢٠٢٦",
       "metricIds": [
         "north-june-revenue",
         "north-june-target",
@@ -45876,7 +45876,7 @@
       "id": "slide-4",
       "kind": "quality",
       "title": "ما الذي تغيّر في البيانات؟",
-      "subtitle": "تحليل المثال · يونيو ٢٠٢٦",
+      "subtitle": "تحليل نموذجي · يونيو ٢٠٢٦",
       "metricIds": [
         "quality-duplicate",
         "quality-category",
@@ -45897,7 +45897,7 @@
       "id": "slide-5",
       "kind": "methodology",
       "title": "تحقّق قبل اتخاذ القرار",
-      "subtitle": "تحليل المثال · يونيو ٢٠٢٦",
+      "subtitle": "تحليل نموذجي · يونيو ٢٠٢٦",
       "metricIds": [],
       "findingIds": [],
       "chartIds": [],

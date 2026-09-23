@@ -139,6 +139,6 @@ describe("scenario fixed domain", () => {
   it("renders the scenario bar dashed with the hypothetical label", () => {
     const html = render(scenarioBarsExample);
     expect(html).toContain('stroke-dasharray="5 3"');
-    expect(html).toContain("A mechanical sensitivity calculation, not a forecast.");
+    expect(html).toContain("A mechanical sensitivity calculation, not a forecast");
   });
 });

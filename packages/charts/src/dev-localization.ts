@@ -21,16 +21,16 @@ const CATALOG: Record<FixtureLocale, Record<string, string>> = {
     "a11y.chartTable": "Data table for this chart",
     "action.viewData": "View data table",
     "chart.downtime.summary":
-      "North downtime moved month over month across complete scheduled periods.",
+      "North downtime moved month over month across complete scheduled periods",
     "chart.downtime.title": "North downtime, May to June",
     "chart.north.summary":
-      "North, June: actual revenue against its target.",
+      "North, June: actual revenue against its target",
     "chart.north.title": "Actual revenue against target",
     "chart.quality.summary":
-      "What was resolved, and what remains open.",
-    "chart.quality.title": "Data quality, with the limits visible",
+      "What was resolved, and what remains open",
+    "chart.quality.title": "Data quality and its limits",
     "chart.scenario.summary":
-      "Margin under the committed operating-cost scenario; revenue held fixed.",
+      "Margin under the committed operating-cost scenario; revenue held fixed",
     "chart.scenario.title": "Contribution margin under the cost scenario",
     "common.actual": "Actual",
     "common.allRegions": "All regions",
@@ -44,7 +44,7 @@ const CATALOG: Record<FixtureLocale, Record<string, string>> = {
     "common.target": "Target",
     "common.undefined": "Not defined",
     "common.units": "Units",
-    "limitations.noForecast": "A mechanical sensitivity calculation, not a forecast.",
+    "limitations.noForecast": "A mechanical sensitivity calculation, not a forecast",
     "metric.margin": "Contribution margin",
     "metric.marginDelta": "Margin change, percentage points",
     "period.april": "April",
@@ -68,16 +68,16 @@ const CATALOG: Record<FixtureLocale, Record<string, string>> = {
     "a11y.chartTable": "جدول بيانات هذا المخطط",
     "action.viewData": "عرض جدول البيانات",
     "chart.downtime.summary":
-      "تحرّك وقت التوقف في الشمال على مدى فترتي تقارير مكتملتين.",
+      "تحرّك وقت التوقف في الشمال على مدى فترات تقارير مكتملة",
     "chart.downtime.title": "وقت التوقف في الشمال من مايو إلى يونيو",
     "chart.north.summary":
-      "الشمال في يونيو: الإيرادات الفعلية مقابل المستهدف.",
+      "الشمال في يونيو: الإيرادات الفعلية مقابل المستهدف",
     "chart.north.title": "الإيرادات الفعلية مقابل المستهدف",
     "chart.quality.summary":
-      "صفوف وخلايا عولجت، وعناصر تبقى مفتوحة.",
-    "chart.quality.title": "جودة البيانات مع توضيح الحدود",
+      "صفوف وخلايا عولجت، وعناصر تبقى مفتوحة",
+    "chart.quality.title": "جودة البيانات وحدودها",
     "chart.scenario.summary":
-      "الهامش في سيناريو تكاليف التشغيل المُطبَّق؛ والإيرادات ثابتة.",
+      "الهامش في سيناريو تكاليف التشغيل المُطبَّق؛ والإيرادات ثابتة",
     "chart.scenario.title": "هامش المساهمة التشغيلية في سيناريو التكاليف",
     "common.actual": "الفعلي",
     "common.allRegions": "جميع المناطق",
@@ -91,8 +91,8 @@ const CATALOG: Record<FixtureLocale, Record<string, string>> = {
     "common.target": "المستهدف",
     "common.undefined": "غير معرّف",
     "common.units": "الوحدات",
-    "limitations.noForecast": "حساب لحساسية النتائج تجاه افتراض محدد، وليس توقعاً.",
-    "metric.margin": "هامش الفائض التشغيلي",
+    "limitations.noForecast": "حساب لحساسية النتائج تجاه افتراض محدد، وليس توقعاً",
+    "metric.margin": "هامش المساهمة التشغيلية",
     "metric.marginDelta": "تغيّر الهامش بالنقاط المئوية",
     "period.april": "أبريل",
     "period.june": "يونيو",

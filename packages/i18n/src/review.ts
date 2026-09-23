@@ -73,7 +73,7 @@ const FLAGS: readonly TerminologyFlag[] = Object.freeze<TerminologyFlag[]>([
     },
     {
       key: "upload.types",
-      arabicText: "CSV بترميز UTF-8 أو XLSX غير مشفّر · حتى ١٠ ميبيبايت",
+      arabicText: "CSV (UTF-8) أو XLSX (غير مشفّر) · حتى ١٠ ميغابايت",
       concern: "«ميبيبايت» for MiB; confirm versus «ميغابايت» or a Latin «MiB» island.",
       suggestion: null,
       severity: "needs-native-review",
@@ -95,14 +95,14 @@ const FLAGS: readonly TerminologyFlag[] = Object.freeze<TerminologyFlag[]>([
     },
     {
       key: "evidence.hashNote",
-      arabicText: "يؤكد الملف الذي أنتج هذا التقرير، ولا يتحقق من الأرقام التجارية.",
+      arabicText: "يؤكد الملف الذي أنتج هذا التقرير، ولا يتحقق من الأرقام التجارية",
       concern: "«يؤكد الملف» phrasing for the fingerprint disclaimer; confirm it reads naturally to a native reader.",
       suggestion: null,
       severity: "needs-native-review",
     },
     {
       key: "scenario.result",
-      arabicText: "هامش المساهمة التشغيلية: من {baseline} إلى {scenario}؛ التغيّر {delta} نقطة مئوية.",
+      arabicText: "هامش المساهمة التشغيلية: من {baseline} إلى {scenario}؛ التغيّر {delta} نقطة مئوية",
       concern:
         "Arabic semicolon «؛» placement plus the margin-term drift; also check agreement of «نقطة مئوية» with a placeholder count.",
       suggestion: null,
