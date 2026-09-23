@@ -121,7 +121,7 @@
   "finding.descriptive.body": "Business meaning has not been confirmed. These summaries describe the selected columns only.",
   "finding.descriptive.title": "A descriptive view of your table",
   "finding.downtime.body": "North downtime increased {change}, from {previous} to {current} minutes.",
-  "finding.downtime.title": "Downtime is moving the wrong way.",
+  "finding.downtime.title": "North downtime rose 31.1% from May to June, 1,194 to 1,565 minutes.",
   "finding.north.body": "North June revenue is {gap} below target, while order volume is {orders} higher than May.",
   "finding.north.title": "Revenue sits 11.9% under target even as orders rose 8.0%.",
   "finding.quality.body": "{duplicates} duplicate rows excluded, {categories} category cells normalized; {missing} optional scores remain missing.",
