@@ -1,0 +1,13 @@
+{
+  "protocolVersion": 1,
+  "requestId": "req-1",
+  "sessionId": "session-synthetic",
+  "revision": 1,
+  "operation": "ingest",
+  "payload": {
+    "sourceName": "sample_operations.xlsx",
+    "format": "xlsx",
+    "byteLength": 150599,
+    "binarySlot": "source"
+  }
+}

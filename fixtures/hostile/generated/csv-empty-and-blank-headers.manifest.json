@@ -1,0 +1,27 @@
+{
+  "caseId": "csv-empty-and-blank-headers",
+  "category": "csv_headers",
+  "description": "One truly empty header and one whitespace-only header in the same table.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 3,
+      "headerColumns": 4,
+      "perRecordFieldCounts": [
+        4,
+        4,
+        4
+      ]
+    },
+    "requiredBehavior": [
+      "position 2 (empty) and position 3 (single space) are two distinct unnamed columns",
+      "no silent trim-merge; default labels distinguish positions until renamed"
+    ]
+  },
+  "notes": [],
+  "artifact": "csv-empty-and-blank-headers.csv",
+  "sha256": "c7458e5f11688798e57c3cd52c4ebe4b631a08d6c6098ad41bfd37454e973489",
+  "bytes": 52,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

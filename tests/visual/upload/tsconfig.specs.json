@@ -1,0 +1,23 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "jsx": "react-jsx",
+    "paths": {
+      "@rowfolio/contracts": ["../../../packages/contracts/src/index.ts"],
+      "@rowfolio/i18n": ["../../../packages/i18n/src/index.ts"],
+      "@rowfolio/ingest": ["../../../packages/ingest/src/index.ts"],
+      "@rowfolio/ui": ["../../../packages/ui/src/index.ts"]
+    }
+  },
+  "include": [
+    "playwright.config.ts",
+    "specs/**/*.ts",
+    "gallery/**/*.ts",
+    "gallery/**/*.tsx",
+    "unit/**/*.ts",
+    "../../../apps/web/src/upload/**/*.ts",
+    "../../../apps/web/src/upload/**/*.tsx"
+  ]
+}

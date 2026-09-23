@@ -1,0 +1,29 @@
+{
+  "caseId": "csv-zero-and-negative-baselines",
+  "category": "csv_invalid_values",
+  "description": "Zero and negative baselines that make naive percentage change misleading.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 4,
+      "headerColumns": 4,
+      "perRecordFieldCounts": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "requiredBehavior": [
+      "Z-1: previous=0 makes relative change not_computable; copy reads 'from zero to 500', never 'infinite growth'",
+      "Z-3: negative base reports absolute change with a warning, not a percentage",
+      "Z-2: current=0 is a valid observation, not a missing value"
+    ]
+  },
+  "notes": [],
+  "artifact": "csv-zero-and-negative-baselines.csv",
+  "sha256": "b56cc66f22f97f1b2291c5a95f3b15880ef834fefb6ba869aee7c7ca4e038c9c",
+  "bytes": 118,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

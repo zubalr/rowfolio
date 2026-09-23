@@ -1,0 +1,27 @@
+{
+  "caseId": "xlsx-empty-sheetdata",
+  "category": "ooxml_structure",
+  "description": "Workbook with one named sheet whose sheetData is empty.",
+  "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "expected": {
+    "sheets": [
+      {
+        "name": "Blank",
+        "headerPhysicalRow": null,
+        "records": 0,
+        "header": [],
+        "rows": []
+      }
+    ],
+    "requiredBehavior": [
+      "an existing but empty sheet is enumerated, not an error; selection UI offers other sheets",
+      "no usable table on this sheet alone; no fabricated header inference"
+    ]
+  },
+  "notes": [],
+  "artifact": "xlsx-empty-sheetdata.xlsx",
+  "sha256": "212e2b36a40792cf615068797f6fff8fb7316c5f866b7ad21219f0c313590a4e",
+  "bytes": 2828,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

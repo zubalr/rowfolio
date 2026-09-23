@@ -1,0 +1,14 @@
+{
+  "message": {
+    "protocolVersion": 1,
+    "requestId": "req-x",
+    "sessionId": "sess-a",
+    "revision": 1,
+    "operation": "dispose",
+    "payload": {}
+  },
+  "binaries": [
+    { "slot": "dup", "buffer": { "byteLength": 1 } },
+    { "slot": "dup", "buffer": { "byteLength": 1 } }
+  ]
+}

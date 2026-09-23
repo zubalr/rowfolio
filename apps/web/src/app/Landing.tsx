@@ -1,0 +1,103 @@
+import { useRef, useState, type ChangeEvent } from 'react';
+import { Button } from '@rowfolio/ui';
+import { useI18n, useServices } from './context.tsx';
+import type { MessageKey } from '@rowfolio/i18n';
+
+export interface LandingProps {
+  onNavigateWorkspace: () => void;
+}
+
+/**
+ * Built-in landing — divider-led, paper surface, no card grid. Replaced
+ * automatically by the A12 landing module when `src/landing/` lands.
+ */
+export function Landing({ onNavigateWorkspace }: LandingProps) {
+  const { controllerReady } = useServices();
+  const i18n = useI18n();
+  const t = (key: MessageKey, params?: Record<string, string>) => i18n.tSafe(key, params);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  const runSample = () => {
+    onNavigateWorkspace();
+    void controllerReady.then((controller) => controller.useSample());
+  };
+
+  const onFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    const bytes = await file.arrayBuffer();
+    const format = /\.xlsx$/i.test(file.name) ? 'xlsx' : 'csv';
+    onNavigateWorkspace();
+    void controllerReady.then((controller) => controller.selectSource(bytes, file.name, format));
+  };
+
+  return (
+    <main className="rf-landing">
+      <header className="rf-masthead">
+        <span className="rf-brand">{t('brand.name')}</span>
+        <nav className="rf-mastnav">
+          <LanguageToggle />
+        </nav>
+      </header>
+
+      <section className="rf-hero">
+        <h1 className="rf-hero-title">
+          <span className="rf-hero-brand">{t('brand.name')}</span>
+          {t('hero.title')}
+        </h1>
+        <p className="rf-hero-body">{t('hero.body')}</p>
+        <div className="rf-hero-actions">
+          <Button variant="primary" icon="table" onClick={runSample} data-testid="open-demo-cta">
+            {t('action.tryDemo')}
+          </Button>
+          <Button variant="secondary" icon="upload" onClick={() => fileRef.current?.click()}>
+            {t('action.upload')}
+          </Button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            hidden
+            onChange={(e) => void onFile(e)}
+          />
+        </div>
+        <p className="rf-hero-note">{t('upload.types')}</p>
+      </section>
+
+      <footer className="rf-landing-foot">
+        <p>{t('privacy.short')}</p>
+        <p className="rf-quiet">{t('common.local')}</p>
+      </footer>
+    </main>
+  );
+}
+
+export function LanguageToggle() {
+  const i18n = useI18n();
+  const other = i18n.getState().locale === 'ar' ? 'en' : 'ar';
+  const [announcement, setAnnouncement] = useState('');
+  return (
+    <>
+      <Button
+        variant="secondary"
+        lang={other}
+        aria-label={i18n.localeName(other)}
+        onClick={() => {
+          i18n.setLocale(other);
+          setAnnouncement(i18n.t('language.changed'));
+          if (typeof history !== 'undefined') {
+            // Keep the hash route: rewriting to a bare path would drop
+            // `#/workspace` and bounce a reload back to the landing.
+            history.replaceState(null, '', (other === 'ar' ? '/ar/' : '/') + window.location.hash);
+          }
+        }}
+      >
+        {i18n.localeName(other)}
+      </Button>
+      <span role="status" className="rf-visually-hidden">{announcement}</span>
+    </>
+  );
+}
+
+

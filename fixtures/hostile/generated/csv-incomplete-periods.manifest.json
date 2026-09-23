@@ -1,0 +1,49 @@
+{
+  "caseId": "csv-incomplete-periods",
+  "category": "csv_missing_values",
+  "description": "Monthly panel with an entirely missing month (2025-03) and a partial latest month, plus zero targets.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 8,
+      "headerColumns": 4,
+      "perRecordFieldCounts": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "exactSums": {
+      "amount_usd": "735.00",
+      "target_usd": "710.00"
+    },
+    "exactSumsByGroup": {
+      "column": "amount_usd",
+      "groupBy": "month",
+      "values": {
+        "2025-01": "270.00",
+        "2025-02": "285.00",
+        "2025-04": "180.00"
+      }
+    },
+    "requiredBehavior": [
+      "2025-03 is absent: absence is not zero and never fills a trend series",
+      "2025-04 is partial (2 of 3 branches): it is not compared as a full period against complete months",
+      "target_usd = 0 rows make target variance not_computable for those rows (target > 0 required); zero is not treated as missing",
+      "month sums reconcile exactly per exactSumsByGroup"
+    ]
+  },
+  "notes": [
+    "Branch identifiers and amounts are invented."
+  ],
+  "artifact": "csv-incomplete-periods.csv",
+  "sha256": "ad4707f6a628a1147e019a244ae1d7e8143ed84ed23e1d7de8c82d2533e8cd70",
+  "bytes": 245,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

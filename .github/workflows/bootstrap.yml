@@ -1,0 +1,48 @@
+name: bootstrap
+
+on:
+  push:
+    branches: [integration/rowfolio, main]
+  pull_request:
+
+concurrency:
+  group: bootstrap-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+
+      - name: Enable pinned pnpm
+        run: corepack enable
+
+      - name: Frozen install (lockfile must already be complete)
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit and bootstrap tests
+        run: pnpm test
+
+      - name: Static build
+        run: pnpm build
+
+      - name: Static-only + landing-chunk audit
+        run: pnpm audit:static
+
+      - name: License / vendored-dependency audit
+        run: pnpm audit:licenses
+
+      - name: Worker bundle spike (strict CSP, static leg)
+        run: pnpm spike:workers

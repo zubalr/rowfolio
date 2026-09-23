@@ -1,0 +1,415 @@
+/**
+ * Workspace craft layer — scoped to .rf-workspace; nothing here reaches the
+ * landing or upload surfaces beyond the product lease. Surfaces are
+ * Broadsheet plates: white cards with a hairline rule, a numbered mono plate
+ * label as the visual spine, and divider-led sections inside.
+ */
+
+/* ---------- Plate grammar ------------------------------------------------- */
+
+/* The plate: one white surface, one hairline, panel radius, no shadow. */
+/* The landing spread positions decorative `.rf-wplate` frames absolutely on the
+   bare class; product plates inside the workspace always stay in flow. */
+.rf-workspace .rf-wplate {
+  position: static;
+  overflow: visible;
+}
+
+.rf-wplate {
+  background: var(--rf-surface);
+  border: 1px solid var(--rf-rule);
+  border-radius: var(--rf-radius-panel);
+  padding: var(--rf-space-5);
+  min-width: 0;
+}
+
+.rf-wplate__head {
+  margin-block-end: var(--rf-space-4);
+}
+
+.rf-wplate__title {
+  margin: var(--rf-space-2) 0 0;
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+html[lang="ar"] .rf-wplate__title {
+  font-size: 22px;
+  line-height: 1.55;
+  letter-spacing: normal;
+}
+
+/* The one-line "what am I seeing" that precedes each plate's data. */
+.rf-wplate__note {
+  margin: var(--rf-space-2) 0 0;
+  color: var(--rf-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 64ch;
+}
+
+html[lang="ar"] .rf-wplate__note {
+  font-size: 15px;
+}
+
+/* Plate label — the pipeline spine: index, 24px vermilion rule, mono name. */
+.rf-plate-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rf-space-3);
+  font-family: var(--rf-font-mono);
+  font-size: var(--rf-plate-label-size);
+  font-weight: var(--rf-plate-label-weight);
+  letter-spacing: var(--rf-plate-label-tracking);
+  text-transform: uppercase;
+  color: var(--rf-ink);
+}
+
+.rf-plate-label__num {
+  color: var(--rf-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-plate-label__rule {
+  flex: none;
+  inline-size: 24px;
+  block-size: 2px;
+  background: var(--rf-attention);
+}
+
+.rf-plate-label__name {
+  color: var(--rf-ink);
+}
+
+/* Plex Mono has no Arabic cut and tracking disconnects the script — the
+   name falls back to the body stack, untracked, sentence case. */
+html[lang="ar"] .rf-plate-label {
+  letter-spacing: normal;
+}
+
+html[lang="ar"] .rf-plate-label__name {
+  font-family: var(--rf-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* Divider-led sections inside a plate: the hairline stays but tightens, and
+   the section title steps down under the plate's own heading. */
+.rf-wplate .rf-section {
+  margin-block-start: var(--rf-space-4);
+  padding-block-start: var(--rf-space-4);
+}
+
+.rf-wplate .rf-section__title {
+  font-size: 19px;
+}
+
+html[lang="ar"] .rf-wplate .rf-section__title {
+  font-size: 20px;
+}
+
+/* ---------- Quiet action — a mono underlined link, not a second button ---- */
+
+.rf-linkbtn {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: var(--rf-font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--rf-text-muted);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--rf-rule);
+  cursor: pointer;
+  min-height: var(--rf-control-height);
+  transition:
+    color var(--rf-hover-ms) var(--rf-ease),
+    text-decoration-color var(--rf-hover-ms) var(--rf-ease);
+}
+
+.rf-linkbtn:hover:not(:disabled) {
+  color: var(--rf-text);
+  text-decoration-color: currentColor;
+}
+
+.rf-linkbtn:focus-visible {
+  outline: 3px solid var(--rf-focus);
+  outline-offset: 3px;
+  border-radius: var(--rf-radius-control);
+}
+
+.rf-linkbtn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+html[lang="ar"] .rf-linkbtn {
+  font-family: var(--rf-font-body);
+  font-size: 14px;
+}
+
+[data-rf-surface="ink"] .rf-linkbtn {
+  color: var(--rf-ink-muted);
+  text-decoration-color: var(--rf-ink-rule);
+}
+
+[data-rf-surface="ink"] .rf-linkbtn:hover:not(:disabled) {
+  color: var(--rf-ink-text);
+}
+
+/* ---------- Stage ---------------------------------------------------------- */
+
+.rf-wstage {
+  display: grid;
+  gap: var(--rf-space-5);
+}
+
+/* The hero stage lives inside the overview plate — a named head, then the
+   figure with no card chrome of its own. */
+.rf-wstage-panel {
+  color: var(--rf-text);
+}
+
+.rf-wstage-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--rf-space-4);
+  margin-block-end: var(--rf-space-4);
+}
+
+.rf-wstage-titles {
+  min-width: 0;
+}
+
+/* The stage eyebrow is a quiet mono micro-label (Latin); Arabic keeps the
+   body stack. */
+.rf-wstage-eyebrow {
+  margin: 0 0 var(--rf-space-1);
+  font-family: var(--rf-font-mono);
+  font-size: var(--rf-plate-label-size);
+  font-weight: var(--rf-plate-label-weight);
+  letter-spacing: var(--rf-plate-label-tracking);
+  text-transform: uppercase;
+  color: var(--rf-text-muted);
+}
+
+html[lang='ar'] .rf-wstage-eyebrow {
+  font-family: var(--rf-font-body);
+  font-size: 13px;
+  letter-spacing: normal;
+}
+
+.rf-wstage-title {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+html[lang='ar'] .rf-wstage-title {
+  font-size: 20px;
+  letter-spacing: normal;
+}
+
+.rf-wstage-scope {
+  margin: var(--rf-space-1) 0 0;
+  font-size: 12px;
+  color: var(--rf-text-muted);
+}
+
+html[lang='ar'] .rf-wstage-scope {
+  font-size: 13px;
+}
+
+/* Chart title/summary inside the stage stay quiet — the stage head names
+   the finding; the chart block only needs its axes and marks. */
+.rf-wstage-panel .rf-chart__title {
+  font-size: 14px;
+  color: var(--rf-text-muted);
+  font-weight: 500;
+  letter-spacing: normal;
+}
+
+.rf-wstage-panel .rf-chart__summary {
+  color: var(--rf-text-muted);
+}
+
+/* When the hero chart left the grid, the remaining pair sit side by side —
+   the app stylesheet only promotes a lone first chart to full width. */
+.rf-wstage .rf-charts--paired > *:first-child {
+  grid-column: auto;
+}
+
+/* Evidence chip — the badge on the stage that morphs into the drawer badge.
+   Pill on the plate; shares its shape when it arrives in the panel. */
+.rf-ev-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 var(--rf-space-4);
+  border: 1px solid var(--rf-rule);
+  border-radius: 999px;
+  background: var(--rf-surface);
+  color: var(--rf-text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex: none;
+  transition: background-color var(--rf-hover-ms) var(--rf-ease);
+}
+
+.rf-ev-chip:hover {
+  background: var(--rf-paper);
+}
+
+.rf-ev-chip:focus-visible {
+  outline: 3px solid var(--rf-focus);
+  outline-offset: 2px;
+}
+
+.rf-ev-chip:active {
+  transform: scale(0.98);
+}
+
+/* Inside the evidence drawer the badge is content, not a control — the
+   selected element landed on the ink surface. Semantic tokens remap under
+   [data-rf-surface="ink"], so the same chrome reads correctly on both. */
+.rf-ev-chip--badge {
+  cursor: default;
+  background: color-mix(in srgb, var(--rf-accent) 8%, transparent);
+  border: 1px solid transparent;
+  box-shadow: inset 0 0 0 2px var(--rf-accent);
+  font-size: 12px;
+  min-height: 28px;
+  padding: 0 10px;
+  margin-block-end: var(--rf-space-2);
+}
+
+/* The header metadata row names the full analysis scope. */
+.rf-workspace-scope {
+  margin-block-start: 2px;
+}
+
+/* KPI unit badges are atomic tokens — 'USD' must never split as U/S/D on
+   narrow viewports. (The badge element itself lives in @rowfolio/ui; the
+   nowrap override stays scoped to the workspace.) */
+.rf-workspace .rf-metric__unit {
+  white-space: nowrap;
+}
+
+/* Stat block — headline figures sit on the 40px metric step (30px at small
+   widths); the caption under it is a plain sentence, never a label salad. */
+.rf-workspace .rf-metric--feature .rf-metric__value {
+  font-size: 40px;
+  line-height: 1.1;
+}
+
+@media (max-width: 767px) {
+  .rf-workspace .rf-metric--feature .rf-metric__value {
+    font-size: 30px;
+  }
+}
+
+/* Arabic-Indic figures run wide; at 320px even 30px can overflow — shrink
+   instead of breaking the numeral mid-token. */
+@media (max-width: 360px) {
+  .rf-workspace .rf-metric--feature .rf-metric__value {
+    font-size: clamp(18px, 7vw, 30px);
+  }
+}
+
+/* KPI denominators — "97 / 100 records" under each headline number. */
+.rf-metric-scope {
+  font-size: 12px;
+  color: var(--rf-text-muted, #54666e);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Inside the overview plate, the chart grid separates from the hero by one
+   hairline instead of card-on-card nesting. */
+.rf-wplate .rf-wstage-body {
+  margin: 0;
+  padding-block-start: var(--rf-space-4);
+  color: var(--rf-text);
+  max-width: 62ch;
+}
+
+.rf-charts {
+  border-block-start: 1px solid var(--rf-divider);
+  padding-block-start: var(--rf-space-4);
+  gap: var(--rf-space-5);
+}
+
+/* Stat blocks sit on the plate; finding rows follow, ruled by their own
+   hairlines. */
+.rf-wplate .rf-findings {
+  margin-block-start: var(--rf-space-4);
+}
+
+/* Scenario surface — the committed assumption block wears the scenario hue
+   (amber = hypothetical) rather than the generic divider treatment. */
+.rf-workspace .rf-scenario-result {
+  border-block-start: none;
+  border-inline-start: 3px solid var(--rf-scenario);
+  background: color-mix(in srgb, var(--rf-scenario) 6%, var(--rf-bg));
+  padding-block: var(--rf-space-3);
+  padding-inline-start: var(--rf-space-4);
+  border-radius: 0 var(--rf-radius-control) var(--rf-radius-control) 0;
+}
+
+[dir='rtl'] .rf-workspace .rf-scenario-result {
+  border-radius: var(--rf-radius-control) 0 0 var(--rf-radius-control);
+}
+
+.rf-workspace .rf-scenario-result .rf-quiet {
+  color: var(--rf-scenario-text);
+}
+
+@media (max-width: 640px) {
+  .rf-wstage-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .rf-ev-chip {
+    align-self: flex-start;
+  }
+
+  .rf-workspace .rf-finding {
+    flex-direction: column;
+    gap: var(--rf-space-3);
+  }
+
+  .rf-workspace .rf-finding .rf-btn {
+    align-self: flex-start;
+  }
+
+  .rf-wplate {
+    padding: var(--rf-space-4) var(--rf-space-3);
+  }
+}
+
+/* Small screens: the stage may horizontally overflow before the chart
+   measure loop settles — clip rather than push the page. */
+.rf-wstage-panel .rf-chart-plot {
+  overflow-x: clip;
+}
+
+/* Canonical decimals can carry arbitrarily long fractions — an unbreakable
+   numeric token must wrap before it can widen the layout. */
+.rf-workspace .rf-finding-body,
+.rf-workspace .rf-metric__value,
+.rf-workspace .rf-evidence__num {
+  overflow-wrap: anywhere;
+}

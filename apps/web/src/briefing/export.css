@@ -1,0 +1,42 @@
+/**
+ * Export dialog chrome — dialog width and download-link provenance.
+ * The slide/workbook preview styles (.rf-sp-*) live in slide-preview.css,
+ * and the viewer pane/rail styles (.rf-rv-*) in report-viewer.css.
+ */
+
+/* Fixed-width export dialog: the preview grid must not reflow the dialog
+   between the model-build and ready states. */
+.rf-dialog--export {
+  inline-size: min(620px, calc(100vw - 2 * var(--rf-gutter)));
+}
+
+/* Provenance lines under each download link — hashed filenames stay
+   de-emphasized: muted, mono, middle-truncated by the caller. */
+.rf-export-link__meta {
+  font-family: var(--rf-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--rf-muted);
+  overflow-wrap: anywhere;
+}
+html[lang="ar"] .rf-export-link__meta { font-family: var(--rf-font-body); }
+
+/* Breathing room between the preview notes and the shared viewer. */
+.rf-export-preview > .rf-rv {
+  margin-block-start: var(--rf-space-3);
+}
+
+/* Diagnostics under a download link — collapsible, same muted treatment. */
+.rf-export-link__tech {
+  font-size: 12px;
+  color: var(--rf-muted);
+}
+.rf-export-link__tech summary {
+  cursor: pointer;
+  font-family: var(--rf-font-body);
+}
+.rf-export-link__tech > span {
+  font-family: var(--rf-font-mono);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}

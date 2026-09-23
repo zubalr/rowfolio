@@ -1,0 +1,61 @@
+/* Gallery chrome — mirrors the product surface (paper bg, ink text, rules). */
+:root {
+  --rf-c-ink: #10191e;
+  --rf-c-paper: #f5f7f8;
+  --rf-c-surface: #ffffff;
+  --rf-c-muted: #54666e;
+  --rf-c-rule: #d9e0e4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--rf-c-paper);
+  color: var(--rf-c-ink);
+  font-family: "IBM Plex Sans", "IBM Plex Sans Arabic", Arial, sans-serif;
+}
+
+.cg {
+  max-width: 900px;
+  margin: 0 auto;
+  padding-inline: 24px;
+  padding-block: 16px 64px;
+}
+
+.cg__mast {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 64px;
+  border-block-end: 1px solid var(--rf-c-rule);
+  margin-block-end: 24px;
+}
+
+.cg__brand {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.cg__mast nav {
+  display: flex;
+  gap: 16px;
+}
+
+.cg__mast a {
+  color: var(--rf-c-muted);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.cg__mast a[data-active] {
+  color: var(--rf-c-ink);
+  font-weight: 600;
+}
+
+.cg section {
+  padding-block: 24px;
+  border-block-end: 1px solid var(--rf-c-rule);
+}

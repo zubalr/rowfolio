@@ -1,0 +1,938 @@
+/**
+ * Primitive styles — editorial, divider-led, direction-aware.
+ * All geometry uses logical properties; the only physical flips are the
+ * explicitly mirrored directional icons and the evidence drawer's travel.
+ */
+
+/* ---------- icons ---------- */
+.rf-icon {
+  flex: none;
+}
+[dir="rtl"] .rf-icon--mirror {
+  transform: scaleX(-1);
+}
+
+/* ---------- The cell-selection chrome ----------
+ * ONE identical treatment on every selected element across the app — a
+ * 2px cobalt inset rule over an 8% cobalt wash, the "cell selected" read.
+ * Hue token is --rf-accent (=== --rf-data cobalt on paper, remapped to the
+ * light cobalt on the ink surface) so the chrome stays correct on both.
+ */
+.rf-cell-selected,
+[data-rf-selected] {
+  box-shadow: inset 0 0 0 2px var(--rf-accent);
+  background: color-mix(in srgb, var(--rf-accent) 8%, transparent);
+}
+
+/* ---------- Button ---------- */
+.rf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rf-space-2);
+  min-height: var(--rf-control-height);
+  padding-block: var(--rf-space-2);
+  padding-inline: var(--rf-space-4);
+  border: 1px solid transparent;
+  border-radius: var(--rf-radius-control);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.4;
+  text-decoration: none;
+  transition:
+    background-color var(--rf-hover-ms) var(--rf-ease),
+    border-color var(--rf-hover-ms) var(--rf-ease),
+    box-shadow var(--rf-hover-ms) var(--rf-ease),
+    color var(--rf-hover-ms) var(--rf-ease);
+}
+html[lang="ar"] .rf-btn {
+  font-size: 16px;
+}
+
+/* Primary: the verdict tier — solid ink with a cobalt underprint rule. */
+.rf-btn--primary {
+  background: var(--rf-ink);
+  color: var(--rf-surface);
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--rf-data) 55%, transparent);
+}
+.rf-btn--primary:hover:not(:disabled) {
+  background: var(--rf-data);
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--rf-ink) 40%, transparent);
+}
+.rf-btn--primary:active:not(:disabled) {
+  background: #2443C7;
+}
+
+/* Secondary: the ruled tier — hairline ledger rule on a raised cell. */
+.rf-btn--secondary {
+  background: var(--rf-bg-raised);
+  border-color: var(--rf-divider);
+  color: var(--rf-text);
+}
+.rf-btn--secondary:hover:not(:disabled) {
+  border-color: var(--rf-accent);
+}
+.rf-btn--secondary .rf-btn__label {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: text-decoration-color var(--rf-hover-ms) var(--rf-ease);
+}
+.rf-btn--secondary:hover:not(:disabled) .rf-btn__label {
+  text-decoration-color: currentColor;
+}
+
+/* Ghost: the quiet tier — no cell frame at all, text that wakes on hover. */
+.rf-btn--ghost {
+  background: transparent;
+  color: var(--rf-text-muted);
+}
+.rf-btn--ghost:hover:not(:disabled) {
+  color: var(--rf-text);
+  background: color-mix(in srgb, var(--rf-ink) 5%, transparent);
+}
+[data-rf-surface="ink"] .rf-btn--ghost {
+  color: var(--rf-ink-muted);
+}
+[data-rf-surface="ink"] .rf-btn--ghost:hover:not(:disabled) {
+  color: var(--rf-ink-text);
+  background: color-mix(in srgb, var(--rf-ink-text) 8%, transparent);
+}
+
+/* Attention: vermilion is reserved for genuine exceptions. The
+   attention-on-paper pair is large-text-only (4.24:1), so the label uses the
+   darker text-grade negative token while the border/icon carry vermilion. */
+.rf-btn--attention {
+  background: transparent;
+  border-color: var(--rf-attention);
+  color: var(--rf-negative);
+}
+.rf-btn--attention .rf-icon {
+  color: var(--rf-attention);
+}
+.rf-btn--attention:hover:not(:disabled) {
+  background: #E04E1A0D;
+}
+[data-rf-surface="ink"] .rf-btn--attention {
+  color: var(--rf-ink-attention);
+  border-color: var(--rf-ink-attention);
+}
+[data-rf-surface="ink"] .rf-btn--attention .rf-icon {
+  color: var(--rf-ink-attention);
+}
+[data-rf-surface="ink"] .rf-btn--attention:hover:not(:disabled) {
+  background: #E8907C14;
+}
+
+[data-rf-surface="ink"] .rf-btn--secondary {
+  color: var(--rf-ink-text);
+  border-color: var(--rf-ink-rule);
+}
+[data-rf-surface="ink"] .rf-btn--secondary:hover:not(:disabled) {
+  background: var(--rf-ink-surface);
+}
+[data-rf-surface="ink"] .rf-btn--primary {
+  background: var(--rf-surface);
+  color: var(--rf-ink);
+}
+[data-rf-surface="ink"] .rf-btn--primary:hover:not(:disabled) {
+  background: #EDEAE0;
+}
+
+.rf-btn:disabled {
+  opacity: 0.55;
+}
+.rf-btn--icon-only {
+  padding-inline: var(--rf-space-2);
+  min-width: var(--rf-control-height);
+}
+.rf-btn--block {
+  width: 100%;
+}
+
+/* ---------- Section (divider-led) ---------- */
+.rf-section {
+  border-block-start: 1px solid var(--rf-divider);
+  padding-block-start: var(--rf-space-4);
+  margin-block-start: var(--rf-space-6);
+}
+.rf-section__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--rf-space-4);
+  flex-wrap: wrap;
+  margin-block-end: var(--rf-space-4);
+}
+.rf-section__eyebrow {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--rf-accent);
+  margin-block-end: var(--rf-space-1);
+}
+html[lang="ar"] .rf-section__eyebrow {
+  font-size: 13px;
+  letter-spacing: normal;
+}
+.rf-section__title {
+  font-size: 32px;
+  line-height: 1.25;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+html[lang="ar"] .rf-section__title {
+  font-size: 30px;
+  line-height: 1.5333; /* 30/46 */
+  letter-spacing: normal;
+}
+@media (max-width: 767px) {
+  .rf-section__title {
+    font-size: 26px;
+  }
+}
+.rf-section__meta {
+  font-size: 13px;
+  color: var(--rf-text-muted);
+}
+html[lang="ar"] .rf-section__meta {
+  font-size: 14px;
+}
+
+/* ---------- Field ---------- */
+.rf-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-2);
+  max-width: 42ch;
+}
+.rf-field__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--rf-text);
+}
+html[lang="ar"] .rf-field__label {
+  font-size: 14px;
+}
+.rf-field__required {
+  color: var(--rf-danger-text);
+  margin-inline-start: 2px;
+}
+.rf-field__control {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--rf-divider);
+  border-radius: var(--rf-radius-control);
+  background: var(--rf-bg-raised);
+  transition: border-color var(--rf-hover-ms) var(--rf-ease);
+}
+.rf-field__control:focus-within {
+  border-color: var(--rf-accent);
+}
+.rf-field--invalid .rf-field__control {
+  border-color: var(--rf-danger-text);
+}
+.rf-field__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  min-height: var(--rf-control-height);
+  padding-block: var(--rf-space-2);
+  padding-inline: var(--rf-space-3);
+  font-variant-numeric: tabular-nums;
+}
+.rf-field__input:focus-visible {
+  outline: none; /* control ring carries the focus indication */
+}
+.rf-field__control:focus-within {
+  outline: 3px solid var(--rf-focus);
+  outline-offset: 3px;
+}
+.rf-field__unit {
+  display: inline-flex;
+  align-items: center;
+  padding-inline: var(--rf-space-3);
+  color: var(--rf-text-muted);
+  font-size: 13px;
+  border-inline-start: 1px solid var(--rf-divider);
+  white-space: nowrap;
+}
+.rf-field__help {
+  font-size: 13px;
+  color: var(--rf-text-muted);
+}
+html[lang="ar"] .rf-field__help {
+  font-size: 14px;
+}
+.rf-field__error {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rf-space-1);
+  font-size: 13px;
+  color: var(--rf-danger-text);
+}
+html[lang="ar"] .rf-field__error {
+  font-size: 14px;
+}
+.rf-field__error .rf-icon {
+  align-self: center;
+}
+
+/* ---------- Dialog ---------- */
+.rf-dialog {
+  border: 0;
+  padding: 0;
+  border-radius: var(--rf-radius-dialog);
+  background: var(--rf-bg-raised);
+  color: var(--rf-text);
+  max-width: min(620px, calc(100vw - 2 * var(--rf-gutter)));
+  max-height: calc(100dvh - 96px);
+  box-shadow: var(--rf-shadow-overlay);
+}
+.rf-dialog::backdrop {
+  background: #10191E59;
+}
+.rf-dialog[open] {
+  animation: rf-dialog-in var(--rf-panel-ms) var(--rf-ease);
+}
+@keyframes rf-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* End-anchored drawer (evidence): full height, end side, ≤ evidenceWidth.
+   The UA dialog sets inset-inline-start: 0 — it must be released to auto or
+   the overconstrained box snaps to the start edge. */
+.rf-dialog--drawer {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  margin: 0;
+  border-radius: 0;
+  width: min(var(--rf-evidence-width), 100vw);
+  max-width: 100vw;
+  max-height: 100dvh;
+  height: 100dvh;
+  --rf-drawer-sign: 1;
+}
+[dir="rtl"] .rf-dialog--drawer {
+  --rf-drawer-sign: -1;
+}
+.rf-dialog--drawer[open] {
+  animation-name: rf-drawer-in;
+}
+@keyframes rf-drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--rf-drawer-sign) * 48px));
+  }
+}
+
+.rf-dialog__inner {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: inherit;
+}
+.rf-dialog__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--rf-space-4);
+  padding: var(--rf-space-5) var(--rf-space-5) var(--rf-space-4);
+  border-block-end: 1px solid var(--rf-divider);
+}
+.rf-dialog__title {
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+html[lang="ar"] .rf-dialog__title {
+  letter-spacing: normal;
+  line-height: 1.55;
+}
+.rf-dialog__description {
+  font-size: 13px;
+  color: var(--rf-text-muted);
+  margin-block-start: var(--rf-space-1);
+}
+html[lang="ar"] .rf-dialog__description {
+  font-size: 14px;
+}
+.rf-dialog__body {
+  padding: var(--rf-space-5);
+  overflow: auto;
+  overscroll-behavior: contain;
+  min-height: 0;
+}
+.rf-dialog__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--rf-space-3);
+  flex-wrap: wrap;
+  padding: var(--rf-space-4) var(--rf-space-5);
+  border-block-start: 1px solid var(--rf-divider);
+}
+
+/* ---------- Status ---------- */
+.rf-status {
+  display: flex;
+  gap: var(--rf-space-3);
+  align-items: flex-start;
+  padding-block: var(--rf-space-3);
+  border-block-start: 1px solid var(--rf-divider);
+  border-block-end: 1px solid var(--rf-divider);
+}
+.rf-status__icon {
+  margin-block-start: 2px;
+}
+/* Error = a vermilion edge accent, never a red flood. */
+.rf-status--error {
+  border-inline-start: 3px solid var(--rf-attention);
+  padding-inline-start: var(--rf-space-3);
+}
+.rf-status--error .rf-status__icon {
+  color: var(--rf-attention);
+}
+[data-rf-surface="ink"] .rf-status--error {
+  border-inline-start-color: var(--rf-ink-attention);
+}
+/* Empty = a quiet unfilled ledger cell. */
+.rf-status--empty {
+  border: 1px dashed var(--rf-divider);
+  border-radius: var(--rf-radius-panel);
+  padding: var(--rf-space-5);
+}
+[data-rf-surface="ink"] .rf-status--empty {
+  border-color: var(--rf-ink-rule);
+}
+.rf-status--success .rf-status__icon {
+  color: var(--rf-positive);
+}
+.rf-status--warning .rf-status__icon,
+.rf-status--loading .rf-status__icon {
+  color: var(--rf-scenario);
+}
+.rf-status--info .rf-status__icon,
+.rf-status--empty .rf-status__icon {
+  color: var(--rf-accent);
+}
+[data-rf-surface="ink"] .rf-status--success .rf-status__icon {
+  color: var(--rf-ink-positive);
+}
+[data-rf-surface="ink"] .rf-status--warning .rf-status__icon,
+[data-rf-surface="ink"] .rf-status--loading .rf-status__icon {
+  color: var(--rf-ink-scenario);
+}
+.rf-status__title {
+  font-weight: 600;
+  font-size: 15px;
+}
+html[lang="ar"] .rf-status__title {
+  font-size: 16px;
+}
+.rf-status__body {
+  font-size: 13px;
+  color: var(--rf-text-muted);
+  margin-block-start: 2px;
+}
+html[lang="ar"] .rf-status__body {
+  font-size: 14px;
+}
+.rf-status__stages {
+  margin: var(--rf-space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  color: var(--rf-text-muted);
+}
+.rf-status__stage {
+  display: flex;
+  gap: var(--rf-space-2);
+  align-items: baseline;
+  padding-block: 2px;
+  padding-inline: var(--rf-space-2);
+  margin-inline: calc(-1 * var(--rf-space-2));
+  border-radius: var(--rf-radius-control);
+}
+.rf-status__stage::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 1px;
+  border: 1px solid var(--rf-divider);
+  align-self: center;
+  flex: none;
+}
+.rf-status__stage[data-state="done"]::before {
+  background: var(--rf-positive);
+  border-color: var(--rf-positive);
+}
+.rf-status__stage[data-state="current"] {
+  color: var(--rf-text);
+}
+[data-rf-surface="ink"] .rf-status__stage[data-state="current"] {
+  color: var(--rf-ink-text);
+}
+/* The in-flight stage reads as the selected cell in the ledger. */
+.rf-status__stage[data-state="current"] {
+  box-shadow: inset 0 0 0 1.5px var(--rf-accent);
+  background: color-mix(in srgb, var(--rf-accent) 8%, transparent);
+}
+.rf-status__stage[data-state="current"]::before {
+  background: var(--rf-accent);
+  border-color: var(--rf-accent);
+}
+.rf-status__actions {
+  margin-block-start: var(--rf-space-3);
+}
+
+/* Bar loader — the ruled-ledger indeterminate indicator: a cobalt segment
+   marching along a rule-width track across the top of the status. Static
+   under reduced-motion (a parked segment, never a fake percentage). */
+.rf-status--loading {
+  position: relative;
+  padding-block-start: calc(var(--rf-space-3) + 4px);
+}
+.rf-loader {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  block-size: 3px;
+  background: color-mix(in srgb, var(--rf-accent) 14%, transparent);
+  overflow: hidden;
+}
+.rf-loader__fill {
+  display: block;
+  block-size: 100%;
+  inline-size: 26%;
+  background: var(--rf-accent);
+  animation: rf-loader-march 1.3s var(--rf-ease) infinite alternate;
+}
+@keyframes rf-loader-march {
+  from {
+    transform: translateX(-8%);
+  }
+  to {
+    transform: translateX(292%);
+  }
+}
+[data-rf-surface="ink"] .rf-loader {
+  background: color-mix(in srgb, var(--rf-ink-data) 18%, transparent);
+}
+[data-rf-surface="ink"] .rf-loader__fill {
+  background: var(--rf-ink-data);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-loader__fill {
+    animation: none;
+    transform: translateX(137%);
+  }
+}
+
+/* Spinner — retained for compact callers outside the status banner. */
+.rf-spinner {
+  animation: rf-spin 1.2s linear infinite;
+}
+@keyframes rf-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-spinner {
+    animation: none;
+  }
+}
+
+/* Skeleton — the honest shimmer of a cell still being written. One sweep
+   across a ruled gradient; reduced-motion freezes it mid-state. */
+.rf-skeleton {
+  display: block;
+  block-size: 1em;
+  border-radius: var(--rf-radius-control);
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--rf-ink) 5%, transparent) 25%,
+      color-mix(in srgb, var(--rf-ink) 11%, transparent) 50%,
+      color-mix(in srgb, var(--rf-ink) 5%, transparent) 75%
+    );
+  background-size: 240px 100%;
+  background-repeat: no-repeat;
+  animation: rf-skeleton-sweep 1.4s var(--rf-ease) infinite;
+}
+@keyframes rf-skeleton-sweep {
+  from {
+    background-position: -240px 0;
+  }
+  to {
+    background-position: calc(100% + 240px) 0;
+  }
+}
+[data-rf-surface="ink"] .rf-skeleton {
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--rf-ink-text) 6%, transparent) 25%,
+    color-mix(in srgb, var(--rf-ink-text) 12%, transparent) 50%,
+    color-mix(in srgb, var(--rf-ink-text) 6%, transparent) 75%
+  );
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-skeleton {
+    animation: none;
+  }
+}
+
+/* ---------- Tabs ----------
+ * Tabs are cells in the ledger's index strip; the selected tab carries the
+ * same cell-selection chrome as every other selected element.
+ */
+.rf-tabs {
+  display: flex;
+  gap: var(--rf-space-1);
+  border-block-end: 1px solid var(--rf-divider);
+}
+.rf-tab {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: var(--rf-radius-control) var(--rf-radius-control) 0 0;
+  padding: var(--rf-space-2) var(--rf-space-3);
+  color: var(--rf-text-muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color var(--rf-hover-ms) var(--rf-ease),
+    box-shadow var(--rf-hover-ms) var(--rf-ease),
+    color var(--rf-hover-ms) var(--rf-ease);
+}
+.rf-tab:hover {
+  color: var(--rf-text);
+}
+.rf-tab[aria-selected="true"],
+.rf-tab.is-selected {
+  color: var(--rf-text);
+  box-shadow: inset 0 0 0 2px var(--rf-accent);
+  background: color-mix(in srgb, var(--rf-accent) 8%, transparent);
+}
+
+/* ---------- Tooltip ----------
+ * Ink surface, one hairline rule — the ledger margin note.
+ */
+.rf-tooltip {
+  position: absolute;
+  z-index: 70;
+  background: var(--rf-ink);
+  color: var(--rf-ink-text);
+  border: 1px solid var(--rf-ink-rule);
+  border-radius: var(--rf-radius-control);
+  padding: var(--rf-space-1) var(--rf-space-2);
+  font-size: 12px;
+  line-height: 1.4;
+  max-inline-size: 32ch;
+  pointer-events: none;
+}
+
+/* ---------- Range input ----------
+ * Ruled track + cobalt thumb. Semantic surfaces override --rf-range-accent
+ * (the assumption slider keeps its amber).
+ */
+input[type="range"] {
+  --rf-range-accent: var(--rf-data);
+  --rf-range-track: color-mix(in srgb, var(--rf-range-accent) 30%, var(--rf-divider));
+  appearance: none;
+  -webkit-appearance: none;
+  block-size: 20px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  block-size: 4px;
+  border-radius: 2px;
+  /* Filled track: accent up to --rf-range-pct, then the quiet rule. */
+  background: linear-gradient(
+    to right,
+    var(--rf-range-accent) 0 var(--rf-range-pct, 0%),
+    var(--rf-range-track) var(--rf-range-pct, 0%) 100%
+  );
+}
+input[type="range"]:dir(rtl)::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to left,
+    var(--rf-range-accent) 0 var(--rf-range-pct, 0%),
+    var(--rf-range-track) var(--rf-range-pct, 0%) 100%
+  );
+}
+input[type="range"]::-moz-range-progress {
+  block-size: 4px;
+  border-radius: 2px;
+  background: var(--rf-range-accent);
+}
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  inline-size: 18px;
+  block-size: 18px;
+  border-radius: 50%;
+  background: var(--rf-range-accent);
+  border: 2px solid var(--rf-bg);
+  margin-block-start: -7px;
+  transition: transform var(--rf-hover-ms) var(--rf-ease);
+}
+input[type="range"]::-moz-range-track {
+  block-size: 4px;
+  border-radius: 2px;
+  background: var(--rf-range-track);
+}
+input[type="range"]::-moz-range-thumb {
+  inline-size: 14px;
+  block-size: 14px;
+  border-radius: 50%;
+  background: var(--rf-range-accent);
+  border: 2px solid var(--rf-bg);
+  transition: transform var(--rf-hover-ms) var(--rf-ease);
+}
+input[type="range"]:hover::-webkit-slider-thumb,
+input[type="range"]:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+input[type="range"]:hover::-moz-range-thumb,
+input[type="range"]:focus-visible::-moz-range-thumb {
+  transform: scale(1.15);
+}
+
+/* ---------- Data table ---------- */
+.rf-table-wrap {
+  border: 1px solid var(--rf-divider);
+  border-radius: var(--rf-radius-panel);
+  background: var(--rf-bg-raised);
+  overflow: hidden;
+}
+/* The baseline axis — the header ledger rule is a heavier ink line. */
+.rf-table thead tr {
+  border-block-end: 1px solid var(--rf-ink);
+}
+/* A selected table row carries the same cell chrome as everything else. */
+.rf-table tbody tr.is-selected,
+.rf-table tbody tr[data-rf-selected] {
+  box-shadow: inset 0 0 0 2px var(--rf-accent);
+  background: color-mix(in srgb, var(--rf-accent) 8%, transparent);
+}
+.rf-table-scroll {
+  overflow: auto;
+  max-height: var(--rf-table-max-height, 480px);
+  overscroll-behavior: contain;
+}
+.rf-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+  line-height: 1.5;
+}
+html[lang="ar"] .rf-table {
+  font-size: 14px;
+}
+.rf-table caption {
+  text-align: start;
+  padding: var(--rf-space-3) var(--rf-space-4);
+  font-size: 13px;
+  color: var(--rf-text-muted);
+  border-block-end: 1px solid var(--rf-divider);
+}
+html[lang="ar"] .rf-table caption {
+  font-size: 14px;
+}
+.rf-table th,
+.rf-table td {
+  padding: var(--rf-space-2) var(--rf-space-3);
+  border-block-end: 1px solid var(--rf-divider);
+  text-align: start;
+  vertical-align: top;
+}
+.rf-table thead th {
+  position: sticky;
+  inset-block-start: 0;
+  background: var(--rf-bg-raised);
+  color: var(--rf-text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  z-index: 1;
+}
+html[lang="ar"] .rf-table thead th {
+  font-size: 13px;
+  letter-spacing: normal;
+}
+.rf-table [data-align="end"] {
+  text-align: end;
+}
+.rf-table [data-align="center"] {
+  text-align: center;
+}
+.rf-table tbody tr:hover {
+  background: #10191E08;
+}
+[data-rf-surface="ink"] .rf-table tbody tr:hover {
+  background: #FFFFFF08;
+}
+.rf-table__sourcerow {
+  font-family: var(--rf-font-mono);
+  font-size: 12px;
+  color: var(--rf-text-muted);
+  white-space: nowrap;
+}
+.rf-table__foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--rf-space-3);
+  padding: var(--rf-space-3) var(--rf-space-4);
+  font-size: 13px;
+  color: var(--rf-text-muted);
+}
+html[lang="ar"] .rf-table__foot {
+  font-size: 14px;
+}
+
+/* ---------- Metric + strip ---------- */
+.rf-metric-strip {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: var(--rf-space-5);
+}
+.rf-metric {
+  padding-inline-start: var(--rf-space-5);
+  border-inline-start: 1px solid var(--rf-divider);
+  min-width: 0;
+  flex: 1 1 240px;
+}
+/* The lead metric takes a full row of the strip — the ledger's head figure. */
+.rf-metric--feature {
+  flex-basis: 100%;
+}
+.rf-metric-strip > .rf-metric:first-child,
+.rf-metric-strip > [dir] > .rf-metric:first-child {
+  padding-inline-start: 0;
+  border-inline-start: 0;
+}
+.rf-metric__label {
+  font-size: 13px;
+  color: var(--rf-text-muted);
+  display: block;
+}
+html[lang="ar"] .rf-metric__label {
+  font-size: 14px;
+}
+.rf-metric__value {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rf-space-2);
+  margin-block-start: var(--rf-space-1);
+  font-size: 40px;
+  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+/* Ledger numerals: mono tabular figures — a figure never breaks mid-token. */
+.rf-metric__value .rf-numeric {
+  font-family: var(--rf-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+html[lang="ar"] .rf-metric__value {
+  letter-spacing: normal;
+}
+.rf-metric__value--undefined {
+  color: var(--rf-text-muted);
+}
+@media (max-width: 767px) {
+  .rf-metric__value {
+    font-size: 30px;
+    line-height: 1.2;
+  }
+}
+/* Arabic-Indic numerals run wide — at 320px a 30px figure plus its unit is
+   broader than the KPI cell, and nowrap figures cannot shrink. Scale the
+   metric further at the narrowest widths instead of breaking mid-token. */
+@media (max-width: 360px) {
+  .rf-metric__value {
+    font-size: clamp(18px, 6.5vw, 26px);
+  }
+}
+.rf-metric__unit {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--rf-text-muted);
+  letter-spacing: normal;
+  white-space: nowrap;
+}
+.rf-metric__delta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--rf-space-1);
+  margin-block-start: 2px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+html[lang="ar"] .rf-metric__delta {
+  font-size: 14px;
+}
+.rf-metric__delta--positive {
+  color: var(--rf-positive);
+}
+.rf-metric__delta--negative {
+  color: var(--rf-danger-text);
+}
+.rf-metric__delta--attention {
+  color: var(--rf-negative);
+}
+.rf-metric__delta--neutral {
+  color: var(--rf-text-muted);
+}
+.rf-metric__reason {
+  font-size: 13px;
+  color: var(--rf-text-muted);
+  margin-block-start: 2px;
+}
+html[lang="ar"] .rf-metric__reason {
+  font-size: 14px;
+}
+.rf-metric__provenance {
+  margin-block-start: var(--rf-space-1);
+}
+
+/* ---------- Skip link ---------- */
+.rf-skip {
+  position: absolute;
+  inset-inline-start: var(--rf-space-4);
+  inset-block-start: var(--rf-space-4);
+  transform: translateY(-200%);
+  background: var(--rf-ink);
+  color: var(--rf-surface);
+  padding: var(--rf-space-2) var(--rf-space-4);
+  border-radius: var(--rf-radius-control);
+  z-index: 100;
+  transition: transform var(--rf-state-ms) var(--rf-ease);
+}
+.rf-skip:focus-visible {
+  transform: translateY(0);
+}
+
+/* ---------- Bidi island ---------- */
+.rf-bidi {
+  unicode-bidi: isolate;
+}

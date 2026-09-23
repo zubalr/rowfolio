@@ -1,0 +1,132 @@
+/**
+ * Rowfolio design tokens as CSS custom properties.
+ * Source of truth: contracts/design-tokens.json v1.0.0 — see src/tokens.ts.
+ * One light theme; the dark evidence surface is a scoped treatment via
+ * [data-rf-surface="ink"], not a second theme.
+ */
+
+:root {
+  /* Palette (contract v3) */
+  --rf-ink: #0E1B2E;
+  --rf-paper: #F4F6F9;
+  --rf-surface: #FFFFFF;
+  --rf-surface-cool: #E9EFF7;
+  --rf-muted: #54666E;
+  --rf-rule: #DCE3EA;
+  --rf-data: #2B50E8;
+  --rf-data-tint-30: #C6D1FF;
+  --rf-cobalt: #2B50E8;
+  --rf-cobalt-ink: #1D3BB4;
+  --rf-cobalt-tint: #E7EDFD;
+  --rf-attention: #A33224;
+  --rf-negative: #A33224;
+  --rf-positive: #0E8F7E;
+  --rf-teal: #0E8F7E;
+  --rf-gray: #66788A;
+  --rf-gray-soft: #C9D3DE;
+  --rf-positive-text: #116B63;
+  --rf-scenario: #B96F00;
+  --rf-scenario-text: #946000;
+
+  /* On-ink tints — dark evidence surface only */
+  --rf-ink-text: #FFFFFF;
+  --rf-ink-muted: #93A9C0;
+  --rf-ink-data: #A8BCFF;
+  --rf-ink-attention: #D98373;
+  --rf-ink-positive: #74C6B8;
+  --rf-ink-scenario: #F0B45C;
+  --rf-ink-rule: #31475F;
+  --rf-ink-surface: #16283F;
+
+  /* Semantic aliases (light theme) */
+  --rf-text: var(--rf-ink);
+  --rf-text-muted: var(--rf-muted);
+  --rf-bg: var(--rf-paper);
+  --rf-bg-raised: var(--rf-surface);
+  --rf-divider: var(--rf-rule);
+  --rf-accent: var(--rf-data);
+  --rf-focus: var(--rf-data);
+  --rf-danger-text: var(--rf-negative);
+
+  /* Spacing scale */
+  --rf-space-1: 4px;
+  --rf-space-2: 8px;
+  --rf-space-3: 12px;
+  --rf-space-4: 16px;
+  --rf-space-5: 24px;
+  --rf-space-6: 32px;
+  --rf-space-7: 48px;
+  --rf-space-8: 64px;
+  --rf-space-9: 96px;
+
+  /* Radius */
+  --rf-radius-control: 8px;
+  --rf-radius-panel: 16px;
+  --rf-radius-dialog: 20px;
+
+  /* Layout */
+  --rf-max-width: 1320px;
+  --rf-gutter: 48px;
+  --rf-evidence-width: 560px;
+  --rf-control-height: 44px;
+
+  /* Motion — restrained, meaningful. Reduced motion zeroes these. */
+  --rf-hover-ms: 120ms;
+  --rf-state-ms: 160ms;
+  --rf-panel-ms: 240ms;
+  --rf-number-ms: 240ms;
+  --rf-stagger-ms: 40ms;
+  --rf-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Plate label — numbered-plate micro-labels (mono, uppercase, tracked) */
+  --rf-plate-label-size: 11.5px;
+  --rf-plate-label-weight: 600;
+  --rf-plate-label-tracking: 0.12em;
+
+  /* Type stacks */
+  --rf-font-body: "IBM Plex Sans", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --rf-font-mono: "IBM Plex Mono", "IBM Plex Sans", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* Elevation: shadows are for overlays only */
+  --rf-shadow-overlay: 0 20px 70px #10191E1F;
+
+  color-scheme: light;
+}
+
+@media (max-width: 1199px) {
+  :root {
+    --rf-gutter: 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --rf-gutter: 16px;
+  }
+}
+
+/* Dark evidence treatment — a scoped surface, not a theme switch. */
+[data-rf-surface="ink"] {
+  --rf-text: var(--rf-ink-text);
+  --rf-text-muted: var(--rf-ink-muted);
+  --rf-bg: var(--rf-ink);
+  --rf-bg-raised: var(--rf-ink-surface);
+  --rf-divider: var(--rf-ink-rule);
+  --rf-accent: var(--rf-ink-data);
+  --rf-focus: var(--rf-ink-data);
+  --rf-danger-text: var(--rf-ink-attention);
+
+  background: var(--rf-ink);
+  color: var(--rf-ink-text);
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --rf-hover-ms: 0ms;
+    --rf-state-ms: 0ms;
+    --rf-panel-ms: 0ms;
+    --rf-number-ms: 0ms;
+    --rf-stagger-ms: 0ms;
+  }
+}

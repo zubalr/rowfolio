@@ -1,0 +1,42 @@
+{
+  "caseId": "csv-missing-optional-values",
+  "category": "csv_missing_values",
+  "description": "Optional integer score blank on two of six records.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 6,
+      "headerColumns": 4,
+      "perRecordFieldCounts": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "missingCells": [
+      {
+        "row": 3,
+        "column": "csat_score"
+      },
+      {
+        "row": 6,
+        "column": "csat_score"
+      }
+    ],
+    "requiredBehavior": [
+      "blanks remain missing; no zero fill, no imputation",
+      "csat_score is descriptive: never summed; revenue_usd aggregates are unaffected by csat blanks"
+    ]
+  },
+  "notes": [
+    "Regions and values are invented; format mirrors a generic service score."
+  ],
+  "artifact": "csv-missing-optional-values.csv",
+  "sha256": "6b4bedbc1bf6c37f8bcbab4f3a589bd967be8779fcf5baa2b556102c751b1bfb",
+  "bytes": 205,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

@@ -1,0 +1,362 @@
+/**
+ * Upload review surfaces — paper/ink/cobalt, divider-led hierarchy.
+ * Only contract tokens; no new palette entries (04_DESIGN_SYSTEM.md).
+ */
+
+.rf-upload {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-5);
+  max-inline-size: 56rem;
+}
+
+/* --- dropzone ------------------------------------------------------------
+   * The drop target is a control, not a plate — the dashed hairline is its
+   * affordance and it sits transparent inside the upload plate. */
+
+.rf-upload__drop {
+  border: 1px dashed var(--rf-divider);
+  border-radius: var(--rf-radius-panel);
+  padding: var(--rf-space-7) var(--rf-space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--rf-space-4);
+  text-align: center;
+  transition:
+    border-color var(--rf-state-ms) var(--rf-ease),
+    background-color var(--rf-state-ms) var(--rf-ease);
+}
+
+.rf-upload__drop--active {
+  border-color: var(--rf-accent);
+  background: color-mix(in srgb, var(--rf-accent) 4%, transparent);
+}
+
+.rf-upload__drop:focus-within {
+  outline: 3px solid var(--rf-focus);
+  outline-offset: 3px;
+}
+
+.rf-upload__drop-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--rf-space-3);
+  cursor: pointer;
+  color: var(--rf-text);
+  font-weight: 500;
+}
+
+.rf-upload__drop-icon {
+  color: var(--rf-accent);
+}
+
+/* --- shared text rows ---------------------------------------------------- */
+
+.rf-upload__meta {
+  color: var(--rf-text-muted);
+  font-size: 13px;
+  line-height: 1.46;
+}
+
+html[lang="ar"] .rf-upload__meta {
+  font-size: 14px;
+}
+
+.rf-upload__note {
+  color: var(--rf-text-muted);
+  font-size: 13px;
+  line-height: 1.46;
+  border-block-start: 1px solid var(--rf-divider);
+  padding-block-start: var(--rf-space-3);
+}
+
+html[lang="ar"] .rf-upload__note {
+  font-size: 14px;
+}
+
+.rf-upload__prior {
+  display: flex;
+  gap: var(--rf-space-2);
+  align-items: center;
+  color: var(--rf-text-muted);
+  font-size: 13px;
+}
+
+.rf-upload__limits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rf-space-2) var(--rf-space-5);
+  color: var(--rf-text-muted);
+  font-size: 13px;
+}
+
+.rf-upload__limits li {
+  display: flex;
+  gap: var(--rf-space-2);
+  align-items: baseline;
+}
+
+/* --- sheet list ----------------------------------------------------------- */
+
+.rf-upload__sheets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rf-upload__sheet {
+  display: flex;
+  align-items: center;
+  gap: var(--rf-space-3);
+  padding-block: var(--rf-space-3);
+  border-block-start: 1px solid var(--rf-divider);
+  min-height: var(--rf-control-height);
+}
+
+.rf-upload__sheet:first-child {
+  border-block-start: none;
+}
+
+.rf-upload__sheet input[type="radio"],
+.rf-upload__issue input[type="checkbox"],
+.rf-upload__cache input[type="checkbox"],
+.rf-upload__optin input[type="checkbox"] {
+  inline-size: 18px;
+  block-size: 18px;
+  accent-color: var(--rf-accent);
+  flex-shrink: 0;
+}
+
+.rf-upload__sheet-name {
+  font-weight: 500;
+}
+
+.rf-upload__sheet-dims {
+  margin-inline-start: auto;
+  color: var(--rf-text-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-upload__badge {
+  font-size: 12px;
+  color: var(--rf-text-muted);
+  border: 1px solid var(--rf-divider);
+  border-radius: var(--rf-radius-control);
+  padding: 2px var(--rf-space-2);
+  font-family: var(--rf-font-mono);
+}
+
+/* --- preview -------------------------------------------------------------- */
+
+.rf-upload__preview {
+  max-block-size: 320px;
+  /* The scroll child (.rf-table-scroll, 480px cap) must clip to this cap —
+     unchecked overflow paints over the header select and Apply/Cancel. */
+  overflow: clip;
+}
+
+/* Baseline axis: the header ledger rule is the heavier ink line. */
+.rf-upload__preview .rf-table thead tr {
+  border-block-end: 2px solid var(--rf-ink);
+}
+
+/* Mono/data cells never break mid-token — IDs and dates stay whole in
+   both locales; the preview scroll container takes the overflow. */
+.rf-upload__preview .rf-table td,
+.rf-upload__preview .rf-table th {
+  white-space: nowrap;
+}
+
+/* The pending header-row choice reads as a selected cell row — cobalt
+   chrome over the row, darker baseline under it. */
+.rf-upload__preview-header > td,
+.rf-upload__preview tr[data-header] > td {
+  background: color-mix(in srgb, var(--rf-accent) 8%, transparent);
+  box-shadow: inset 0 -2px 0 var(--rf-accent), inset 0 2px 0 var(--rf-accent);
+}
+
+/* --- delta brackets ----------------------------------------------------------
+ * A proposed change is bracketed like a spreadsheet cell: the 'after' value
+   (the cell following the → arrow) gets an amber assumption frame.
+ */
+.rf-upload__issue-detail span[aria-hidden="true"] + .rf-upload__cell,
+.rf-upload__issue-detail span[aria-hidden="true"] + .rf-mono {
+  border: 1px solid color-mix(in srgb, var(--rf-scenario) 55%, transparent);
+  background: color-mix(in srgb, var(--rf-scenario) 7%, transparent);
+  border-radius: var(--rf-radius-control);
+  padding-inline: var(--rf-space-2);
+  color: var(--rf-scenario-text);
+}
+
+/* --- warnings / disclosures ------------------------------------------------ */
+
+.rf-upload__warnings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-2);
+}
+
+.rf-upload__warning {
+  display: flex;
+  gap: var(--rf-space-2);
+  align-items: baseline;
+  color: var(--rf-text);
+  font-size: 14px;
+}
+
+.rf-upload__warning .rf-icon {
+  color: var(--rf-scenario-text);
+  flex-shrink: 0;
+  transform: translateY(2px);
+}
+
+.rf-upload__code {
+  font-family: var(--rf-font-mono);
+  font-size: 12px;
+  color: var(--rf-text-muted);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* --- issues & decisions ----------------------------------------------------
+ * Proposed changes live in the amber assumption area — a dashed amber rail
+   and a faint wash mark every row still awaiting a decision; nothing amber
+   is committed.
+ */
+
+.rf-upload__issue,
+.rf-upload__cache,
+.rf-upload__optin,
+.rf-upload__colconfirm {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rf-space-3);
+  padding-block: var(--rf-space-3);
+  padding-inline-start: var(--rf-space-3);
+  border-block-start: 1px solid var(--rf-divider);
+  border-inline-start: 3px solid color-mix(in srgb, var(--rf-scenario) 60%, transparent);
+  background: color-mix(in srgb, var(--rf-scenario) 4%, transparent);
+}
+
+.rf-upload__issue-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-1);
+  min-inline-size: 0;
+}
+
+.rf-upload__issue-title {
+  font-weight: 500;
+}
+
+.rf-upload__issue-detail {
+  color: var(--rf-text-muted);
+  font-size: 13px;
+  display: flex;
+  gap: var(--rf-space-2);
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+html[lang="ar"] .rf-upload__issue-detail {
+  font-size: 14px;
+}
+
+.rf-upload__cell {
+  font-family: var(--rf-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  background: var(--rf-paper);
+  border-radius: var(--rf-radius-control);
+  padding: 1px var(--rf-space-2);
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+}
+
+.rf-upload__colconfirm {
+  flex-direction: column;
+  align-items: stretch;
+  padding-block-end: var(--rf-space-3);
+}
+
+.rf-upload__colconfirm .rf-upload__badge {
+  color: var(--rf-scenario-text);
+  border-color: color-mix(in srgb, var(--rf-scenario) 55%, transparent);
+  background: color-mix(in srgb, var(--rf-scenario) 8%, transparent);
+}
+
+.rf-upload__colconfirm-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rf-space-3);
+  flex-wrap: wrap;
+}
+
+.rf-upload__colconfirm select {
+  min-block-size: var(--rf-control-height);
+  border: 1px solid var(--rf-divider);
+  border-radius: var(--rf-radius-control);
+  background: var(--rf-bg-raised);
+  padding-inline: var(--rf-space-3);
+}
+
+/* --- capability summary ---------------------------------------------------- */
+
+.rf-upload__capabilities {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rf-space-2);
+}
+
+.rf-upload__capability {
+  display: flex;
+  gap: var(--rf-space-2);
+  align-items: baseline;
+  font-size: 14px;
+  color: var(--rf-text);
+}
+
+.rf-upload__capability .rf-icon {
+  color: var(--rf-scenario-text);
+  flex-shrink: 0;
+  transform: translateY(2px);
+}
+
+/* --- action row ------------------------------------------------------------ */
+
+/* --- action row ------------------------------------------------------------
+ * One real action per surface: the primary button leads; every quiet action
+   * is a mono underlined link, never a second button. */
+
+.rf-upload__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--rf-space-4);
+  flex-wrap: wrap;
+  padding-block-start: var(--rf-space-4);
+  border-block-start: 1px solid var(--rf-divider);
+}
+
+.rf-upload__actions .rf-btn--block {
+  flex: 1 1 auto;
+}
+
+@media (max-width: 767px) {
+  .rf-upload__drop {
+    padding: var(--rf-space-6) var(--rf-space-4);
+  }
+}

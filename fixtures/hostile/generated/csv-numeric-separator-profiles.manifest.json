@@ -1,0 +1,31 @@
+{
+  "caseId": "csv-numeric-separator-profiles",
+  "category": "csv_numeric_date_ambiguity",
+  "description": "One column mixing en-US grouping, European decimal-comma and Arabic-Indic digits.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 4,
+      "headerColumns": 2,
+      "perRecordFieldCounts": [
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "requiredBehavior": [
+      "'1,234.50' and '1.234,50' need an explicit numeric-convention profile; without one they stay ambiguous, never silently combined",
+      "S-3 uses Arabic-Indic digits (U+0660–U+066F) with the Arabic decimal separator U+066B and requires an explicit parser profile",
+      "S-4 is plain decimal; a mixed column fails single-profile validation and is disclosed as partial"
+    ]
+  },
+  "notes": [
+    "Values are invented amounts of no real currency context."
+  ],
+  "artifact": "csv-numeric-separator-profiles.csv",
+  "sha256": "83a81b6feb91be11f1bb52179a3c74ec24e184bc498c5ea5cb86c6fda3d60b48",
+  "bytes": 75,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

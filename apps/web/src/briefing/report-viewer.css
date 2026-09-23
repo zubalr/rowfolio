@@ -1,0 +1,60 @@
+/**
+ * Report viewer — one reading pane plus a thumbnail rail. Shared by the
+ * export dialog and any surface that previews the report (landing consumes
+ * the same component). The slide/workbook preview styles (.rf-sp-*) live in
+ * slide-preview.css, imported by SlidePreview.tsx itself.
+ */
+
+.rf-rv {
+  display: grid;
+  gap: var(--rf-space-3);
+}
+
+/* Reading pane above the rail — the selected deliverable at real size. */
+.rf-rv__pane:focus-visible {
+  outline: 2px solid var(--rf-accent);
+  outline-offset: 2px;
+}
+
+.rf-rv__rail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: var(--rf-space-3);
+}
+
+/* Thumbnail tabs: inert slide figures inside real buttons — the button
+   carries the accessible name, focus ring, and the selected mark. */
+.rf-rv__pick {
+  display: block;
+  inline-size: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-align: inherit;
+}
+.rf-rv__pick .rf-sp {
+  border-color: var(--rf-rule, var(--rf-divider));
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.rf-rv__pick:hover .rf-sp {
+  border-color: var(--rf-muted);
+}
+.rf-rv__pick:focus-visible {
+  outline: 2px solid var(--rf-accent);
+  outline-offset: 2px;
+}
+.rf-rv__pick--on .rf-sp {
+  border-color: var(--rf-accent);
+  box-shadow: 0 0 0 1px var(--rf-accent);
+}
+
+@media (max-width: 479px) {
+  .rf-rv__rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

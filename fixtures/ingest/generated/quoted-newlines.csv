@@ -1,0 +1,6 @@
+id,note,amount
+1,"line one
+line two",10
+2,"comma, inside",20
+3,"semi;inside",30
+4,"quote ""inner""",40

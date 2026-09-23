@@ -1,0 +1,277 @@
+/**
+ * Landing page — broadsheet layout: masthead, the annotator spread (lead
+ * copy + numbered plates in the first viewport, see spread.css),
+ * finished-output plates, product invitation, footer.
+ * Phones stack to one column; nothing overflows at 320px.
+ */
+
+/* Layout-transparent scope root — the landing's chrome rules below live
+   under it so they can never collide with the app shell's own
+   `.rf-masthead`/`.rf-brand` rules in app.css (single source per side). */
+.rf-landing-root { display: contents; }
+
+.rf-landing-root .rf-masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rf-space-3);
+  /* compressed chrome — the row stays at or under 48px */
+  padding: 4px var(--rf-space-5);
+  border-block-end: 1px solid var(--rf-rule);
+}
+
+/* the chrome's CTA compresses with it */
+.rf-landing-root .rf-masthead__ws {
+  min-height: 32px;
+  padding-block: 4px;
+  padding-inline: 12px;
+  font-size: 13px;
+}
+
+.rf-landing-root .rf-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rf-space-2);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--rf-ink);
+  text-decoration: none;
+  flex: none;
+}
+
+.rf-landing-root .rf-brand__mark {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  block-size: 16px;
+}
+
+.rf-landing-root .rf-brand__mark i {
+  display: block;
+  inline-size: 4px;
+  background: var(--rf-data);
+  border-radius: 1px;
+}
+
+.rf-landing-root .rf-brand__mark i:nth-child(1) { block-size: 6px; }
+.rf-landing-root .rf-brand__mark i:nth-child(2) { block-size: 11px; }
+.rf-landing-root .rf-brand__mark i:nth-child(3) { block-size: 16px; background: var(--rf-positive); }
+
+.rf-landing-root .rf-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--rf-space-2) var(--rf-space-4);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* Nav labels are plain body text — How it works / GitHub / العربية —
+   never mono all-caps micro-labels. */
+.rf-landing-root .rf-nav a {
+  color: var(--rf-muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.rf-landing-root .rf-nav a:hover { color: var(--rf-ink); }
+
+.rf-landing-root .rf-nav a:focus-visible,
+.rf-landing-root .rf-brand:focus-visible {
+  outline: 2px solid var(--rf-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Section micro-label — Plex Sans caps, never mono; the accent tick is
+   cobalt now that vermilion is retired. */
+.rf-secmark {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rf-muted);
+}
+.rf-secmark > i { width: 24px; height: 2px; background: var(--rf-cobalt); flex: none; }
+html[lang="ar"] .rf-secmark {
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* --- Finished output ------------------------------------------------ */
+.rf-output {
+  max-inline-size: 1360px;
+  margin-inline: auto;
+  padding: var(--rf-space-7) var(--rf-space-5);
+  border-block-start: 1px solid var(--rf-rule);
+}
+
+.rf-output__title {
+  margin: var(--rf-space-2) 0 0;
+  font-size: clamp(22px, 2.4vw, 30px);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--rf-ink);
+}
+
+.rf-output__body {
+  margin: var(--rf-space-2) 0 0;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--rf-muted);
+  max-inline-size: 68ch;
+}
+
+/* ONE report viewer: the shared ReportViewer holds a real artifact at
+   reading size — the second framed surface the contract allows — with a
+   thumbnail rail. Never a grid of equal-weight boxes. */
+.rf-output__viewer {
+  margin-block-start: var(--rf-space-5);
+  max-inline-size: 880px;
+}
+
+/* the other locale's artifact appears only as this labeled variant — an
+   inline link in the caption, never a third equal box */
+.rf-opane--alt {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: var(--rf-cobalt);
+}
+.rf-opane--alt:hover { text-decoration: underline; }
+.rf-opane--alt:focus-visible { outline: 2px solid var(--rf-focus); outline-offset: 1px; }
+
+.rf-output__cap {
+  margin-block-start: var(--rf-space-2);
+  font-size: 12px;
+  color: var(--rf-muted);
+}
+
+.rf-output__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rf-space-2);
+  margin-block-start: var(--rf-space-4);
+}
+
+/* --- Invitation ------------------------------------------------------ */
+.rf-invite {
+  max-inline-size: 1360px;
+  margin-inline: auto;
+  padding: var(--rf-space-7) var(--rf-space-5);
+  border-block-start: 1px solid var(--rf-rule);
+}
+
+.rf-invite__title {
+  margin: var(--rf-space-2) 0 0;
+  font-size: clamp(22px, 2.4vw, 30px);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--rf-ink);
+}
+
+.rf-invite__body {
+  margin: var(--rf-space-2) 0 0;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--rf-muted);
+  max-inline-size: 62ch;
+}
+
+.rf-invite__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rf-space-2);
+  margin-block-start: var(--rf-space-4);
+}
+
+.rf-invite__help {
+  margin: var(--rf-space-3) 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--rf-muted);
+  max-inline-size: 62ch;
+}
+
+/* --- Footer ---------------------------------------------------------- */
+.rf-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--rf-space-2) var(--rf-space-5);
+  padding: var(--rf-space-4) var(--rf-space-5);
+  border-block-start: 1px solid var(--rf-rule);
+  font-size: 13px;
+  color: var(--rf-muted);
+}
+
+.rf-footer p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--rf-space-2);
+}
+
+@media (max-width: 767px) {
+  /* compressed chrome stays a single row — no second nav line */
+  .rf-landing-root .rf-masthead {
+    padding: var(--rf-space-1) var(--rf-space-3);
+    gap: var(--rf-space-2);
+  }
+
+  .rf-landing-root .rf-nav {
+    gap: var(--rf-space-1) var(--rf-space-3);
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+
+  .rf-landing-root .rf-nav a { font-size: 12.5px; white-space: nowrap; }
+
+  .rf-landing-root .rf-masthead__ws {
+    font-size: 12px;
+    padding-inline: 10px;
+  }
+
+}
+
+@media (max-width: 360px) {
+  /* at 320 the chrome keeps wordmark + language + CTA; GitHub stays
+     reachable below the fold (footer) — a second row is not allowed */
+  .rf-landing-root .rf-nav a[href^="https://github.com/zubalr/rowfolio"] { display: none; }
+  .rf-landing-root .rf-masthead { padding-inline: 8px; gap: 6px; }
+  .rf-landing-root .rf-nav { gap: 4px 8px; }
+  .rf-landing-root .rf-masthead__ws { padding-inline: 8px; white-space: nowrap; }
+  .rf-landing-root .rf-brand { font-size: 16px; }
+}
+
+@media (max-width: 480px) {
+  /* the section anchor is redundant while the stage fills the first
+     screen — keep wordmark + GitHub + language + the CTA visible */
+  .rf-landing-root .rf-nav a[href="#how-it-works"] { display: none; }
+}
+
+/* Landing primary actions carry the cobalt primary-action role.
+   Scoped to landing surfaces so workspace/contract chrome is untouched. */
+.rf-output .rf-btn--primary,
+.rf-invite .rf-btn--primary {
+  background: var(--rf-cobalt);
+  color: var(--rf-surface);
+  box-shadow: none;
+}
+
+.rf-output .rf-btn--primary:hover:not(:disabled),
+.rf-invite .rf-btn--primary:hover:not(:disabled) {
+  background: var(--rf-cobalt-ink);
+  box-shadow: none;
+}
+
+.rf-output .rf-btn--primary:active:not(:disabled),
+.rf-invite .rf-btn--primary:active:not(:disabled) {
+  background: var(--rf-cobalt-ink);
+}

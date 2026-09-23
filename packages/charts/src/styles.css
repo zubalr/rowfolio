@@ -1,0 +1,581 @@
+/**
+ * Scoped chart styles — divider-led, paper/ink/cobalt per the design tokens
+ * contract. Everything hangs off `.rf-chart` so nothing leaks outside the
+ * component. All geometry values in px are computed layout; text sizing
+ * follows the fixed type ramp (never below 12px labels).
+ */
+
+.rf-chart {
+  --rf-c-ink: #10191e;
+  --rf-c-paper: #f5f7f8;
+  --rf-c-surface: #ffffff;
+  --rf-c-muted: #54666e;
+  --rf-c-rule: #d9e0e4;
+  --rf-c-data: #2b50e8;
+  --rf-c-data-tint-30: #c6d1ff;
+  --rf-c-attention: #e04e1a;
+  --rf-c-negative: #a33224;
+  --rf-c-positive: #0e8f7e;
+  /* text-grade variants keep small labels AA on paper */
+  --rf-c-positive-text: #116b63;
+  --rf-c-scenario: #b96f00;
+  --rf-c-scenario-text: #946000;
+  /* mark motion: geometry transitions land on settled values (never animated
+     numbers); entrance grows marks from their true baseline once. */
+  --rf-chart-ms: 240ms;
+  --rf-chart-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  margin: 0;
+  color: var(--rf-c-ink);
+  font-family: "IBM Plex Sans", "IBM Plex Sans Arabic", Arial, sans-serif;
+}
+
+/* Ink stage — a chart mounted on a dark surface adopts the ink palette.
+   Every mark paint is a var() so the whole plot remaps here. */
+[data-rf-surface="ink"] .rf-chart {
+  --rf-c-ink: #ffffff;
+  --rf-c-paper: #10191e;
+  --rf-c-surface: #1e3846;
+  --rf-c-muted: #aec2cb;
+  --rf-c-rule: #3a4a53;
+  --rf-c-data: #a8bcff;
+  --rf-c-data-tint-30: #a8bcff;
+  --rf-c-attention: #f0926c;
+  --rf-c-negative: #f0926c;
+  --rf-c-positive: #74c6b8;
+  --rf-c-positive-text: #74c6b8;
+  --rf-c-scenario: #f0b45c;
+  --rf-c-scenario-text: #f0b45c;
+}
+
+.rf-chart__caption {
+  padding: 0;
+}
+
+.rf-chart__title {
+  margin: 0 0 4px;
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.rf-chart__summary {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--rf-c-muted);
+  max-width: 64ch;
+}
+
+html[lang="ar"] .rf-chart__summary {
+  font-size: 14px;
+}
+
+.rf-chart__toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding-block: 8px;
+}
+
+.rf-chart__toggle {
+  min-height: 44px;
+  padding-inline: 16px;
+  border: 1px solid var(--rf-c-rule);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--rf-c-ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 120ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.rf-chart__toggle:hover {
+  background: var(--rf-c-paper);
+}
+
+.rf-chart__toggle[aria-expanded="true"] {
+  background: var(--rf-c-ink);
+  color: var(--rf-c-surface);
+  border-color: var(--rf-c-ink);
+}
+
+/* ---------- plot ---------- */
+
+.rf-chart-plot {
+  position: relative;
+  outline: none;
+}
+
+.rf-chart-plot:focus-visible {
+  outline: 3px solid var(--rf-c-data);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.rf-chart-svg {
+  display: block;
+  max-width: 100%;
+}
+
+.rf-chart-grid__line {
+  stroke: var(--rf-c-rule);
+  stroke-width: 1;
+}
+
+/* The zero baseline is an axis rule, not a gridline — ink, slightly
+   heavier than the ruled gridlines. */
+.rf-chart-zero {
+  stroke: var(--rf-c-ink);
+  stroke-width: 1.25;
+}
+
+.rf-chart-tick {
+  font-size: 12px;
+  fill: var(--rf-c-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-chart-cat {
+  font-size: 12px;
+  fill: var(--rf-c-ink);
+}
+
+html[lang="ar"] .rf-chart-cat,
+html[lang="ar"] .rf-chart-hlabel {
+  font-size: 14px;
+}
+
+.rf-chart-value {
+  font-size: 13px;
+  font-weight: 600;
+  fill: var(--rf-c-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-chart-missing {
+  font-size: 13px;
+  fill: var(--rf-c-muted);
+}
+
+.rf-chart-delta {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-chart-delta--neg {
+  fill: var(--rf-c-negative);
+}
+
+.rf-chart-delta--pos {
+  fill: var(--rf-c-positive-text);
+}
+
+.rf-chart-delta--big {
+  font-size: 15px;
+}
+
+.rf-chart-hypo {
+  font-size: 11px;
+  fill: var(--rf-c-scenario-text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.rf-chart-bar {
+  /* Settled marks always land on actual values: geometry props transition
+     (interruptibly) between known values; the grow keyframe only plays once
+     at mount, from the bar's true baseline edge (flip side when negative). */
+  transition:
+    x var(--rf-chart-ms) var(--rf-chart-ease),
+    y var(--rf-chart-ms) var(--rf-chart-ease),
+    width var(--rf-chart-ms) var(--rf-chart-ease),
+    height var(--rf-chart-ms) var(--rf-chart-ease),
+    opacity 160ms var(--rf-chart-ease);
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: rf-bar-grow-y var(--rf-chart-ms) var(--rf-chart-ease);
+}
+
+.rf-chart-bar[data-neg] {
+  transform-origin: 50% 0;
+}
+
+.rf-chart-plot--rows .rf-chart-bar {
+  transform-origin: 0 50%;
+  animation-name: rf-bar-grow-x;
+}
+
+.rf-chart-plot--rows .rf-chart-bar[data-neg] {
+  transform-origin: 100% 50%;
+}
+
+@keyframes rf-bar-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes rf-bar-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.rf-chart-line--draw {
+  stroke-dasharray: 1;
+  animation: rf-line-draw 300ms var(--rf-chart-ease);
+}
+
+@keyframes rf-line-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+.rf-chart-point {
+  transition:
+    cx var(--rf-chart-ms) var(--rf-chart-ease),
+    cy var(--rf-chart-ms) var(--rf-chart-ease),
+    r 160ms var(--rf-chart-ease);
+}
+
+.rf-chart-target {
+  transition:
+    x1 var(--rf-chart-ms) var(--rf-chart-ease),
+    x2 var(--rf-chart-ms) var(--rf-chart-ease),
+    y1 var(--rf-chart-ms) var(--rf-chart-ease),
+    y2 var(--rf-chart-ms) var(--rf-chart-ease);
+}
+
+[data-active="true"] .rf-chart-bar {
+  stroke: var(--rf-c-ink);
+  stroke-width: 1.5;
+}
+
+/* The selected datum carries the one cell-selection chrome: a 2px cobalt
+   inset over an 8% cobalt tint (drawn as an overlay rect inset 1px inside
+   the mark), plus the notch and value chip for value-first reading. */
+.rf-chart-cellsel {
+  fill: color-mix(in srgb, var(--rf-c-data) 8%, transparent);
+  stroke: var(--rf-c-data);
+  stroke-width: 2;
+  pointer-events: none;
+  transition:
+    x var(--rf-chart-ms) var(--rf-chart-ease),
+    y var(--rf-chart-ms) var(--rf-chart-ease),
+    width var(--rf-chart-ms) var(--rf-chart-ease),
+    height var(--rf-chart-ms) var(--rf-chart-ease);
+}
+
+.rf-chart-mark {
+  fill: var(--rf-c-paper);
+}
+
+.rf-chart-ring {
+  fill: color-mix(in srgb, var(--rf-c-data) 8%, transparent);
+  stroke: var(--rf-c-data);
+  stroke-width: 2;
+}
+
+.rf-chart-valuechip {
+  fill: var(--rf-c-ink);
+}
+
+.rf-chart-value--chip {
+  fill: var(--rf-c-paper);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rf-chart-cat[data-emphasis] {
+  font-weight: 700;
+}
+
+.rf-chart-hlabel[data-emphasis] {
+  font-weight: 700;
+}
+
+/* Unit caption at the head of the value axis / the end of the label column. */
+.rf-chart-unit {
+  font-size: 11px;
+  fill: var(--rf-c-muted);
+  letter-spacing: 0.05em;
+}
+
+html[lang="ar"] .rf-chart-unit {
+  font-size: 12px;
+}
+
+.rf-chart-hunit {
+  margin-block-start: auto;
+  padding-block-end: 2px;
+  font-size: 11px;
+  color: var(--rf-c-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+html[lang="ar"] .rf-chart-hunit {
+  font-size: 12px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* ---------- horizontal label column ---------- */
+
+.rf-chart-hgrid {
+  display: grid;
+  align-items: start;
+}
+
+.rf-chart-hlabels {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rf-chart-hlabel {
+  font-size: 13px;
+  color: var(--rf-c-ink);
+  padding-inline-end: 10px;
+  text-align: end;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-box-pack: center;
+  -webkit-line-clamp: 2;
+}
+
+/* ---------- compact category chips (narrow target-bars) ---------- */
+
+.rf-chart-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-block: 4px 10px;
+  scrollbar-width: thin;
+}
+
+.rf-chart-chip {
+  flex: none;
+  min-height: 36px;
+  padding-inline: 12px;
+  border: 1px solid var(--rf-c-rule);
+  border-radius: 8px;
+  background: var(--rf-c-surface);
+  color: var(--rf-c-muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.rf-chart-chip[aria-pressed="true"] {
+  border-color: var(--rf-c-data);
+  box-shadow: inset 0 0 0 1px var(--rf-c-data);
+  background: color-mix(in srgb, var(--rf-c-data) 8%, var(--rf-c-surface));
+  color: var(--rf-c-ink);
+  font-weight: 600;
+}
+
+/* ---------- legend ---------- */
+
+.rf-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 8px 0 0;
+  border-block-start: 1px solid var(--rf-c-rule);
+  font-size: 12px;
+  color: var(--rf-c-muted);
+}
+
+.rf-chart-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rf-chart-legend__swatch {
+  inline-size: 18px;
+  block-size: 3px;
+  border-radius: 2px;
+  background: var(--rf-c-data);
+}
+
+.rf-chart-legend__swatch[data-semantic="target"] {
+  background: repeating-linear-gradient(90deg, var(--rf-c-ink) 0 4px, transparent 4px 7px);
+}
+
+.rf-chart-legend__swatch[data-semantic="scenario"] {
+  background: repeating-linear-gradient(90deg, var(--rf-c-scenario) 0 4px, transparent 4px 7px);
+}
+
+.rf-chart-legend__swatch[data-semantic="attention"] {
+  background: var(--rf-c-attention);
+}
+
+/* ---------- tooltip ---------- */
+
+.rf-chart-tip {
+  position: absolute;
+  transform: translateX(-50%);
+  min-width: 120px;
+  max-width: 220px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--rf-c-ink);
+  color: var(--rf-c-surface);
+  font-size: 12px;
+  line-height: 1.45;
+  pointer-events: none;
+  box-shadow: 0 20px 70px rgba(23, 43, 53, 0.12);
+  z-index: 2;
+}
+
+html[dir="rtl"] .rf-chart-tip,
+[dir="rtl"] .rf-chart-tip {
+  transform: translateX(50%);
+}
+
+.rf-chart-tip__label {
+  font-weight: 600;
+  margin-block-end: 4px;
+}
+
+.rf-chart-tip__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rf-chart-tip__value {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Delta annotations — the gap between actual and target is drawn as a
+   shaded area (vermilion when behind, teal when ahead); the scenario delta
+   is a bracket between the bar tops in the scenario hue. */
+.rf-chart-deltaarea {
+  pointer-events: none;
+}
+
+.rf-chart-deltaarea--neg {
+  fill: color-mix(in srgb, var(--rf-c-attention) 14%, transparent);
+}
+
+.rf-chart-deltaarea--pos {
+  fill: color-mix(in srgb, var(--rf-c-positive) 12%, transparent);
+}
+
+.rf-chart-deltabracket {
+  fill: none;
+  stroke: var(--rf-c-scenario);
+  stroke-width: 1.5;
+}
+
+/* ---------- evidence table ---------- */
+
+.rf-chart__values {
+  margin-block-start: 12px;
+}
+
+.rf-chart-table {
+  overflow-x: auto;
+  border-block-start: 1px solid var(--rf-c-rule);
+}
+
+.rf-chart-table:focus-visible {
+  outline: 3px solid var(--rf-c-data);
+  outline-offset: 3px;
+}
+
+.rf-chart-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.rf-chart-table caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.rf-chart-table th,
+.rf-chart-table td {
+  padding: 8px 10px;
+  border-block-end: 1px solid var(--rf-c-rule);
+  text-align: start;
+  vertical-align: top;
+}
+
+.rf-chart-table thead th {
+  color: var(--rf-c-muted);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rf-chart-table [data-align="end"] {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-chart-table__mono {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--rf-c-muted);
+}
+
+.rf-chart-table__provenance {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--rf-c-muted);
+}
+
+.rf-chart-table__provenance bdi {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+}
+
+/* ---------- notes / helpers ---------- */
+
+.rf-chart-note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--rf-c-scenario-text);
+}
+
+.rf-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-chart .rf-chart-bar,
+  .rf-chart .rf-chart-cellsel,
+  .rf-chart .rf-chart-point,
+  .rf-chart .rf-chart-line,
+  .rf-chart .rf-chart-target,
+  .rf-chart .rf-chart-mark,
+  .rf-chart .rf-chart-ring,
+  .rf-chart .rf-chart-chip,
+  .rf-chart .rf-chart-toggle {
+    transition: none;
+    animation: none;
+  }
+}

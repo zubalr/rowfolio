@@ -1,0 +1,39 @@
+{
+  "caseId": "csv-unicode-rtl-category-names",
+  "category": "csv_unicode_rtl",
+  "description": "Arabic RTL category names, Latin identifiers, and an NFC/NFD pair of the same visible word.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 3,
+      "headerColumns": 4,
+      "perRecordFieldCounts": [
+        4,
+        4,
+        4
+      ]
+    },
+    "normalizationPair": {
+      "rows": [
+        1,
+        2
+      ],
+      "column": "note_en",
+      "rawBytesDiffer": true,
+      "nfcComparisonKeysEqual": true
+    },
+    "requiredBehavior": [
+      "values preserved as authored; source column names and category text are user content and never auto-translated",
+      "NFC normalization is applied for comparison keys only; Arabic letters are never merged and diacritics never stripped",
+      "RTL cells need directional isolation (dir=auto / bdi) at display time; Latin IDs stay LTR islands"
+    ]
+  },
+  "notes": [
+    "Data rows 1 and 2 hold the same visible word in NFC and NFD form respectively (e vs e + U+0301)."
+  ],
+  "artifact": "csv-unicode-rtl-category-names.csv",
+  "sha256": "9857b6abf608de75d7a9eae7261ea7f5cb508dd40aeaf57fec763af4068ab028",
+  "bytes": 125,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

@@ -1,0 +1,29 @@
+{
+  "caseId": "csv-ambiguous-slash-dates",
+  "category": "csv_numeric_date_ambiguity",
+  "description": "Slash dates compatible with both day-first and month-first reading, plus one ISO row.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 4,
+      "headerColumns": 3,
+      "perRecordFieldCounts": [
+        3,
+        3,
+        3,
+        3
+      ]
+    },
+    "requiredBehavior": [
+      "D-1 and D-2 are day/month ambiguous; D-3 (day 13) is only valid day-first, but one discriminating row must not decide the column",
+      "raw strings preserved until the user confirms date order; success-rate voting never picks '03/04/26'",
+      "D-4 matches ISO date-only strictly with no timezone conversion"
+    ]
+  },
+  "notes": [],
+  "artifact": "csv-ambiguous-slash-dates.csv",
+  "sha256": "c8378ff5a06f3b71ada593fac49f2c63bfc4c8020fa3e3be60cf6d26b2e8897d",
+  "bytes": 93,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

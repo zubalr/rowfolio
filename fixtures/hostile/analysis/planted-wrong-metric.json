@@ -1,0 +1,13 @@
+{
+  "metrics": {
+    "northJuneRevenue": "882000",
+    "northJuneTarget": "1000000",
+    "juneRevenue": "6000000.00",
+    "juneCost": "4500000.00",
+    "baseMargin": "0.25",
+    "scenarioMargin": "0.19",
+    "northMayDowntime": "1194",
+    "northJuneDowntime": "1565.5"
+  },
+  "notes": "planted: northJuneRevenue 881000->882000, northJuneDowntime 1565->1565.5"
+}

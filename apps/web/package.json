@@ -1,0 +1,34 @@
+{
+  "name": "@rowfolio/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@rowfolio/analysis": "workspace:*",
+    "@rowfolio/charts": "workspace:*",
+    "@rowfolio/contracts": "workspace:*",
+    "@rowfolio/export-model": "workspace:*",
+    "@rowfolio/export-pptx": "workspace:*",
+    "@rowfolio/export-xlsx": "workspace:*",
+    "@rowfolio/i18n": "workspace:*",
+    "@rowfolio/ingest": "workspace:*",
+    "@rowfolio/normalize": "workspace:*",
+    "@rowfolio/provenance": "workspace:*",
+    "@rowfolio/scenario": "workspace:*",
+    "@rowfolio/ui": "workspace:*",
+    "@vercel/analytics": "2.0.1",
+    "motion": "13.2.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "6.1.1",
+    "vite": "8.3.0"
+  }
+}

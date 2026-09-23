@@ -1,0 +1,100 @@
+import type { AnalysisSnapshot } from '@rowfolio/contracts';
+import { ChartFigure } from '@rowfolio/charts';
+import { chartLocalization } from './chartLocalization.ts';
+import { useI18n, useServices, useSessionState } from '../app/context.tsx';
+import type { MessageKey } from '@rowfolio/i18n';
+import { chartFinding, emphasisKeyFor, heroChart } from './stageModel.ts';
+import { EvidenceChip } from './EvidenceChip.tsx';
+import { findingBody, findingTitle } from './findingCopy.ts';
+import { formatScope } from '../evidence/model.ts';
+
+/**
+ * Overview: one hero chart — the chart the selected finding is about — on
+ * the overview plate, named by the finding's headline with its analysis
+ * scope beside it and the evidence badge that morphs into the drawer.
+ * Remaining charts follow on the standard grid, each marking the datum its
+ * finding claims.
+ */
+export function ChartStage({ snapshot }: { snapshot: AnalysisSnapshot }) {
+  const i18n = useI18n();
+  const { controller } = useServices();
+  const state = useSessionState();
+  const selected = snapshot.findings.find((f) => f.id === state.selectedFindingId) ?? null;
+  // A selected finding with no chart (e.g. the descriptive overview) must not
+  // fall back to another finding's chart — show the finding itself.
+  const chartless = selected !== null && selected.chartId === null;
+  const hero = chartless ? null : heroChart(snapshot, selected);
+  const heroFinding = hero === null ? null : (chartFinding(snapshot, hero.id) ?? selected);
+  const restCharts =
+    chartless || hero === null ? snapshot.charts : snapshot.charts.filter((c) => c.id !== hero.id);
+  const localization = chartLocalization(i18n);
+
+  return (
+    <div className="rf-wstage" id="overview">
+      {chartless && selected !== null ? (
+        <div className="rf-wstage-panel">
+          <header className="rf-wstage-head">
+            <div className="rf-wstage-titles">
+              <p className="rf-wstage-eyebrow">
+                {i18n.tSafe('a11y.selectedFinding' as MessageKey)}
+              </p>
+              <h3 className="rf-wstage-title">{findingTitle(i18n, selected)}</h3>
+              <p className="rf-wstage-scope">{formatScope(i18n, selected.scope)}</p>
+            </div>
+            {selected.provenanceIds.length > 0 && (
+              <EvidenceChip
+                findingId={selected.id}
+                hidden={state.evidenceFindingId === selected.id}
+                onOpen={() => controller.openEvidence(selected.id)}
+              />
+            )}
+          </header>
+          <p className="rf-wstage-body">{findingBody(i18n, snapshot, selected)}</p>
+        </div>
+      ) : hero === null ? null : (
+        <div className="rf-wstage-panel">
+          <header className="rf-wstage-head">
+            <div className="rf-wstage-titles">
+              {heroFinding === null ? null : (
+                <p className="rf-wstage-eyebrow">
+                  {i18n.tSafe('a11y.selectedFinding' as MessageKey)}
+                </p>
+              )}
+              <h3 className="rf-wstage-title">
+                {heroFinding === null
+                  ? i18n.tSafe(hero.titleKey as MessageKey)
+                  : findingTitle(i18n, heroFinding)}
+              </h3>
+              <p className="rf-wstage-scope">{formatScope(i18n, hero.scope)}</p>
+            </div>
+            {heroFinding === null || heroFinding.provenanceIds.length === 0 ? null : (
+              <EvidenceChip
+                findingId={heroFinding.id}
+                hidden={state.evidenceFindingId === heroFinding.id}
+                onOpen={() => controller.openEvidence(heroFinding.id)}
+              />
+            )}
+          </header>
+          <ChartFigure
+            spec={hero}
+            localization={localization}
+            emphasisKey={emphasisKeyFor(hero, heroFinding)}
+          />
+        </div>
+      )}
+      <div className={`rf-charts${hero === null ? '' : ' rf-charts--paired'}`}>
+        {restCharts.map((spec) => {
+          const finding = chartFinding(snapshot, spec.id);
+          return (
+            <ChartFigure
+              key={spec.id}
+              spec={spec}
+              localization={localization}
+              emphasisKey={emphasisKeyFor(spec, finding)}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}

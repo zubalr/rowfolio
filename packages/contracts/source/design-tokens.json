@@ -1,0 +1,87 @@
+{
+  "color": {
+    "ink": "#0E1B2E",
+    "paper": "#F4F6F9",
+    "surface": "#FFFFFF",
+    "surfaceCool": "#E9EFF7",
+    "muted": "#54666E",
+    "rule": "#DCE3EA",
+    "data": "#2B50E8",
+    "cobalt": "#2B50E8",
+    "cobaltInk": "#1D3BB4",
+    "cobaltTint": "#E7EDFD",
+    "attention": "#A33224",
+    "negative": "#A33224",
+    "positive": "#0E8F7E",
+    "teal": "#0E8F7E",
+    "gray": "#66788A",
+    "graySoft": "#C9D3DE",
+    "scenario": "#B96F00",
+    "dataTint30": "#C6D1FF",
+    "positiveText": "#116B63",
+    "scenarioText": "#946000"
+  },
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48,
+    64,
+    96
+  ],
+  "font": {
+    "latin": "IBM Plex Sans",
+    "arabic": "IBM Plex Sans Arabic",
+    "code": "IBM Plex Mono",
+    "deck": "Arial"
+  },
+  "radius": {
+    "control": 8,
+    "panel": 16,
+    "dialog": 20,
+    "pill": 999
+  },
+  "layout": {
+    "maxWidth": 1320,
+    "desktopGutter": 48,
+    "tabletGutter": 24,
+    "mobileGutter": 16,
+    "evidenceWidth": 560
+  },
+  "motion": {
+    "hoverMs": 120,
+    "stateMs": 160,
+    "panelMs": 240,
+    "chartMs": 220,
+    "staggerMs": 40,
+    "firstResultsMs": 180,
+    "numberMs": 240,
+    "progressMs": 120,
+    "reducedMs": 0
+  },
+  "plateLabel": {
+    "sizePx": 11.5,
+    "family": "code",
+    "weight": 600,
+    "transform": "uppercase",
+    "trackingEm": 0.12
+  },
+  "typePx": {
+    "hero": 64,
+    "heroMobile": 42,
+    "page": 36,
+    "section": 32,
+    "body": 16,
+    "small": 13,
+    "metric": 40,
+    "metricMobile": 30,
+    "arabicHero": 54,
+    "arabicHeroMobile": 36,
+    "arabicSection": 30,
+    "arabicBody": 17,
+    "arabicSmall": 14
+  }
+}

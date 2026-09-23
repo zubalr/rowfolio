@@ -1,0 +1,52 @@
+{
+  "caseId": "csv-formula-like-strings",
+  "category": "csv_formula_like_strings",
+  "description": "Text cells beginning with =, +, - and @ in a CSV (inert data; no macros exist in CSV).",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 4,
+      "headerColumns": 3,
+      "perRecordFieldCounts": [
+        3,
+        3,
+        3,
+        3
+      ]
+    },
+    "formulaLikeCells": [
+      {
+        "row": 1,
+        "column": "memo",
+        "raw": "=SUM(A2:A3)"
+      },
+      {
+        "row": 2,
+        "column": "memo",
+        "raw": "+470011002233"
+      },
+      {
+        "row": 3,
+        "column": "memo",
+        "raw": "-status"
+      },
+      {
+        "row": 4,
+        "column": "memo",
+        "raw": "@risk_register"
+      }
+    ],
+    "requiredBehavior": [
+      "cells remain inert strings; never evaluated, interpolated into formulas, or turned into executable links",
+      "if exported to OOXML they are written as string cells, never formula cells"
+    ]
+  },
+  "notes": [
+    "Values are synthetic and non-executable; files are inert CSV data."
+  ],
+  "artifact": "csv-formula-like-strings.csv",
+  "sha256": "2bc3026263b9aacf04db9e11ca639a12b132b3c945f939466f659ef2145272b4",
+  "bytes": 91,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

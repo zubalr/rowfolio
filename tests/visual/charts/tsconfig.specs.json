@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "jsx": "react-jsx",
+    "paths": {
+      "@rowfolio/contracts": ["../../../packages/contracts/src/index.ts"]
+    }
+  },
+  "include": [
+    "playwright.config.ts",
+    "specs/**/*.ts",
+    "../../../packages/charts/gallery/**/*.ts",
+    "../../../packages/charts/gallery/**/*.tsx",
+    "../../../packages/charts/src/**/*.ts",
+    "../../../packages/charts/src/**/*.tsx"
+  ]
+}

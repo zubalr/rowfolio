@@ -1,0 +1,67 @@
+{
+  "caseId": "csv-fractional-pp",
+  "category": "csv_numeric_date_ambiguity",
+  "description": "Weekly conversion rates stored as 4-decimal fractions, giving fractional percentage-point deltas between weeks.",
+  "mediaType": "text/csv",
+  "expected": {
+    "tableShape": {
+      "records": 4,
+      "headerColumns": 4,
+      "perRecordFieldCounts": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "parsedRows": [
+      [
+        "week",
+        "visitors",
+        "conversions",
+        "conversion_rate"
+      ],
+      [
+        "2026-W01",
+        "1000",
+        "123",
+        "0.1230"
+      ],
+      [
+        "2026-W02",
+        "1250",
+        "141",
+        "0.1128"
+      ],
+      [
+        "2026-W03",
+        "900",
+        "99",
+        "0.1100"
+      ],
+      [
+        "2026-W04",
+        "1470",
+        "205",
+        "0.1395"
+      ]
+    ],
+    "exactSums": {
+      "visitors": "4620",
+      "conversions": "568"
+    },
+    "requiredBehavior": [
+      "conversion_rate is a ratio: never summed, never averaged row-over-row",
+      "week-over-week deltas are fractional percentage points (e.g. W01->W02 is -1.02 pp) and derive from the stored fractions",
+      "any overall rate is a weighted ratio of summed conversions over summed visitors, not a mean of rates"
+    ]
+  },
+  "notes": [
+    "Rates are conversions/visitors quantized to 4 decimals at authoring time; the raw counts are the additive truth."
+  ],
+  "artifact": "csv-fractional-pp.csv",
+  "sha256": "3dffc065fe34d2e889421ad58ccf03ef16c5550b18d36f5c00558fa0233e4127",
+  "bytes": 140,
+  "generator": "tooling/test/corpus/generate_hostile_corpus.py",
+  "corpusVersion": "1.0.0"
+}

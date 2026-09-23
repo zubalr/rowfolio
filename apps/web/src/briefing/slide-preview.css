@@ -1,0 +1,603 @@
+/**
+ * SlidePreview styles — owned by the component (imported by
+ * SlidePreview.tsx); these rules moved out of export.css, which keeps only
+ * the dialog chrome (.rf-export-*).
+ *
+ * Two correctness fixes over the moved block:
+ * - The container-relative type scale lives on .rf-sp's CHILDREN, not on
+ *   .rf-sp itself: cqw on a query container resolves against the small
+ *   viewport, never its own size, so every card used to render at the
+ *   clamp bounds regardless of width (and overflow its fixed aspect).
+ *   With the scale on children it measures the card and both thumbnails
+ *   and full-size previews hit their intended type size.
+ * - Bar marks resolve their percent height against a dedicated track
+ *   (.rf-sp__bartrack) that excludes the value label, so rendered px
+ *   ratio is the true data ratio on the shared ink baseline.
+ */
+
+/* One report page: paper card, deck aspect, type sized in page units. */
+.rf-sp {
+  container-type: inline-size;
+  aspect-ratio: 16 / 9;
+  margin: 0;
+  border: 1px solid var(--rf-rule, var(--rf-divider));
+  border-radius: var(--rf-radius-control);
+  background: var(--rf-paper);
+  padding: 5.5% 5.5% 4%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Type scale set on children so cqw measures THIS card. The 1rem cap keeps
+   full-size previews inside the readability floor (base 16px, title
+   1.4em = 22.4px, stat values ~14px, labels >=12.5px). */
+.rf-sp > * {
+  font-size: clamp(4px, 2.55cqw, 1rem);
+}
+
+.rf-sp__mast {
+  position: relative;
+  padding-inline-start: 0;
+  border-block-end: 1px solid var(--rf-rule);
+  padding-block-end: 0.6em;
+}
+
+.rf-sp__tick {
+  display: block;
+  inline-size: 9%;
+  block-size: 0.5em;
+  background: var(--rf-cobalt, var(--rf-data));
+  margin-block-end: 0.55em;
+}
+
+.rf-sp__tick--sheet {
+  background: var(--rf-teal, var(--rf-positive));
+}
+
+.rf-sp__title {
+  margin: 0;
+  font-size: 1.4em;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--rf-ink);
+  overflow-wrap: anywhere;
+}
+
+.rf-sp__title--file {
+  font-family: var(--rf-font-mono);
+  font-size: 0.95em;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+html[lang="ar"] .rf-sp__title--file { font-family: var(--rf-font-body); }
+
+.rf-sp__subtitle {
+  margin: 0.25em 0 0;
+  font-size: 0.9em;
+  color: var(--rf-muted);
+}
+
+.rf-sp__body {
+  flex: 1;
+  min-height: 0;
+  padding-block: 0.7em;
+  display: flex;
+  flex-direction: column;
+}
+
+.rf-sp__split {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 6%;
+  flex: 1;
+  min-height: 0;
+}
+
+.rf-sp__text {
+  min-width: 0;
+  border-inline-start: 3px solid var(--rf-cobalt, var(--rf-data));
+  padding-inline-start: 0.8em;
+}
+
+.rf-sp__headline {
+  margin: 0;
+  font-size: 1.18em;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--rf-ink);
+}
+
+.rf-sp__headline--small {
+  font-size: 1.12em;
+}
+
+.rf-sp__headline--muted {
+  color: var(--rf-muted);
+  font-weight: 500;
+}
+
+.rf-sp__scope {
+  margin: 0.3em 0 0;
+  font-size: 0.85em;
+  color: var(--rf-muted);
+}
+
+.rf-sp__kicker {
+  margin: 0 0 0.4em;
+  font-size: 0.85em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.rf-sp__kicker--scenario { color: var(--rf-muted); }
+.rf-sp__kicker--verified { color: var(--rf-teal, var(--rf-positive)); }
+
+.rf-sp__metrics {
+  list-style: none;
+  margin: 0.45em 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.22em;
+}
+
+.rf-sp__metrics li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4em;
+  font-size: 0.88em;
+  min-width: 0;
+}
+
+.rf-sp__dot {
+  flex: none;
+  inline-size: 0.55em;
+  block-size: 0.55em;
+  background: var(--rf-cobalt, var(--rf-data));
+  align-self: center;
+}
+
+.rf-sp__metric-name {
+  color: var(--rf-muted);
+  overflow-wrap: break-word;
+}
+
+.rf-sp__metric-value {
+  font-weight: 700;
+  color: var(--rf-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rf-sp__metric-value--muted {
+  font-weight: 500;
+  color: var(--rf-muted);
+}
+
+.rf-sp__card {
+  align-self: start;
+  min-width: 0;
+  border: 1px solid var(--rf-rule);
+  border-radius: 6px;
+  background: var(--rf-surface);
+  padding: 0.7em;
+}
+
+.rf-sp__card-label {
+  margin: 0;
+  font-size: 0.85em;
+  color: var(--rf-muted);
+}
+
+.rf-sp__card-value {
+  margin: 0.15em 0 0.55em;
+  font-size: 1.25em;
+  font-weight: 700;
+  color: var(--rf-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-sp__card-value--file {
+  font-size: 1.05em;
+  overflow-wrap: anywhere;
+}
+
+.rf-sp__card-line {
+  margin: 0.25em 0 0;
+  font-size: 0.9em;
+  color: var(--rf-ink);
+}
+
+.rf-sp__card-line--muted { color: var(--rf-muted); }
+
+.rf-sp__card-line--mono {
+  font-family: var(--rf-font-mono);
+  font-size: 0.8em;
+  color: var(--rf-muted);
+}
+html[lang="ar"] .rf-sp__card-line--mono { font-family: var(--rf-font-body); }
+
+.rf-sp__pos { color: var(--rf-teal, var(--rf-positive)); }
+
+.rf-sp__lineage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22em;
+  margin-block: 0.4em 0.7em;
+}
+
+.rf-sp__lineage-bar {
+  display: block;
+  block-size: 0.55em;
+  border-radius: 2px;
+}
+
+.rf-sp__lineage-bar--raw { background: var(--rf-rule); }
+.rf-sp__lineage-bar--kept { background: var(--rf-cobalt, var(--rf-data)); }
+
+/* KPI page: headline figures in separated columns over a real table. */
+.rf-sp__kpis {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  flex: 1;
+  min-height: 0;
+}
+
+.rf-sp__kpi-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+}
+
+.rf-sp__kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+  min-width: 0;
+  padding-inline-start: 0.35em;
+  border-inline-start: 1px solid var(--rf-rule);
+}
+
+.rf-sp__kpi .rf-sp__metric-value {
+  font-size: 0.92em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.rf-sp__kpi .rf-sp__metric-name {
+  font-size: 0.78em;
+}
+
+.rf-sp__table {
+  border-collapse: collapse;
+  inline-size: 100%;
+  font-size: 0.85em;
+  border-block-start: 1px solid var(--rf-ink);
+}
+
+.rf-sp__table td {
+  padding: 0.3em 0;
+  border-block-end: 1px solid var(--rf-rule);
+}
+
+.rf-sp__table .rf-sp__num {
+  text-align: end;
+}
+
+/* Chart marks: series hue = semantics (cobalt observed, gray target,
+   cobalt-tint scenario, negative attention). */
+.rf-sp__visual {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rf-sp__chart {
+  flex: 1;
+  min-height: 3em;
+  display: flex;
+  gap: 0.5em;
+}
+
+.rf-sp__chart-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Bars row sits on the ink baseline; the category label rides under it. */
+.rf-sp__bars {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  border-block-end: 1px solid var(--rf-ink);
+}
+
+.rf-sp__barcell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-width: 0;
+  block-size: 100%;
+}
+
+/* Value readout sits directly above its mark; hidden only when empty.
+   It lives outside the track so the mark's percent height resolves
+   against the track alone. */
+.rf-sp__barval {
+  flex: none;
+  font-size: 0.8em;
+  line-height: 1.2;
+  color: var(--rf-ink, var(--rf-text));
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.rf-sp__bartrack {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.rf-sp__bar {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: block;
+  min-height: 2px;
+  border-radius: 1px 1px 0 0;
+}
+
+.rf-sp__bar--observed { background: var(--rf-cobalt, var(--rf-data)); }
+.rf-sp__bar--target { background: var(--rf-gray-soft, var(--rf-muted)); }
+.rf-sp__bar--scenario { background: var(--rf-cobalt-tint, var(--rf-scenario)); }
+.rf-sp__bar--attention { background: var(--rf-negative, var(--rf-attention)); }
+
+.rf-sp__cat {
+  font-size: 0.8em;
+  line-height: 1.3;
+  color: var(--rf-muted);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rf-sp__chart-caption {
+  margin: 0.35em 0 0;
+  font-size: 0.8em;
+  color: var(--rf-muted);
+  overflow: hidden;
+}
+
+.rf-sp__chart-title {
+  display: block;
+  font-weight: 600;
+  color: var(--rf-ink, var(--rf-text));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rf-sp__chart-meta {
+  display: block;
+  font-size: 0.82em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Workbook card: the report title leads; the deterministic filename drops to
+   a mono meta line under it. */
+.rf-sp__wrows {
+  margin: 0.2em 0 0;
+  font-size: 0.75em;
+  color: var(--rf-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Quality page: track rails + reconciliation card. */
+.rf-sp__tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+  justify-content: center;
+  min-width: 0;
+}
+
+.rf-sp__track p {
+  margin: 0 0 0.15em;
+  font-size: 0.85em;
+}
+
+.rf-sp__rail {
+  block-size: 0.4em;
+  background: var(--rf-rule);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.rf-sp__rail-fill {
+  display: block;
+  block-size: 100%;
+  background: var(--rf-cobalt, var(--rf-data));
+}
+
+/* Quality tracks — every counted row is a data problem; the deck paints
+   all three fills in the negative role. */
+.rf-sp__rail-fill--problem { background: var(--rf-negative); }
+
+/* Scenario page: empty state reads designed, not blank. Only reachable when
+   a caller renders a scenario slide by hand — model-built decks omit it. */
+.rf-sp__empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rf-sp__empty .rf-sp__text {
+  max-width: 75%;
+  border-inline-start-color: var(--rf-cobalt, var(--rf-scenario));
+}
+
+/* Workbook sheet list — real names in their declared direction. */
+.rf-sp__sheets {
+  list-style: none;
+  margin: 0.6em 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.28em;
+  flex: 1;
+}
+
+.rf-sp__sheets li {
+  font-size: 0.85em;
+  color: var(--rf-ink);
+  border-block-end: 1px solid var(--rf-rule);
+  padding-block-end: 0.25em;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.rf-sp__sheets li::before {
+  content: '';
+  flex: none;
+  inline-size: 0.5em;
+  block-size: 0.9em;
+  background: var(--rf-teal, var(--rf-positive));
+  border-radius: 1px;
+}
+
+.rf-sp__foot {
+  border-block-start: 1px solid var(--rf-rule);
+  padding-block-start: 0.5em;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.rf-sp__folio {
+  font-size: 0.85em;
+  color: var(--rf-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-sp__tech { margin-top: 0.4em; font-size: 0.85em; color: var(--rf-muted); }
+.rf-sp__tech summary { cursor: pointer; }
+
+/* ------------------------------------------------------------------ */
+/* Reading pane — the export dialog's selected page at real reading     */
+/* size. Content sets the height (no fixed aspect => nothing clips      */
+/* vertically); the type scale is steeper so a ~300px pane still reads  */
+/* at >=10px effective. Thumbnails keep the .rf-sp defaults above.      */
+/* ------------------------------------------------------------------ */
+.rf-sp--pane {
+  aspect-ratio: auto;
+}
+
+.rf-sp--pane > * {
+  font-size: clamp(10px, 5.5cqw, 1rem);
+}
+
+/* Small print keeps the 10px reading floor: at ~240px panes the 5.5cqw
+   base makes 0.85em land at 9.89px. */
+.rf-sp--pane .rf-sp__scope,
+.rf-sp--pane .rf-sp__card-label,
+.rf-sp--pane .rf-sp__folio,
+.rf-sp--pane .rf-sp__tech,
+.rf-sp--pane .rf-sp__subtitle,
+.rf-sp--pane .rf-sp__chart-meta {
+  font-size: max(10px, 0.85em);
+}
+
+/* 1.15 leaves glyph ink overflowing the line box (~2px at 390px panes);
+   1.3 contains it. */
+.rf-sp--pane .rf-sp__title {
+  line-height: 1.3;
+}
+
+/* Pane-narrow recompose: the split drops to one column so the chart keeps
+   real width and every caption wraps instead of ellipsizing, and the KPI
+   row stacks so no figure truncates. */
+@container (max-width: 430px) {
+  .rf-sp--pane .rf-sp__split {
+    grid-template-columns: 1fr;
+    gap: 0.9em;
+  }
+  .rf-sp--pane .rf-sp__kpi-row {
+    grid-auto-flow: row;
+    gap: 0.5em;
+  }
+  .rf-sp--pane .rf-sp__kpi {
+    border-inline-start: none;
+    padding-inline-start: 0;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.5em;
+  }
+  .rf-sp--pane .rf-sp__cat,
+  .rf-sp--pane .rf-sp__chart-title,
+  .rf-sp--pane .rf-sp__chart-meta,
+  .rf-sp--pane .rf-sp__sheets li,
+  .rf-sp--pane .rf-sp__kpi .rf-sp__metric-value {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: break-word;
+  }
+  .rf-sp--pane .rf-sp__chart {
+    min-height: 4.5em;
+  }
+}
+
+/* Thumbnails stay navigation marks, not squeezed slides: under ~430px of
+   card width the data table and chart caption step out so the masthead +
+   headline figures still compose inside the fixed page aspect instead of
+   clipping past the card edge. */
+@container (max-width: 430px) {
+  .rf-sp:not(.rf-sp--pane) .rf-sp__table,
+  .rf-sp:not(.rf-sp--pane) .rf-sp__chart-caption {
+    display: none;
+  }
+  .rf-sp:not(.rf-sp--pane) .rf-sp__metrics li:nth-child(n + 4) {
+    display: none;
+  }
+}
+
+/* Tiniest marks (~rail cells at 320px): text column only, two metric rows —
+   the point is a recognisable page tab, not a crop that spills its body. */
+@container (max-width: 200px) {
+  .rf-sp:not(.rf-sp--pane) .rf-sp__visual {
+    display: none;
+  }
+  .rf-sp:not(.rf-sp--pane) .rf-sp__split {
+    grid-template-columns: 1fr;
+  }
+  .rf-sp:not(.rf-sp--pane) .rf-sp__metrics li:nth-child(n + 3) {
+    display: none;
+  }
+  .rf-sp:not(.rf-sp--pane) .rf-sp__sheets li:nth-child(n + 4) {
+    display: none;
+  }
+  .rf-sp:not(.rf-sp--pane) .rf-sp__card,
+  .rf-sp:not(.rf-sp--pane) .rf-sp__scope {
+    display: none;
+  }
+}

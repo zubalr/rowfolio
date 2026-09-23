@@ -1,0 +1,11 @@
+{
+  "message": {
+    "protocolVersion": 1,
+    "requestId": "req-x",
+    "sessionId": "sess-a",
+    "revision": 1,
+    "operation": "ingest",
+    "payload": { "sourceName": "synthetic.csv", "format": "csv", "byteLength": 4, "binarySlot": "src" }
+  },
+  "binaries": [{ "slot": "src", "buffer": { "byteLength": 512 } }]
+}

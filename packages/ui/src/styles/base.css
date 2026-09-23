@@ -1,0 +1,103 @@
+/**
+ * Foundation styles: box model, typography ramp, focus and assistive utilities.
+ * Loaded automatically with @rowfolio/ui — components rely on these vars.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--rf-bg);
+  color: var(--rf-text);
+  font-family: var(--rf-font-body);
+  font-size: 16px;
+  line-height: 1.5625; /* 16/25 */
+  text-align: start;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Arabic rhythm: roomier line heights, no letter-spacing, never below 14px
+   in primary controls (04_DESIGN_SYSTEM.md). */
+html[lang="ar"] body {
+  font-size: 17px;
+  line-height: 1.7059; /* 17/29 */
+}
+
+h1, h2, h3, h4, p {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled {
+  cursor: not-allowed;
+}
+
+a {
+  color: inherit;
+}
+
+img,
+svg {
+  display: block;
+}
+
+/* Keyboard focus: 3px cobalt outline separated by 3px of surrounding paper
+   (04_DESIGN_SYSTEM.md). Never removed for aesthetics. */
+:focus-visible {
+  outline: 3px solid var(--rf-focus);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Visually hidden but announced — for captions, status text, table captions. */
+.rf-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Numeric/source islands: tabular figures + Latin mono where specified. */
+.rf-numeric {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.rf-mono {
+  font-family: var(--rf-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Reduced motion: no transition may carry meaning (05_MOTION_SPEC.md). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}

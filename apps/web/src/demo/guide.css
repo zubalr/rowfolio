@@ -1,0 +1,76 @@
+/**
+ * GuideBar chrome — the guided-demo control surface on the broadsheet
+ * grammar: a plate frame (hairline + mono label bar with the vermilion
+ * tick), a plain context sentence before any figures, and the transport
+ * controls underneath.
+ */
+
+.rf-guide {
+  position: relative;
+  border: 1px solid var(--rf-rule);
+  background: var(--rf-surface);
+  font-size: 13px;
+}
+
+.rf-guide__label {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-block-end: 1px solid var(--rf-rule);
+  font-family: var(--rf-font-mono);
+  font-size: var(--rf-plate-label-size);
+  font-weight: var(--rf-plate-label-weight);
+  letter-spacing: var(--rf-plate-label-tracking);
+  text-transform: uppercase;
+  color: var(--rf-ink);
+}
+html[lang="ar"] .rf-guide__label {
+  font-family: var(--rf-font-body);
+  font-size: 12px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+.rf-guide__label > i { width: 24px; height: 2px; background: var(--rf-attention); flex: none; }
+.rf-guide__label .rf-guide__num { color: var(--rf-muted); font-variant-numeric: tabular-nums; }
+html[lang="ar"] .rf-guide__label .rf-guide__num { font-family: var(--rf-font-mono); }
+
+.rf-guide__context {
+  margin: 0;
+  padding: 10px 12px 0;
+  color: var(--rf-muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+  max-inline-size: 72ch;
+}
+
+.rf-guide__caption {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 6px 12px;
+}
+.rf-guide__count {
+  font-family: var(--rf-font-mono);
+  font-size: 11px;
+  color: var(--rf-muted);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+.rf-guide__text { font-weight: 600; color: var(--rf-ink); }
+.rf-guide__error { color: var(--rf-negative); font-weight: 600; }
+
+.rf-guide__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rf-space-1) var(--rf-space-2);
+  padding: 0 12px 10px;
+}
+
+.rf-guide__live {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+}

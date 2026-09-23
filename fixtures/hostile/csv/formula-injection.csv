@@ -1,0 +1,7 @@
+name,value
+=cmd|'/c calc'!A0,10
++HYPERLINK("https://attacker.invalid","click"),20
+@SUM(1:2),30
+-2+3+cmd,40
+	normal-leading-tab,50
+clean,60
