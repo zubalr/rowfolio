@@ -9,7 +9,7 @@ export { buildPresentation, ExportPptxError } from './presentation.ts';
 export type { BuiltArtifact, Progress } from './presentation.ts';
 // Shared copy/format surface: the in-app preview resolves the same labels and
 // figures through these so the preview can never drift from the artifact.
-export { hasLabel, label, metricDisplayName, scopeText } from './labels.ts';
+export { hasLabel, label, metricDisplayName, scopeText, unitLabel } from './labels.ts';
 export {
   formatCompact,
   formatFull,

@@ -25,7 +25,7 @@ import type {
 } from '@rowfolio/contracts';
 import { exportUnitLabel, localizeDigits, periodLabel } from '@rowfolio/export-model';
 import { ExportPptxError } from './presentation.ts';
-import { hasLabel, label, metricDisplayName, scopeText } from './labels.ts';
+import { hasLabel, label, metricDisplayName, scopeText, unitLabel } from './labels.ts';
 import {
   formatCompact,
   formatInteger,
@@ -132,7 +132,7 @@ function metricLineRuns(ctx: LayoutContext, metric: Metric): TextRun[] {
   const name = hasLabel(metric.labelKey) ? label(ctx.locale, metric.labelKey) : metric.id;
   return [
     { text: `${name}  `, options: { color: GRAY } },
-    { text: formatMetricValue(metric.value, metric.unit, (k) => label(ctx.locale, k), ctx.model.numberingSystem), options: { color: INK, bold: true } },
+    { text: formatMetricValue(metric.value, metric.unit, (k, n) => unitLabel(ctx.locale, k, n), ctx.model.numberingSystem), options: { color: INK, bold: true } },
   ];
 }
 
@@ -555,7 +555,7 @@ function layoutKpis(ctx: LayoutContext): void {
     const color = metric.unit.kind === 'ratio' && negative ? RED : INK;
     const big = metric.unit.kind === 'currency' && metric.value !== null
       ? `${exportUnitLabel(metric.unit, (k) => label(ctx.locale, k))} ${formatCompact(metric.value, ctx.model.numberingSystem)}`.trim()
-      : formatMetricValue(metric.value, metric.unit, (k) => label(ctx.locale, k), ctx.model.numberingSystem);
+      : formatMetricValue(metric.value, metric.unit, (k, n) => unitLabel(ctx.locale, k, n), ctx.model.numberingSystem);
     const name = metricDisplayName(ctx.locale, metric, metrics);
     if (i > 0) {
       bar(ctx, `kpi-sep-${i}`, LEFT_X + i * colW - 0.07, BODY_Y + 0.08, 0.014, 1.35, RULE);
@@ -575,7 +575,7 @@ function layoutKpis(ctx: LayoutContext): void {
   ];
   const rows = [header, ...metrics.map((metric) => [
     { text: metricDisplayName(ctx.locale, metric, metrics), options: {} },
-    { text: formatMetricValue(metric.value, metric.unit, (k) => label(ctx.locale, k), ctx.model.numberingSystem), options: { bold: true } },
+    { text: formatMetricValue(metric.value, metric.unit, (k, n) => unitLabel(ctx.locale, k, n), ctx.model.numberingSystem), options: { bold: true } },
     { text: exportUnitLabel(metric.unit, (k) => label(ctx.locale, k)), options: { color: GRAY } },
   ])];
   fitGuard(slide.id, 'table', JSON.stringify(rows), SMALL_SIZE, 12.23, 1.9);
@@ -709,7 +709,7 @@ function layoutScenario(ctx: LayoutContext): void {
   const lines: TextRun[] = [];
   const amberLine = (name: string, m: Metric): void => {
     lines.push({ text: `${name}  `, options: { color: GRAY } });
-    lines.push({ text: formatMetricValue(m.value, m.unit, (k) => label(ctx.locale, k), ctx.model.numberingSystem), options: { color: AMBER, bold: true, breakLine: true, paraSpaceAfter: 8 } });
+    lines.push({ text: formatMetricValue(m.value, m.unit, (k, n) => unitLabel(ctx.locale, k, n), ctx.model.numberingSystem), options: { color: AMBER, bold: true, breakLine: true, paraSpaceAfter: 8 } });
   };
   if (cost !== undefined) amberLine(label(locale, 'scenario.costChange'), cost);
   if (contribution !== undefined) amberLine(label(locale, 'metric.contribution'), contribution);
@@ -822,7 +822,7 @@ function layoutMethodology(ctx: LayoutContext): void {
       ? label(locale, metric.labelKey)
       : label(locale, 'evidence.calculation');
     const shown = metric !== undefined && metric.value !== null
-      ? formatMetricValue(metric.value, metric.unit, (k) => label(ctx.locale, k), ctx.model.numberingSystem)
+      ? formatMetricValue(metric.value, metric.unit, (k, n) => unitLabel(ctx.locale, k, n), ctx.model.numberingSystem)
       : (proof.result ?? '');
     return { text: `${name} = ${shown}`, options: { breakLine: true, paraSpaceAfter: 8 } };
   });
