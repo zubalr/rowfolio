@@ -225,16 +225,18 @@ html[lang="ar"] .rf-mini .rf-mini__sheets li, html[lang="ar"] .rf-mini .rf-mini_
   .rf-mini .rf-mini__mast { padding: 8px 10px 0; }
   .rf-mini .rf-mini__body { padding: 6px 10px 0; }
   .rf-mini .rf-mini__metrics { gap: 3px; }
-  .rf-mini .rf-mini__metrics li:nth-child(n + 3) { display: none; }
-  .rf-mini .rf-mini__viz { margin-top: 4px; }
+  /* one headline stat row on phone tiles — the other values already read
+     on the bar labels; the full table lives in the exported deck */
+  .rf-mini .rf-mini__metrics li:nth-child(n + 2) { display: none; }
+  .rf-mini .rf-mini__viz { margin-top: 3px; }
   .rf-mini .rf-mini__chart { padding: 0 2px 0 4px; gap: 6px; }
-  .rf-mini .rf-mini__bars { gap: 6px; }
-  .rf-mini .rf-mini__group { gap: 3px; }
+  .rf-mini .rf-mini__bars { gap: 5px; }
+  .rf-mini .rf-mini__group { gap: 2px; }
   .rf-mini .rf-mini__barval { line-height: 1.15; }
   /* the caption duplicates the row labels + foot scope — drop it on
      small plates before any meaning-bearing text would clip */
   .rf-mini .rf-mini__chartcap { display: none; }
-  .rf-mini .rf-mini__foot { padding: 4px 10px 5px; margin-top: 3px; }
+  .rf-mini .rf-mini__foot { padding: 3px 10px 4px; margin-top: 3px; }
 }
 
 /* Landing output tiles (.rf-output__preview): required text never
