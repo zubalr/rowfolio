@@ -15,6 +15,7 @@ import {
   assertExportModel,
   DESIGN_TOKENS,
   isDecimal,
+  isValidDate,
   sha256Hex,
   significantDigits,
 } from '@rowfolio/contracts';
@@ -415,8 +416,11 @@ export const buildWorkbook = async (
     const record: Record<string, string | number | boolean | Date | null> = {};
     for (const column of dataColumns) {
       const raw = row.values[column.id] ?? null;
+      // Only canonical real-calendar dates become serials — malformed
+      // values (2026-02-31, arbitrary text) stay verbatim text rather
+      // than silently rolling or producing Invalid Date.
       record[column.id] =
-        column.type === 'date' && typeof raw === 'string'
+        column.type === 'date' && typeof raw === 'string' && isValidDate(raw)
           ? new Date(`${raw}T00:00:00Z`)
           : typeof raw === 'string'
             ? toCellValue(raw)

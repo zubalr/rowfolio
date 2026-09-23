@@ -734,4 +734,32 @@ describe('workbook formula recalculation', () => {
       }
     }
   });
+
+  it('preserves malformed date-typed values as verbatim text, never rolled or Invalid Date', async () => {
+    // Profiling can leave minority malformed cells in a date-typed column;
+    // export must not silently rewrite them into different dates.
+    const modified: NormalizedTable = {
+      ...table,
+      rows: [
+        ...table.rows,
+        { ...table.rows[0]!, id: 'S0:R9998', sourceRow: 9998, values: { ...table.rows[0]!.values, date: '2026-02-31' } },
+        { ...table.rows[0]!, id: 'S0:R9999', sourceRow: 9999, values: { ...table.rows[0]!.values, date: 'not-a-date' } },
+      ],
+    };
+    const model = buildExportModel(snapshot, modified, scenario, 'en', 'latn', CREATED);
+    const artifact = await buildWorkbook(model, () => undefined);
+    const entries = unzip(new Uint8Array(artifact.bytes));
+    const { grids, pathByName } = workbookGrids(entries);
+    const cleanXml = textOf(entries, pathByName.get(model.sheets.find((s) => s.id === 'clean')?.name ?? 'clean') as string);
+    expect(cleanXml).not.toContain('NaN');
+
+    const cleanGrid = grids.get(model.sheets.find((s) => s.id === 'clean')?.name ?? 'clean');
+    const lastTwo = modified.rows.length + 1; // appended rows sit at the end
+    expect(cleanGrid?.get(`B${lastTwo - 1}`)).toBe('2026-02-31');
+    expect(cleanGrid?.get(`B${lastTwo}`)).toBe('not-a-date');
+    // A valid date in the same column still serializes as a number.
+    const dateCell = /<c r="B2"([^>]*)>([\s\S]*?)<\/c>/.exec(cleanXml);
+    expect(dateCell?.[0] ?? '').not.toContain('t="s"');
+    expect(Number(/<v>([^<]+)/.exec(dateCell?.[2] ?? '')?.[1])).toBeGreaterThan(40000);
+  });
 });
