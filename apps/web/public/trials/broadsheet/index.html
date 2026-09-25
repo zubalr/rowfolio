@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; form-action 'none'">
+<title>Rowfolio · Broadsheet</title>
+<link rel="preload" href="fonts/IBMPlexSans-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="broadsheet.css">
+</head>
+<body>
+<div class="frame" aria-hidden="true"></div>
+
+<header class="head">
+  <div class="brand">
+    <span class="wordmark">Rowfolio</span>
+    <span class="vertag">in-browser report builder</span>
+  </div>
+  <nav class="hnav">
+    <a href="#" class="hlink">GitHub</a>
+    <a href="#" class="hlink ar">العربية</a>
+  </nav>
+</header>
+
+<main class="spread" id="spread">
+  <section class="lead" aria-label="Intro">
+    <p class="kicker">ROWFOLIO · IN-BROWSER REPORT BUILDER</p>
+    <h1 class="h1">Your spreadsheet, <em class="accent">checked</em> and explained.</h1>
+    <p class="standfirst">Drop in a CSV or XLSX. Rowfolio flags what needs attention, draws every figure from named source rows, and produces a report you can edit in PowerPoint and Excel. Your file never leaves this tab.</p>
+    <div class="stat">
+      <p class="stat-num">USD 881,000</p>
+      <p class="stat-cap">North region revenue, June 2026, against a USD 1,000,000 target</p>
+    </div>
+    <p class="stat-inline">USD 881,000 vs 1,000,000 target</p>
+    <div class="cta-row">
+      <a href="#" class="cta">Open Rowfolio</a>
+      <span class="cta-note">Runs locally. No upload.</span>
+    </div>
+  </section>
+
+  <section class="plates" id="plates" aria-label="Example artifacts" tabindex="0">
+    <p class="smallprint">Shown with an example workbook: June 2026 operations for a fictional six-region service business.</p>
+    <!-- 01 DATA -->
+    <article class="plate p-data" id="plateData">
+      <header class="plate-label"><i></i>01 DATA</header>
+      <div class="plate-body">
+        <div class="data-head">
+          <span class="filechip">sample_operations.xlsx</span>
+        </div>
+        <table class="grid" id="bsGrid">
+          <thead>
+            <tr><th>Date</th><th>Region</th><th class="num">Revenue</th><th class="num">Plan</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Jun 1</td><td>North</td><td class="num">9,081</td><td class="num">12,018</td></tr>
+            <tr><td>Jun 2</td><td>North</td><td class="num">7,935</td><td class="num">11,305</td></tr>
+            <tr><td>Jun 3</td><td>North</td><td class="num">7,053</td><td class="num">10,286</td></tr>
+            <tr id="bsDup"><td>Jun 2</td><td>North</td><td class="num">8,992</td><td class="num">7,944</td></tr>
+            <tr><td>Jun 3</td><td>North</td><td class="num">10,403</td><td class="num" id="bsBlank">&nbsp;</td></tr>
+            <tr><td>Jun 3</td><td>North</td><td class="num">6,700</td><td class="num">8,046</td></tr>
+          </tbody>
+        </table>
+        <p class="data-foot"><span id="rowCount">2,417 rows read</span></p>
+        <div class="flagrow">
+          <div class="flag flag-dup" id="bsFlagDup">Duplicate row excluded</div>
+          <div class="flag flag-blank" id="bsFlagBlank">Left blank, not filled</div>
+        </div>
+        <div class="vrule" id="vrule"></div>
+        <div class="strike" id="bsStrike"></div>
+        <div class="ring" id="bsRing"></div>
+      </div>
+    </article>
+
+    <!-- 02 FINDINGS -->
+    <article class="plate p-find" id="plateFind">
+      <header class="plate-label"><i></i>02 FINDINGS</header>
+      <div class="plate-body">
+        <div class="f-cap-top">
+          <span class="chip chip-delta" id="bsDelta">-0.0%</span>
+          <span class="chip chip-orders" id="bsOrders"><svg viewBox="0 0 10 10" class="arr"><path d="M1 8 L9 2 M9 2 H4 M9 2 V7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Orders +8.0%</span>
+        </div>
+        <div class="fchart" id="fChart">
+          <div class="fchart-plot">
+            <div class="f-target" id="fTarget"><span>USD 1,000,000</span></div>
+            <div class="f-bar"><i id="fBarFill"></i><span class="f-bar-val" id="fBarVal">USD 881,000</span></div>
+          </div>
+          <div class="f-rticks" id="fRticks">
+            <span class="f-rticks-label">4 regions within 4% of plan</span>
+            <div class="f-rticks-track"><i style="left:80.7%"></i><i style="left:89.2%"></i><i style="left:90.0%"></i><i style="left:90.0%"></i><i style="left:93.5%"></i><b style="left:90.91%"></b></div>
+          </div>
+        </div>
+        <p class="f-cap">North · June 2026 · Actual vs target, USD</p>
+        <div class="ghost" id="ghostF" aria-hidden="true">
+          <i class="gf-head"></i>
+          <span class="gf-plot"><i class="gf-tgt"></i><i class="gf-bar"></i></span>
+          <i class="gf-ticks"></i>
+          <i class="gf-cap"></i>
+        </div>
+      </div>
+    </article>
+
+    <!-- 03 REPORT -->
+    <article class="plate p-rep" id="plateRep">
+      <header class="plate-label"><i></i>03 REPORT</header>
+      <div class="plate-body">
+        <div class="slide">
+          <p class="s-kicker">North · June 2026</p>
+          <p class="s-title" id="sTitle">Orders rose 8.0%; revenue sits 11.9% under target.</p>
+          <div class="s-chart" id="sChart">
+            <div class="s-chart-plot">
+              <div class="s-target"><span>USD 1,000,000</span></div>
+              <div class="s-bar"><i></i><span class="s-bar-val">USD 881,000</span></div>
+            </div>
+          </div>
+          <p class="s-note" id="sNote">Operations rows 1802-1901</p>
+          <div class="s-foot" id="sFoot">3 / 6 · English</div>
+        </div>
+        <div class="wbstrip" id="wbStrip">
+          <p class="wb-title">Monthly operations report</p>
+          <p class="wb-tabs">Executive Summary · Cleaned Data · Data Quality · KPI Analysis · Methodology</p>
+          <p class="wb-dl">Editable .pptx and .xlsx</p>
+        </div>
+        <div class="ghost ghost-rep" id="ghostR" aria-hidden="true">
+          <i class="gr-kick"></i>
+          <i class="gr-title"></i>
+          <span class="gr-plot"><i class="gr-tgt"></i><i class="gr-bar"></i></span>
+          <i class="gr-note"></i>
+          <i class="gr-foot"></i>
+          <i class="gr-wb"></i>
+        </div>
+      </div>
+    </article>
+  </section>
+</main>
+
+<nav class="rail" aria-label="Demo chapters">
+  <button class="rmark" data-t="400"><i></i><span>Data</span></button>
+  <button class="rmark" data-t="3600"><i></i><span>Findings</span></button>
+  <button class="rmark" data-t="6600"><i></i><span>Report</span></button>
+  <button class="replay" id="replayBtn" aria-label="Replay demo"><svg viewBox="0 0 12 12" class="r-ic"><path d="M6 1.5 A4.5 4.5 0 1 1 1.5 6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M1.5 1.8 V6 H5.7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Replay</button>
+</nav>
+
+<div class="loopfade" id="loopFade"></div>
+
+<script src="broadsheet.js"></script>
+</body>
+</html>

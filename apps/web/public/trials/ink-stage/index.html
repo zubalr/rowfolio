@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; form-action 'none'">
+<title>Rowfolio · Ink Stage trial</title>
+<link rel="preload" href="./fonts/IBMPlexSans-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="./fonts/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="./ink-stage.css">
+<script src="./ink-stage.js" defer></script>
+</head>
+<body>
+<header class="nav">
+  <a class="wordmark" href="/">Rowfolio</a>
+  <nav class="nav-links" aria-label="Site">
+    <a class="nav-link nav-github" href="https://github.com/zubalr/rowfolio">GitHub</a>
+    <a class="nav-link" href="/ar/">العربية</a>
+  </nav>
+</header>
+
+<main class="page">
+  <section class="hero">
+    <p class="eyebrow">LIVE EXAMPLE · NOTHING UPLOADS</p>
+    <h1 class="h1">A spreadsheet goes in. <br>A report comes out.</h1>
+    <p class="sub">Rowfolio checks your data, draws charts from the exact source rows, and builds an editable PowerPoint and Excel report. It all runs in this browser.</p>
+  </section>
+
+  <section class="stage" id="stage" aria-label="Rowfolio demo stage">
+    <div class="field" id="field" role="button" tabindex="0" aria-label="Demo stage. Activate to pause or play.">
+      <p class="beat-caption" id="beatCaption">Your spreadsheet, checked</p>
+
+      <div class="plate sheet" id="sheetPlate">
+        <div class="plate-body sheet-body">
+          <div class="sheet-head">
+            <span class="filechip">sample_operations.xlsx</span>
+            <span class="rowcount">2,417 rows</span>
+          </div>
+          <table class="grid">
+            <thead>
+              <tr><th>Date</th><th>Region</th><th class="num">Revenue</th><th class="num">Plan</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Jun 1</td><td>North</td><td class="num">9,081</td><td class="num">12,018</td></tr>
+              <tr><td>Jun 2</td><td>North</td><td class="num">7,935</td><td class="num">11,305</td></tr>
+              <tr><td>Jun 3</td><td>North</td><td class="num">7,053</td><td class="num">10,286</td></tr>
+              <tr id="dupRow"><td>Jun 2</td><td>North</td><td class="num">8,992</td><td class="num">7,944</td></tr>
+              <tr id="blankRow"><td>Jun 3</td><td>North</td><td class="num">10,403</td><td class="num blank" id="blankCell"></td></tr>
+              <tr><td>Jun 3</td><td>North</td><td class="num">6,700</td><td class="num">8,046</td></tr>
+            </tbody>
+          </table>
+          <div class="sheet-foot"><span class="counter" id="counter">2,417 of 2,417 rows kept</span></div>
+          <div class="scanline" id="scanline"></div>
+          <div class="strike" id="strike"></div>
+          <div class="ring" id="ring"></div>
+          <div class="flag flag-dup" id="flagDup">Duplicate row excluded</div>
+          <div class="flag flag-blank" id="flagBlank">Blank left blank, not filled</div>
+        </div>
+        <div class="plate-mini">sample_operations.xlsx · 2,400 rows kept</div>
+      </div>
+
+      <div class="plate chartplate" id="chartPlate">
+        <div class="plate-body chart-body">
+          <div class="chart-ui" id="chartUi">
+            <p class="readout">USD 881,000</p>
+            <div class="chart-chips">
+              <span class="chip chip-delta" id="deltaChip">-0.0% vs plan</span>
+              <span class="chip chip-orders" id="ordersChip"><svg viewBox="0 0 10 10" class="arr"><path d="M1 8 L9 2 M9 2 H4 M9 2 V7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Orders +8.0%</span>
+            </div>
+            <div class="chart-cap">North region · June 2026 · Actual vs target (USD)</div>
+          </div>
+          <div class="chart-plot" id="chartPlot">
+            <div class="bar-row">
+              <span class="bar-label">North</span>
+              <div class="bar-track">
+                <div class="bar-ghost" id="barGhost"></div>
+                <div class="bar-fill" id="barFill"></div>
+                <span class="bar-val" id="barVal">USD 881k</span>
+                <div class="target-rule" id="targetRule"></div>
+              </div>
+            </div>
+            <div class="axis">
+              <span class="axis-tick zero" style="left:0%">0</span>
+              <span class="axis-tick target" style="left:90.91%">USD 1.00m</span>
+            </div>
+            <div class="axis axis-note">
+              <span class="axis-tick target" style="left:90.91%">Target USD 1,000,000</span>
+            </div>
+            <div class="rticks" id="rticks">
+              <span class="rticks-label">4 regions within 4% of plan</span>
+              <div class="rticks-track">
+                <i style="left:80.7%"></i><i style="left:89.2%"></i><i style="left:90.0%"></i><i style="left:90.0%"></i><i style="left:93.5%"></i>
+                <b class="rticks-target" style="left:90.91%"></b>
+              </div>
+            </div>
+          </div>
+          <div class="slide-ui" id="slideUi">
+            <p class="s-kicker">North · June 2026</p>
+            <p class="s-title">Orders rose 8.0%; revenue sits 11.9% under target.</p>
+            <div class="s-foot">
+              <span class="s-src">Operations rows 1802-1901</span>
+              <span class="s-page">3 / 6</span>
+            </div>
+          </div>
+        </div>
+        <div class="plate-mini">North · June 2026 · Actual vs target</div>
+      </div>
+
+      <div class="plate spine" id="spinePlate">
+        <div class="plate-body spine-body">
+          <p class="spine-title">Monthly operations report</p>
+          <ul class="spine-tabs">
+            <li>Executive Summary</li>
+            <li>Cleaned Data</li>
+            <li>Data Quality</li>
+            <li>KPI Analysis</li>
+            <li>Methodology</li>
+          </ul>
+          <p class="spine-file">rowfolio-export-analysis.xlsx</p>
+          <p class="spine-rows">2,400 / 2,417 source rows</p>
+        </div>
+        <div class="plate-mini">rowfolio-export-analysis.xlsx</div>
+      </div>
+
+      <div class="plate stillcard" id="stillCard" aria-hidden="true">
+        <div class="plate-body stillcard-body">
+          <p class="s-kicker">North · June 2026</p>
+          <p class="s-title">Orders rose 8.0%; revenue sits 11.9% under target.</p>
+          <div class="stillbar">
+            <div class="stillbar-track"><i></i><b></b></div>
+            <div class="stillbar-ax"><span>USD 881,000</span><span>Target USD 1,000,000</span></div>
+          </div>
+          <div class="s-foot"><span class="s-src">Operations rows 1802-1901</span><span class="s-page">3 / 6</span></div>
+        </div>
+      </div>
+
+      <div class="dl-chips" id="dlChips">
+        <span class="chip chip-dl">Editable .pptx</span>
+        <span class="chip chip-dl">Editable .xlsx</span>
+      </div>
+
+      <button class="replay" id="replayBtn">Replay</button>
+      <div class="dim" id="dim"></div>
+    </div>
+
+    <div class="controls">
+      <button class="pp" id="ppBtn" aria-label="Pause demo" aria-pressed="false">
+        <svg class="ic-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="3" width="3.4" height="10" rx="1"/><rect x="9.6" y="3" width="3.4" height="10" rx="1"/></svg>
+        <svg class="ic-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 3 L13 8 L4 13 Z"/></svg>
+      </button>
+      <div class="ticks" role="group" aria-label="Chapters">
+        <button class="tick" data-t="1200">Check</button>
+        <button class="tick" data-t="3200">Chart</button>
+        <button class="tick" data-t="5800">Report</button>
+      </div>
+      <div class="dots" id="dots" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <div class="cta-row">
+    <a class="cta" href="/">Try your own spreadsheet</a>
+    <a class="quiet" href="/sample/sample_operations.xlsx">Browse the example workbook</a>
+  </div>
+  <p class="smallprint">Example data: June 2026 operations for a fictional six-region service business.</p>
+</main>
+
+<footer class="foot">
+  <span>Rowfolio</span>
+  <span class="foot-note">In-browser report builder</span>
+</footer>
+</body>
+</html>
